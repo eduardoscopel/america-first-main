@@ -27,6 +27,9 @@
 		}
 		leagueManagers[manager.roster].push(entryMan);
 	}
+    
+    // const player - 
+    // let avatar = player.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`;
 
     const lineupIQGraph = {
         stats: lineupIQs,
@@ -354,6 +357,20 @@
         display: table;
         box-shadow: 0px 3px 3px -2px var(--boxShadowOne), 0px 3px 4px 0px var(--boxShadowTwo), 0px 1px 8px 0px var(--boxShadowThree);
         margin: 2em auto 0.5em;
+    }
+
+    .playerAvatar {
+		vertical-align: middle;
+		height: 45px;
+		width: 45px;
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: auto 45px;
+	}
+
+    .playerInfo {
+        display: inline-block;
+        padding: 0 6px;
     }
 
     .fullFlex {
