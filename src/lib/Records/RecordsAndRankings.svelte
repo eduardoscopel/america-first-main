@@ -27,9 +27,6 @@
 		}
 		leagueManagers[manager.roster].push(entryMan);
 	}
-    
-    // const player - 
-    // let avatar = player.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`;
 
     const lineupIQGraph = {
         stats: lineupIQs,
@@ -370,7 +367,8 @@
 
     .playerInfo {
         display: inline-block;
-        padding: 0 6px;
+        /* display: flex; */
+        padding: 0 0 0 20px;
     }
 
     .fullFlex {
@@ -829,6 +827,7 @@
                 </Row>
                 <Row>
                     <Cell class="header rank"></Cell>
+                    <div class="playerAvatar playerInfo" />
                     <Cell class="header">Player</Cell>
                     <Cell class="header">POS</Cell>
                     <Cell class="header">NFL Team</Cell>
@@ -847,6 +846,7 @@
                 {#each playerSeasonTOPS as playerATSeasonTOP, ix}
                     <Row>
                         <Cell class="rank">{ix + 1}</Cell>
+                        <div class="playerAvatar playerInfo" style="{playerATSeasonTOP.avatar}" />
                         <Cell class="left">{playerATSeasonTOP.playerInfo.fn} {playerATSeasonTOP.playerInfo.ln}</Cell>
                         <Cell class="center">{playerATSeasonTOP.playerInfo.pos}</Cell>
                         <Cell class="center">{playerATSeasonTOP.playerInfo.t}</Cell>
@@ -878,6 +878,7 @@
                 </Row>
                 <Row>
                     <Cell class="header rank"></Cell>
+                    <div class="playerAvatar playerInfo" />
                     <Cell class="header">Player</Cell>
                     <Cell class="header">POS</Cell>
                     <Cell class="header">NFL Team</Cell>
@@ -893,6 +894,7 @@
                 {#each playerWeekTOPS as playerATWeekTOP, ix}
                     <Row>
                         <Cell class="rank">{ix + 1}</Cell>
+                        <div class="playerAvatar playerInfo" style="{playerATWeekTOP.avatar}" />
                         <Cell class="left">{playerATWeekTOP.playerInfo.fn} {playerATWeekTOP.playerInfo.ln}</Cell>
                         <Cell class="center">{playerATWeekTOP.playerInfo.pos}</Cell>
                         <Cell class="center">{playerATWeekTOP.playerInfo.t}</Cell>
@@ -921,6 +923,7 @@
                 </Row>
                 <Row>
                     <Cell class="header rank"></Cell>
+                    <div class="playerAvatar playerInfo" /> 
                     <Cell class="header">Player</Cell>
                     <Cell class="header">POS</Cell>
                     <Cell class="header">NFL Team</Cell>
@@ -936,6 +939,7 @@
                 {#each playerWeekMissedTOPS as playerATWeekMissedTOP, ix}
                     <Row>
                         <Cell class="rank">{ix + 1}</Cell>
+                        <div class="playerAvatar playerInfo" style="{playerATWeekMissedTOP.avatar}" />
                         <Cell class="left">{playerATWeekMissedTOP.playerInfo.fn} {playerATWeekMissedTOP.playerInfo.ln}</Cell>
                         <Cell class="center">{playerATWeekMissedTOP.playerInfo.pos}</Cell>
                         <Cell class="center">{playerATWeekMissedTOP.playerInfo.t}</Cell>
@@ -1328,6 +1332,7 @@
                         </Row>
                         <Row>
                             <Cell class="header rank"></Cell>
+                            <div class="playerAvatar playerInfo" />
                             <Cell class="header">Player</Cell>
                             <Cell class="header">POS</Cell>
                             <Cell class="header">NFL Team</Cell>
@@ -1346,6 +1351,7 @@
                         {#each playerSeasonBests as playerATSeasonBest, ix}
                             <Row>
                                 <Cell class="rank">{ix + 1}</Cell>
+                                <div class="playerAvatar playerInfo" style="{playerATSeasonBest.avatar}" />
                                 <Cell class="left">{playerATSeasonBest.playerInfo.fn} {playerATSeasonBest.playerInfo.ln}</Cell>
                                 <Cell class="center">{playerATSeasonBest.playerInfo.pos}</Cell>
                                 <Cell class="center">{playerATSeasonBest.playerInfo.t}</Cell>
@@ -1381,6 +1387,7 @@
                         </Row>
                         <Row>
                             <Cell class="header rank"></Cell>
+                            <div class="playerAvatar playerInfo" />
                             <Cell class="header">Player</Cell>
                             <Cell class="header">POS</Cell>
                             <Cell class="header">NFL Team</Cell>
@@ -1396,6 +1403,7 @@
                         {#each playerWeekBests as playerATWeekBest, ix}
                             <Row>
                                 <Cell class="rank">{ix + 1}</Cell>
+                                <div class="playerAvatar playerInfo" style="{playerATWeekBest.avatar}" />
                                 <Cell class="left">{playerATWeekBest.playerInfo.fn} {playerATWeekBest.playerInfo.ln}</Cell>
                                 <Cell class="center">{playerATWeekBest.playerInfo.pos}</Cell>
                                 <Cell class="center">{playerATWeekBest.playerInfo.t}</Cell>
@@ -1428,6 +1436,7 @@
                         </Row>
                         <Row>
                             <Cell class="header rank"></Cell>
+                            <div class="playerAvatar playerInfo" />
                             <Cell class="header">Player</Cell>
                             <Cell class="header">POS</Cell>
                             <Cell class="header">NFL Team</Cell>
@@ -1443,6 +1452,7 @@
                         {#each playerWeekMissedBests as playerATWeekMissedBest, ix}
                             <Row>
                                 <Cell class="rank">{ix + 1}</Cell>
+                                <div class="playerAvatar playerInfo" style="{playerATWeekMissedBest.avatar}" />
                                 <Cell class="left">{playerATWeekMissedBest.playerInfo.fn} {playerATWeekMissedBest.playerInfo.ln}</Cell>
                                 <Cell class="center">{playerATWeekMissedBest.playerInfo.pos}</Cell>
                                 <Cell class="center">{playerATWeekMissedBest.playerInfo.t}</Cell>
