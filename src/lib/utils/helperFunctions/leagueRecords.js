@@ -1460,6 +1460,14 @@ export const getLeagueRecords = async (refresh = false) => {
 					TE: 0,
 					K: 0,
 					DEF: 0,
+					DL: 0,
+					DE: 0,
+					DT: 0,
+					LB: 0,
+					DB: 0,
+					CB: 0,
+					SS: 0,
+					FS: 0,
 				};
 				let	teamFPTS = {
 					ARI: 0,
@@ -1820,6 +1828,14 @@ export const getLeagueRecords = async (refresh = false) => {
 				TE: 0,
 				K: 0,
 				DEF: 0,
+				DL: 0,
+				DE: 0,
+				DT: 0,
+				LB: 0,
+				DB: 0,
+				CB: 0,
+				SS: 0,
+				FS: 0,
 			};
 			let	teamFPTS = {
 				ARI: 0,
