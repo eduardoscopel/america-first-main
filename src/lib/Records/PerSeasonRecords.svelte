@@ -89,14 +89,6 @@
 		    	fptspg,
 				year: null,
 			})
-	        // add season-long scoring low
-            yearsObj[season.year].seasonLongLows.push({
-                manager: season.manager,
-				recordManID,
-				fpts,
-		    	fptspg,
-				year: null,
-			})
 
             // add win percentage rankings
             yearsObj[season.year].winPercentages.push({
@@ -136,8 +128,8 @@
 
     for(const key in yearsObj) {
         // sort records
+        yearsObj[key].seasonLongLows = yearsObj[key].seasonLongRecords.slice().sort((a, b) => a.fpts - b.fpts).slice(0, 10);
         yearsObj[key].seasonLongRecords = yearsObj[key].seasonLongRecords.sort((a, b) => b.fpts - a.fpts).slice(0, 10);
-	    yearsObj[key].seasonLongLows = yearsObj[key].seasonLongLows.sort((a, b) => a.fpts - b.fpts).slice(0, 10);
         
         // sort rankings
         yearsObj[key].winPercentages.sort((a, b) => b.percentage - a.percentage);

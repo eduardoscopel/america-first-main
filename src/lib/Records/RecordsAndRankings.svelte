@@ -336,6 +336,27 @@
     
     let innerWidth;
 
+    let selection = 'regular';
+    let showRegular = new Boolean (true);
+    let showPlayoffs = new Boolean (false);
+
+    const changeSelection = () => {
+        if(selection == 'regular') {
+            showRegular = true;
+            showPlayoffs = false;
+        } else if(selection == 'playoffs') {
+            showRegular = false;
+            showPlayoffs = true;
+        } else if(selection == 'combined') {
+            showRegular = true;
+            showPlayoffs = true;
+        }
+    }
+
+    $: changeSelection(selection);
+
+
+
 </script>
 
 <svelte:window bind:innerWidth={innerWidth} />
@@ -586,8 +607,22 @@
 
 <h4>{prefix} Records</h4>
 
+<div class="buttonHolder">
+    <Group variant="outlined">
+        <Button class="selectionButtons" on:click={() => changeSelection('regular')} variant="{selection == 'regular' || selection == 'combined' ? "raised" : "outlined"}">
+            <Label>Regular Season</Label>
+        </Button>
+        <Button class="selectionButtons" on:click={() => changeSelection('playoffs')} variant="{selection == 'playoffs' || selection == 'combined' ? "raised" : "outlined"}">
+            <Label>Playoffs</Label>
+        </Button>
+        <Button class="selectionButtons" on:click={() => changeSelection('combined')} variant="{selection == 'combined' ? "raised" : "outlined"}">
+            <Label>Combined</Label>
+        </Button>
+    </Group>
+</div>
+
 <div class="fullFlex">
-    {#if weekRecords && weekRecords.length}
+    {#if weekRecords && weekRecords.length && showRegular}
         <DataTable class="recordTable">
             <Head>
                 <Row>
