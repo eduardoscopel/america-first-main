@@ -2,7 +2,7 @@
     import {round} from '$lib/utils/helper'
   	import RecordsAndRankings from './RecordsAndRankings.svelte'; 
 
-    export let leagueRosterRecords, leagueWeekRecords, leagueWeekLows, allTimeEPERecords, allTimeBiggestBlowouts, allTimeClosestMatchups, allTimeWeekBests, allTimeWeekWorsts, allTimeSeasonBests, allTimeSeasonWorsts, currentManagers, mostSeasonLongPoints, leastSeasonLongPoints, transactionTotals, playerATSeasonTOPS, playerATSeasonBests, playerATWeekTOPS, playerATWeekBests, playerATWeekMissedBests, playerATWeekMissedTOPS;
+    export let selection, leagueRosterRecords, leagueWeekRecords, leagueWeekLows, allTimeEPERecords, allTimeBiggestBlowouts, allTimeClosestMatchups, allTimeWeekBests, allTimeWeekWorsts, allTimeSeasonBests, allTimeSeasonWorsts, currentManagers, mostSeasonLongPoints, leastSeasonLongPoints, transactionTotals, playerATSeasonTOPS, playerATSeasonBests, playerATWeekTOPS, playerATWeekBests, playerATWeekMissedBests, playerATWeekMissedTOPS, leagueRecordArrays;
 
     let winPercentages = [];
     let lineupIQs = [];
@@ -65,6 +65,87 @@
     fptsHistories.sort((a, b) => b.fptsFor - a.fptsFor);
     tradesData.sort((a, b) => b.trades - a.trades);
     waiversData.sort((a, b) => b.waivers - a.waivers);
+
+    let showRegular = new Boolean (true);
+    let showPlayoffs = new Boolean (false);
+    let showCombined = new Boolean (false);
+    let displayStats;
+
+    const changeSelection = (selection) => {
+        if(selection == 'regular') {
+            showRegular = true;
+            showPlayoffs = false;
+            showCombined = false;
+        } else if(selection == 'playoffs') {
+            showRegular = false;
+            showPlayoffs = true;
+            showCombined = false;
+
+        } else if(selection == 'combined') {
+            showRegular = false;
+            showPlayoffs = false;
+            showCombined = true;
+        }
+        displayStats = selection;
+        setSelected(displayStats);
+    }
+
+    $: changeSelection(selection);
+
+    const setSelected = (s) => {
+        if(displayStats == 'regular') {
+            leagueWeekRecords = leagueRecordArrays.regularSeason.week_Top;
+            leagueWeekLows = leagueRecordArrays.regularSeason.week_Low;
+            mostSeasonLongPoints = leagueRecordArrays.regularSeason.period_Top;
+            leastSeasonLongPoints = leagueRecordArrays.regularSeason.period_Low;
+            allTimeEPERecords = leagueRecordArrays.regularSeason.managerBests.epeRecords;
+            allTimeSeasonWorsts = leagueRecordArrays.regularSeason.managerBests.period_Worst;
+            allTimeSeasonBests = leagueRecordArrays.regularSeason.managerBests.period_Best;
+            allTimeWeekBests = leagueRecordArrays.regularSeason.managerBests.week_Worst;
+            allTimeWeekWorsts = leagueRecordArrays.regularSeason.managerBests.week_Best;
+            playerATSeasonTOPS = leagueRecordArrays.regularSeason.players.period_Top;
+            playerATSeasonBests = leagueRecordArrays.regularSeason.players.period_Best;
+            playerATWeekBests = leagueRecordArrays.regularSeason.players.week_Best;
+            playerATWeekMissedBests = leagueRecordArrays.regularSeason.players.week_MissedBest;
+            playerATWeekTOPS = leagueRecordArrays.regularSeason.players.week_Top;
+            playerATWeekMissedTOPS = leagueRecordArrays.regularSeason.players.week_MissedTop;
+        } else if(displayStats == 'playoffs') {
+            leagueWeekRecords = leagueRecordArrays.playoffs.week_Top;
+            leagueWeekLows = leagueRecordArrays.playoffs.week_Low;
+            mostSeasonLongPoints = leagueRecordArrays.playoffs.period_Top;
+            leastSeasonLongPoints = leagueRecordArrays.playoffs.period_Low;
+            allTimeEPERecords = leagueRecordArrays.playoffs.managerBests.epeRecords;
+            allTimeSeasonWorsts = leagueRecordArrays.playoffs.managerBests.period_Worst;
+            allTimeSeasonBests = leagueRecordArrays.playoffs.managerBests.period_Best;
+            allTimeWeekBests = leagueRecordArrays.playoffs.managerBests.week_Worst;
+            allTimeWeekWorsts = leagueRecordArrays.playoffs.managerBests.week_Best;
+            playerATSeasonTOPS = leagueRecordArrays.playoffs.players.period_Top;
+            playerATSeasonBests = leagueRecordArrays.playoffs.players.period_Best;
+            playerATWeekBests = leagueRecordArrays.playoffs.players.week_Best;
+            playerATWeekMissedBests = leagueRecordArrays.playoffs.players.week_MissedBest;
+            playerATWeekTOPS = leagueRecordArrays.playoffs.players.week_Top;
+            playerATWeekMissedTOPS = leagueRecordArrays.playoffs.players.week_MissedTop;
+        } else if(displayStats == 'combined') {
+            leagueWeekRecords = leagueRecordArrays.combined.week_Top;
+            leagueWeekLows = leagueRecordArrays.combined.week_Low; 
+            mostSeasonLongPoints = leagueRecordArrays.combined.period_Top;  
+            leastSeasonLongPoints = leagueRecordArrays.combined.period_Low; 
+            allTimeEPERecords = leagueRecordArrays.combined.managerBests.epeRecords;  
+            allTimeSeasonWorsts = leagueRecordArrays.combined.managerBests.period_Worst; 
+            allTimeSeasonBests = leagueRecordArrays.combined.managerBests.period_Best; 
+            allTimeWeekBests = leagueRecordArrays.combined.managerBests.week_Worst;
+            allTimeWeekWorsts = leagueRecordArrays.combined.managerBests.week_Best;
+            playerATSeasonTOPS = leagueRecordArrays.combined.players.period_Top;
+            playerATSeasonBests = leagueRecordArrays.combined.players.period_Best;
+            playerATWeekBests = leagueRecordArrays.combined.players.week_Best;
+            playerATWeekMissedBests = leagueRecordArrays.combined.players.week_MissedBest;
+            playerATWeekTOPS = leagueRecordArrays.combined.players.week_Top;
+            playerATWeekMissedTOPS = leagueRecordArrays.combined.players.week_MissedTop;
+        }
+    }
+
+    $: setSelected(displayStats);
+
 </script>
 
 <RecordsAndRankings
@@ -94,4 +175,6 @@
     {waiversData}
     prefix="All-Time"
     allTime={true}
+    regular={selection == 'regular'}
+    bind:selection={selection}
 />

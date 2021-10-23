@@ -2,10 +2,10 @@
     import {round} from '$lib/utils/helper';
   	import RecordsAndRankings from './RecordsAndRankings.svelte';
 
-    export let leagueRosterRecords, seasonWeekRecords, currentManagers, allTimeWeekBests, allTimeWeekWorsts, allTimeSeasonBests, allTimeSeasonWorsts, allTimeEPERecords, currentYear, lastYear, transactionTotals;
+    export let selection, leagueRosterRecords, seasonWeekRecords, currentManagers, allTimeWeekBests, allTimeWeekWorsts, allTimeSeasonBests, allTimeSeasonWorsts, allTimeEPERecords, currentYear, lastYear, transactionTotals;
 
     const yearsObj = {};
-    const years = [];
+    let years = [];
 
     let loopYear = currentYear;
     while(loopYear >= lastYear) {
@@ -34,6 +34,19 @@
             year: loopYear
         }
         loopYear--;
+    }
+
+    const arraysObj = {};
+
+    for(const seasonWeekRecord of seasonWeekRecords) {
+        arraysObj[seasonWeekRecord.year] = {
+                regularSeason: {},
+                playoffs: {},
+                combined: {},
+            };
+        for(const recordType in seasonWeekRecord.leagueRecordArrays) {
+            arraysObj[seasonWeekRecord.year][recordType] = seasonWeekRecord.leagueRecordArrays[recordType];
+        }
     }
 
     for(const seasonWeekRecord of seasonWeekRecords) {
@@ -144,6 +157,110 @@
 
     years.sort((a, b) => b.year - a.year);
 
+    let showRegular = new Boolean (true);
+    let showPlayoffs = new Boolean (false);
+    let showCombined = new Boolean (false);
+    let displayStats;
+
+    const changeSelection = (selection) => {
+        if(selection == 'regular') {
+            showRegular = true;
+            showPlayoffs = false;
+            showCombined = false;
+        } else if(selection == 'playoffs') {
+            showRegular = false;
+            showPlayoffs = true;
+            showCombined = false;
+
+        } else if(selection == 'combined') {
+            showRegular = false;
+            showPlayoffs = false;
+            showCombined = true;
+        }
+        displayStats = selection;
+        setSelected(displayStats);
+    }
+
+    $: changeSelection(selection);
+
+    const setSelected = (s) => {
+        if(displayStats == 'regular') {
+            let regularYears = [];
+            for(const key in yearsObj) {
+                yearsObj[key].weekRecords = arraysObj[key].regularSeason.week_Top;
+                yearsObj[key].weekLows = arraysObj[key].regularSeason.week_Low;
+                yearsObj[key].seasonLongRecords = arraysObj[key].regularSeason.period_Top;
+                yearsObj[key].seasonLongLows = arraysObj[key].regularSeason.period_Low;
+
+                yearsObj[key].weekBests = arraysObj[key].regularSeason.managerBests.week_Best;
+                yearsObj[key].weekWorsts = arraysObj[key].regularSeason.managerBests.week_Worst;
+                yearsObj[key].seasonBests = arraysObj[key].regularSeason.managerBests.period_Best;
+                yearsObj[key].seasonWorsts = arraysObj[key].regularSeason.managerBests.period_Worst;
+                yearsObj[key].seasonEPERecords = arraysObj[key].regularSeason.managerBests.epeRecords;
+
+                yearsObj[key].playerSeasonTOPS = arraysObj[key].regularSeason.players.period_Top;
+                yearsObj[key].playerSeasonBests = arraysObj[key].regularSeason.players.period_Best;
+                yearsObj[key].playerWeekBests = arraysObj[key].regularSeason.players.week_Best;
+                yearsObj[key].playerWeekMissedBests = arraysObj[key].regularSeason.players.week_MissedBest;
+                yearsObj[key].playerWeekTOPS = arraysObj[key].regularSeason.players.week_Top;
+                yearsObj[key].playerWeekMissedTOPS = arraysObj[key].regularSeason.players.week_MissedTop;
+                
+                regularYears.push(yearsObj[key]);
+            }
+            years = regularYears.sort((a, b) => b.year - a.year);
+        } else if(displayStats == 'playoffs') {
+            let playoffYears = [];
+            for(const key in yearsObj) {
+                yearsObj[key].weekRecords = arraysObj[key].playoffs.week_Top;
+                yearsObj[key].weekLows = arraysObj[key].playoffs.week_Low;
+                yearsObj[key].seasonLongRecords = arraysObj[key].playoffs.period_Top;
+                yearsObj[key].seasonLongLows = arraysObj[key].playoffs.period_Low;
+
+                yearsObj[key].weekBests = arraysObj[key].playoffs.managerBests.week_Best;
+                yearsObj[key].weekWorsts = arraysObj[key].playoffs.managerBests.week_Worst;
+                yearsObj[key].seasonBests = arraysObj[key].playoffs.managerBests.period_Best;
+                yearsObj[key].seasonWorsts = arraysObj[key].playoffs.managerBests.period_Worst;
+                yearsObj[key].seasonEPERecords = arraysObj[key].playoffs.managerBests.epeRecords;
+
+                yearsObj[key].playerSeasonTOPS = arraysObj[key].playoffs.players.period_Top;
+                yearsObj[key].playerSeasonBests = arraysObj[key].playoffs.players.period_Best;
+                yearsObj[key].playerWeekBests = arraysObj[key].playoffs.players.week_Best;
+                yearsObj[key].playerWeekMissedBests = arraysObj[key].playoffs.players.week_MissedBest;
+                yearsObj[key].playerWeekTOPS = arraysObj[key].playoffs.players.week_Top;
+                yearsObj[key].playerWeekMissedTOPS = arraysObj[key].playoffs.players.week_MissedTop;
+
+                playoffYears.push(yearsObj[key]);
+            }
+            years = playoffYears.sort((a, b) => b.year - a.year);
+        } else if(displayStats == 'combined') {
+            let combinedYears = [];
+            for(const key in yearsObj) {
+                yearsObj[key].weekRecords = arraysObj[key].combined.week_Top;
+                yearsObj[key].weekLows = arraysObj[key].combined.week_Low;
+                yearsObj[key].seasonLongRecords = arraysObj[key].combined.period_Top;
+                yearsObj[key].seasonLongLows = arraysObj[key].combined.period_Low;
+
+                yearsObj[key].weekBests = arraysObj[key].combined.managerBests.week_Best;
+                yearsObj[key].weekWorsts = arraysObj[key].combined.managerBests.week_Worst;
+                yearsObj[key].seasonBests = arraysObj[key].combined.managerBests.period_Best;
+                yearsObj[key].seasonWorsts = arraysObj[key].combined.managerBests.period_Worst;
+                yearsObj[key].seasonEPERecords = arraysObj[key].combined.managerBests.epeRecords;
+
+                yearsObj[key].playerSeasonTOPS = arraysObj[key].combined.players.period_Top;
+                yearsObj[key].playerSeasonBests = arraysObj[key].combined.players.period_Best;
+                yearsObj[key].playerWeekBests = arraysObj[key].combined.players.week_Best;
+                yearsObj[key].playerWeekMissedBests = arraysObj[key].combined.players.week_MissedBest;
+                yearsObj[key].playerWeekTOPS = arraysObj[key].combined.players.week_Top;
+                yearsObj[key].playerWeekMissedTOPS = arraysObj[key].combined.players.week_MissedTop;
+
+                combinedYears.push(yearsObj[key]);
+            }
+            years = combinedYears.sort((a, b) => b.year - a.year);
+        }
+    }
+
+    $: setSelected(displayStats);
+
 </script>
 
 {#each years as {waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, seasonLongLows, showTies, winPercentages, fptsHistories, lineupIQs, year, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, allTimeWeekBests, allTimeWeekWorsts, allTimeSeasonBests, allTimeSeasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekTOPS, playerWeekBests, playerWeekMissedBests, playerWeekMissedTOPS}, ix}
@@ -178,5 +295,7 @@
         prefix={year}
         {currentManagers}
         last={ix == years.length - 1}
+        regular={selection == 'regular'}
+        bind:selection={selection}
     />
 {/each}

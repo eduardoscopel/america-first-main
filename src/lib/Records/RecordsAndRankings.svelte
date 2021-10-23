@@ -6,10 +6,30 @@
 
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table'; 
 
-    export let waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerATSeasonTOPS, playerATSeasonBests, playerATWeekBests, playerATWeekMissedBests, playerWeekMissedTOPS, playerATWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerATWeekTOPS, playerWeekTOPS, allTimeEPERecords, allTimeSeasonBests, allTimeSeasonWorsts, allTimeWeekBests, allTimeWeekWorsts, currentManagers, allTime=false, last=false;
+    export let selection = 'regular', waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerATSeasonTOPS, playerATSeasonBests, playerATWeekBests, playerATWeekMissedBests, playerWeekMissedTOPS, playerATWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerATWeekTOPS, playerWeekTOPS, allTimeEPERecords, allTimeSeasonBests, allTimeSeasonWorsts, allTimeWeekBests, allTimeWeekWorsts, currentManagers, allTime=false, last=false;
 
     let leagueManagers = {};
     const numManagers = managers.length;
+
+    const changeSelection = (s) => {
+        let showRegular = new Boolean (true);
+        let showPlayoffs = new Boolean (false);
+        let showCombined = new Boolean (false);
+        if(selection == 'regular') {
+            showRegular = true;
+            showPlayoffs = false;
+            showCombined = false;
+        } else if(selection == 'playoffs') {
+            showRegular = false;
+            showPlayoffs = true;
+            showCombined = false;
+        } else if(selection == 'combined') {
+            showRegular = false;
+            showPlayoffs = false;
+            showCombined = true;
+        }
+        selection = s;
+    }
 
 	for(const managerID in managers) {
 		const manager = managers[managerID];
@@ -336,27 +356,6 @@
     
     let innerWidth;
 
-    let selection = 'regular';
-    let showRegular = new Boolean (true);
-    let showPlayoffs = new Boolean (false);
-
-    const changeSelection = () => {
-        if(selection == 'regular') {
-            showRegular = true;
-            showPlayoffs = false;
-        } else if(selection == 'playoffs') {
-            showRegular = false;
-            showPlayoffs = true;
-        } else if(selection == 'combined') {
-            showRegular = true;
-            showPlayoffs = true;
-        }
-    }
-
-    $: changeSelection(selection);
-
-
-
 </script>
 
 <svelte:window bind:innerWidth={innerWidth} />
@@ -609,10 +608,10 @@
 
 <div class="buttonHolder">
     <Group variant="outlined">
-        <Button class="selectionButtons" on:click={() => changeSelection('regular')} variant="{selection == 'regular' || selection == 'combined' ? "raised" : "outlined"}">
+        <Button class="selectionButtons" on:click={() => changeSelection('regular')} variant="{selection == 'regular' ? "raised" : "outlined"}">
             <Label>Regular Season</Label>
         </Button>
-        <Button class="selectionButtons" on:click={() => changeSelection('playoffs')} variant="{selection == 'playoffs' || selection == 'combined' ? "raised" : "outlined"}">
+        <Button class="selectionButtons" on:click={() => changeSelection('playoffs')} variant="{selection == 'playoffs' ? "raised" : "outlined"}">
             <Label>Playoffs</Label>
         </Button>
         <Button class="selectionButtons" on:click={() => changeSelection('combined')} variant="{selection == 'combined' ? "raised" : "outlined"}">
@@ -622,7 +621,7 @@
 </div>
 
 <div class="fullFlex">
-    {#if weekRecords && weekRecords.length && showRegular}
+    {#if weekRecords && weekRecords.length}
         <DataTable class="recordTable">
             <Head>
                 <Row>
@@ -662,32 +661,32 @@
     {#if allTime}
         <DataTable class="recordTable">
             <Head>
-            <Row>
-                <Cell class="header" colspan=5>{prefix} Season-Long Scoring Records</Cell>
-            </Row>
-            <Row>
-                <Cell class="header rank"></Cell>
-                <Cell class="header">Manager</Cell>
-                <Cell class="header">Year</Cell>
-                <Cell class="header">PF</Cell>
-                <Cell class="header">PPG</Cell>
-            </Row>
+                <Row>
+                    <Cell class="header" colspan=5>{prefix} Season-Long Scoring Records</Cell>
+                </Row>
+                <Row>
+                    <Cell class="header rank"></Cell>
+                    <Cell class="header">Manager</Cell>
+                    <Cell class="header">Year</Cell>
+                    <Cell class="header">PF</Cell>
+                    <Cell class="header">PPG</Cell>
+                </Row>
             </Head>
             <Body>
-            {#each seasonLongRecords as mostSeasonLongPoint, ix}
-                <Row>
-                <Cell class="rank">{ix + 1}</Cell>
-                <Cell class="cellName" on:click={() => gotoManager(mostSeasonLongPoint.recordManID)}>
-                    {mostSeasonLongPoint.manager.realname}
-                    {#if !allTime}
-                    <div class="fantasyTeamName">({mostSeasonLongPoint.manager.name})</div>
-                    {/if}
-                </Cell>
-                <Cell class="center">{mostSeasonLongPoint.year}</Cell>
-                <Cell class="center">{round(mostSeasonLongPoint.fpts)}</Cell>
-                <Cell class="center">{round(mostSeasonLongPoint.fptspg)}</Cell>
-                </Row>
-            {/each}
+                {#each seasonLongRecords as mostSeasonLongPoint, ix}
+                    <Row>
+                        <Cell class="rank">{ix + 1}</Cell>
+                        <Cell class="cellName" on:click={() => gotoManager(mostSeasonLongPoint.recordManID)}>
+                            {mostSeasonLongPoint.manager.realname}
+                            {#if !allTime}
+                            <div class="fantasyTeamName">({mostSeasonLongPoint.manager.name})</div>
+                            {/if}
+                        </Cell>
+                        <Cell class="center">{mostSeasonLongPoint.year}</Cell>
+                        <Cell class="center">{round(mostSeasonLongPoint.fpts)}</Cell>
+                        <Cell class="center">{round(mostSeasonLongPoint.fptspg)}</Cell>
+                    </Row>
+                {/each}
             </Body>
         </DataTable>
     {/if}

@@ -2182,6 +2182,7 @@ export const getLeagueRecords = async (refresh = false) => {
 			playoffsPointsLows: recordArrays.league.years[year].playoffs.week_Low,
 			seasonPointsRecords: recordArrays.league.years[year].regularSeason.week_Top,
 			seasonPointsLows: recordArrays.league.years[year].regularSeason.week_Low,
+			leagueRecordArrays: recordArrays.league.years[year],
 		}
 
 		if(interSeasonEntry.seasonPointsRecords.length > 0) {
@@ -2357,10 +2358,6 @@ export const getLeagueRecords = async (refresh = false) => {
 	}
 
 	const recordsData = {
-		// alltimeCombinedWeekBests,
-		// alltimeCombinedWeekWorsts,
-		alltimeCombinedWeekLows: recordArrays.league.alltime.combined.week_Low,
-		alltimeCombinedWeekRecords: recordArrays.league.alltime.combined.week_Top,
 		allTimeBiggestBlowouts,
 		allTimeClosestMatchups,
 		allTimeWeekBests: recordArrays.league.alltime.regularSeason.managerBests.week_Best,
@@ -2392,6 +2389,7 @@ export const getLeagueRecords = async (refresh = false) => {
 		leaguePOWeekLows: recordArrays.league.alltime.playoffs.week_Low,
 		allTimeBiggestPOBlowouts,
 		allTimeClosestPOMatchups,
+		leagueRecordArrays: recordArrays.league.alltime,
 		currentManagers,
 		currentYear,
 		lastYear
