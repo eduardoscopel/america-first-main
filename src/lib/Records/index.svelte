@@ -41,12 +41,6 @@
         playerATWeekMissedBests = newRecords.playerATWeekMissedBests;
         playerATWeekMissedTOPS = newRecords.playerATWeekMissedTOPS;
         leagueRecordArrays = newRecords.leagueRecordArrays;
-        // playerATPlayoffBests = newRecords.playerATPlayoffBests;
-		// playerATPOWeekBests = newRecords.playerATPOWeekBests;
-		// playerATPOWeekMissedBests = newRecords.playerATPOWeekMissedBests;
-		// playerATPOWeekTOPS = newRecords.playerATPOWeekTOPS;
-		// playerATPlayoffTOPS = newRecords.playerATPlayoffTOPS;
-        // playerATPOWeekMissedTOPS = newRecords.playerATPOWeekMissedTOPS;
     }
 
     if(stale) {

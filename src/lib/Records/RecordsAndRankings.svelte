@@ -782,17 +782,17 @@
                     <Row>
                         <Cell class="rank">{ix + 1}</Cell>
                         <Cell class="cellName center differentialName">
-                            <div class="center" on:click={() => gotoManager(blowout.home.recordManID)}>
-                                {blowout.home.manager.realname} ({round(blowout.home.fpts)})
+                            <div class="center" on:click={() => gotoManager(blowout.recordManID)}>
+                                {blowout.manager.realname} ({round(blowout.fpts)})
                                 {#if !allTime}
-                                    <div class="fantasyTeamName">({blowout.home.manager.name})</div>
+                                    <div class="fantasyTeamName">({blowout.manager.name})</div>
                                 {/if}
                             </div>
                             vs
-                            <div class="center" on:click={() => gotoManager(blowout.away.recordManID)}>
-                                {blowout.away.manager.realname} ({round(blowout.away.fpts)})
+                            <div class="center" on:click={() => gotoManager(blowout.againstRecordManID)}>
+                                {blowout.againstManager.realname} ({round(blowout.fptsAgainst)})
                                 {#if !allTime}
-                                    <div class="fantasyTeamName">({blowout.away.manager.name})</div>
+                                    <div class="fantasyTeamName">({blowout.againstManager.name})</div>
                                 {/if}
                             </div>
                         </Cell>
@@ -800,7 +800,7 @@
                                 <Cell class="center">{blowout.year}</Cell>
                             {/if}
                         <Cell class="center">{blowout.week}</Cell>
-                        <Cell class="center">{round(blowout.differential)}</Cell>
+                        <Cell class="center">{round(blowout.matchDifferential)}</Cell>
                     </Row>
                 {/each}
             </Body>
@@ -828,17 +828,17 @@
                     <Row>
                         <Cell class="rank">{ix + 1}</Cell>
                         <Cell class="cellName center differentialName">
-                            <div class="center" on:click={() => gotoManager(closestMatchup.home.recordManID)}>
-                                {closestMatchup.home.manager.realname} ({round(closestMatchup.home.fpts)})
+                            <div class="center" on:click={() => gotoManager(closestMatchup.recordManID)}>
+                                {closestMatchup.manager.realname} ({round(closestMatchup.fpts)})
                                 {#if !allTime}
-                                    <div class="fantasyTeamName">({closestMatchup.home.manager.name})</div>
+                                    <div class="fantasyTeamName">({closestMatchup.manager.name})</div>
                                 {/if}
                             </div>
                             vs
-                            <div class="center" on:click={() => gotoManager(closestMatchup.away.recordManID)}>
-                                {closestMatchup.away.manager.realname} ({round(closestMatchup.away.fpts)})
+                            <div class="center" on:click={() => gotoManager(closestMatchup.againstRecordManID)}>
+                                {closestMatchup.againstManager.realname} ({round(closestMatchup.fptsAgainst)})
                                 {#if !allTime}
-                                    <div class="fantasyTeamName">({closestMatchup.away.manager.name})</div>
+                                    <div class="fantasyTeamName">({closestMatchup.againstManager.name})</div>
                                 {/if}
                             </div>
                         </Cell>
@@ -846,7 +846,7 @@
                                 <Cell class="center">{closestMatchup.year}</Cell>
                             {/if}
                         <Cell class="center">{closestMatchup.week}</Cell>
-                        <Cell class="center">{round(closestMatchup.differential)}</Cell>
+                        <Cell class="center">{round(closestMatchup.matchDifferential)}</Cell>
                     </Row>
                 {/each}
             </Body>

@@ -50,21 +50,21 @@
     }
 
     for(const seasonWeekRecord of seasonWeekRecords) {
-        yearsObj[seasonWeekRecord.year].weekRecords = seasonWeekRecord.seasonPointsRecords;
-	    yearsObj[seasonWeekRecord.year].weekLows = seasonWeekRecord.seasonPointsLows;
-        yearsObj[seasonWeekRecord.year].blowouts = seasonWeekRecord.biggestBlowouts;
-        yearsObj[seasonWeekRecord.year].closestMatchups = seasonWeekRecord.closestMatchups;
-        yearsObj[seasonWeekRecord.year].weekBests = seasonWeekRecord.weekBests;
-        yearsObj[seasonWeekRecord.year].weekWorsts = seasonWeekRecord.weekWorsts;
-        yearsObj[seasonWeekRecord.year].seasonBests = seasonWeekRecord.seasonBests;
-        yearsObj[seasonWeekRecord.year].seasonWorsts = seasonWeekRecord.seasonWorsts;
-        yearsObj[seasonWeekRecord.year].seasonEPERecords = seasonWeekRecord.seasonEPERecords;
-        yearsObj[seasonWeekRecord.year].playerSeasonTOPS = seasonWeekRecord.playerSeasonTOPS;
-        yearsObj[seasonWeekRecord.year].playerSeasonBests = seasonWeekRecord.playerSeasonBests;
-        yearsObj[seasonWeekRecord.year].playerWeekTOPS = seasonWeekRecord.playerWeekTOPS;
-        yearsObj[seasonWeekRecord.year].playerWeekBests = seasonWeekRecord.playerWeekBests;
-        yearsObj[seasonWeekRecord.year].playerWeekMissedBests = seasonWeekRecord.playerWeekMissedBests;
-        yearsObj[seasonWeekRecord.year].playerWeekMissedTOPS = seasonWeekRecord.playerWeekMissedTOPS;
+        yearsObj[seasonWeekRecord.year].weekRecords = seasonWeekRecord.leagueRecordArrays.regularSeason.week_Top;
+	    yearsObj[seasonWeekRecord.year].weekLows = seasonWeekRecord.leagueRecordArrays.regularSeason.week_Low;
+        yearsObj[seasonWeekRecord.year].blowouts = seasonWeekRecord.leagueRecordArrays.regularSeason.biggestBlowouts;
+        yearsObj[seasonWeekRecord.year].closestMatchups = seasonWeekRecord.leagueRecordArrays.regularSeason.narrowestVictories;
+        yearsObj[seasonWeekRecord.year].weekBests = seasonWeekRecord.leagueRecordArrays.regularSeason.managerBests.week_Best;
+        yearsObj[seasonWeekRecord.year].weekWorsts = seasonWeekRecord.leagueRecordArrays.regularSeason.managerBests.week_Worst;
+        yearsObj[seasonWeekRecord.year].seasonBests = seasonWeekRecord.leagueRecordArrays.regularSeason.managerBests.period_Best;
+        yearsObj[seasonWeekRecord.year].seasonWorsts = seasonWeekRecord.leagueRecordArrays.regularSeason.managerBests.period_Worst;
+        yearsObj[seasonWeekRecord.year].seasonEPERecords = seasonWeekRecord.leagueRecordArrays.regularSeason.managerBests.epeRecords;
+        yearsObj[seasonWeekRecord.year].playerSeasonTOPS = seasonWeekRecord.leagueRecordArrays.regularSeason.players.period_Top;
+        yearsObj[seasonWeekRecord.year].playerSeasonBests = seasonWeekRecord.leagueRecordArrays.regularSeason.players.period_Best;
+        yearsObj[seasonWeekRecord.year].playerWeekTOPS = seasonWeekRecord.leagueRecordArrays.regularSeason.players.week_Top;
+        yearsObj[seasonWeekRecord.year].playerWeekBests = seasonWeekRecord.leagueRecordArrays.regularSeason.players.week_Best;
+        yearsObj[seasonWeekRecord.year].playerWeekMissedBests = seasonWeekRecord.leagueRecordArrays.regularSeason.players.week_MissedBest;
+        yearsObj[seasonWeekRecord.year].playerWeekMissedTOPS = seasonWeekRecord.leagueRecordArrays.regularSeason.players.week_MissedTop;
     }
     
     for(const season in transactionTotals.seasons) {
@@ -191,6 +191,8 @@
                 yearsObj[key].weekLows = arraysObj[key].regularSeason.week_Low;
                 yearsObj[key].seasonLongRecords = arraysObj[key].regularSeason.period_Top;
                 yearsObj[key].seasonLongLows = arraysObj[key].regularSeason.period_Low;
+                yearsObj[key].blowouts = arraysObj[key].regularSeason.biggestBlowouts;
+                yearsObj[key].closestMatchups = arraysObj[key].regularSeason.narrowestVictories;
 
                 yearsObj[key].weekBests = arraysObj[key].regularSeason.managerBests.week_Best;
                 yearsObj[key].weekWorsts = arraysObj[key].regularSeason.managerBests.week_Worst;
@@ -215,6 +217,8 @@
                 yearsObj[key].weekLows = arraysObj[key].playoffs.week_Low;
                 yearsObj[key].seasonLongRecords = arraysObj[key].playoffs.period_Top;
                 yearsObj[key].seasonLongLows = arraysObj[key].playoffs.period_Low;
+                yearsObj[key].blowouts = arraysObj[key].playoffs.biggestBlowouts;
+                yearsObj[key].closestMatchups = arraysObj[key].playoffs.narrowestVictories;
 
                 yearsObj[key].weekBests = arraysObj[key].playoffs.managerBests.week_Best;
                 yearsObj[key].weekWorsts = arraysObj[key].playoffs.managerBests.week_Worst;
@@ -239,6 +243,8 @@
                 yearsObj[key].weekLows = arraysObj[key].combined.week_Low;
                 yearsObj[key].seasonLongRecords = arraysObj[key].combined.period_Top;
                 yearsObj[key].seasonLongLows = arraysObj[key].combined.period_Low;
+                yearsObj[key].blowouts = arraysObj[key].combined.biggestBlowouts;
+                yearsObj[key].closestMatchups = arraysObj[key].combined.narrowestVictories;
 
                 yearsObj[key].weekBests = arraysObj[key].combined.managerBests.week_Best;
                 yearsObj[key].weekWorsts = arraysObj[key].combined.managerBests.week_Worst;

@@ -54,9 +54,6 @@ export const getLeagueRecords = async (refresh = false) => {
 	let currentYear;
 	let lastYear;
 
-	let allTimeMatchupDifferentials = [];
-	let allTimePOMatchupDifferentials = [];
-
 	let leagueRosterRecords = {}; 				// every full season stat point (for each year and all years combined)
 	let playoffRosterRecords = {}; 
 	let seasonWeekRecords = []; 				// highest weekly points within a single season
@@ -159,11 +156,6 @@ export const getLeagueRecords = async (refresh = false) => {
 			},
 		},
 	};
-
-	let allTimeBiggestBlowouts = []; 			// 10 biggest blowouts
-	let allTimeBiggestPOBlowouts = [];
-	let allTimeClosestMatchups = []; 			// 10 closest matchups
-	let allTimeClosestPOMatchups = [];
 
 	let leagueManagers = {};
 	let activeManagers = [];
@@ -545,10 +537,7 @@ export const getLeagueRecords = async (refresh = false) => {
 		// now that we've used the current season ID for everything we need, set it to the previous season
 		curSeason = leagueData.previous_league_id;
 
-		let matchupDifferentials = [];
-
 		const playoffPointsRecord = [];
-		let POmatchupDifferentials = [];
 
 		// CREATING YEARLY RECORD OBJECTS/ARRAYS
 		// League Objects/Arrays (for all-around records)
@@ -618,24 +607,7 @@ export const getLeagueRecords = async (refresh = false) => {
 						home = champMatch[1];
 						away = champMatch[0];
 					}
-
-					const POmatchupDifferential = {
-						year: home.year,
-						week: home.week,
-						home: {
-							manager: home.manager,
-							fpts: home.fpts,
-							recordManID: home.recordManID,
-						},
-						away: {
-							manager: away.manager,
-							fpts: away.fpts,
-							recordManID: away.recordManID,
-						},
-						differential: home.fpts - away.fpts
-					}
-					allTimePOMatchupDifferentials.push(POmatchupDifferential);
-					POmatchupDifferentials.push(POmatchupDifferential);
+					const matchDifferential = home.fpts - away.fpts;
 
 					for(const key in champMatch) {
 						const opponent = champMatch[key];
@@ -663,6 +635,9 @@ export const getLeagueRecords = async (refresh = false) => {
 							rosterID: opponent.rosterID,
 							fpts: opponent.fpts,
 							fptspg: null,
+							fptsAgainst: null,
+							againstManager: null,
+							againstRecordManID: null,
 							epeWins: 0,
 							epeTies: 0,
 							epeLosses: 0,
@@ -673,8 +648,35 @@ export const getLeagueRecords = async (refresh = false) => {
 							medianPerc: null,
 							topScore: new Boolean(false),
 							bottomScore: new Boolean(false),
+							matchWin: new Boolean(false),
+							matchLoss: new Boolean(false),
+							matchTie: new Boolean(false),
+							matchDifferential,
 							week: opponent.week,
 							year,
+						}
+
+						if(opponent == home) {
+							comboEntry.matchWin = true;
+							comboEntry.fptsAgainst = away.fpts;
+							comboEntry.againstManager = away.manager;
+							comboEntry.againstRecordManID = away.recordManID;
+						} else if(opponent == away) {
+							comboEntry.matchLoss = true;
+							comboEntry.matchDifferential = matchDifferential * (-1);
+							comboEntry.fptsAgainst = home.fpts;
+							comboEntry.againstManager = home.manager;
+							comboEntry.againstRecordManID = home.recordManID;
+						} else if(home.fpts == away.fpts) {
+							comboEntry.matchTie = true;
+							comboEntry.fptsAgainst = away.fpts;
+							if(opponent.recordManID == home.recordManID) {
+								comboEntry.againstManager = away.manager;
+								comboEntry.againstRecordManID = away.recordManID;
+							} else {
+								comboEntry.againstManager = home.manager;
+								comboEntry.againstRecordManID = home.recordManID;
+							}
 						}
 
 						playoffPointsRecord.push(POweekEntry);
@@ -818,14 +820,6 @@ export const getLeagueRecords = async (refresh = false) => {
 
 					playoffRosterRecords[home.recordManID].years[year].fptsAgainst += away.fpts;
 					playoffRosterRecords[away.recordManID].years[year].fptsAgainst += home.fpts;
-
-					if(POmatchupDifferential.differential == 0) {
-						playoffRosterRecords[home.recordManID].years[year].ties++;
-						playoffRosterRecords[away.recordManID].years[year].ties++;
-					} else {
-						playoffRosterRecords[home.recordManID].years[year].wins++;
-						playoffRosterRecords[away.recordManID].years[year].losses++;
-					}
 				} else if(playoffCase == 3 ||														// Relevant Match IDs: 1, 2
 				   		  playoffCase == 9 ||
 				   		  playoffCase == 6 && POstartWeek < POrecordsWeek + playoffLength ||
@@ -843,24 +837,7 @@ export const getLeagueRecords = async (refresh = false) => {
 							home = POmatchups[i][1];
 							away = POmatchups[i][0];
 						}
-	
-						const POmatchupDifferential = {
-							year: home.year,
-							week: home.week,
-							home: {
-								manager: home.manager,
-								fpts: home.fpts,
-								recordManID: home.recordManID,
-							},
-							away: {
-								manager: away.manager,
-								fpts: away.fpts,
-								recordManID: away.recordManID,
-							},
-							differential: home.fpts - away.fpts
-						}
-						allTimePOMatchupDifferentials.push(POmatchupDifferential);
-						POmatchupDifferentials.push(POmatchupDifferential);
+						const matchDifferential = home.fpts - away.fpts;
 
 						for(const key in POmatchups[i]) {
 							const opponent = POmatchups[i][key];
@@ -888,6 +865,9 @@ export const getLeagueRecords = async (refresh = false) => {
 								rosterID: opponent.rosterID,
 								fpts: opponent.fpts,
 								fptspg: null,
+								fptsAgainst: null,
+								againstManager: null,
+								againstRecordManID: null,
 								epeWins: 0,
 								epeTies: 0,
 								epeLosses: 0,
@@ -898,8 +878,35 @@ export const getLeagueRecords = async (refresh = false) => {
 								medianPerc: null,
 								topScore: new Boolean(false),
 								bottomScore: new Boolean(false),
+								matchWin: new Boolean(false),
+								matchLoss: new Boolean(false),
+								matchTie: new Boolean(false),
+								matchDifferential,
 								week: opponent.week,
 								year,
+							}
+
+							if(opponent == home) {
+								comboEntry.matchWin = true;
+								comboEntry.fptsAgainst = away.fpts;
+								comboEntry.againstManager = away.manager;
+								comboEntry.againstRecordManID = away.recordManID;
+							} else if(opponent == away) {
+								comboEntry.matchLoss = true;
+								comboEntry.matchDifferential = matchDifferential * (-1);
+								comboEntry.fptsAgainst = home.fpts;
+								comboEntry.againstManager = home.manager;
+								comboEntry.againstRecordManID = home.recordManID;
+							} else if(home.fpts == away.fpts) {
+								comboEntry.matchTie = true;
+								comboEntry.fptsAgainst = away.fpts;
+								if(opponent.recordManID == home.recordManID) {
+									comboEntry.againstManager = away.manager;
+									comboEntry.againstRecordManID = away.recordManID;
+								} else {
+									comboEntry.againstManager = home.manager;
+									comboEntry.againstRecordManID = home.recordManID;
+								}
 							}
 							
 							playoffPointsRecord.push(POweekEntry);
@@ -1043,14 +1050,6 @@ export const getLeagueRecords = async (refresh = false) => {
 	
 						playoffRosterRecords[home.recordManID].years[year].fptsAgainst += away.fpts;
 						playoffRosterRecords[away.recordManID].years[year].fptsAgainst += home.fpts;
-	
-						if(POmatchupDifferential.differential == 0) {
-							playoffRosterRecords[home.recordManID].years[year].ties++;
-							playoffRosterRecords[away.recordManID].years[year].ties++;
-						} else {
-							playoffRosterRecords[home.recordManID].years[year].wins++;
-							playoffRosterRecords[away.recordManID].years[year].losses++;
-						}
 					}
 				} else if(playoffCase == 7 && 2 < POround < 5 ||									// Relevant Match IDs: 1, 2, 3
 				   		  playoffCase == 4 && POround == 2 ||
@@ -1064,24 +1063,7 @@ export const getLeagueRecords = async (refresh = false) => {
 							home = POmatchups[i][1];
 							away = POmatchups[i][0];
 						}
-	
-						const POmatchupDifferential = {
-							year: home.year,
-							week: home.week,
-							home: {
-								manager: home.manager,
-								fpts: home.fpts,
-								recordManID: home.recordManID,
-							},
-							away: {
-								manager: away.manager,
-								fpts: away.fpts,
-								recordManID: away.recordManID,
-							},
-							differential: home.fpts - away.fpts
-						}
-						allTimePOMatchupDifferentials.push(POmatchupDifferential);
-						POmatchupDifferentials.push(POmatchupDifferential);
+						const matchDifferential = home.fpts - away.fpts;
 	
 						for(const key in POmatchups[i]) {
 							const opponent = POmatchups[i][key];
@@ -1109,6 +1091,9 @@ export const getLeagueRecords = async (refresh = false) => {
 								rosterID: opponent.rosterID,
 								fpts: opponent.fpts,
 								fptspg: null,
+								fptsAgainst: null,
+								againstManager: null,
+								againstRecordManID: null,
 								epeWins: 0,
 								epeTies: 0,
 								epeLosses: 0,
@@ -1119,8 +1104,35 @@ export const getLeagueRecords = async (refresh = false) => {
 								medianPerc: null,
 								topScore: new Boolean(false),
 								bottomScore: new Boolean(false),
+								matchWin: new Boolean(false),
+								matchLoss: new Boolean(false),
+								matchTie: new Boolean(false),
+								matchDifferential,
 								week: opponent.week,
 								year,
+							}
+
+							if(opponent == home) {
+								comboEntry.matchWin = true;
+								comboEntry.fptsAgainst = away.fpts;
+								comboEntry.againstManager = away.manager;
+								comboEntry.againstRecordManID = away.recordManID;
+							} else if(opponent == away) {
+								comboEntry.matchLoss = true;
+								comboEntry.matchDifferential = matchDifferential * (-1);
+								comboEntry.fptsAgainst = home.fpts;
+								comboEntry.againstManager = home.manager;
+								comboEntry.againstRecordManID = home.recordManID;
+							} else if(home.fpts == away.fpts) {
+								comboEntry.matchTie = true;
+								comboEntry.fptsAgainst = away.fpts;
+								if(opponent.recordManID == home.recordManID) {
+									comboEntry.againstManager = away.manager;
+									comboEntry.againstRecordManID = away.recordManID;
+								} else {
+									comboEntry.againstManager = home.manager;
+									comboEntry.againstRecordManID = home.recordManID;
+								}
 							}
 
 							playoffPointsRecord.push(POweekEntry);
@@ -1264,14 +1276,6 @@ export const getLeagueRecords = async (refresh = false) => {
 	
 						playoffRosterRecords[home.recordManID].years[year].fptsAgainst += away.fpts;
 						playoffRosterRecords[away.recordManID].years[year].fptsAgainst += home.fpts;
-	
-						if(POmatchupDifferential.differential == 0) {
-							playoffRosterRecords[home.recordManID].years[year].ties++;
-							playoffRosterRecords[away.recordManID].years[year].ties++;
-						} else {
-							playoffRosterRecords[home.recordManID].years[year].wins++;
-							playoffRosterRecords[away.recordManID].years[year].losses++;
-						}
 					}
 				} else if(playoffCase == 8 ||														// Relevant Match IDs: 1, 2, 3, 4
 				   		  playoffCase == 2 ||
@@ -1285,24 +1289,7 @@ export const getLeagueRecords = async (refresh = false) => {
 							home = POmatchups[i][1];
 							away = POmatchups[i][0];
 						}
-	
-						const POmatchupDifferential = {
-							year: home.year,
-							week: home.week,
-							home: {
-								manager: home.manager,
-								fpts: home.fpts,
-								recordManID: home.recordManID,
-							},
-							away: {
-								manager: away.manager,
-								fpts: away.fpts,
-								recordManID: away.recordManID,
-							},
-							differential: home.fpts - away.fpts
-						}
-						allTimePOMatchupDifferentials.push(POmatchupDifferential);
-						POmatchupDifferentials.push(POmatchupDifferential);
+						const matchDifferential = home.fpts - away.fpts;
 	
 						for(const key in POmatchups[i]) {
 							const opponent = POmatchups[i][key];
@@ -1330,6 +1317,9 @@ export const getLeagueRecords = async (refresh = false) => {
 								rosterID: opponent.rosterID,
 								fpts: opponent.fpts,
 								fptspg: null,
+								fptsAgainst: null,
+								againstManager: null,
+								againstRecordManID: null,
 								epeWins: 0,
 								epeTies: 0,
 								epeLosses: 0,
@@ -1340,8 +1330,35 @@ export const getLeagueRecords = async (refresh = false) => {
 								medianPerc: null,
 								topScore: new Boolean(false),
 								bottomScore: new Boolean(false),
+								matchWin: new Boolean(false),
+								matchLoss: new Boolean(false),
+								matchTie: new Boolean (false),
+								matchDifferential,
 								week: opponent.week,
 								year,
+							}
+
+							if(opponent == home) {
+								comboEntry.matchWin = true;
+								comboEntry.fptsAgainst = away.fpts;
+								comboEntry.againstManager = away.manager;
+								comboEntry.againstRecordManID = away.recordManID;
+							} else if(opponent == away) {
+								comboEntry.matchLoss = true;
+								comboEntry.matchDifferential = matchDifferential * (-1);
+								comboEntry.fptsAgainst = home.fpts;
+								comboEntry.againstManager = home.manager;
+								comboEntry.againstRecordManID = home.recordManID;
+							} else if(home.fpts == away.fpts) {
+								comboEntry.matchTie = true;
+								comboEntry.fptsAgainst = away.fpts;
+								if(opponent.recordManID == home.recordManID) {
+									comboEntry.againstManager = away.manager;
+									comboEntry.againstRecordManID = away.recordManID;
+								} else {
+									comboEntry.againstManager = home.manager;
+									comboEntry.againstRecordManID = home.recordManID;
+								}
 							}
 
 							playoffPointsRecord.push(POweekEntry);
@@ -1486,14 +1503,6 @@ export const getLeagueRecords = async (refresh = false) => {
 	
 						playoffRosterRecords[home.recordManID].years[year].fptsAgainst += away.fpts;
 						playoffRosterRecords[away.recordManID].years[year].fptsAgainst += home.fpts;
-	
-						if(POmatchupDifferential.differential == 0) {
-							playoffRosterRecords[home.recordManID].years[year].ties++;
-							playoffRosterRecords[away.recordManID].years[year].ties++;
-						} else {
-							playoffRosterRecords[home.recordManID].years[year].wins++;
-							playoffRosterRecords[away.recordManID].years[year].losses++;
-						}
 					}
 				}
 
@@ -1521,21 +1530,9 @@ export const getLeagueRecords = async (refresh = false) => {
 					continue;
 				}
 			}
-			
-
-			POmatchupDifferentials = POmatchupDifferentials.sort((a, b) => b.differential - a.differential);
-			const biggestPOBlowouts = POmatchupDifferentials.slice(0, 10);
-
-			const closestPOMatchups = [];
-			for(let i = 0; i < 10; i++) {
-				closestPOMatchups.push(POmatchupDifferentials.pop());
-			}
-
 			// per-season ranks & records to push thru seasonWeekRecords
 			const interSeasonPOEntry = {
 				year,
-				biggestPOBlowouts,
-				closestPOMatchups,
 				playoffPointsRecords: playoffPointsRecord.sort((a, b) => b.fpts - a.fpts).slice(0, 10),
 			}
 
@@ -1570,12 +1567,21 @@ export const getLeagueRecords = async (refresh = false) => {
 					recordManID,
 				}
 
+				// add each entry to the matchup object
+				if(!matchups[matchup.matchup_id]) {
+					matchups[matchup.matchup_id] = [];
+				}
+				matchups[matchup.matchup_id].push(entry);
+
 				const comboEntry = {
 					manager: originalManagers[recordManID],
 					recordManID,
 					rosterID: matchup.roster_id,
 					fpts: matchup.points,
 					fptspg: null,
+					fptsAgainst: null,
+					againstManager: null,
+					againstRecordManID: null,
 					epeWins: 0,
 					epeTies: 0,
 					epeLosses: 0,
@@ -1586,6 +1592,10 @@ export const getLeagueRecords = async (refresh = false) => {
 					medianPerc: null,
 					topScore: new Boolean(false),
 					bottomScore: new Boolean(false),
+					matchWin: new Boolean(false),
+					matchLoss: new Boolean(false),
+					matchTie: new Boolean(false),
+					matchDifferential: 0,
 					week: startWeek,
 					year,
 				}
@@ -1611,12 +1621,6 @@ export const getLeagueRecords = async (refresh = false) => {
 					masterRecordBook.managers.combined.years[year][recordManID] = [];
 				}
 				masterRecordBook.managers.combined.years[year][recordManID].push(comboEntry);
-	
-				// add each entry to the matchup object
-				if(!matchups[matchup.matchup_id]) {
-					matchups[matchup.matchup_id] = [];
-				}
-				matchups[matchup.matchup_id].push(entry);
 
 				const starters = matchup.starters;
 				const startersPTS = matchup.starters_points.sort((a, b) => b - a);
@@ -1731,7 +1735,6 @@ export const getLeagueRecords = async (refresh = false) => {
 					}
 					masterRecordBook.players.managers.combined.years[year][recordManID].push(playerEntry);
 
-					
 				}
 				
 			}
@@ -1747,23 +1750,85 @@ export const getLeagueRecords = async (refresh = false) => {
 					home = matchup[1];
 					away = matchup[0];
 				}
-				const matchupDifferential = {
-					year: home.year,
-					week: home.week,
-					home: {
-						manager: home.manager,
-						fpts: home.fpts,
-						recordManID: home.recordManID,
-					},
-					away: {
-						manager: away.manager,
-						fpts: away.fpts,
-						recordManID: away.recordManID,
-					},
-					differential: home.fpts - away.fpts
-				}
-				allTimeMatchupDifferentials.push(matchupDifferential);
-				matchupDifferentials.push(matchupDifferential);
+
+				// update recordbook entries
+				if(home.fpts != away.fpts) {
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchWin = true;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchLoss = true;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchDifferential = home.fpts - away.fpts;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchDifferential = away.fpts - home.fpts;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchWin = true;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchLoss = true;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchDifferential = home.fpts - away.fpts;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchDifferential = away.fpts - home.fpts;
+
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchWin = true;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchLoss = true;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchDifferential = home.fpts - away.fpts;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchDifferential = away.fpts - home.fpts;
+					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchWin = true;
+					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchLoss = true;
+					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
+					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
+					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
+					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
+					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
+					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
+					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchDifferential = home.fpts - away.fpts;
+					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchDifferential = away.fpts - home.fpts;
+				} else if(home.fpts == away.fpts) {
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchTie = true;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchTie = true;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
+					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchTie = true;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchTie = true;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
+					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
+
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchTie = true;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchTie = true;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
+					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchTie = true;
+					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchTie = true;
+					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
+					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
+					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
+					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
+					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
+					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
+				}	
 			}
 		}
 		
@@ -1784,6 +1849,11 @@ export const getLeagueRecords = async (refresh = false) => {
 						const recordMan = typeRecord.years[year][recordManID];
 
 						let fptsTotal = 0;
+						let fptsAgainstTotal = 0;
+						let winTotal = 0;
+						let lossTotal = 0;
+						let tieTotal = 0;
+						let runningDifferential = 0;
 						let epeWinsTotal = 0;
 						let epeTiesTotal = 0;
 						let epeLossesTotal = 0;
@@ -1796,6 +1866,15 @@ export const getLeagueRecords = async (refresh = false) => {
 						for(let i = 0; i < recordMan.length; i++) {
 							// add each week's score to running total
 							fptsTotal += recordMan[i].fpts;
+							fptsAgainstTotal += recordMan[i].fptsAgainst;
+							runningDifferential += recordMan[i].matchDifferential;
+							if(recordMan[i].matchWin == true) {
+								winTotal++;
+							} else if(recordMan[i].matchLoss == true) {
+								lossTotal++;
+							} else if(recordMan[i].matchTie == true) {
+								tieTotal++;
+							}
 							// compare score to other scores from that week
 							const compareWins = masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.fpts < recordMan[i].fpts);
 							const compareLosses = masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.fpts > recordMan[i].fpts);
@@ -1807,7 +1886,7 @@ export const getLeagueRecords = async (refresh = false) => {
 							epeWinsTotal += epeWins;
 							epeLossesTotal += epeLosses;
 							epeTiesTotal += epeTies;
-							// update that week's EPE stats in league & manager records
+							// update that week's EPE stats in league & manager(??) records
 							const epePerc = (epeWins + epeTies / 2) / (epeWins + epeTies + epeLosses) * 100;
 							masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID)[0].epeWins = epeWins;
 							masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID)[0].epeLosses = epeLosses;
@@ -1821,7 +1900,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								bottomScores++;
 								masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID)[0].bottomScore = true;
 							}
-							// determine if beat median score AND update that week's entry in league & manager records
+							// determine if beat median score AND update that week's entry in league & manager(??) records
 							let scoresArray = masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week);
 							const numScores = scoresArray.length;
 							scoresArray = scoresArray.sort((a, b) => b.fpts - a.fpts).slice(numScores / 2 - 1, numScores / 2 + 1);
@@ -1847,6 +1926,7 @@ export const getLeagueRecords = async (refresh = false) => {
 							rosterID: recordMan[0].rosterID,
 							fpts: fptsTotal,
 							fptspg: totalPPG,
+							fptsAgainst: fptsAgainstTotal,
 							epeWins: epeWinsTotal,
 							epeTies: epeTiesTotal,
 							epeLosses: epeLossesTotal,
@@ -1857,6 +1937,10 @@ export const getLeagueRecords = async (refresh = false) => {
 							medianPerc,
 							topScores,
 							bottomScores,
+							wins: winTotal,
+							losses: lossTotal,
+							ties: tieTotal,
+							periodDifferential: runningDifferential,
 							week: null,
 							year,
 						}
@@ -1995,14 +2079,6 @@ export const getLeagueRecords = async (refresh = false) => {
 			}
 		}
 
-		matchupDifferentials = matchupDifferentials.sort((a, b) => b.differential - a.differential);
-		const biggestBlowouts = matchupDifferentials.slice(0, 10);
-
-		const closestMatchups = [];
-		for(let i = 0; i < 10; i++) {
-			closestMatchups.push(matchupDifferentials.pop());
-		}
-
 		// PLAYER –– POSITION - playerPositionRecords is the book of finished ARRAYS representing various positional records/rankings
 		playerPositionRecords.league.years[year] = {		// Directory: for every [year]
 			regularSeason: {									// League: league-wide records (ie. pooled from all managers in that year)
@@ -2088,12 +2164,18 @@ export const getLeagueRecords = async (refresh = false) => {
 				week_Low: masterRecordBook.league[recordPeriod].years[year].slice().sort((a, b) => a.fpts - b.fpts).slice(0, 10),
 				period_Top: masterRecordBook.league.totals.years[year][recordPeriod].slice().sort((a, b) => b.fptspg - a.fptspg).slice(0, 10),
 				period_Low: masterRecordBook.league.totals.years[year][recordPeriod].slice().sort((a, b) => a.fptspg - b.fptspg).slice(0, 10),
+				biggestBlowouts: masterRecordBook.league[recordPeriod].years[year].slice().sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 10),
+				narrowestVictories: masterRecordBook.league[recordPeriod].years[year].slice().filter(v => v.matchDifferential >= 0).sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 10),
 			};
 			recordArrays.league.years[year][recordPeriod].managerBests = {
 				week_Best: [],
 				week_Worst: [],
 				period_Best: [],
 				period_Worst: [],
+				blowout_Best: [],
+				blowout_Worst: [],
+				narrow_Best: [],
+				narrow_Worst: [],
 				epeRecords: masterRecordBook.league.totals.years[year][recordPeriod].slice().sort((a, b) => b.epePerc - a.epePerc),
 				medianRecords: masterRecordBook.league.totals.years[year][recordPeriod].slice().sort((a, b) => b.medianPerc - a.medianPerc),
 				cumulativePoints: masterRecordBook.league.totals.years[year][recordPeriod].slice().sort((a, b) => b.fptspg - a.fptspg),
@@ -2114,12 +2196,18 @@ export const getLeagueRecords = async (refresh = false) => {
 				recordArrays.league.years[year][recordPeriod].managerBests.week_Worst.push(masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().sort((a, b) => a.fpts - b.fpts).slice(0, 1)[0]); 
 				recordArrays.league.years[year][recordPeriod].managerBests.period_Best.push(masterRecordBook.managers.totals.years[year][recordManID][recordPeriod].slice().sort((a, b) => b.fptspg - a.fptspg).slice(0, 1)[0]); 
 				recordArrays.league.years[year][recordPeriod].managerBests.period_Worst.push(masterRecordBook.managers.totals.years[year][recordManID][recordPeriod].slice().sort((a, b) => a.fptspg - b.fptspg).slice(0, 1)[0]); 
+				recordArrays.league.years[year][recordPeriod].managerBests.blowout_Best.push(masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 1)[0]);
+				recordArrays.league.years[year][recordPeriod].managerBests.blowout_Worst.push(masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 1)[0]);
+				recordArrays.league.years[year][recordPeriod].managerBests.narrow_Best.push(masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().filter(v => v.matchDifferential >= 0).sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 1)[0]);
+				recordArrays.league.years[year][recordPeriod].managerBests.narrow_Worst.push(masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().filter(v => v.matchDifferential <= 0).sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 1)[0]);
 				if(!recordArrays.managers.years[year][recordPeriod][recordManID]) {		
 					recordArrays.managers.years[year][recordPeriod][recordManID] = {
-						week_Top: masterRecordBook.league[recordPeriod].years[year].slice().filter(p => p.recordManID == recordManID).sort((a, b) => b.fpts - a.fpts).slice(0, 10),
-						week_Low: masterRecordBook.league[recordPeriod].years[year].slice().filter(p => p.recordManID == recordManID).sort((a, b) => a.fpts - b.fpts).slice(0, 10),
-						period_Top: masterRecordBook.league.totals.years[year][recordPeriod].slice().filter(p => p.recordManID == recordManID).sort((a, b) => b.fptspg - a.fptspg).slice(0, 10),
-						period_Low: masterRecordBook.league.totals.years[year][recordPeriod].slice().filter(p => p.recordManID == recordManID).sort((a, b) => a.fptspg - b.fptspg).slice(0, 10),
+						week_Best: masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().sort((a, b) => b.fpts - a.fpts).slice(0, 10),
+						week_Worst: masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().sort((a, b) => a.fpts - b.fpts).slice(0, 10),
+						blowout_Best: masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 10),
+						blowout_Worst: masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 10),
+						narrow_Best: masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().filter(v => v.matchDifferential > 0).sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 10),
+						narrow_Worst: masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().filter(v => v.matchDifferential < 0).sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 10),
 					};
 				}
 			}
@@ -2130,58 +2218,16 @@ export const getLeagueRecords = async (refresh = false) => {
 			recordArrays.league.years[year][recordPeriod].managerBests.week_Worst = recordArrays.league.years[year][recordPeriod].managerBests.week_Worst.sort((a, b) => b.fpts - a.fpts);		
 			recordArrays.league.years[year][recordPeriod].managerBests.period_Best = recordArrays.league.years[year][recordPeriod].managerBests.period_Best.sort((a, b) => b.fptspg - a.fptspg);
 			recordArrays.league.years[year][recordPeriod].managerBests.period_Worst = recordArrays.league.years[year][recordPeriod].managerBests.period_Worst.sort((a, b) => b.fptspg - a.fptspg);
+			recordArrays.league.years[year][recordPeriod].managerBests.blowout_Best = recordArrays.league.years[year][recordPeriod].managerBests.blowout_Best.sort((a, b) => b.matchDifferential - a.matchDifferential);
+			recordArrays.league.years[year][recordPeriod].managerBests.blowout_Worst = recordArrays.league.years[year][recordPeriod].managerBests.blowout_Worst.sort((a, b) => a.matchDifferential - b.matchDifferential);
+			recordArrays.league.years[year][recordPeriod].managerBests.narrow_Best = recordArrays.league.years[year][recordPeriod].managerBests.narrow_Best.sort((a, b) => a.matchDifferential - b.matchDifferential);
+			recordArrays.league.years[year][recordPeriod].managerBests.narrow_Worst = recordArrays.league.years[year][recordPeriod].managerBests.narrow_Worst.sort((a, b) => b.matchDifferential - a.matchDifferential);
 		}
 
 		// per-season ranks & records to push thru seasonWeekRecords
 		const interSeasonEntry = {
 			year,
-			biggestBlowouts,
-			closestMatchups,
-			weekBests: recordArrays.league.years[year].regularSeason.managerBests.week_Best,
-			weekWorsts: recordArrays.league.years[year].regularSeason.managerBests.week_Worst,
-			playoffWeekBests: recordArrays.league.years[year].playoffs.managerBests.week_Best,
-			playoffWeekWorsts: recordArrays.league.years[year].playoffs.managerBests.week_Worst,
-			combinedWeekBests: recordArrays.league.years[year].combined.managerBests.week_Best,
-			combinedWeekWorsts: recordArrays.league.years[year].combined.managerBests.week_Worst,
-			seasonBests: recordArrays.league.years[year].regularSeason.managerBests.period_Best,
-			seasonWorsts: recordArrays.league.years[year].regularSeason.managerBests.period_Worst,
-			playoffBests: recordArrays.league.years[year].playoffs.managerBests.period_Best,
-			playoffWorsts: recordArrays.league.years[year].playoffs.managerBests.period_Worst,
-			combinedBests: recordArrays.league.years[year].combined.managerBests.period_Best,
-			combinedWorsts: recordArrays.league.years[year].combined.managerBests.period_Worst,
-			seasonEPERecords: recordArrays.league.years[year].regularSeason.managerBests.epeRecords,
-			combinedEPERecords: recordArrays.league.years[year].combined.managerBests.epeRecords,
-			playoffEPERecords: recordArrays.league.years[year].playoffs.managerBests.epeRecords,
-			seasonMedianRecords: recordArrays.league.years[year].regularSeason.managerBests.medianRecords,
-			combinedMedianRecords: recordArrays.league.years[year].combined.managerBests.medianRecords,
-			playoffMedianRecords: recordArrays.league.years[year].playoffs.managerBests.medianRecords,
-			seasonCumulativePoints: recordArrays.league.years[year].regularSeason.managerBests.cumulativePoints,
-			combinedCumulativePoints: recordArrays.league.years[year].combined.managerBests.cumulativePoints,
-			playoffCumulativePoints: recordArrays.league.years[year].playoffs.managerBests.cumulativePoints,
-			playerSeasonTOPS: recordArrays.league.years[year].regularSeason.players.period_Top,
-			playerPlayoffTOPS: recordArrays.league.years[year].playoffs.players.period_Top,
-			playerCombinedTOPS: recordArrays.league.years[year].combined.players.period_Top,
-			playerSeasonBests: recordArrays.league.years[year].regularSeason.players.period_Best,
-			playerPlayoffBests: recordArrays.league.years[year].playoffs.players.period_Best,
-			playerCombinedBests: recordArrays.league.years[year].combined.players.period_Best,
-			playerWeekTOPS: recordArrays.league.years[year].regularSeason.players.week_Top,
-			playerWeekCombinedTOPS: recordArrays.league.years[year].combined.players.week_Top,
-			playerWeekPlayoffTOPS: recordArrays.league.years[year].playoffs.players.week_Top,
-			playerWeekMissedTOPS: recordArrays.league.years[year].regularSeason.players.week_MissedTop,
-			playerWeekCombinedMissedTOPS: recordArrays.league.years[year].combined.players.week_MissedTop,
-			playerWeekPlayoffMissedTOPS: recordArrays.league.years[year].playoffs.players.week_MissedTop,
-			playerWeekBests: recordArrays.league.years[year].regularSeason.players.week_Best,
-			playerPlayoffWeekBests: recordArrays.league.years[year].playoffs.players.week_Best,
-			playerCombinedWeekBests: recordArrays.league.years[year].combined.players.week_Best,
-			playerWeekMissedBests: recordArrays.league.years[year].regularSeason.players.week_MissedBest,
-			playerPlayoffWeekMissedBests: recordArrays.league.years[year].playoffs.players.week_MissedBest,
-			playerCombinedWeekMissedBests: recordArrays.league.years[year].combined.players.week_MissedBest,
-			combinedPointsRecords: recordArrays.league.years[year].combined.week_Top,
-			combinedPointsLows: recordArrays.league.years[year].combined.week_Low,
-			playoffsPointsRecords: recordArrays.league.years[year].playoffs.week_Top,
-			playoffsPointsLows: recordArrays.league.years[year].playoffs.week_Low,
 			seasonPointsRecords: recordArrays.league.years[year].regularSeason.week_Top,
-			seasonPointsLows: recordArrays.league.years[year].regularSeason.week_Low,
 			leagueRecordArrays: recordArrays.league.years[year],
 		}
 
@@ -2299,12 +2345,18 @@ export const getLeagueRecords = async (refresh = false) => {
 			week_Low: masterRecordBook.league[recordPeriod].alltime.slice().sort((a, b) => a.fpts - b.fpts).slice(0, 10),
 			period_Top: masterRecordBook.league.totals.alltime[recordPeriod].slice().sort((a, b) => b.fptspg - a.fptspg).slice(0, 10),
 			period_Low: masterRecordBook.league.totals.alltime[recordPeriod].slice().sort((a, b) => a.fptspg - b.fptspg).slice(0, 10),
+			biggestBlowouts: masterRecordBook.league[recordPeriod].alltime.slice().sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 10),
+			narrowestVictories: masterRecordBook.league[recordPeriod].alltime.slice().filter(v => v.matchDifferential >= 0).sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 10),
 		};
 		recordArrays.league.alltime[recordPeriod].managerBests = {
 			week_Best: [],
 			week_Worst: [],
 			period_Best: [],
 			period_Worst: [],
+			blowout_Best: [],
+			blowout_Worst: [],
+			narrow_Best: [],
+			narrow_Worst: [],
 			epeRecords: masterRecordBook.league.grandTotals[recordPeriod].slice().sort((a, b) => b.epePerc - a.epePerc),
 			medianRecords: masterRecordBook.league.grandTotals[recordPeriod].slice().sort((a, b) => b.medianPerc - a.medianPerc),
 			cumulativePoints: masterRecordBook.league.grandTotals[recordPeriod].slice().sort((a, b) => b.fptspg - a.fptspg),
@@ -2325,12 +2377,18 @@ export const getLeagueRecords = async (refresh = false) => {
 			recordArrays.league.alltime[recordPeriod].managerBests.week_Worst.push(masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().sort((a, b) => a.fpts - b.fpts).slice(0, 1)[0]); 
 			recordArrays.league.alltime[recordPeriod].managerBests.period_Best.push(masterRecordBook.managers.totals.alltime[recordManID][recordPeriod].slice().sort((a, b) => b.fptspg - a.fptspg).slice(0, 1)[0]); 
 			recordArrays.league.alltime[recordPeriod].managerBests.period_Worst.push(masterRecordBook.managers.totals.alltime[recordManID][recordPeriod].slice().sort((a, b) => a.fptspg - b.fptspg).slice(0, 1)[0]); 
+			recordArrays.league.alltime[recordPeriod].managerBests.blowout_Best.push(masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 1)[0]);
+			recordArrays.league.alltime[recordPeriod].managerBests.blowout_Worst.push(masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 1)[0]);
+			recordArrays.league.alltime[recordPeriod].managerBests.narrow_Best.push(masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().filter(v => v.matchDifferential >= 0).sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 1)[0]);
+			recordArrays.league.alltime[recordPeriod].managerBests.narrow_Worst.push(masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().filter(v => v.matchDifferential <= 0).sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 1)[0]);
 			if(!recordArrays.managers.alltime[recordPeriod][recordManID]) {		
 				recordArrays.managers.alltime[recordPeriod][recordManID] = {
-					week_Top: masterRecordBook.league[recordPeriod].alltime.slice().filter(p => p.recordManID == recordManID).sort((a, b) => b.fpts - a.fpts).slice(0, 10),
-					week_Low: masterRecordBook.league[recordPeriod].alltime.slice().filter(p => p.recordManID == recordManID).sort((a, b) => a.fpts - b.fpts).slice(0, 10),
-					period_Top: masterRecordBook.league.totals.alltime[recordPeriod].slice().filter(p => p.recordManID == recordManID).sort((a, b) => b.fptspg - a.fptspg).slice(0, 10),
-					period_Low: masterRecordBook.league.totals.alltime[recordPeriod].slice().filter(p => p.recordManID == recordManID).sort((a, b) => a.fptspg - b.fptspg).slice(0, 10),
+					week_Best: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().sort((a, b) => b.fpts - a.fpts).slice(0, 10),
+					week_Worst: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().sort((a, b) => a.fpts - b.fpts).slice(0, 10),
+					blowout_Best: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 10),
+					blowout_Worst: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 10),
+					narrow_Best: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().filter(v => v.matchDifferential > 0).sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 10),
+					narrow_Worst: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().filter(v => v.matchDifferential < 0).sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 10),
 				};
 			}
 		}
@@ -2341,25 +2399,15 @@ export const getLeagueRecords = async (refresh = false) => {
 		recordArrays.league.alltime[recordPeriod].managerBests.week_Worst = recordArrays.league.alltime[recordPeriod].managerBests.week_Worst.sort((a, b) => b.fpts - a.fpts);		
 		recordArrays.league.alltime[recordPeriod].managerBests.period_Best = recordArrays.league.alltime[recordPeriod].managerBests.period_Best.sort((a, b) => b.fptspg - a.fptspg);
 		recordArrays.league.alltime[recordPeriod].managerBests.period_Worst = recordArrays.league.alltime[recordPeriod].managerBests.period_Worst.sort((a, b) => b.fptspg - a.fptspg);
-	}
-	
-	allTimeMatchupDifferentials = allTimeMatchupDifferentials.sort((a, b) => b.differential - a.differential);
-	allTimeBiggestBlowouts = allTimeMatchupDifferentials.slice(0, 10);
-
-	for(let i = 0; i < 10; i++) {
-		allTimeClosestMatchups.push(allTimeMatchupDifferentials.pop());
-	}
-
-	allTimePOMatchupDifferentials = allTimePOMatchupDifferentials.sort((a, b) => b.differential - a.differential);
-	allTimeBiggestPOBlowouts = allTimePOMatchupDifferentials.slice(0, 10);
-
-	for(let i = 0; i < 10; i++) {
-		allTimeClosestPOMatchups.push(allTimePOMatchupDifferentials.pop());
+		recordArrays.league.alltime[recordPeriod].managerBests.blowout_Best = recordArrays.league.alltime[recordPeriod].managerBests.blowout_Best.sort((a, b) => b.matchDifferential - a.matchDifferential);
+		recordArrays.league.alltime[recordPeriod].managerBests.blowout_Worst = recordArrays.league.alltime[recordPeriod].managerBests.blowout_Worst.sort((a, b) => a.matchDifferential - b.matchDifferential);
+		recordArrays.league.alltime[recordPeriod].managerBests.narrow_Best = recordArrays.league.alltime[recordPeriod].managerBests.narrow_Best.sort((a, b) => a.matchDifferential - b.matchDifferential);
+		recordArrays.league.alltime[recordPeriod].managerBests.narrow_Worst = recordArrays.league.alltime[recordPeriod].managerBests.narrow_Worst.sort((a, b) => b.matchDifferential - a.matchDifferential);
 	}
 
 	const recordsData = {
-		allTimeBiggestBlowouts,
-		allTimeClosestMatchups,
+		allTimeBiggestBlowouts: recordArrays.league.alltime.regularSeason.biggestBlowouts,
+		allTimeClosestMatchups: recordArrays.league.alltime.regularSeason.narrowestVictories,
 		allTimeWeekBests: recordArrays.league.alltime.regularSeason.managerBests.week_Best,
 		allTimeWeekWorsts: recordArrays.league.alltime.regularSeason.managerBests.week_Worst,
 		allTimeSeasonBests: recordArrays.league.alltime.regularSeason.managerBests.period_Best,
@@ -2383,12 +2431,8 @@ export const getLeagueRecords = async (refresh = false) => {
 		leagueWeekRecords: recordArrays.league.alltime.regularSeason.week_Top,
 		seasonWeekRecords,
 		leagueRosterRecords,
-		playoffWeekRecords,
-		playoffRosterRecords,
 		leaguePOWeekRecords: recordArrays.league.alltime.playoffs.week_Top,
 		leaguePOWeekLows: recordArrays.league.alltime.playoffs.week_Low,
-		allTimeBiggestPOBlowouts,
-		allTimeClosestPOMatchups,
 		leagueRecordArrays: recordArrays.league.alltime,
 		currentManagers,
 		currentYear,

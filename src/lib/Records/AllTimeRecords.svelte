@@ -109,6 +109,8 @@
             playerATWeekMissedBests = leagueRecordArrays.regularSeason.players.week_MissedBest;
             playerATWeekTOPS = leagueRecordArrays.regularSeason.players.week_Top;
             playerATWeekMissedTOPS = leagueRecordArrays.regularSeason.players.week_MissedTop;
+            allTimeBiggestBlowouts = leagueRecordArrays.regularSeason.biggestBlowouts;
+            allTimeClosestMatchups = leagueRecordArrays.regularSeason.narrowestVictories;
         } else if(displayStats == 'playoffs') {
             leagueWeekRecords = leagueRecordArrays.playoffs.week_Top;
             leagueWeekLows = leagueRecordArrays.playoffs.week_Low;
@@ -125,6 +127,8 @@
             playerATWeekMissedBests = leagueRecordArrays.playoffs.players.week_MissedBest;
             playerATWeekTOPS = leagueRecordArrays.playoffs.players.week_Top;
             playerATWeekMissedTOPS = leagueRecordArrays.playoffs.players.week_MissedTop;
+            allTimeBiggestBlowouts = leagueRecordArrays.playoffs.biggestBlowouts;
+            allTimeClosestMatchups = leagueRecordArrays.playoffs.narrowestVictories;
         } else if(displayStats == 'combined') {
             leagueWeekRecords = leagueRecordArrays.combined.week_Top;
             leagueWeekLows = leagueRecordArrays.combined.week_Low; 
@@ -141,6 +145,8 @@
             playerATWeekMissedBests = leagueRecordArrays.combined.players.week_MissedBest;
             playerATWeekTOPS = leagueRecordArrays.combined.players.week_Top;
             playerATWeekMissedTOPS = leagueRecordArrays.combined.players.week_MissedTop;
+            allTimeBiggestBlowouts = leagueRecordArrays.combined.biggestBlowouts;
+            allTimeClosestMatchups = leagueRecordArrays.combined.narrowestVictories;
         }
     }
 
