@@ -29,7 +29,21 @@
             showCombined = true;
         }
         selection = s;
+        setHeading(selection);
     }
+
+    let recordPrefix;
+    const setHeading = (s) => {
+        if(selection == 'regular') {
+            recordPrefix = "Regular Season";
+        } else if(selection == 'playoffs') {
+            recordPrefix = "Playoffs";
+        } else if(selection == 'combined') {
+            recordPrefix = "Overall";
+        }
+    }
+
+    $: setHeading(selection);
 
 	for(const managerID in managers) {
 		const manager = managers[managerID];
@@ -445,6 +459,12 @@
         line-height: 1.1em;
     }
 
+    .recordHeading {
+        font-size: 1.1em;
+        line-height: 0.2em;
+        text-align: center;
+    }
+
     .rankingTableWrapper {
         width: 25%;
     }
@@ -513,7 +533,7 @@
     @media (max-width: 510px) {
         :global(.recordTable th) {
             font-size: 0.8em;
-            padding: 1px 12px;
+            padding: 1px 5px;
         }
         :global(.recordTable td) {
             font-size: 0.8em;
@@ -533,7 +553,7 @@
     @media (max-width: 420px) {
         :global(.recordTable th) {
             font-size: 0.6em;
-            padding: 1px 12px;
+            padding: 1px 5px;
         }
         :global(.recordTable td) {
             font-size: 0.6em;
@@ -544,7 +564,7 @@
     @media (max-width: 330px) {
         :global(.recordTable th) {
             font-size: 0.5em;
-            padding: 1px 8px;
+            padding: 1px 5px;
         }
         :global(.recordTable td) {
             font-size: 0.5em;
@@ -625,7 +645,12 @@
         <DataTable class="recordTable">
             <Head>
                 <Row>
-                    <Cell class="header" colspan=5>{prefix} Single-Week Scoring Records</Cell>
+                    <Cell class="header" colspan=5>
+                        <p>
+                            Top 10 Week Scores<br>
+                            {prefix} – {recordPrefix} 
+                        </p>
+                    </Cell>
                 </Row>
                 <Row>
                     <Cell class="header rank"></Cell>
@@ -662,7 +687,12 @@
         <DataTable class="recordTable">
             <Head>
                 <Row>
-                    <Cell class="header" colspan=5>{prefix} Season-Long Scoring Records</Cell>
+                    <Cell class="header" colspan=5>
+                        <p>
+                            Top 10 Total Scores<br>
+                            {prefix} – {recordPrefix} 
+                        </p>
+                    </Cell>
                 </Row>
                 <Row>
                     <Cell class="header rank"></Cell>
@@ -695,7 +725,12 @@
         <DataTable class="recordTable">
             <Head>
                 <Row>
-                    <Cell class="header" colspan=5>{prefix} Single-Week Scoring Lows</Cell>
+                    <Cell class="header" colspan=5>
+                        <p>
+                            Top 10 Lowest Week Scores<br>
+                            {prefix} – {recordPrefix} 
+                        </p>
+                    </Cell>                
                 </Row>
                 <Row>
                     <Cell class="header rank"></Cell>
@@ -732,7 +767,12 @@
     	<DataTable class="recordTable">
             <Head>
                 <Row>
-                    <Cell class="header" colspan=5>{prefix} Season-Long Scoring Lows</Cell>
+                    <Cell class="header" colspan=5>
+                        <p>
+                            Top 10 Lowest Total Scores<br>
+                            {prefix} – {recordPrefix} 
+                        </p>
+                    </Cell>                  
                 </Row>
                 <Row>
                     <Cell class="header rank"></Cell>
@@ -765,7 +805,12 @@
         <DataTable class="recordTable">
             <Head>
                 <Row>
-                    <Cell class="header" colspan=5>{prefix} Largest Blowouts</Cell>
+                    <Cell class="header" colspan=5>
+                        <p>
+                            Top 10 Biggest Blowouts<br>
+                            {prefix} – {recordPrefix} 
+                        </p>
+                    </Cell>                  
                 </Row>
                 <Row>
                     <Cell class="header rank"></Cell>
@@ -811,7 +856,12 @@
         <DataTable class="recordTable">
             <Head>
                 <Row>
-                    <Cell class="header" colspan=5>{prefix} Narrowest Wins</Cell>
+                    <Cell class="header" colspan=5>
+                        <p>
+                            Top 10 Narrowest Victories<br>
+                            {prefix} – {recordPrefix} 
+                        </p>
+                    </Cell>                  
                 </Row>
                 <Row>
                     <Cell class="header rank"></Cell>
@@ -857,7 +907,12 @@
         <DataTable class="recordTable">
             <Head>
                 <Row>
-                    <Cell class="header" colspan=11>{prefix} Top Single-Season Points Earners</Cell>
+                    <Cell class="header" colspan=11>
+                        <p>
+                            Top 10 Week Scores – Players<br>
+                            {prefix} – {recordPrefix} 
+                        </p>
+                    </Cell>                  
                 </Row>
                 <Row>
                     <Cell class="header rank"></Cell>
@@ -908,7 +963,12 @@
         <DataTable class="recordTable">
             <Head>
                 <Row>
-                    <Cell class="header" colspan=8>{prefix} Top Single-Week Points Earners</Cell>
+                    <Cell class="header" colspan=8>
+                        <p>
+                            Top 10 Total Scores - Players<br>
+                            {prefix} – {recordPrefix} 
+                        </p>
+                    </Cell>                  
                 </Row>
                 <Row>
                     <Cell class="header rank"></Cell>
@@ -953,7 +1013,12 @@
         <DataTable class="recordTable">
             <Head>
                 <Row>
-                    <Cell class="header" colspan=8>{prefix} Top Bench Booms</Cell>
+                    <Cell class="header" colspan=8>
+                        <p>
+                            Top 10 Bench Booms – Players<br>
+                            {prefix} – {recordPrefix} 
+                        </p>
+                    </Cell>                  
                 </Row>
                 <Row>
                     <Cell class="header rank"></Cell>
@@ -1154,8 +1219,11 @@
                     <Head>
                         <Row>
                             <Cell class="header" colspan=5>
-                                {prefix} {"Team Highest Scoring Seasons"}
-                            </Cell>
+                                <p>
+                                    Personal Best Total Scores<br>
+                                    {prefix} – {recordPrefix} 
+                                </p>
+                            </Cell>  
                         </Row>
                         <Row>
                             <Cell class="header"></Cell>
@@ -1195,8 +1263,11 @@
                     <Head>
                         <Row>
                             <Cell class="header" colspan=5>
-                                {prefix} {"Team Lowest Scoring Seasons"}
-                            </Cell>
+                                <p>
+                                    Personal Worst Total Scores<br>
+                                    {prefix} – {recordPrefix} 
+                                </p>
+                            </Cell>  
                         </Row>
                         <Row>
                             <Cell class="header"></Cell>
@@ -1232,8 +1303,11 @@
                     <Head>
                         <Row>
                             <Cell class="header" colspan=5>
-                                {prefix} {"Team Highest Scoring Week"}
-                            </Cell>
+                                <p>
+                                    Personal Best Week Scores<br>
+                                    {prefix} – {recordPrefix} 
+                                </p>
+                            </Cell>  
                         </Row>
                         <Row>
                             <Cell class="header"></Cell>
@@ -1273,8 +1347,11 @@
                     <Head>
                         <Row>
                             <Cell class="header" colspan=5>
-                                {prefix} {"Team Lowest Scoring Week"}
-                            </Cell>
+                                <p>
+                                    Personal Worst Week Scores<br>
+                                    {prefix} – {recordPrefix} 
+                                </p>
+                            </Cell>  
                         </Row>
                         <Row>
                             <Cell class="header"></Cell>
@@ -1314,8 +1391,11 @@
                     <Head>
                         <Row>
                             <Cell class="header" colspan=8>
-                                {prefix} {"Everyone Plays Everyone Stats"}
-                            </Cell>
+                                <p>
+                                    Everyone Plays Everyone Records<br>
+                                    {prefix} – {recordPrefix} 
+                                </p>
+                            </Cell>  
                         </Row>
                         <Row>
                             <Cell class="header"></Cell>
@@ -1361,8 +1441,11 @@
                     <Head>
                         <Row>
                             <Cell class="header" colspan=11>
-                                {prefix} {"Top Single-Season Points Earners"}
-                            </Cell>
+                                <p>
+                                    Personal Best Total Scores – Players<br>
+                                    {prefix} – {recordPrefix} 
+                                </p>
+                            </Cell>  
                         </Row>
                         <Row>
                             <Cell class="header rank"></Cell>
@@ -1416,8 +1499,11 @@
                     <Head>
                         <Row>
                             <Cell class="header" colspan=8>
-                                {prefix} {"Top Single-Week Points Earners"}
-                            </Cell>
+                                <p>
+                                    Personal Best Week Scores – Players<br>
+                                    {prefix} – {recordPrefix} 
+                                </p>
+                            </Cell>  
                         </Row>
                         <Row>
                             <Cell class="header rank"></Cell>
@@ -1465,8 +1551,11 @@
                     <Head>
                         <Row>
                             <Cell class="header" colspan=8>
-                                {prefix} {"Top Bench Booms"}
-                            </Cell>
+                                <p>
+                                    Personal Biggest Bench Booms – Players<br>
+                                    {prefix} – {recordPrefix} 
+                                </p>
+                            </Cell>  
                         </Row>
                         <Row>
                             <Cell class="header rank"></Cell>
