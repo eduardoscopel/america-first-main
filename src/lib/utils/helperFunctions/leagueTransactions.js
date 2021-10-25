@@ -336,12 +336,19 @@ const digestTransaction = (transaction, prevManagers, currentSeason) => {
 		}
 	}
 
+	let transactionManagers = [];
+	for(const transactionRoster of transactionRosters) {
+		let recordManager = leagueManagers[transactionRoster].filter(m => m.yearsactive.includes(season));
+		let recordManID = recordManager[0].managerID;
+		transactionManagers.push(recordManID);
+	}
 
 	let digestedTransaction = {
 		id: transaction.transaction_id,
 		date,
 		type: "waiver",
 		rosters: transactionRosters,
+		recordManIDs: transactionManagers,
 		moves : []
 	}
 	
