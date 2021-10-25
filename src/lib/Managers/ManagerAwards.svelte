@@ -1,6 +1,5 @@
 <script>
     import { round } from "$lib/utils/helper";
-    import { managers } from '$lib/utils/leagueInfo';
 
     export let awards, records, roster, tookOver, recordManID;
 
@@ -12,30 +11,6 @@
     
     let formerGlobal = false;
 
-    let leagueManagers = {};
-	let activeManagers = [];
-
-	for(const managerID in managers) {
-		const manager = managers[managerID];
-
-		const entryMan = {
-			managerID: manager.managerID,
-			rosterID: manager.roster,
-			name: manager.name,
-			status: manager.status,
-			yearsactive: manager.yearsactive,
-		}
-
-		if(!leagueManagers[manager.roster]) {
-			leagueManagers[manager.roster] = [];
-		}
-		leagueManagers[manager.roster].push(entryMan);
-
-		if(manager.status == "active") {
-			activeManagers.push(manager.managerID);
-		}
-	}
-
     const computePodiums = (currentRoster) => {
         formerGlobal = false;
         displayAwards = [];
@@ -43,9 +18,6 @@
         // first lookl through annual awards (champion, second, etc)
         for(const podium of awards.podiums) {
             for(const award in podium) {
-                const yearP = parseInt(podium.year);
-                let recordManager = leagueManagers[currentRoster.roster_id].filter(m => m.yearsactive.includes(yearP));
-                let recordManID = recordManager[0].managerID;
 
                 if(podium[award]?.recordManID == recordManID) {
                     // const former = tookOver && tookOver > podium.year;
@@ -63,7 +35,7 @@
                 }
                 if(award == 'divisions') {
                     for(const division of podium[award]) {
-                        if(division.roster == recordManID) {
+                        if(division.recordManID == recordManID) {
                             // const former = tookOver && tookOver > podium.year;
                             // if(former) {
                             //     formerGlobal = true;
@@ -103,10 +75,6 @@
             const winRecord = winRecords[i];
             const pointsRecord = pointsRecords[i];
             const iqRecord = iqRecords[i];
-
-            const yearP = parseInt(leagueWeekRecord.year);
-            let recordManager = leagueManagers[currentRoster.roster_id].filter(m => m.yearsactive.includes(yearP));
-            let recordManID = recordManager[0].managerID;
 
             if(winRecord?.recordManID == recordManID && i < 3) {
                 displayAwards.push({
@@ -149,7 +117,7 @@
                     originalName: leagueWeekRecord.manager.name,
                     year: leagueWeekRecord.year,
                     week: leagueWeekRecord.week,
-                    extraInfo: leagueWeekRecord.fpts,
+                    extraInfo: round(leagueWeekRecord.fpts),
                     // former
                 })
             }
@@ -165,7 +133,7 @@
                     type: 'All-Time Season Long Points',
                     originalName: seasonLongRecord.manager.name,
                     year: seasonLongRecord.year,
-                    extraInfo: seasonLongRecord.fpts,
+                    extraInfo: round(seasonLongRecord.fpts),
                     // former
                 })
             }
@@ -173,10 +141,6 @@
         for(const yearRecords of records.seasonWeekRecords) {
             for(let i = 0; i < 3; i++) {
                 const seasonPointsRecord = yearRecords.seasonPointsRecords[i];
-
-                const yearP = parseInt(seasonPointsRecord.year);
-                let recordManager = leagueManagers[currentRoster.roster_id].filter(m => m.yearsactive.includes(yearP));
-                let recordManID = recordManager[0].managerID;
 
                 if(seasonPointsRecord.recordManID == recordManID) {
                 //     const former = tookOver && tookOver > yearRecords.year;
