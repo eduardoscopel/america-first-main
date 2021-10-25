@@ -8,43 +8,26 @@
     import ManagerFantasyInfo from './ManagerFantasyInfo.svelte';
     import ManagerAwards from './ManagerAwards.svelte';
     import { onMount } from 'svelte';
-    // import { managers } from '$lib/utils/leagueInfo';
-
-
+    // import PancakeTable from './PancakeTable.svelte';
 
     export let manager, managers, rostersData, users, rosterPositions, transactions, currentManagers, awards, records;
 
-    // let leagueManagers = {};
-
-	// for(const managerID in managers) {
-	// 	const manager = managers[managerID];
-
-	// 	const entryMan = {
-	// 		managerID: manager.managerID,
-	// 		rosterID: manager.roster,
-	// 		name: manager.name,
-	// 		status: manager.status,
-	// 		yearsactive: manager.yearsactive,
-	// 	}
-
-	// 	if(!leagueManagers[manager.roster]) {
-	// 		leagueManagers[manager.roster] = [];
-	// 	}
-	// 	leagueManagers[manager.roster].push(entryMan);
-
-	// 	}
-	// }
-
+    let showRoster = new Boolean (true);
     let viewManager = managers[manager];
+    let recordManID = viewManager.managerID;
 
-    let teamTransactions = transactions.filter(t => t.rosters.indexOf(viewManager.roster) > -1);
+    if(viewManager.status == "inactive") {
+        showRoster = false;
+    }
+
+    let teamTransactions = transactions.filter(t => t.rosters.indexOf(viewManager.roster) > -1 && t.recordManIDs.includes(recordManID));
 
     let startersAndReserve = rostersData.startersAndReserve;
     let rosters = rostersData.rosters;
 
     let rosterArrNum = viewManager.roster-1;
 
-    let roster = rosters[rosterArrNum];
+    let roster = rosters[rosterArrNum];  
 
     let user = users[roster.owner_id];
 
@@ -66,6 +49,7 @@
 
     const changeManager = (newManager, noscroll = false) => {
         manager = newManager;
+        recordManID = newManager;
         viewManager = managers[newManager];
 
         teamTransactions = transactions.filter(t => t.rosters.indexOf(viewManager.roster) > -1);
@@ -303,6 +287,9 @@
 
     <ManagerAwards tookOver={viewManager.tookOver} {awards} {records} {roster} />
 
+    <!-- UNDER CONSTRUCTION: dynamic tree map of fantasy points by NFL team -->
+    <!-- <PancakeTable {recordManID} /> -->
+
     {#if loading}
         <!-- promise is pending -->
         <div class="loading">
@@ -310,7 +297,9 @@
             <LinearProgress indeterminate />
         </div>
     {:else}
-        <Roster division="1" expanded={false} {rosterPositions} {roster} {users} {players} {startersAndReserve} />
+        {#if showRoster == true}
+            <Roster division="1" expanded={false} {rosterPositions} {roster} {users} {players} {startersAndReserve} />
+        {/if}
     {/if}
 
     <h3>Team Transactions</h3>
