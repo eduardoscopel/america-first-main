@@ -1,15 +1,15 @@
 <script>
-	import {cleanName, gotoManager} from '$lib/utils/helper';
+	import {cleanName, gotoManager, managers} from '$lib/utils/helper';
 	export let podium, currentManagers;
 
 	const { year, champion, second, third, divisions, toilet } = podium;
 
-	const getNames = (name, recordManID) => {
-		if(cleanName(name) != cleanName(currentManagers[recordManID].name)) {
-			return `${name}<div class="curOwner">(${currentManagers[recordManID].name})</div>`;
-		}
-		return name;
-	}
+	// const getNames = (name, recordManID) => {
+	// 	if(cleanName(name) != cleanName(currentManagers[recordManID].name)) {
+	// 		return `${name}<div class="curOwner">(${currentManagers[recordManID].name})</div>`;
+	// 	}
+	// 	return name;
+	// }
 </script>
 
 <style>
@@ -342,13 +342,13 @@
 		<!-- champs -->
 		<img src="{champion.avatar}" class="first champ clickable" on:click={() => gotoManager(champion.recordManID)} alt="champion" />
 		<img src="./laurel.png" class="laurel" alt="laurel" />
-		<span class="label firstLabel clickable" on:click={() => gotoManager(champion.recordManID)}>{@html getNames(champion.name, champion.recordManID)}</span>
+		<span class="label firstLabel clickable" on:click={() => gotoManager(champion.recordManID)}>{champion.realname}<br><div class="curOwner">{champion.name}</div></span>
 
 		<img src="{second.avatar}" class="second champ clickable" on:click={() => gotoManager(second.recordManID)} alt="2nd" />
-		<span class="label secondLabel clickable" on:click={() => gotoManager(second.recordManID)}>{@html getNames(second.name, second.recordManID)}</span>
+		<span class="label secondLabel clickable" on:click={() => gotoManager(second.recordManID)}>{second.realname}<br><div class="curOwner">{second.name}</div></span>
 
 		<img src="{third.avatar}" class="third champ clickable" on:click={() => gotoManager(third.recordManID)} alt="3rd" />
-		<span class="label thirdLabel clickable" on:click={() => gotoManager(third.recordManID)}>{@html getNames(third.name, third.recordManID)}</span>
+		<span class="label thirdLabel clickable" on:click={() => gotoManager(third.recordManID)}>{third.realname}<br><div class="curOwner">{third.name}</div></span>
 	</div>
 	<div class="divisions">
 		{#each divisions as division}
@@ -363,7 +363,7 @@
 						<img src="{division.manager.avatar}" class="divisionLeader clickable" on:click={() => gotoManager(division.manager.recordManID)} alt="{division.name} champion" />
 						<img src="./medal.png" class="medal" alt="champion" />
 					</div>
-					<span class="genLabel clickable" on:click={() => gotoManager(division.manager.recordManID)}>{@html getNames(division.manager.name, division.manager.recordManID)}</span>
+					<span class="genLabel clickable" on:click={() => gotoManager(division.manager.recordManID)}>{division.manager.realname}<br><div class="curOwner">{division.manager.name}</div></span>
 				</div>
 			{/if}
 		{/each}
@@ -379,7 +379,7 @@
 				<img src="{toilet.avatar}" class="toiletWinner clickable" on:click={() => gotoManager(toilet.recordManID)} alt="toilet bowl winner" />
 				<img src="./toilet-bowl-2.png" class="toilet" alt="toilet bowl" />
 			</div>
-			<span class="genLabel clickable" on:click={() => gotoManager(toilet.recordManID)}>{@html getNames(toilet.name, toilet.recordManID)}</span>
+			<span class="genLabel clickable" on:click={() => gotoManager(toilet.recordManID)}>{toilet.realname}<br><div class="curOwner">{toilet.name}</div></span>
 		</div>
 	{/if}
 </div>

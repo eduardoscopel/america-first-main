@@ -22,7 +22,6 @@ export const getAwards = async () => {
 	const currentManagers = {};
 
 	let leagueManagers = {};
-	let activeManagers = {};
 
 	for(const managerID in managers) {
 		const manager = managers[managerID];
@@ -39,17 +38,12 @@ export const getAwards = async () => {
 			leagueManagers[manager.roster] = [];
 		}
 		leagueManagers[manager.roster].push(entryMan);
-
-		if(!activeManagers[manager.roster] && manager.status == "active") {
-			activeManagers[manager.roster] = [];
-            activeManagers[manager.roster].push(entryMan);
-		}
 	}
 
 	for(const roster of rosters) {
 		const user = users[roster.owner_id];
 
-		let recordManager = activeManagers[roster.roster_id];
+		let recordManager = leagueManagers[roster.roster_id].filter(m => m.status == "active");
 		let recordManID = recordManager[0].managerID;
 
 		if(user) {
@@ -98,30 +92,38 @@ const getPodiums = async (previousSeasonID) => {
 			playoffRounds,
 			toiletRounds,
 			leagueMetadata,
-			yearManagers,
-			yearP,
+			recordManagers,
 		} = previousSeasonData;
 
 		previousSeasonID = previousSeasonData.previousSeasonID;
 
-		const {divisions, prevManagers} = buildDivisionsAndManagers({usersData, previousRosters, leagueMetadata, numDivisions, yearManagers, yearP});
+		const {divisions, prevManagers} = buildDivisionsAndManagers({usersData, previousRosters, leagueMetadata, numDivisions, recordManagers});
 
 		// add manager to division obj and convert to array
 		const divisionArr = []
 		for(const key in divisions) {
-			divisions[key].manager = prevManagers[yearP][divisions[key].roster];
+			divisions[key].manager = prevManagers[divisions[key].recordManID];
 			divisionArr.push(divisions[key]);
 		}
 
 		const finalsMatch = winnersData.filter(m => m.r == playoffRounds && m.t1_from.w)[0];
-		const champion = prevManagers[yearP][finalsMatch.w];
-		const second = prevManagers[yearP][finalsMatch.l];
+
+		let recordChamp = recordManagers.filter(m => m.rosterID == finalsMatch.w);
+		let recordChampID = recordChamp[0].managerID;
+		const champion = prevManagers[recordChampID];
+		let recordSilver = recordManagers.filter(m => m.rosterID == finalsMatch.l);
+		let recordSilverID = recordSilver[0].managerID;
+		const second = prevManagers[recordSilverID];
 	
 		const runnersUpMatch = winnersData.filter(m => m.r == playoffRounds && m.t1_from.l)[0];
-		const third = prevManagers[yearP][runnersUpMatch.w];
+		let recordBronze = recordManagers.filter(m => m.rosterID == runnersUpMatch.w);
+		let recordBronzeID = recordBronze[0].managerID;
+		const third = prevManagers[recordBronzeID];
 
 		const toiletBowlMatch = losersData.filter(m => m.r == toiletRounds && (!m.t1_from || m.t1_from.w))[0];
-		const toilet = prevManagers[yearP][toiletBowlMatch.w]
+		let recordToilet = recordManagers.filter(m => m.rosterID == toiletBowlMatch.w);
+		let recordToiletID = recordToilet[0].managerID;
+		const toilet = prevManagers[recordToiletID]
 
 		const podium = {
 			year,
@@ -161,9 +163,9 @@ const getPreviousLeagueData = async (previousSeasonID) => {
 	const [prevLeagueData, losersData, winnersData] = await waitForAll(...jsonPromises).catch((err) => { console.error(err); });
 
 	const year = prevLeagueData.season;	
-	const yearP = parseInt(year);
+	let yearP = parseInt(year);
 
-	let yearManagers = {};
+	let leagueManagers = {};
 
 	for(const managerID in managers) {
 		const manager = managers[managerID];
@@ -174,19 +176,22 @@ const getPreviousLeagueData = async (previousSeasonID) => {
 			name: manager.name,
 			status: manager.status,
 			yearsactive: manager.yearsactive,
-			ownerID: [],
+			yearP,
 		}
 
-		if(!yearManagers[yearP]) {
-			yearManagers[yearP] = {};
+		if(!leagueManagers[manager.roster]) {
+			leagueManagers[manager.roster] = [];
 		}
-		if(!(yearManagers[yearP][manager.roster]) && manager.yearsactive.includes(yearP)) {
-			yearManagers[yearP][manager.roster] = [];
-            yearManagers[yearP][manager.roster].push(entryMan);
-		}
+		leagueManagers[manager.roster].push(entryMan);
 	}
 
 	const previousRosters = rostersData.rosters;
+	let recordManagers = [];
+
+	for(const roster of previousRosters) {
+		let recordManager = leagueManagers[roster.roster_id].filter(m => m.yearsactive.includes(yearP));
+		recordManagers.push(recordManager[0]);
+	}
 
 	const numDivisions = prevLeagueData.settings.divisions || 1;
 
@@ -206,13 +211,12 @@ const getPreviousLeagueData = async (previousSeasonID) => {
 		playoffRounds,
 		toiletRounds,
 		leagueMetadata: prevLeagueData.metadata,
-		yearManagers,
-		yearP
+		recordManagers,
 	}
 }
 
 // determine division champions and construct previousManagers object
-const buildDivisionsAndManagers = ({usersData, previousRosters, leagueMetadata, numDivisions, yearManagers, yearP}) => {
+const buildDivisionsAndManagers = ({usersData, previousRosters, leagueMetadata, numDivisions, recordManagers}) => {
 	const prevManagers = {};
 
 	const divisions = {};
@@ -222,7 +226,8 @@ const buildDivisionsAndManagers = ({usersData, previousRosters, leagueMetadata, 
 			name: leagueMetadata ? leagueMetadata[`division_${i + 1}`] : null,
 			roster: null,
 			wins: -1,
-			points: -1
+			points: -1,
+			recordManID: null,
 		}
 	}
 
@@ -230,35 +235,31 @@ const buildDivisionsAndManagers = ({usersData, previousRosters, leagueMetadata, 
 		const rSettings = roster.settings;
 		const div = rSettings.division ? rSettings.division : 1;
 
-		let recordManager = yearManagers[yearP][roster.roster_id];
+		let recordManager = recordManagers.filter(m => m.rosterID == roster.roster_id);
 		let recordManID = recordManager[0].managerID;
-		recordManager[0].ownerID = roster.owner_id
 
 		if(rSettings.wins > divisions[div].wins || (rSettings.wins == divisions[div].wins && (rSettings.fpts  + rSettings.fpts_decimal / 100)  == divisions[div].points)) {
 			divisions[div].points = rSettings.fpts  + rSettings.fpts_decimal / 100;
 			divisions[div].wins = rSettings.wins;
-			divisions[div].roster = recordManID;
+			divisions[div].roster = roster.roster_id;
+			divisions[div].recordManID = recordManID;
 		}
 		const user = usersData[roster.owner_id];
 
-		if(!prevManagers[yearP]) {
-			prevManagers[yearP] = {};
+		prevManagers[recordManID] = {
+			rosterID: roster.roster_id,
+			avatar: `https://sleepercdn.com/images/v2/icons/player_default.webp`,
+			name: 'Unknown Manager',
+			realname: 'John Q. Rando',
+			recordManID,
+			ownerID: roster.owner_id,
 		}
-		if(!prevManagers[yearP][recordManID]){
-			prevManagers[yearP][recordManID] = {
-				rosterID: roster.roster_id,
-				avatar: `https://sleepercdn.com/images/v2/icons/player_default.webp`,
-				name: 'Unknown Manager',
-				realname: 'John Q. Rando',
-				recordManID,
-				ownerID: roster.owner_id,
-			}
-			if(user) {
-				prevManagers[yearP][recordManID].avatar = `https://sleepercdn.com/avatars/thumbs/${user.avatar}`;
-				prevManagers[yearP][recordManID].name = user.metadata.team_name ? user.metadata.team_name : user.display_name;
-				prevManagers[yearP][recordManID].realname = recordManager[0].name;
-			}
+		if(user) {
+			prevManagers[recordManID].avatar = `https://sleepercdn.com/avatars/thumbs/${user.avatar}`;
+			prevManagers[recordManID].name = user.metadata.team_name ? user.metadata.team_name : user.display_name;
+			prevManagers[recordManID].realname = recordManager[0].name;
 		}
+		
 	}
 
 	return {divisions, prevManagers}

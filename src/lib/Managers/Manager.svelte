@@ -285,7 +285,7 @@
         <ManagerFantasyInfo {viewManager} {players} />
     {/if}
 
-    <ManagerAwards tookOver={viewManager.tookOver} {awards} {records} {roster} />
+    <ManagerAwards tookOver={viewManager.tookOver} {recordManID} {awards} {records} {roster} />
 
     <!-- UNDER CONSTRUCTION: dynamic tree map of fantasy points by NFL team -->
     <!-- <PancakeTable {recordManID} /> -->

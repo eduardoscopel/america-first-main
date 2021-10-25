@@ -2,7 +2,7 @@
     import { round } from "$lib/utils/helper";
     import { managers } from '$lib/utils/leagueInfo';
 
-    export let awards, records, roster, tookOver;
+    export let awards, records, roster, tookOver, recordManID;
 
     let displayAwards = [];
 
