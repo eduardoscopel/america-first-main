@@ -2205,7 +2205,7 @@ export const getLeagueRecords = async (refresh = false) => {
 						week_Best: masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().sort((a, b) => b.fpts - a.fpts).slice(0, 10),
 						week_Worst: masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().sort((a, b) => a.fpts - b.fpts).slice(0, 10),
 						blowout_Best: masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().filter(v => v.matchDifferential >= 0).sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 10),
-						blowout_Worst: masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().filter(v => v.matchDifferential >= 0).sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 10),
+						blowout_Worst: masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().filter(v => v.matchDifferential <= 0).sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 10),
 						narrow_Best: masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().filter(v => v.matchDifferential >= 0).sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 10),
 						narrow_Worst: masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().filter(v => v.matchDifferential <= 0).sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 10),
 					};
@@ -2401,7 +2401,7 @@ export const getLeagueRecords = async (refresh = false) => {
 					week_Best: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().sort((a, b) => b.fpts - a.fpts).slice(0, 10),
 					week_Worst: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().sort((a, b) => a.fpts - b.fpts).slice(0, 10),
 					blowout_Best: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().filter(v => v.matchDifferential >= 0).sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 10),
-					blowout_Worst: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().filter(v => v.matchDifferential >= 0).sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 10),
+					blowout_Worst: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().filter(v => v.matchDifferential <= 0).sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 10),
 					narrow_Best: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().filter(v => v.matchDifferential >= 0).sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 10),
 					narrow_Worst: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().filter(v => v.matchDifferential <= 0).sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 10),
 				};
