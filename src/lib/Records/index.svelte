@@ -1,5 +1,5 @@
 <script>
-    import { getLeagueRecords, getLeagueTransactions } from '$lib/utils/helper'; //recomit
+    import { getLeagueRecords, getLeagueTransactions } from '$lib/utils/helper'; 
 
     import AllTimeRecords from './AllTimeRecords.svelte';
     import PerSeasonRecords from './PerSeasonRecords.svelte';
@@ -11,7 +11,7 @@
         totals = newTransactions.totals;
     }
 
-    let {leagueRosterRecords, currentManagers, seasonWeekRecords, currentYear, lastYear, leagueWeekRecords, leagueRecordArrays, playerPositionRecords, managerRecordArrays} = leagueRecords;
+    let {leagueRosterRecords, currentManagers, seasonWeekRecords, currentYear, lastYear, leagueWeekRecords, leagueRecordArrays } = leagueRecords;
 
     const refreshRecords = async () => {
         const newRecords = await getLeagueRecords(true);
@@ -25,8 +25,6 @@
         currentYear = newRecords.currentYear;
         lastYear = newRecords.lastYear;
         leagueRecordArrays = newRecords.leagueRecordArrays;
-        playerPositionRecords = newRecords.playerPositionRecords;
-        managerRecordArrays = newRecords.managerRecordArrays;
     }
 
     if(stale) {

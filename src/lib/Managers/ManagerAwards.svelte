@@ -71,7 +71,7 @@
 
         for(let i = 0; i < records.leagueWeekRecords.length; i++) {
             const leagueWeekRecord = records.leagueWeekRecords[i];
-            const seasonLongRecord = records.mostSeasonLongPoints[i];
+            const seasonLongRecord = records.leagueRecordArrays.regularSeason.period_Top[i];
             const winRecord = winRecords[i];
             const pointsRecord = pointsRecords[i];
             const iqRecord = iqRecords[i];

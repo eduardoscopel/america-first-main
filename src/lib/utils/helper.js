@@ -10,6 +10,7 @@ import {loadPlayers} from './helperFunctions/players';
 import { waitForAll } from './helperFunctions/multiPromise';
 import { getUpcomingDraft, getPreviousDrafts } from './helperFunctions/leagueDrafts'
 import { getLeagueRecords } from './helperFunctions/leagueRecords'
+import { getManagerRecords } from './helperFunctions/managerRecords'
 import { getAwards } from './helperFunctions/leagueAwards'
 import { cleanName, round, generateGraph, gotoManager, getAuthor, parseDate, getAvatar } from './helperFunctions/universalFunctions';
 import { predictScores } from './helperFunctions/predictOptimalScore';
@@ -34,6 +35,7 @@ export {
     getUpcomingDraft,
     getPreviousDrafts,
     getLeagueRecords,
+    getManagerRecords,
     cleanName,
     round,
     dues,

@@ -39,7 +39,7 @@
         } else if(selection == 'playoffs') {
             recordPrefix = "Playoffs";
         } else if(selection == 'combined') {
-            recordPrefix = "Overall";
+            recordPrefix = "Combined";
         }
     }
 

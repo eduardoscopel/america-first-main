@@ -12,12 +12,12 @@
 
     if(transactionsData.stale) {
         refreshTransactions();
-    }
+    }    
 </script>
 
 <div class="matchups"> 
     {#if manager}
-        <!-- promise was fulfilled CHANGE ALL originalManagers back to current if FUCKED in all managers pages-->
+        <!-- promise was fulfilled -->
         <Manager {awards} {records} {manager} {managers} {rostersData} {users} rosterPositions={leagueData.roster_positions} transactions={transactionsData.transactions} currentManagers={transactionsData.currentManagers} />
     {:else}
         <AllManagers {managers} rosters={rostersData} {users}/>

@@ -6,6 +6,7 @@ export const upcomingDraft = writable({});
 export const previousDrafts = writable([]);
 export const matchupsStore = writable({});
 export const records = writable({});
+export const managerrecords = writable({});
 export const rostersStore = writable({});
 export const transactionsStore = writable({});
 export const users = writable({});

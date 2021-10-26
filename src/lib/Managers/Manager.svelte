@@ -8,6 +8,7 @@
     import ManagerFantasyInfo from './ManagerFantasyInfo.svelte';
     import ManagerAwards from './ManagerAwards.svelte';
     import { onMount } from 'svelte';
+    import PlayerTable from './PlayerTable.svelte';
     // import PancakeTable from './PancakeTable.svelte';
 
     export let manager, managers, rostersData, users, rosterPositions, transactions, currentManagers, awards, records;
@@ -286,6 +287,8 @@
     {/if}
 
     <ManagerAwards tookOver={viewManager.tookOver} {recordManID} {awards} {records} {roster} />
+
+    <PlayerTable {recordManID} />
 
     <!-- UNDER CONSTRUCTION: dynamic tree map of fantasy points by NFL team -->
     <!-- <PancakeTable {recordManID} /> -->

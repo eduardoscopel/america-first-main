@@ -5,23 +5,13 @@ import { getLeagueRosters } from "./leagueRosters"
 import { getLeagueUsers } from "./leagueUsers"
 import { waitForAll } from './multiPromise';
 import { get } from 'svelte/store';
-import {records} from '$lib/stores';
+import { managerrecords } from '$lib/stores';
 import { loadPlayers, getPreviousDrafts } from '$lib/utils/helper';
 import { null_to_empty } from 'svelte/internal';
 
-export const getLeagueRecords = async (refresh = false) => {
-	if(get(records).seasonWeekRecords) {
-		return get(records);
-	}
-
-	// if this isn't a refresh data call, check if there are already transactions stored in localStorage
-	if(!refresh) {
-		let localRecords = await JSON.parse(localStorage.getItem("records"));
-		// check if transactions have been saved to localStorage before
-		if(localRecords) {
-			localRecords.stale = true;
-			return localRecords;
-		}
+export const getManagerRecords = async (refresh = false) => {
+	if(get(managerrecords).managerRecordArrays) {
+		return get(managerrecords);
 	}
 
 	const playersData = await loadPlayers().catch((err) => { console.error(err); });
@@ -2420,20 +2410,12 @@ export const getLeagueRecords = async (refresh = false) => {
 		recordArrays.league.alltime[recordPeriod].managerBests.narrow_Worst = recordArrays.league.alltime[recordPeriod].managerBests.narrow_Worst.sort((a, b) => b.matchDifferential - a.matchDifferential);
 	}
 
-	const recordsData = {
-		seasonWeekRecords,
-		leagueRosterRecords,
-		leagueWeekRecords: recordArrays.league.alltime.regularSeason.week_Top,
-		leagueRecordArrays: recordArrays.league.alltime,
-		currentManagers,
-		currentYear,
-		lastYear
-	};
+	const managerRecordsData = {
+		playerPositionRecords: playerPositionRecords.managers,
+		managerRecordArrays: recordArrays.managers,
+	}
 
-	// update localStorage
-	localStorage.setItem("records", JSON.stringify(recordsData));
+	managerrecords.update(() => managerRecordsData);
 
-	records.update(() => recordsData);
-
-	return recordsData;
+	return managerRecordsData;
 }
