@@ -2,11 +2,9 @@
     import {round} from '$lib/utils/helper'
   	import RecordsAndRankings from './RecordsAndRankings.svelte'; 
 
-    export let selection, leagueRosterRecords, leagueWeekRecords, leagueWeekLows, allTimeEPERecords, allTimeBiggestBlowouts, allTimeClosestMatchups, allTimeWeekBests, allTimeWeekWorsts, allTimeSeasonBests, allTimeSeasonWorsts, currentManagers, mostSeasonLongPoints, leastSeasonLongPoints, transactionTotals, playerATSeasonTOPS, playerATSeasonBests, playerATWeekTOPS, playerATWeekBests, playerATWeekMissedBests, playerATWeekMissedTOPS, leagueRecordArrays;
+    export let selection, leagueRosterRecords, currentManagers, transactionTotals, leagueWeekRecords, leagueRecordArrays;
 
-    let winPercentages = [];
     let lineupIQs = [];
-    const fptsHistories = [];
     const tradesData = [];
     const waiversData = [];
 
@@ -27,14 +25,6 @@
 
     for(const key in leagueRosterRecords) {
         const leagueRosterRecord = leagueRosterRecords[key];
-        winPercentages.push({
-            recordManID: key,
-            manager: leagueRosterRecord.manager,
-            percentage: round((leagueRosterRecord.wins + leagueRosterRecord.ties / 2) / (leagueRosterRecord.wins + leagueRosterRecord.ties + leagueRosterRecord.losses) * 100),
-            wins: leagueRosterRecord.wins,
-            ties: leagueRosterRecord.ties,
-            losses: leagueRosterRecord.losses,
-        })
 
         let lineupIQ = {
             recordManID: key,
@@ -49,22 +39,35 @@
 
         lineupIQs.push(lineupIQ)
     
-        fptsHistories.push({
-            recordManID: key,
-            manager: leagueRosterRecord.manager,
-            fptsFor: round(leagueRosterRecord.fptsFor),
-            fptsAgainst: round(leagueRosterRecord.fptsAgainst),
-            fptsPerGame: round(leagueRosterRecord.fptsFor / (leagueRosterRecord.wins + leagueRosterRecord.losses + leagueRosterRecord.ties)),
-        })
-    
         if(leagueRosterRecord.ties > 0) showTies = true;
     }
 
-    winPercentages.sort((a, b) => b.percentage - a.percentage);
+    let winPercentages = leagueRecordArrays.regularSeason.managerBests.winRecords;
     lineupIQs.sort((a, b) => b.iq - a.iq);
-    fptsHistories.sort((a, b) => b.fptsFor - a.fptsFor);
+    let fptsHistories = leagueRecordArrays.regularSeason.managerBests.cumulativePoints;
+    let medianRecords = leagueRecordArrays.regularSeason.managerBests.medianRecords;
     tradesData.sort((a, b) => b.trades - a.trades);
     waiversData.sort((a, b) => b.waivers - a.waivers);
+
+
+    let allTimeBiggestBlowouts = leagueRecordArrays.regularSeason.biggestBlowouts;
+    let allTimeClosestMatchups = leagueRecordArrays.regularSeason.narrowestVictories;
+
+    let playerATSeasonTOPS = leagueRecordArrays.regularSeason.players.period_Top;
+    let playerATSeasonBests = leagueRecordArrays.regularSeason.players.period_Best;
+    let playerATWeekBests = leagueRecordArrays.regularSeason.players.week_Best;
+    let playerATWeekMissedBests = leagueRecordArrays.regularSeason.players.week_MissedBest;
+    let playerATWeekTOPS = leagueRecordArrays.regularSeason.players.week_Top;
+    let playerATWeekMissedTOPS = leagueRecordArrays.regularSeason.players.week_MissedTop;
+
+    let leagueWeekLows = leagueRecordArrays.regularSeason.week_Low;
+    let mostSeasonLongPoints = leagueRecordArrays.regularSeason.period_Top;
+    let leastSeasonLongPoints = leagueRecordArrays.regularSeason.period_Low;
+    let allTimeEPERecords = leagueRecordArrays.regularSeason.managerBests.epeRecords;
+    let allTimeSeasonWorsts = leagueRecordArrays.regularSeason.managerBests.period_Worst;
+    let allTimeSeasonBests = leagueRecordArrays.regularSeason.managerBests.period_Best;
+    let allTimeWeekBests = leagueRecordArrays.regularSeason.managerBests.week_Best;
+    let allTimeWeekWorsts = leagueRecordArrays.regularSeason.managerBests.week_Worst;
 
     let showRegular = new Boolean (true);
     let showPlayoffs = new Boolean (false);
@@ -101,8 +104,8 @@
             allTimeEPERecords = leagueRecordArrays.regularSeason.managerBests.epeRecords;
             allTimeSeasonWorsts = leagueRecordArrays.regularSeason.managerBests.period_Worst;
             allTimeSeasonBests = leagueRecordArrays.regularSeason.managerBests.period_Best;
-            allTimeWeekBests = leagueRecordArrays.regularSeason.managerBests.week_Worst;
-            allTimeWeekWorsts = leagueRecordArrays.regularSeason.managerBests.week_Best;
+            allTimeWeekBests = leagueRecordArrays.regularSeason.managerBests.week_Best;
+            allTimeWeekWorsts = leagueRecordArrays.regularSeason.managerBests.week_Worst;
             playerATSeasonTOPS = leagueRecordArrays.regularSeason.players.period_Top;
             playerATSeasonBests = leagueRecordArrays.regularSeason.players.period_Best;
             playerATWeekBests = leagueRecordArrays.regularSeason.players.week_Best;
@@ -111,6 +114,9 @@
             playerATWeekMissedTOPS = leagueRecordArrays.regularSeason.players.week_MissedTop;
             allTimeBiggestBlowouts = leagueRecordArrays.regularSeason.biggestBlowouts;
             allTimeClosestMatchups = leagueRecordArrays.regularSeason.narrowestVictories;
+            winPercentages = leagueRecordArrays.regularSeason.managerBests.winRecords;
+            fptsHistories = leagueRecordArrays.regularSeason.managerBests.cumulativePoints;
+            medianRecords = leagueRecordArrays.regularSeason.managerBests.medianRecords;
         } else if(displayStats == 'playoffs') {
             leagueWeekRecords = leagueRecordArrays.playoffs.week_Top;
             leagueWeekLows = leagueRecordArrays.playoffs.week_Low;
@@ -119,8 +125,8 @@
             allTimeEPERecords = leagueRecordArrays.playoffs.managerBests.epeRecords;
             allTimeSeasonWorsts = leagueRecordArrays.playoffs.managerBests.period_Worst;
             allTimeSeasonBests = leagueRecordArrays.playoffs.managerBests.period_Best;
-            allTimeWeekBests = leagueRecordArrays.playoffs.managerBests.week_Worst;
-            allTimeWeekWorsts = leagueRecordArrays.playoffs.managerBests.week_Best;
+            allTimeWeekBests = leagueRecordArrays.playoffs.managerBests.week_Best;
+            allTimeWeekWorsts = leagueRecordArrays.playoffs.managerBests.week_Worst;
             playerATSeasonTOPS = leagueRecordArrays.playoffs.players.period_Top;
             playerATSeasonBests = leagueRecordArrays.playoffs.players.period_Best;
             playerATWeekBests = leagueRecordArrays.playoffs.players.week_Best;
@@ -129,6 +135,9 @@
             playerATWeekMissedTOPS = leagueRecordArrays.playoffs.players.week_MissedTop;
             allTimeBiggestBlowouts = leagueRecordArrays.playoffs.biggestBlowouts;
             allTimeClosestMatchups = leagueRecordArrays.playoffs.narrowestVictories;
+            winPercentages = leagueRecordArrays.playoffs.managerBests.winRecords;
+            fptsHistories = leagueRecordArrays.playoffs.managerBests.cumulativePoints;
+            medianRecords = leagueRecordArrays.playoffs.managerBests.medianRecords;
         } else if(displayStats == 'combined') {
             leagueWeekRecords = leagueRecordArrays.combined.week_Top;
             leagueWeekLows = leagueRecordArrays.combined.week_Low; 
@@ -137,8 +146,8 @@
             allTimeEPERecords = leagueRecordArrays.combined.managerBests.epeRecords;  
             allTimeSeasonWorsts = leagueRecordArrays.combined.managerBests.period_Worst; 
             allTimeSeasonBests = leagueRecordArrays.combined.managerBests.period_Best; 
-            allTimeWeekBests = leagueRecordArrays.combined.managerBests.week_Worst;
-            allTimeWeekWorsts = leagueRecordArrays.combined.managerBests.week_Best;
+            allTimeWeekBests = leagueRecordArrays.combined.managerBests.week_Best;
+            allTimeWeekWorsts = leagueRecordArrays.combined.managerBests.week_Worst;
             playerATSeasonTOPS = leagueRecordArrays.combined.players.period_Top;
             playerATSeasonBests = leagueRecordArrays.combined.players.period_Best;
             playerATWeekBests = leagueRecordArrays.combined.players.week_Best;
@@ -147,6 +156,9 @@
             playerATWeekMissedTOPS = leagueRecordArrays.combined.players.week_MissedTop;
             allTimeBiggestBlowouts = leagueRecordArrays.combined.biggestBlowouts;
             allTimeClosestMatchups = leagueRecordArrays.combined.narrowestVictories;
+            winPercentages = leagueRecordArrays.combined.managerBests.winRecords;
+            fptsHistories = leagueRecordArrays.combined.managerBests.cumulativePoints;
+            medianRecords = leagueRecordArrays.combined.managerBests.medianRecords;
         }
     }
 
@@ -176,6 +188,7 @@
     {showTies}
     {winPercentages}
     {fptsHistories}
+    {medianRecords}
     {lineupIQs}
     {tradesData}
     {waiversData}

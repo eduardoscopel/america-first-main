@@ -2,7 +2,7 @@
     import {round} from '$lib/utils/helper';
   	import RecordsAndRankings from './RecordsAndRankings.svelte';
 
-    export let selection, leagueRosterRecords, seasonWeekRecords, currentManagers, allTimeWeekBests, allTimeWeekWorsts, allTimeSeasonBests, allTimeSeasonWorsts, allTimeEPERecords, currentYear, lastYear, transactionTotals;
+    export let selection, leagueRosterRecords, seasonWeekRecords, currentManagers, currentYear, lastYear, transactionTotals;
 
     const yearsObj = {};
     let years = [];
@@ -15,6 +15,7 @@
             winPercentages: [],
             lineupIQs: [],
             fptsHistories: [],
+            medianRecords: [],
             tradesData: [],
             waiversData: [],
             blowouts: [],
@@ -46,6 +47,14 @@
             };
         for(const recordType in seasonWeekRecord.leagueRecordArrays) {
             arraysObj[seasonWeekRecord.year][recordType] = seasonWeekRecord.leagueRecordArrays[recordType];
+        }
+    }
+
+    for(const key in arraysObj) {
+        for(const recordType in arraysObj[key]) {
+            yearsObj[key].winPercentages = arraysObj[key][recordType].managerBests.winRecords;
+            yearsObj[key].fptsHistories = arraysObj[key][recordType].managerBests.cumulativePoints;
+            yearsObj[key].medianRecords = arraysObj[key][recordType].managerBests.medianRecords;
         }
     }
 
@@ -90,29 +99,6 @@
             if(season.ties > 0) {
                 yearsObj[season.year].showTies = true;
             }
-
-			const fpts = season.fpts;
-			const fptspg = season.fpts / (season.wins + season.losses + season.ties);
-
-            // add season-long scoring record
-            yearsObj[season.year].seasonLongRecords.push({
-                manager: season.manager,
-				recordManID,
-				fpts,
-		    	fptspg,
-				year: null,
-			})
-
-            // add win percentage rankings
-            yearsObj[season.year].winPercentages.push({
-                recordManID,
-                manager: season.manager,
-                percentage: round((season.wins + season.ties / 2) / (season.wins + season.ties + season.losses) * 100),
-                wins: season.wins,
-                ties: season.ties,
-                losses: season.losses,
-            })
-
             // add lineup IQ rankings
             let lineupIQ = {
                 recordManID,
@@ -124,30 +110,18 @@
                 lineupIQ.potentialPoints = round(season.potentialPoints);
             }
 
-            yearsObj[season.year].lineupIQs.push(lineupIQ)
-
-            // add fantasy points histories
-            yearsObj[season.year].fptsHistories.push({
-                recordManID,
-                manager: season.manager,
-                fptsFor: round(season.fpts),
-                fptsAgainst: round(season.fptsAgainst),
-		        fptsPerGame: round(season.fpts / (season.wins + season.losses + season.ties)),
-            })
-
+            yearsObj[season.year].lineupIQs.push(lineupIQ);
         }
-
     }
 
     for(const key in yearsObj) {
         // sort records
-        yearsObj[key].seasonLongLows = yearsObj[key].seasonLongRecords.slice().sort((a, b) => a.fpts - b.fpts).slice(0, 10);
-        yearsObj[key].seasonLongRecords = yearsObj[key].seasonLongRecords.sort((a, b) => b.fpts - a.fpts).slice(0, 10);
+        yearsObj[key].seasonLongLows = arraysObj[key].regularSeason.period_Low;
+        yearsObj[key].seasonLongRecords = arraysObj[key].regularSeason.period_Top;
         
         // sort rankings
-        yearsObj[key].winPercentages.sort((a, b) => b.percentage - a.percentage);
         yearsObj[key].lineupIQs.sort((a, b) => b.iq - a.iq);
-        yearsObj[key].fptsHistories.sort((a, b) => b.fptsFor - a.fptsFor);
+        // yearsObj[key].fptsHistories.sort((a, b) => b.fptsFor - a.fptsFor);
         yearsObj[key].tradesData.sort((a, b) => b.trades - a.trades);
         yearsObj[key].waiversData.sort((a, b) => b.waivers - a.waivers);
 
@@ -199,6 +173,9 @@
                 yearsObj[key].seasonBests = arraysObj[key].regularSeason.managerBests.period_Best;
                 yearsObj[key].seasonWorsts = arraysObj[key].regularSeason.managerBests.period_Worst;
                 yearsObj[key].seasonEPERecords = arraysObj[key].regularSeason.managerBests.epeRecords;
+                yearsObj[key].winPercentages = arraysObj[key].regularSeason.managerBests.winRecords;
+                yearsObj[key].fptsHistories = arraysObj[key].regularSeason.managerBests.cumulativePoints;
+                yearsObj[key].medianRecords = arraysObj[key].regularSeason.managerBests.medianRecords;
 
                 yearsObj[key].playerSeasonTOPS = arraysObj[key].regularSeason.players.period_Top;
                 yearsObj[key].playerSeasonBests = arraysObj[key].regularSeason.players.period_Best;
@@ -225,6 +202,9 @@
                 yearsObj[key].seasonBests = arraysObj[key].playoffs.managerBests.period_Best;
                 yearsObj[key].seasonWorsts = arraysObj[key].playoffs.managerBests.period_Worst;
                 yearsObj[key].seasonEPERecords = arraysObj[key].playoffs.managerBests.epeRecords;
+                yearsObj[key].winPercentages = arraysObj[key].playoffs.managerBests.winRecords;
+                yearsObj[key].fptsHistories = arraysObj[key].playoffs.managerBests.cumulativePoints;
+                yearsObj[key].medianRecords = arraysObj[key].playoffs.managerBests.medianRecords;
 
                 yearsObj[key].playerSeasonTOPS = arraysObj[key].playoffs.players.period_Top;
                 yearsObj[key].playerSeasonBests = arraysObj[key].playoffs.players.period_Best;
@@ -251,6 +231,9 @@
                 yearsObj[key].seasonBests = arraysObj[key].combined.managerBests.period_Best;
                 yearsObj[key].seasonWorsts = arraysObj[key].combined.managerBests.period_Worst;
                 yearsObj[key].seasonEPERecords = arraysObj[key].combined.managerBests.epeRecords;
+                yearsObj[key].winPercentages = arraysObj[key].combined.managerBests.winRecords;
+                yearsObj[key].fptsHistories = arraysObj[key].combined.managerBests.cumulativePoints;
+                yearsObj[key].medianRecords = arraysObj[key].combined.managerBests.medianRecords;
 
                 yearsObj[key].playerSeasonTOPS = arraysObj[key].combined.players.period_Top;
                 yearsObj[key].playerSeasonBests = arraysObj[key].combined.players.period_Best;
@@ -269,7 +252,7 @@
 
 </script>
 
-{#each years as {waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, seasonLongLows, showTies, winPercentages, fptsHistories, lineupIQs, year, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, allTimeWeekBests, allTimeWeekWorsts, allTimeSeasonBests, allTimeSeasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekTOPS, playerWeekBests, playerWeekMissedBests, playerWeekMissedTOPS}, ix}
+{#each years as {waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, seasonLongLows, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, year, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekTOPS, playerWeekBests, playerWeekMissedBests, playerWeekMissedTOPS}, ix}
     <RecordsAndRankings
         {waiversData}
         {tradesData}
@@ -280,6 +263,7 @@
         {showTies}
         {winPercentages}
         {fptsHistories}
+        {medianRecords}
         {lineupIQs}
         {blowouts}
         {closestMatchups}
@@ -287,10 +271,6 @@
         {weekWorsts}
         {seasonBests}
         {seasonWorsts}
-        {allTimeWeekBests} 
-        {allTimeWeekWorsts}
-        {allTimeSeasonBests} 
-        {allTimeSeasonWorsts}
         {seasonEPERecords}
         {playerSeasonTOPS}
         {playerSeasonBests}

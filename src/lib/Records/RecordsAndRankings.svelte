@@ -6,7 +6,7 @@
 
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table'; 
 
-    export let selection = 'regular', waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerATSeasonTOPS, playerATSeasonBests, playerATWeekBests, playerATWeekMissedBests, playerWeekMissedTOPS, playerATWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerATWeekTOPS, playerWeekTOPS, allTimeEPERecords, allTimeSeasonBests, allTimeSeasonWorsts, allTimeWeekBests, allTimeWeekWorsts, currentManagers, allTime=false, last=false;
+    export let selection = 'regular', waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerWeekTOPS, currentManagers, allTime=false, last=false;
 
     let leagueManagers = {};
     const numManagers = managers.length;
@@ -99,7 +99,7 @@
         y: "Win Percentage",
         stat: "%",
         header: "Team Win Percentages",
-        field: "percentage",
+        field: "winPerc",
         short: "Win Percentage"
     }
 
@@ -109,8 +109,18 @@
         y: "Fantasy Points",
         stat: "",
         header: "Team Fantasy Points",
-        field: "fptsFor",
+        field: "fptspg",
         short: "Fantasy Points"
+    }
+
+    const medianRecordsGraph = {
+        stats: medianRecords,
+        x: "Manager",
+        y: "Win Percentage",
+        stat: "%",
+        header: "Managers Against the Median",
+        field: "medianPerc",
+        short: "Par Records"
     }
     
     const fptsSeasonBestGraph = {
@@ -218,6 +228,7 @@
     graphs.push(generateGraph(winsGraph, 5));
     graphs.push(generateGraph(winPercentagesGraph));
     graphs.push(generateGraph(fptsHistoriesGraph));
+    graphs.push(generateGraph(medianRecordsGraph));
     if(lineupIQs[0]?.potentialPoints) {
         graphs.push(generateGraph(potentialPointsGraph, 10, 0));
     }
@@ -254,6 +265,7 @@
     const tables = [
         "Win Percentages",
         "Points",
+        "Par Records",
         "Transactions",
         "Season Highs",
         "Season Lows",
@@ -272,7 +284,7 @@
     const changeTable = (newGraph) => {
         switch (newGraph) {
             case 0 - iqOffset:
-            case (4 + (99 * iqOffset)):
+            case (5 + (99 * iqOffset)):
                 curTable = 0;
                 break;
             case 1 - iqOffset:
@@ -282,24 +294,24 @@
             case 3 - iqOffset:
                 curTable = 2 - iqOffset;
                 break;
-            case 5 - (2 * iqOffset):
-            case 6 - (2 * iqOffset):
+            case 4 - iqOffset:
                 curTable = 3 - iqOffset;
                 break;
-	         case 7 - (2 * iqOffset):
-		        if(curTable == 4 - iqOffset || curTable == 5 - iqOffset) {
-		            break;
-		        }
-		        curTable = 4 - iqOffset;
-		        break;			
-            case 8 - (2 * iqOffset):
-		        if(curTable == 6 - iqOffset || curTable == 7 - iqOffset) {
-		            break;
-		        }
-                curTable = 6 - iqOffset;
+            case 6 - (2 * iqOffset):
+            case 7 - (2 * iqOffset):
+                curTable = 4 - iqOffset;
                 break;
+	         case 8 - (2 * iqOffset):
+		        if(curTable == 5 - iqOffset || curTable == 6 - iqOffset) {
+		            break;
+		        }
+		        curTable = 5 - iqOffset;
+		        break;			
             case 9 - (2 * iqOffset):
-                curTable = 8 - iqOffset;
+		        if(curTable == 7 - iqOffset || curTable == 8 - iqOffset) {
+		            break;
+		        }
+                curTable = 7 - iqOffset;
                 break;
             case 10 - (2 * iqOffset):
                 curTable = 9 - iqOffset;
@@ -310,6 +322,9 @@
             case 12 - (2 * iqOffset):
                 curTable = 11 - iqOffset;
                 break;
+            case 13 - (2 * iqOffset):
+                curTable = 12 - iqOffset;
+                break;
             default:
                 curTable = 0;
                 break;
@@ -319,7 +334,7 @@
     const changeGraph = (newTable) => {
         switch (newTable) {
             case 0 - iqOffset:
-                if(curGraph == 0 || curGraph == 4) {
+                if(curGraph == 0 || curGraph == 5) {
                     break;
                 }
                 curGraph = 0;
@@ -334,30 +349,33 @@
                 curGraph = 3 - iqOffset;
                 break;
             case 3 - iqOffset:
-                if(curGraph == 5 - (2 * iqOffset) || curGraph == 6 - (2 * iqOffset)) {
-                    break;
-                }
-                curGraph = 5 - (2 * iqOffset);
+                curGraph = 4 - iqOffset;
                 break;
             case 4 - iqOffset:
-            case 5 - iqOffset:
-                curGraph = 7 - (2 * iqOffset);
+                if(curGraph == 6 - (2 * iqOffset) || curGraph == 7 - (2 * iqOffset)) {
+                    break;
+                }
+                curGraph = 6 - (2 * iqOffset);
                 break;
+            case 5 - iqOffset:
             case 6 - iqOffset:
-            case 7 - iqOffset:
                 curGraph = 8 - (2 * iqOffset);
                 break;
-	        case 8 - iqOffset:
+            case 7 - iqOffset:
+            case 8 - iqOffset:
                 curGraph = 9 - (2 * iqOffset);
                 break;
 	        case 9 - iqOffset:
                 curGraph = 10 - (2 * iqOffset);
                 break;
-            case 10 - iqOffset:
+	        case 10 - iqOffset:
                 curGraph = 11 - (2 * iqOffset);
                 break;
             case 11 - iqOffset:
                 curGraph = 12 - (2 * iqOffset);
+                break;
+            case 12 - iqOffset:
+                curGraph = 13 - (2 * iqOffset);
                 break;
             default:
                 curGraph = 0;
@@ -473,7 +491,7 @@
         position: relative;
         display: flex;
         flex-wrap: nowrap;
-        width: 1200%;
+        width: 1300%;
 		transition: margin-left 0.8s;
     }
 
@@ -909,7 +927,7 @@
                 <Row>
                     <Cell class="header" colspan=11>
                         <p>
-                            Top 10 Week Scores – Players<br>
+                            Top 10 Total Scores – Players<br>
                             {prefix} – {recordPrefix} 
                         </p>
                     </Cell>                  
@@ -965,7 +983,7 @@
                 <Row>
                     <Cell class="header" colspan=8>
                         <p>
-                            Top 10 Total Scores - Players<br>
+                            Top 10 Week Scores - Players<br>
                             {prefix} – {recordPrefix} 
                         </p>
                     </Cell>                  
@@ -1110,7 +1128,12 @@
             <DataTable class="rankingTable">
                 <Head>
                     <Row>
-                        <Cell class="header" colspan=6>{prefix} Win Percentages Rankings</Cell>
+                        <Cell class="header" colspan=6>
+                            <p>
+                                Win Percentage Rankings<br>
+                                {prefix} – {recordPrefix} 
+                            </p>
+                        </Cell>                      
                     </Row>
                     <Row>
                         <Cell class="header"></Cell>
@@ -1133,7 +1156,7 @@
                                     <div class="fantasyTeamName">({winPercentage.manager.name})</div>
                                 {/if}
                             </Cell>
-                            <Cell class="center">{winPercentage.percentage}%</Cell>
+                            <Cell class="center">{round(winPercentage.winPerc)}%</Cell>
                             <Cell class="center">{winPercentage.wins}</Cell>
                                 {#if showTies}
                                     <Cell class="center">{winPercentage.ties}</Cell>
@@ -1150,8 +1173,11 @@
                 <Head>
                     <Row>
                         <Cell class="header" colspan=5>
-                            {prefix} Fantasy Points Rankings
-                        </Cell>
+                            <p>
+                                Points Per Game Rankings<br>
+                                {prefix} – {recordPrefix} 
+                            </p>
+                        </Cell>   
                     </Row>
                     <Row>
                         <Cell class="header"></Cell>
@@ -1171,9 +1197,57 @@
                                     <div class="fantasyTeamName">({fptsHistory.manager.name})</div>
                                 {/if}
                             </Cell>
-                            <Cell class="center">{fptsHistory.fptsFor}</Cell>
-                            <Cell class="center">{fptsHistory.fptsAgainst}</Cell>
-			                <Cell class="center">{fptsHistory.fptsPerGame}</Cell>
+                            <Cell class="center">{round(fptsHistory.fpts)}</Cell>
+                            <Cell class="center">{round(fptsHistory.fptsAgainst)}</Cell>
+			                <Cell class="center">{round(fptsHistory.fptspg)}</Cell>
+                        </Row>
+                    {/each}
+                </Body>
+            </DataTable>
+        </div>
+
+        <div class="rankingTableWrapper">
+            <DataTable class="rankingTable">
+                <Head>
+                    <Row>
+                        <Cell class="header" colspan=8>
+                            <p>
+                                Managers Against the Median Rankings<br>
+                                {prefix} – {recordPrefix} 
+                            </p>
+                        </Cell>   
+                    </Row>
+                    <Row>
+                        <Cell class="header"></Cell>
+                        <Cell class="header">Manager</Cell>
+                        <Cell class="header">Median Win %</Cell>
+                        <Cell class="header">W</Cell>
+                        <!-- {#if showTies} -->
+                            <Cell class="header">T</Cell>
+                        <!-- {/if} -->
+                        <Cell class="header">L</Cell>
+                        <Cell class="header">Avg. Week Rank</Cell>
+                        <Cell class="header">Avg. End Rank</Cell>	
+                    </Row>
+                </Head>
+                <Body>
+                    {#each medianRecords as medianRecord, ix}
+                        <Row>
+                            <Cell>{ix + 1}</Cell>
+                            <Cell class="cellName" on:click={() => gotoManager(medianRecord.recordManID)}>
+                                {medianRecord.manager.realname}
+                                {#if !allTime}
+                                    <div class="fantasyTeamName">({medianRecord.manager.name})</div>
+                                {/if}
+                            </Cell>			
+                            <Cell class="center">{round(medianRecord.medianPerc)}%</Cell>
+                            <Cell class="center">{medianRecord.weekWinners}</Cell>
+                            <!-- {#if showTies} -->
+                                <Cell class="center">{medianRecord.weekTies}</Cell>
+                            <!-- {/if} -->
+                            <Cell class="center">{medianRecord.weekLosers}</Cell>
+                            <Cell class="center">{medianRecord.weekLosers}</Cell>
+                            <Cell class="center">{medianRecord.weekLosers}</Cell>
                         </Row>
                     {/each}
                 </Body>
