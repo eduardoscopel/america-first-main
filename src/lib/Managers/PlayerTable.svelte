@@ -35,6 +35,7 @@
 
     const setRegularTable = (managerRecords) => {
         recordPrefix = "Regular Season";
+        selection = 'regular';
         showEmpty = false;
 
         weekBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].week_Best;
@@ -43,10 +44,11 @@
 
     const setPlayoffsTable = (managerRecords) => {
         recordPrefix = "Playoffs";
+        selection = 'playoffs';
 
         if(managerRecords.managerRecordArrays.alltime.playoffs[recordManID]) {
             showEmpty = false;
-            
+
             weekBests = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].week_Best;
             weekWorsts = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].week_Worst;
         } else {
@@ -57,6 +59,7 @@
 
     const setCombinedTable = (managerRecords) => {
         recordPrefix = "Combined";
+        selection = 'combined';
         showEmpty = false;
 
         weekBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].week_Best;
