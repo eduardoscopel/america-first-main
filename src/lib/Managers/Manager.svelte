@@ -73,6 +73,54 @@
         seasons.push(seasonEntry);
     }
 
+    // Overall Win - Loss Record
+    let recordHistory = {
+        wins: records.leagueRecordArrays.combined.managerBests.winRecords.slice().filter(m => m.recordManID == recordManID)[0].wins,
+        losses: records.leagueRecordArrays.combined.managerBests.winRecords.slice().filter(m => m.recordManID == recordManID)[0].losses,
+        ties: records.leagueRecordArrays.combined.managerBests.winRecords.slice().filter(m => m.recordManID == recordManID)[0].ties,
+        winPerc: records.leagueRecordArrays.combined.managerBests.winRecords.slice().filter(m => m.recordManID == recordManID)[0].winPerc,
+        showTies: new Boolean (false),
+    }
+    if(recordHistory.ties > 0) {
+        recordHistory.showTies = true;
+    } else {
+        recordHistory.showTies = false;
+    }
+    // Overall EPE Win - Loss Record
+    let epeHistory = {
+        wins: records.leagueRecordArrays.combined.managerBests.epeRecords.slice().filter(m => m.recordManID == recordManID)[0].epeWins,
+        losses: records.leagueRecordArrays.combined.managerBests.epeRecords.slice().filter(m => m.recordManID == recordManID)[0].epeLosses,
+        ties: records.leagueRecordArrays.combined.managerBests.epeRecords.slice().filter(m => m.recordManID == recordManID)[0].epeTies,
+        epePerc: records.leagueRecordArrays.combined.managerBests.epeRecords.slice().filter(m => m.recordManID == recordManID)[0].epePerc,
+        showTies: new Boolean (false),
+    }
+    if(epeHistory.ties > 0) {
+        epeHistory.showTies = true;
+    } else {
+        epeHistory.showTies = false;
+    }
+    // FPTS history
+    let fptsHistory = {
+        fpts: records.leagueRecordArrays.combined.managerBests.cumulativePoints.slice().filter(m => m.recordManID == recordManID)[0].fpts,
+        fptsAgainst: records.leagueRecordArrays.combined.managerBests.cumulativePoints.slice().filter(m => m.recordManID == recordManID)[0].fptsAgainst,
+        fptspg: records.leagueRecordArrays.combined.managerBests.cumulativePoints.slice().filter(m => m.recordManID == recordManID)[0].fptspg,
+    }
+    // Median Win - Loss Record
+    let medianHistory = {
+        wins: records.leagueRecordArrays.combined.managerBests.medianRecords.slice().filter(m => m.recordManID == recordManID)[0].weekWinners,
+        losses: records.leagueRecordArrays.combined.managerBests.medianRecords.slice().filter(m => m.recordManID == recordManID)[0].weekLosers,
+        ties: records.leagueRecordArrays.combined.managerBests.medianRecords.slice().filter(m => m.recordManID == recordManID)[0].weekTies,
+        medianPerc: records.leagueRecordArrays.combined.managerBests.medianRecords.slice().filter(m => m.recordManID == recordManID)[0].medianPerc,
+        topScores: records.leagueRecordArrays.combined.managerBests.medianRecords.slice().filter(m => m.recordManID == recordManID)[0].topScores,
+        bottomScores: records.leagueRecordArrays.combined.managerBests.medianRecords.slice().filter(m => m.recordManID == recordManID)[0].bottomScores,
+        showTies: new Boolean (false),
+    }
+    if(medianHistory.ties > 0) {
+        medianHistory.showTies = true;
+    } else {
+        medianHistory.showTies = false;
+    }
+    // Championship icons
     let shipsTrophies = [];
     let championships = 0;
     for(const podium of awards.podiums) {
@@ -98,7 +146,7 @@
             players = newPlayerData.players;
         }
     })
-
+    // current standings info
     const calculateRecord = async (standings, leagueDatum, nflStated, curSeason, viewManager) => {
         const standingsData = await getLeagueStandings().catch((err) => { console.error(err); });
         standings = standingsData;
@@ -198,12 +246,21 @@
         margin: 0 auto 4em;
     }
 
+    .roster {
+        display: inline-block;
+        position: absolute;
+        right: 0;
+        top: 6.8em;
+		background-color: var(--f3f3f3);
+        vertical-align: top;
+    }
+
     .managerBlock {
         position: relative;
         z-index: 1;
         width: 100%;
         min-width: 470px;
-        max-width: 550px;
+        max-width: 600px;
         min-height: 100%;
 		background-color: var(--ebebeb);
         border-left: var(--eee);
@@ -277,6 +334,7 @@
 
     #historyProfile {
         padding: 4px 5px 5px 5px;
+        align-content: center;
 		background-color: var(--f3f3f3);
         box-shadow: 5px 0 8px var(--champShadow);
         border-left: 1px solid var(--ddd);
@@ -390,6 +448,10 @@
     .upper {
         margin-top: 0;
     }
+    
+    .centerV {
+        vertical-align: center;
+    }
 
     /* media queries */
 
@@ -485,6 +547,21 @@
                 <div class="managerRecord">{showTies ? '(' + wins + ' - ' + ties + ' - ' + losses + ')' : '(' + wins + ' - ' + losses + ')'}</div>
             {/if}
         </div>
+    </div>
+        <div class="roster">
+            {#if loading}
+            <!-- promise is pending -->
+            <div class="loading">
+                <p>Retrieving players...</p>
+                <LinearProgress indeterminate />
+            </div>
+            {:else}
+                {#if showRoster == true}
+                    <Roster division="1" expanded={false} {rosterPositions} {roster} {users} {players} {startersAndReserve} />
+                {/if}
+            {/if}
+        </div>
+    <div class="managerBlock">
         <div class="basicInfo">
             <span class="infoChild">{viewManager.location || 'Undisclosed Location'}</span>
             {#if viewManager.fantasyStart}
@@ -509,7 +586,7 @@
                 <DataTable class="historyTable">
                     <Head>
                         <Row>                        
-                            <Cell class="header" colspan=5>League History</Cell>
+                            <Cell class="header" colspan=5>Team History</Cell>
                         </Row>
                         <Row>                        
                             <Cell class="header">Year</Cell>
@@ -532,8 +609,119 @@
                     </Body>
                 </DataTable>
             {/if}
+
+            {#if recordHistory}
+                <DataTable class="historyTable">
+                    <Head>
+                        <Row>                        
+                            <Cell class="header" colspan=4>Overall Record</Cell>
+                        </Row>
+                        <Row>                        
+                            <Cell class="header">Win %</Cell>
+                            <Cell class="header">W</Cell>
+                            {#if recordHistory.showTies} 
+                                <Cell class="header">T</Cell>
+                            {/if}
+                            <Cell class="header">L</Cell>
+                        </Row>
+                    </Head>
+                    <Body>
+                        <Row>
+                            <Cell class="header">{round(recordHistory.winPerc)}</Cell>
+                            <Cell class="header">{recordHistory.wins}</Cell>
+                            {#if recordHistory.showTies} 
+                                <Cell class="header">{recordHistory.ties}</Cell>
+                            {/if}
+                            <Cell class="header">{recordHistory.losses}</Cell>
+                        </Row>
+                    </Body>
+                </DataTable>
+            {/if}
+
+            {#if epeHistory}
+                <DataTable class="historyTable">
+                    <Head>
+                        <Row>                        
+                            <Cell class="header" colspan=4>EPE Record</Cell>
+                        </Row>
+                        <Row>                        
+                            <Cell class="header">Win %</Cell>
+                            <Cell class="header">W</Cell>
+                            {#if epeHistory.showTies} 
+                                <Cell class="header">T</Cell>
+                            {/if}
+                            <Cell class="header">L</Cell>
+                        </Row>
+                    </Head>
+                    <Body>
+                        <Row>
+                            <Cell class="header">{round(epeHistory.epePerc)}</Cell>
+                            <Cell class="header">{epeHistory.wins}</Cell>
+                            {#if epeHistory.showTies} 
+                                <Cell class="header">{epeHistory.ties}</Cell>
+                            {/if}
+                            <Cell class="header">{epeHistory.losses}</Cell>
+                        </Row>
+                    </Body>
+                </DataTable>
+            {/if}
+
+            {#if fptsHistory}
+                <DataTable class="historyTable">
+                    <Head>
+                        <Row>                        
+                            <Cell class="header" colspan=3>Points Record</Cell>
+                        </Row>
+                        <Row>                 
+                            <Cell class="header">PF</Cell>
+                            <Cell class="header">PA</Cell>
+                            <Cell class="header">PPG</Cell>
+                        </Row>   
+                    </Head>
+                    <Body>
+                        <Row>
+                            <Cell class="header">{round(fptsHistory.fpts)}</Cell>
+                            <Cell class="header">{round(fptsHistory.fptsAgainst)}</Cell>
+                            <Cell class="header">{round(fptsHistory.fptspg)}</Cell>
+                        </Row>
+                    </Body>
+                </DataTable>
+            {/if}
+
+            {#if medianHistory}
+                <DataTable class="historyTable">
+                    <Head>
+                        <Row>                        
+                            <Cell class="header" colspan=6>Median Record</Cell>
+                        </Row>
+                        <Row>                 
+                            <Cell class="header">Win %</Cell>
+                            <Cell class="header">W</Cell>
+                            {#if medianHistory.showTies} 
+                                <Cell class="header">T</Cell>
+                            {/if}
+                            <Cell class="header">L</Cell>
+                            <Cell class="header">Top</Cell>
+                            <Cell class="header">Bot.</Cell>
+                        </Row>   
+                    </Head>
+                    <Body>
+                        <Row>
+                            <Cell class="header">{round(medianHistory.medianPerc)}</Cell>
+                            <Cell class="header">{medianHistory.wins}</Cell>
+                            {#if medianHistory.showTies} 
+                                <Cell class="header">{medianHistory.ties}</Cell>
+                            {/if}
+                            <Cell class="header">{medianHistory.losses}</Cell>
+                            <Cell class="header">{medianHistory.topScores}</Cell>
+                            <Cell class="header">{medianHistory.bottomScores}</Cell>
+                        </Row>
+                    </Body>
+                </DataTable>
+            {/if}
         </div>
     </div>
+
     <div class="managerConstrained">
         <p class="bio">{@html viewManager.bio}</p>
 
@@ -555,18 +743,6 @@
 
     <!-- UNDER CONSTRUCTION: dynamic tree map of fantasy points by NFL team -->
     <!-- <PancakeTable {recordManID} /> -->
-
-    {#if loading}
-        <!-- promise is pending -->
-        <div class="loading">
-            <p>Retrieving players...</p>
-            <LinearProgress indeterminate />
-        </div>
-    {:else}
-        {#if showRoster == true}
-            <Roster division="1" expanded={false} {rosterPositions} {roster} {users} {players} {startersAndReserve} />
-        {/if}
-    {/if}
 
     <h3>Team Transactions</h3>
     <div class="managerConstrained" bind:this={el}>
