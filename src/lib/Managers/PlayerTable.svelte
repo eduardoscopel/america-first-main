@@ -13,7 +13,7 @@
     let selection = 'regular';
     let recordPrefix;
 
-    let weekBests, weekWorsts, blowoutBests, blowoutWorsts, narrowBests, narrowWorsts;
+    let weekBests, weekWorsts, periodBests, periodWorsts, blowoutBests, blowoutWorsts, narrowBests, narrowWorsts;
 
     let managerRecords;
     const refreshRecords = async () => {
@@ -40,6 +40,8 @@
 
         weekBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].week_Best;
         weekWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].week_Worst;
+        periodBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].period_Best;
+        periodWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].period_Worst;
         blowoutBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].blowout_Best;
         blowoutWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].blowout_Worst;
         narrowBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].narrow_Best;
@@ -55,6 +57,8 @@
 
             weekBests = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].week_Best;
             weekWorsts = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].week_Worst;
+            periodBests = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].period_Best;
+            periodWorsts = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].period_Worst;
             blowoutBests = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].blowout_Best;
             blowoutWorsts = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].blowout_Worst;
             narrowBests = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].narrow_Best;
@@ -72,6 +76,8 @@
 
         weekBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].week_Best;
         weekWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].week_Worst;
+        periodBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].period_Best;
+        periodWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].period_Worst;
         blowoutBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].blowout_Best;
         blowoutWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].blowout_Worst;
         narrowBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].narrow_Best;
@@ -154,7 +160,7 @@
 
         /* Start button resizing */
 
-        @media (max-width: 540px) {
+    @media (max-width: 540px) {
         :global(.buttonHolder .selectionButtons) {
             font-size: 0.6em;
         }
@@ -353,6 +359,75 @@
             </DataTable>
         {/if}
 
+        {#if periodBests && periodBests.length}
+            <DataTable class="rankingTable">
+                <Head>
+                    <Row>
+                        <Cell class="header" colspan=4>
+                            <p>
+                                Personal Best Season-Long Scores<br>
+                                {recordPrefix} 
+                            </p>
+                        </Cell>  
+                    </Row>
+                    <Row>
+                        <Cell class="header"></Cell>
+                            <!-- {#if allTime} -->
+                                <Cell class="header">Year</Cell>
+                            <!-- {/if} -->
+                        <Cell class="header">PF</Cell>
+                        <Cell class="header">PPG</Cell>
+                    </Row>
+                </Head>
+                <Body>
+                    {#each periodBests as periodBest, ix}
+                        <Row>
+                            <Cell>{ix + 1}</Cell>
+                                <!-- {#if allTime}				 -->
+                                    <Cell class="center">{periodBest.year}</Cell>
+                                <!-- {/if} -->
+                            <Cell class="center">{round(periodBest.fpts)}</Cell>
+                            <Cell class="center">{round(periodBest.fptspg)}</Cell>
+                        </Row>
+                    {/each}
+                </Body>
+            </DataTable>
+        {/if}
+
+        {#if periodWorsts && periodWorsts.length}
+            <DataTable class="rankingTable">
+                <Head>
+                    <Row>
+                        <Cell class="header" colspan=4>
+                            <p>
+                                Personal Worst Season-Long Scores<br>
+                                {recordPrefix} 
+                            </p>
+                        </Cell>  
+                    </Row>
+                    <Row>
+                        <Cell class="header"></Cell>
+                            <!-- {#if allTime} -->
+                                <Cell class="header">Year</Cell>
+                            <!-- {/if} -->
+                        <Cell class="header">PF</Cell>
+                        <Cell class="header">PPG</Cell>
+                    </Row>
+                </Head>
+                <Body>
+                    {#each periodWorsts as periodWorst, ix}
+                        <Row>
+                            <Cell>{ix + 1}</Cell>
+                                <!-- {#if allTime}				 -->
+                                    <Cell class="center">{periodWorst.year}</Cell>
+                                <!-- {/if} -->
+                            <Cell class="center">{round(periodWorst.fpts)}</Cell>
+                            <Cell class="center">{round(periodWorst.fptspg)}</Cell>
+                        </Row>
+                    {/each}
+                </Body>
+            </DataTable>
+        {/if}
 
         {#if blowoutBests && blowoutBests.length}
             <DataTable class="recordTable">

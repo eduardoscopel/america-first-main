@@ -182,9 +182,9 @@
         x: "Manager",
         y: "Fantasy Points Earned",
         stat: "",
-        header: "Top Bench Booms",
+        header: "Top Benchwarmers",
         field: "benchPoints",
-        short: "Bench Booms"
+        short: "Benchwarmers"
     }
 
     for(let i = 1; i <= numManagers; i++) {
@@ -269,12 +269,12 @@
         "Transactions",
         "Season Highs",
         "Season Lows",
-        "Weekly Highs",
-        "Weekly Lows",
+        "Week Highs",
+        "Week Lows",
         "EPE Records",
         "Season Leaders",
         "Week Leaders",
-        "Bench Booms",
+        "Benchwarmers",
     ]
     if(!lineupIQs[0]?.potentialPoints) {
         iqOffset = 1;
@@ -707,7 +707,7 @@
                 <Row>
                     <Cell class="header" colspan=5>
                         <p>
-                            Top 10 Total Scores<br>
+                            Top 10 Season-Long Scores<br>
                             {prefix} – {recordPrefix} 
                         </p>
                     </Cell>
@@ -787,7 +787,7 @@
                 <Row>
                     <Cell class="header" colspan=5>
                         <p>
-                            Top 10 Lowest Total Scores<br>
+                            Top 10 Lowest Season-Long Scores<br>
                             {prefix} – {recordPrefix} 
                         </p>
                     </Cell>                  
@@ -927,7 +927,7 @@
                 <Row>
                     <Cell class="header" colspan=11>
                         <p>
-                            Top 10 Total Scores – Players<br>
+                            Top 10 Season-Long Scores – Players<br>
                             {prefix} – {recordPrefix} 
                         </p>
                     </Cell>                  
@@ -1033,7 +1033,7 @@
                 <Row>
                     <Cell class="header" colspan=8>
                         <p>
-                            Top 10 Bench Booms – Players<br>
+                            Top 10 Benchwarmers – Players<br>
                             {prefix} – {recordPrefix} 
                         </p>
                     </Cell>                  
@@ -1294,7 +1294,7 @@
                         <Row>
                             <Cell class="header" colspan=5>
                                 <p>
-                                    Personal Best Total Scores<br>
+                                    Personal Best Season-Long Scores<br>
                                     {prefix} – {recordPrefix} 
                                 </p>
                             </Cell>  
@@ -1338,7 +1338,7 @@
                         <Row>
                             <Cell class="header" colspan=5>
                                 <p>
-                                    Personal Worst Total Scores<br>
+                                    Personal Worst Season-Long Scores<br>
                                     {prefix} – {recordPrefix} 
                                 </p>
                             </Cell>  
@@ -1516,7 +1516,7 @@
                         <Row>
                             <Cell class="header" colspan=11>
                                 <p>
-                                    Personal Best Total Scores – Players<br>
+                                    Personal Best Season-Long Scores – Players<br>
                                     {prefix} – {recordPrefix} 
                                 </p>
                             </Cell>  
@@ -1626,7 +1626,7 @@
                         <Row>
                             <Cell class="header" colspan=8>
                                 <p>
-                                    Personal Biggest Bench Booms – Players<br>
+                                    Personal Biggest Benchwarmers – Players<br>
                                     {prefix} – {recordPrefix} 
                                 </p>
                             </Cell>  
