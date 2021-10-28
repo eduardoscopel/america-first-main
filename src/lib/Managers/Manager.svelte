@@ -54,6 +54,7 @@
 
     for(const year in records.leagueRosterRecords[recordManID].years) {
         const season = records.leagueRosterRecords[recordManID].years[year];
+        
         let seasonEntry = {
             year: season.year,
             wins: season.wins,
@@ -64,7 +65,9 @@
             fptspg: season.fptspg,
             manager: season.manager,
             regSeasonRank: 0,
-            finalRank: 0,
+            regSeasonRankSuper: null,
+            finalRank: null,
+            finalRankSuper: null,
             showTies: new Boolean (false),
         }
         if(season.ties > 0) {
@@ -73,6 +76,67 @@
             seasonEntry.showTies = false;
         }
         seasons.push(seasonEntry);
+    }
+
+    for(const key in seasons) {
+        const season = seasons[key];
+        const sortOrder = ["fptsAgainst", "fpts", "ties", "wins"];
+        let playerSeasons = [];
+        let yearManagers = managers.filter(m => m.yearsactive.includes(season.year));
+
+        for(const yearManager in yearManagers) {
+            const yearRecordManID = yearManagers[yearManager].managerID;
+            playerSeasons.push(records.leagueRosterRecords[yearRecordManID].years[key]);
+        }
+
+        const calculateRank = (playerSeasons, sortOrder, recordManID) => {
+            for(const sortType of sortOrder) {
+                if(!playerSeasons[0][sortType] && playerSeasons[0][sortType] != 0) {
+                    continue;
+                }
+                playerSeasons = [...playerSeasons].sort((a,b) => b[sortType] - a[sortType]);
+            }
+            let regSeasonRank = playerSeasons.indexOf(playerSeasons.find(p => p.recordManID == recordManID)) + 1;
+            let playerSeasonRanked = playerSeasons;
+            let regSeasonRankSuper;
+            if(regSeasonRank == 1) {
+                regSeasonRankSuper = "st";
+            } else if(regSeasonRank == 2) {
+                regSeasonRankSuper = "nd";
+            } else if(regSeasonRank == 3) {
+                regSeasonRankSuper = "rd";
+            } else if(regSeasonRank > 3) {
+                regSeasonRankSuper = "th";
+            }            
+
+            return {playerSeasonRanked, regSeasonRank, regSeasonRankSuper};
+        }
+        let {playerSeasonRanked, regSeasonRank, regSeasonRankSuper} = calculateRank(playerSeasons, sortOrder, recordManID);
+
+        // TO-DO: need to get final ranks of managers who didn't place in either bracket
+        // this bit only works because that doesn't apply in my league (12 teams, 6 playoff, 6 losers)
+        for(const completedSeason in awards.finalRanks) {
+            if(awards.finalRanks[completedSeason].year == season.year) {
+                for(const rank in awards.finalRanks[completedSeason]) {
+                    if(awards.finalRanks[completedSeason][rank]?.recordManID == recordManID) {
+                        season.finalRank = rank;
+                    }
+                }
+            }
+        }
+
+        if(season.finalRank == 1) {
+            season.finalRankSuper = "st";
+        } else if(season.finalRank == 2) {
+            season.finalRankSuper = "nd";
+        } else if(season.finalRank == 3) {
+            season.finalRankSuper = "rd";
+        } else if(season.finalRank > 3) {
+            season.finalRankSuper = "th";
+        }       
+
+        season.regSeasonRank = regSeasonRank;
+        season.regSeasonRankSuper = regSeasonRankSuper;
     }
 
     // Overall Win - Loss Record
@@ -217,6 +281,12 @@
         startersAndReserve = rostersData.startersAndReserve;
         rosters = rostersData.rosters;
 
+        if(viewManager.status == "active") {
+            showRecord = true;
+        } else {
+            showRecord = false;
+        }
+
         rosterArrNum = viewManager.roster-1;
 
         roster = rosters[rosterArrNum];
@@ -287,7 +357,7 @@
         display: inline-block;
 		background-color: var(--f3f3f3);
         position: absolute;
-        right: 0.15em;
+        right: 0.7em;
         text-align: left;
         vertical-align: top;
         font-size: 2em;
@@ -299,7 +369,7 @@
         display: inline-block;
 		background-color: var(--f3f3f3);
         position: absolute;
-        right: 0.15em;
+        right: 0.7em;
         text-align: left;
         vertical-align: top;
         font-size: 2em;
@@ -658,8 +728,12 @@
                                     <Cell class="header">{round(season.fpts)}</Cell>
                                     <Cell class="header">{round(season.fptsAgainst)}</Cell>
                                     <Cell class="header">{round(season.fptspg)}</Cell>
-                                    <Cell class="header">{season.regSeasonRank}</Cell>
-                                    <Cell class="header">{season.finalRank}</Cell>
+                                    <Cell class="header">{season.regSeasonRank}<sup>{season.regSeasonRankSuper}</sup></Cell>
+                                    {#if season.finalRank}
+                                        <Cell class="header">{season.finalRank}<sup>{season.finalRankSuper}</sup></Cell>
+                                    {:else}
+                                        <Cell class="header">-</Cell>
+                                    {/if}
                                 </Row>
                             {/each}
                         </Body>
