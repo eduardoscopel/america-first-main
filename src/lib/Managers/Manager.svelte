@@ -47,6 +47,7 @@
     let players, playersInfo;
     let loading = true;
     let curSeason = leagueID;
+    let currentYear;
     let nflStated;
     let leagueDatum;
     let standings;
@@ -55,6 +56,10 @@
     for(const year in records.leagueRosterRecords[recordManID].years) {
         const season = records.leagueRosterRecords[recordManID].years[year];
         
+        if(!currentYear) {
+            currentYear = season.year;
+        }
+
         let seasonEntry = {
             year: season.year,
             wins: season.wins,
@@ -78,6 +83,7 @@
         seasons.push(seasonEntry);
     }
 
+    let managerKeys = {};
     for(const key in seasons) {
         const season = seasons[key];
         const sortOrder = ["fptsAgainst", "fpts", "ties", "wins"];
@@ -86,7 +92,14 @@
 
         for(const yearManager in yearManagers) {
             const yearRecordManID = yearManagers[yearManager].managerID;
-            playerSeasons.push(records.leagueRosterRecords[yearRecordManID].years[key]);
+            if(!managerKeys[yearRecordManID] && season.year == yearManagers[yearManager].yearsactive[yearManagers[yearManager].yearsactive.length - 1]) {
+                managerKeys[yearRecordManID] = 0;
+            } else {
+                managerKeys[yearRecordManID] = yearManagers[yearManager].yearsactive[yearManagers[yearManager].yearsactive.length - 1] - season.year;
+            }
+
+            playerSeasons.push(records.leagueRosterRecords[yearRecordManID].years[managerKeys[yearRecordManID]]);
+            managerKeys[yearRecordManID]++;
         }
 
         const calculateRank = (playerSeasons, sortOrder, recordManID) => {
@@ -502,24 +515,6 @@
         text-align: left;
     }
 
-    /* :global(.historyTable tr) {
-        line-height: 25px;
-    } */
-
-    .fullFlex {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-around;
-        margin: 3em auto 5em;
-    }
-
-    h2 {
-        text-align: center;
-        font-size: 2.8em;
-        margin: 1em 0 0em;
-        line-height: 1em;
-    }
-
     h3 {
         text-align: center;
         font-size: 1.5em;
@@ -579,10 +574,6 @@
 
     .upper {
         margin-top: 0;
-    }
-    
-    .centerV {
-        vertical-align: center;
     }
 
     /* media queries */
@@ -900,7 +891,7 @@
 
     <ManagerAwards tookOver={viewManager.tookOver} {recordManID} {awards} {records} {roster} />
 
-    <PlayerTable {recordManID} />
+    <PlayerTable {recordManID} {firstYear} {currentYear} />
 </div>
 
     <!-- UNDER CONSTRUCTION: dynamic tree map of fantasy points by NFL team -->

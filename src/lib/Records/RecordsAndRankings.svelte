@@ -430,23 +430,6 @@
         margin: 3em auto 5em;
     }
 
-    .testHolder {
-        display: block;
-        width: 100%;
-        overflow-x: hidden;
-    }
-
-    .testInner {
-        position: relative;
-        display: flex;
-        flex-wrap: nowrap;
-        width: 100%;
-    }
-
-    .testWrapper {
-        width: 50%;
-    }
-
     .rankingHolder {
         display: block;
         width: 100%;
@@ -460,11 +443,6 @@
         line-height: 1.2em;
     }
 
-    h5 {
-        text-align: center;
-        margin: 2em 0 1em;
-    }
-
     h4 {
         text-align: center;
         margin: 2em 0 1em;
@@ -475,12 +453,6 @@
         color: #999;
         font-size: 0.8em;
         line-height: 1.1em;
-    }
-
-    .recordHeading {
-        font-size: 1.1em;
-        line-height: 0.2em;
-        text-align: center;
     }
 
     .rankingTableWrapper {
@@ -496,11 +468,6 @@
     }
 
     .buttonHolder {
-        text-align: center;
-        margin: 2em 0 4em;
-    }
-
-    .buttonHolderRecords {
         text-align: center;
         margin: 2em 0 4em;
     }

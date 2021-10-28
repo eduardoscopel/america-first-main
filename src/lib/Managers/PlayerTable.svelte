@@ -1,17 +1,21 @@
 <script>
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table'; 
     import Button, { Group, Label } from '@smui/button';
+    import { Icon } from '@smui/tab';
     import { generateGraph, gotoManager, round } from '$lib/utils/helper';
     import { getManagerRecords } from '$lib/utils/helper';
     import { managerrecords } from '$lib/stores';
 
 
-    export let recordManID;
+    export let recordManID, firstYear, currentYear;
 
     let showEmpty = new Boolean (false);
     let emptyMessage;
     let selection = 'regular';
     let recordPrefix;
+    let masterSelection = 'alltime';
+    let masterPrefix;
+    let selectedYear = currentYear;
 
     let weekBests, weekWorsts, periodBests, periodWorsts, blowoutBests, blowoutWorsts, narrowBests, narrowWorsts;
 
@@ -22,39 +26,55 @@
         managerRecords = newRecords;
 
         if(displayStats == 'regular') {
-            setRegularTable(managerRecords);
+            setRegularTable(managerRecords, displayType, displayYear);
         } else if(displayStats == 'playoffs') {
-            setPlayoffsTable(managerRecords);
+            setPlayoffsTable(managerRecords, displayType, displayYear);
         } else if(displayStats == 'combined') {
-            setCombinedTable(managerRecords);
+            setCombinedTable(managerRecords, displayType, displayYear);
         }
     }
   
     refreshRecords(managerrecords);
     
 
-    const setRegularTable = (managerRecords) => {
+    const setRegularTable = (managerRecords, displayType, displayYear) => {
         recordPrefix = "Regular Season";
         selection = 'regular';
         showEmpty = false;
-
-        weekBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].week_Best;
-        weekWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].week_Worst;
-        periodBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].period_Best;
-        periodWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].period_Worst;
-        blowoutBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].blowout_Best;
-        blowoutWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].blowout_Worst;
-        narrowBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].narrow_Best;
-        narrowWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].narrow_Worst;
+        
+        if(displayType == 'alltime') {
+            masterPrefix = "All-Time";
+            masterSelection = 'alltime';
+            weekBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].week_Best;
+            weekWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].week_Worst;
+            periodBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].period_Best;
+            periodWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].period_Worst;
+            blowoutBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].blowout_Best;
+            blowoutWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].blowout_Worst;
+            narrowBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].narrow_Best;
+            narrowWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].narrow_Worst;
+        } else if(displayType == 'yearly') {
+            masterPrefix = displayYear;
+            masterSelection = 'yearly';
+            weekBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason[recordManID].week_Best;
+            weekWorsts = managerRecords.managerRecordArrays.years[displayYear].regularSeason[recordManID].week_Worst;
+            periodBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason[recordManID].period_Best;
+            periodWorsts = managerRecords.managerRecordArrays.years[displayYear].regularSeason[recordManID].period_Worst;
+            blowoutBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason[recordManID].blowout_Best;
+            blowoutWorsts = managerRecords.managerRecordArrays.years[displayYear].regularSeason[recordManID].blowout_Worst;
+            narrowBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason[recordManID].narrow_Best;
+            narrowWorsts = managerRecords.managerRecordArrays.years[displayYear].regularSeason[recordManID].narrow_Worst;
+        }
     }
 
-    const setPlayoffsTable = (managerRecords) => {
+    const setPlayoffsTable = (managerRecords, displayType, displayYear) => {
         recordPrefix = "Playoffs";
         selection = 'playoffs';
 
-        if(managerRecords.managerRecordArrays.alltime.playoffs[recordManID]) {
+        if(displayType == 'alltime' && managerRecords.managerRecordArrays.alltime.playoffs[recordManID]) {
             showEmpty = false;
-
+            masterPrefix = "All-Time";
+            masterSelection = 'alltime';
             weekBests = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].week_Best;
             weekWorsts = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].week_Worst;
             periodBests = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].period_Best;
@@ -62,36 +82,82 @@
             blowoutBests = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].blowout_Best;
             blowoutWorsts = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].blowout_Worst;
             narrowBests = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].narrow_Best;
-            narrowWorsts = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].narrow_Worst;
-        } else {
+            narrowWorsts = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].narrow_Worst;  
+        } else if(displayType == 'yearly' && managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID]) {
+            showEmpty = false;
+            masterPrefix = displayYear;
+            masterSelection = 'yearly';
+            weekBests = managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID].week_Best;
+            weekWorsts = managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID].week_Worst;
+            periodBests = managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID].period_Best;
+            periodWorsts = managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID].period_Worst;
+            blowoutBests = managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID].blowout_Best;
+            blowoutWorsts = managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID].blowout_Worst;
+            narrowBests = managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID].narrow_Best;
+            narrowWorsts = managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID].narrow_Worst;
+        } else if(displayType == 'alltime' && !managerRecords.managerRecordArrays.alltime.playoffs[recordManID]) {
             showEmpty = true;
             emptyMessage = "No Playoff Records Yet...";
+            masterSelection = 'alltime';
+            masterPrefix = "All-Time";
+        } else if(displayType == 'yearly' && !managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID]) {
+            showEmpty = true;
+            emptyMessage = `No Playoff Records for ${displayYear}...`;
+            masterSelection = 'yearly';
+            masterPrefix = displayYear;
         }
     }
 
-    const setCombinedTable = (managerRecords) => {
+    const setCombinedTable = (managerRecords, displayType, displayYear) => {
         recordPrefix = "Combined";
         selection = 'combined';
         showEmpty = false;
 
-        weekBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].week_Best;
-        weekWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].week_Worst;
-        periodBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].period_Best;
-        periodWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].period_Worst;
-        blowoutBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].blowout_Best;
-        blowoutWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].blowout_Worst;
-        narrowBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].narrow_Best;
-        narrowWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].narrow_Worst;
+        if(displayType == 'alltime') {
+            masterPrefix = "All-Time";
+            masterSelection = 'alltime';
+            weekBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].week_Best;
+            weekWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].week_Worst;
+            periodBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].period_Best;
+            periodWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].period_Worst;
+            blowoutBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].blowout_Best;
+            blowoutWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].blowout_Worst;
+            narrowBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].narrow_Best;
+            narrowWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].narrow_Worst;
+        } else if(displayType == 'yearly') {
+            masterPrefix = displayYear;
+            masterSelection = 'yearly';
+            weekBests = managerRecords.managerRecordArrays.years[displayYear].combined[recordManID].week_Best;
+            weekWorsts = managerRecords.managerRecordArrays.years[displayYear].combined[recordManID].week_Worst;
+            periodBests = managerRecords.managerRecordArrays.years[displayYear].combined[recordManID].period_Best;
+            periodWorsts = managerRecords.managerRecordArrays.years[displayYear].combined[recordManID].period_Worst;
+            blowoutBests = managerRecords.managerRecordArrays.years[displayYear].combined[recordManID].blowout_Best;
+            blowoutWorsts = managerRecords.managerRecordArrays.years[displayYear].combined[recordManID].blowout_Worst;
+            narrowBests = managerRecords.managerRecordArrays.years[displayYear].combined[recordManID].narrow_Best;
+            narrowWorsts = managerRecords.managerRecordArrays.years[displayYear].combined[recordManID].narrow_Worst;
+        }
     }
 
     let displayStats;
-
     const changeSelection = (selection) => {
         displayStats = selection;
         refreshRecords(displayStats);
     }
-
     $: changeSelection(selection);
+
+    let displayType;
+    const changeMasterSelection = (masterSelection) => {
+        displayType = masterSelection;
+        refreshRecords(displayType);
+    }
+    $: changeMasterSelection(masterSelection);
+
+    let displayYear;
+    const changeYear = (selectedYear) => {
+        displayYear = selectedYear;
+        refreshRecords(displayYear);
+    }
+    $: changeYear(selectedYear);
 
 </script>
 
@@ -137,17 +203,32 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: space-around;
-        margin: 3em auto 5em;
+        margin: 1em auto 5em;
     }
 
     .buttonHolder {
         text-align: center;
-        margin: 2em 0 4em;
+        margin: 1.75em 0 0;
+    }
+    .buttonHolderMaster {
+        text-align: center;
+        margin: 0em 0 0em;
     }
 
     :global(.cellName) {
         cursor: pointer;
         line-height: 1.2em;
+    }
+
+    h2 {
+        text-align: center;
+    }
+
+    .yearText {
+        flex-grow: 1;
+        text-align: center;
+        font-size: 2.25em;
+        font-weight: 220;
     }
 
     .center {
@@ -156,6 +237,28 @@
 
     .left {
         text-align: left;
+    }
+
+    .yearContainer {
+        display: flex;
+        width: 95%;
+        max-width: 600px;
+        margin: 0 auto;
+        align-items: center;
+    }
+
+    :global(.changeYear) {
+        font-size: 3em;
+        cursor: pointer;
+        color: #888;
+    }
+
+    :global(.changeYear:hover) {
+        color: #00316b;
+    }
+
+    .spacer {
+        width: 48px;
     }
 
         /* Start button resizing */
@@ -230,6 +333,17 @@
 
 </style>
 
+<div class="buttonHolderMaster">
+    <Group variant="outlined">
+        <Button class="selectionButtons" on:click={() => changeMasterSelection('alltime')} variant="{masterSelection == 'alltime' ? "raised" : "outlined"}">
+            <Label>All-Time</Label>
+        </Button>
+        <Button class="selectionButtons" on:click={() => changeMasterSelection('yearly')} variant="{masterSelection == 'yearly' ? "raised" : "outlined"}">
+            <Label>Yearly</Label>
+        </Button>
+    </Group>
+</div>
+
 <div class="buttonHolder">
     <Group variant="outlined">
         <Button class="selectionButtons" on:click={() => changeSelection('regular')} variant="{selection == 'regular' ? "raised" : "outlined"}">
@@ -242,6 +356,22 @@
             <Label>Combined</Label>
         </Button>
     </Group>
+</div>
+
+<div class="yearContainer">
+    {#if masterSelection == 'yearly' && displayYear > firstYear}
+        <Icon class="material-icons changeYear" on:click={() => changeYear(displayYear - 1)}>chevron_left</Icon>
+    {:else}
+        <span class="spacer" />
+    {/if}  
+
+    <h2 class="yearText">{masterPrefix} Records</h2>
+
+    {#if masterSelection == 'yearly' && displayYear < currentYear}
+        <Icon class="material-icons changeYear" on:click={() => changeYear(displayYear + 1)}>chevron_right</Icon>
+    {:else}
+        <span class="spacer" />
+    {/if}  
 </div>
 
 <div class="fullFlex">
