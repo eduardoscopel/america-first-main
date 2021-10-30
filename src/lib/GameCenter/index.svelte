@@ -73,7 +73,7 @@
             <Scoreboard {nflMatchups} {week} bind:gameSelection={gameSelection} />
         </div>
         <div class="gameBox">
-            <GameBox {playersInfo} {fantasyStarters} bind:gameSelection={gameSelection} />
+            <GameBox {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} bind:gameSelection={gameSelection} />
         </div>
     </div>
 </div>
