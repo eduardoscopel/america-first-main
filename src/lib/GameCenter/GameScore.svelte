@@ -1,5 +1,5 @@
 <script>
-    export let gameID, home, away;
+    export let gameID, home, away, gameSelection = gameID;
 
     let timezone = 'CST';
     let isComplete = home.status.type.completed;
@@ -16,6 +16,13 @@
         gameStatus.quarter = "Final";
         gameStatus.clock = "";
     }
+    let newGameSelection
+    const changeGameSelection = (gameID) => {
+        newGameSelection = gameID;
+        gameSelection = newGameSelection;
+        return gameSelection;
+    }
+    
 
     const timezoneShift = (timezone, time) => {
         let timeHour;
@@ -120,6 +127,11 @@
         padding: 0 0 0 7em;
     }
 
+    :global(.scoresBlock:hover) {
+        cursor: pointer;
+        opacity: 1;
+    }
+
     .gameComplete {
         display: inline-flex;
         position: absolute;
@@ -163,7 +175,7 @@
     }
 </style>
 
-<div class="scoresBlock">
+<div class="scoresBlock" on:click={() => changeGameSelection(gameID)}>
     <div class="teamsBlock">
         <img class="teamLogo" src="https://sleepercdn.com/images/team_logos/nfl/{home.sleeperID.toLowerCase()}.png" alt="{home.sleeperID}"/>
         <div class="teamAbbrev">{home.sleeperID}</div>

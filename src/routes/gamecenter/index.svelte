@@ -45,9 +45,9 @@
 			<br />
 			<LinearProgress indeterminate />
 		</div>
-	{:then [leagueData, rosterData, users, nflWeek, matchupsInfo, playersInfo]}
+	{:then [rosterData, users, leagueData, nflWeek, matchupsInfo, playersInfo]}
 		<!-- promise was fulfilled -->
-		<GameCenter {leagueData} {rosterData} {users} {nflWeek} {matchupsInfo} {playersInfo} /> 
+		<GameCenter {rosterData} {users} {leagueData} {nflWeek} {matchupsInfo} {playersInfo} /> 
 	{:catch error}
 		<!-- promise was rejected -->
 		<p>Something went wrong: {error.message}</p>

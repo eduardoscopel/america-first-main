@@ -17,7 +17,7 @@ import { predictScores } from './helperFunctions/predictOptimalScore';
 import { getBrackets } from './helperFunctions/leagueBrackets';
 import { getBlogPosts } from './helperFunctions/getBlogPosts';
 import { getLeagueStandings } from './helperFunctions/leagueStandings';
-import { getNflScoreboard } from './helperFunctions/gameCenter';
+import { getNflScoreboard, getPlayByPlay } from './helperFunctions/gameCenter';
 import { nflTeams } from './NFLinfo';
 
 export {
@@ -52,6 +52,7 @@ export {
     predictScores,
     getLeagueStandings,
     getNflScoreboard,
+    getPlayByPlay,
     nflTeams,
     getAuthor,
     parseDate,

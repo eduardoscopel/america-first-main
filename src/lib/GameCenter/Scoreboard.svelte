@@ -1,7 +1,7 @@
 <script>
     import GameScore from './GameScore.svelte';
 
-    export let nflMatchups, week;
+    export let nflMatchups, week, gameSelection;
     
     let gameScores = [];
     const gamesObj = {};
@@ -32,7 +32,7 @@
 
 <div class="scoresHolder">
     {#each gameScores as {gameID, home, away}} 
-        <GameScore {gameID} {home} {away} />
+        <GameScore {gameID} {home} {away} bind:gameSelection={gameSelection} />
     {/each}
 </div>
 

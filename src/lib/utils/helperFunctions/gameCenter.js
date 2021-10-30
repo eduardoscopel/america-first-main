@@ -3,6 +3,53 @@ import { nflTeams, getLeagueData, getLeagueUsers, getLeagueRosters, getNflState,
 import { get } from 'svelte/store';
 import {scoreboardStore} from '$lib/stores';
 
+export const getPlayByPlay = async (gameID) => {
+
+    let fullPlayByPlay;
+
+    const playbyplayPromises = [];
+    playbyplayPromises.push(fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/${gameID}/competitions/${gameID}/plays?lang=en&region=us`, {compress: true}));
+
+    const playbyplaysRes = await waitForAll(...playbyplayPromises).catch((err) => { console.error(err); });
+
+    const playbyplayJsonPromises = [];
+    for(const playbyplayRes of playbyplaysRes) {
+        const data = playbyplayRes.json();
+        playbyplayJsonPromises.push(data)
+        if (!playbyplayRes.ok) {
+            throw new Error(data);
+        }
+    }
+    const playbyplaysData = await waitForAll(...playbyplayJsonPromises).catch((err) => { console.error(err); });
+
+    let pageCount = playbyplaysData[0].pageCount;
+    if(pageCount > 1) {
+        const pagePromises = [];
+        for(let i = 1; i < pageCount + 1; i++) {
+            pagePromises.push(fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/${gameID}/competitions/${gameID}/plays?lang=en&region=us&page=${i}`, {compress: true}));
+        }
+
+        const pagesRes = await waitForAll(...pagePromises).catch((err) => { console.error(err); });
+
+        const pageJsonPromises = [];
+        for(const pageRes of pagesRes) {
+            const data = pageRes.json();
+            pageJsonPromises.push(data)
+            if (!pageRes.ok) {
+                throw new Error(data);
+            }
+        }
+        const pagesData = await waitForAll(...pageJsonPromises).catch((err) => { console.error(err); });
+        fullPlayByPlay = pagesData;
+    } else {
+        fullPlayByPlay = playbyplaysData;
+    }
+
+    let page = "test";
+
+    return fullPlayByPlay;
+}
+
 export const getNflScoreboard = async () => {
 	if(get(scoreboardStore).nflWeek) {
 		return get(scoreboardStore);
@@ -17,6 +64,7 @@ export const getNflScoreboard = async () => {
     // http://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/competitors/22/statistics?lang=en&region=us GAME STATS
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436?lang=en&region=us GAME
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2021/types/2/weeks ALL WEEKS
+
     const scoreboardPromises = [];
     scoreboardPromises.push(fetch(`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard`, {compress: true}));
 
@@ -40,19 +88,7 @@ export const getNflScoreboard = async () => {
         }
         return sleeperID;
     }
-    // const getKickoff = (date) => {
-    //     const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    //     let now = new Date();
-    //     let today = days[now.getDay()];
-    //     let todayDate = now.getDate();
 
-    //     let calYear = date.slice(0, 4);
-    //     let calMonth = date.slice(5, 7);
-    //     let calDay = date.slice(8, 10);
-    //     let time = date.slice(11, 16);
-    // }
-    // let testdate = "2021-10-29T00:20Z";
-    // let test = getKickoff(testdate);
     const nflGames = scoreboardsData[0].events;
     let gameInfo = {};
 
