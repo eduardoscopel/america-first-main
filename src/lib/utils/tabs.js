@@ -12,6 +12,11 @@ export const tabs = [
         dest: '/matchups',
     },
     {
+        icon: 'article',
+        label: 'Game Center',
+        dest: '/gamecenter',
+    },
+    {
         icon: 'swap_horiz',
         label: 'Trades & Waivers',
         dest: '/transactions',

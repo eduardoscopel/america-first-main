@@ -17,6 +17,8 @@ import { predictScores } from './helperFunctions/predictOptimalScore';
 import { getBrackets } from './helperFunctions/leagueBrackets';
 import { getBlogPosts } from './helperFunctions/getBlogPosts';
 import { getLeagueStandings } from './helperFunctions/leagueStandings';
+import { getNflScoreboard } from './helperFunctions/gameCenter';
+import { nflTeams } from './NFLinfo';
 
 export {
     enableBlog,
@@ -49,6 +51,8 @@ export {
     getBlogPosts,
     predictScores,
     getLeagueStandings,
+    getNflScoreboard,
+    nflTeams,
     getAuthor,
     parseDate,
     getAvatar,
