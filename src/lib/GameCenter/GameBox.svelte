@@ -3,9 +3,9 @@
 
     export let nflMatchups, leagueData, fantasyStarters, managerInfo, playersInfo, gameSelection;
 
-    // http://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/situation?lang=en&region=us CURRENT DOWN
-    // http://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/plays?lang=en&region=us PLAY BY PLAY
-    // http://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/competitors/22/statistics?lang=en&region=us GAME STATS
+    // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/situation?lang=en&region=us CURRENT DOWN
+    // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/plays?lang=en&region=us PLAY BY PLAY
+    // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/competitors/22/statistics?lang=en&region=us GAME STATS
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436?lang=en&region=us GAME
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2021/types/2/weeks ALL WEEKS
     let startersArray = [];
@@ -73,7 +73,7 @@
                     // loop thru every player involved in play
                     for(const playerKey in play.participants) {
                         // ESPN PBP API includes direct links to player APIs
-                        const espnPlayerLink = play.participants[playerKey].athlete.$ref; 
+                        const espnPlayerLink = 'https' + play.participants[playerKey].athlete.$ref.slice(4); 
                         const playerPromises = [];
                         playerPromises.push(fetch(`${espnPlayerLink}`, {compress: true}));
                         const playersRes = await waitForAll(...playerPromises).catch((err) => { console.error(err); });
