@@ -68,18 +68,20 @@
         width: 97%;
         max-width: 1500px;
         margin: 0 auto 4em;
+        background-color: var(--f3f3f3);
+        display: flex;
+        align-items: baseline;
     }
 
     .scoreboard {
         position: relative;
-        left: 0;
+        display: inline-flex;
+        width: 287px;
+        flex-direction: column;
     }
 
     .gameBox {
-        position: absolute;
         display: inline-flex;
-        left: 20em;
-        top: 0em;
     }
 </style>
 

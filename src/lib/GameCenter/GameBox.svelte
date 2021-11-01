@@ -22,16 +22,19 @@
             const starters = fantasyStarters[recordManID];
 
             for(const starter of starters) {
-                const starterInfo = playersInfo.players[starter];
-                const starterEntry = {
-                    playerID: starter,
-                    owner: managerInfo[recordManID],
-                    fn: starterInfo?.fn || null,
-                    ln: starterInfo?.ln || null,
-                    pos: starterInfo?.pos || null,
-                    t: starterInfo?.t || null,
+                if(starter != '0') {
+                    const starterInfo = playersInfo.players[starter];
+                    const starterEntry = {
+                        playerID: starter,
+                        owner: managerInfo[recordManID],
+                        fn: starterInfo.fn,
+                        ln: starterInfo.ln,
+                        pos: starterInfo.pos,
+                        t: starterInfo.t,
+                        avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                    }
+                    startersArray.push(starterEntry);
                 }
-                startersArray.push(starterEntry);
             }
         }
         // identify NFL teams in the current game
@@ -66,7 +69,7 @@
                     scoreValue,
                     relevantPlayers: [],
                     teamStartPoss: play.start.team?.$ref || null,
-                    teamEndPoss: play?.end.team.$ref || null,
+                    teamEndPoss: play?.end.team?.$ref || null,
                 }
                 // some "plays" in API don't have participants (ex. coin-toss)
                 if(play.participants) {
@@ -532,45 +535,104 @@
 <style>
     .bigBox {
         position: relative;
+        display: inline-flex;
+        flex-direction: column;
         z-index: auto;
         margin: 0.5em 0;
-        width: 966px;
-        height: 666px;
+        width: auto;
+        height: 130.7em;
 		background-color: var(--f3f3f3);
         overflow-y: auto;
-        box-shadow: 0px 3px 3px -2px var(--boxShadowOne), 0px 3px 4px 0px var(--boxShadowTwo), 0px 1px 8px 0px var(--boxShadowThree);
     }
 
     .playContainer {
-        display: inline-flexbox;
-        width: 100%;
-        padding: 2px;
-        justify-content: space-evenly;
-        align-content: center;
+        width: 99%;
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #222;
+        margin: 0.2em;
+        border-radius: 1em;
+    }
+
+    .playMainRow {
+        display: inline-flex;
+        background-color: var(--f3f3f3);
+        position: relative;
+        padding: 0.5em;
+        margin: 0.2em;
+        border-radius: 0.8em;
+        font-size: 1.1em;
+        font-weight: 420;
+        width: 97%;
+        align-items: center;
+        justify-content: center;
     }
 
     .pointsPositive {
         display: inline-flex;
-        color: green;
+        align-items: center;
+        color: #0d6c0d;
+        position: relative;
+        padding: 0.5em 0 0.5em 0.5em;
+        font-size: 1.1em;
+        font-weight: 420;
     }
 
     .pointsNegative {
         display: inline-flex;
-        color: darkred;
+        align-items: center;
+        color: #740404;
+        position: relative;
+        padding: 0.5em 0 0.5em 0.5em;
+        font-size: 1.1em;
+        font-weight: 420;
+    }
+
+    .managerContainer {
+        width: 76%;
+        justify-content: flex-end;
+        display: inline-flex;
     }
 
     .manager {
         display: inline-flex;
         width: auto;
+        color: #ededed;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .playerAvatar {
+        display: inline-flex;
+        position: relative;
+        align-items: center;
+        width: 3.8em;
+        margin: 0 0.5em;
         justify-content: center;
+        height: fit-content;
+        background-color: var(--f3f3f3);
+    }
+
+    .playerName {
+        display: inline-flex;
+        align-items: center;
+        width: 12em;
+        color: #ededed;
+        justify-content: left;
         align-content: center;
     }
 
     .description {
         display: flex;
         width: 66em;
+        font-size: 0.85em;
+        font-weight: 600;
+        color: #b7b7b7;
         justify-content: center;
         align-content: center;
+        padding: 0 1em;
     }
 
 </style>
@@ -582,11 +644,19 @@
             {#each fantasyProducts as play}
                 {#if play.fpts != 0}
                     <div class="playContainer">
-                        <div class="{play.fpts > 0 ? "pointsPositive" : "pointsNegative"}">
-                            {round(play.fpts)}
-                        </div>
-                        <div class="manager">
-                            {play.manager.name}
+                        <div class="playMainRow">
+                            <div class="{play.fpts > 0 ? "pointsPositive" : "pointsNegative"}">
+                                {#if play.fpts > 0}
+                                    +{round(play.fpts)}
+                                {:else}
+                                    {round(play.fpts)}
+                                {/if}
+                            </div>
+                            <img class="playerAvatar" src="{play.playerInfo ? play.playerInfo.avatar : "https://sleepercdn.com/images/v2/icons/player_default.webp"}" alt="{play.playerInfo ? play.playerInfo.ln : "Player"}">
+                            <div class="playerName">{play.playerInfo ? (play.playerInfo.pos == "DEF" ? play.playerInfo.t : play.playerInfo.fn + ' ' + play.playerInfo.ln) : null}</div>
+                            <div class="managerContainer">
+                                <div class="manager">{play.manager.name}</div>
+                            </div>
                         </div>
                         <div class="description">
                             {play.description}

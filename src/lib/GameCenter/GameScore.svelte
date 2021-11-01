@@ -112,6 +112,7 @@
         display: inherit;
         position: relative;
         z-index: auto;
+        color: #ededed;
         font-weight: 600;
         font-size: 1.1em;
         padding: 0 0 0 0.2em;

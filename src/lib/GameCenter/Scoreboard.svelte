@@ -21,8 +21,10 @@
 <style>
     .scoresHolder {
         position: relative;
+        display: inline-flex;
+        flex-direction: column;
         padding: 10px;
-        z-index: 1;
+        z-index: auto;
         width: 267px;
         min-height: 100%;
         background-color: var(--fff);
