@@ -44,9 +44,6 @@ export const getPlayByPlay = async (gameID) => {
     } else {
         fullPlayByPlay = playbyplaysData;
     }
-
-    let page = "test";
-
     return fullPlayByPlay;
 }
 

@@ -1,5 +1,5 @@
 <script>
-    import { getNflScoreboard, managers } from '$lib/utils/helper'; 
+    import { getNflScoreboard, managers, nflTeams } from '$lib/utils/helper'; 
     import Scoreboard from './Scoreboard.svelte';
     import GameBox from './GameBox.svelte';
 
@@ -7,9 +7,11 @@
     export let leagueData, rosterData, users, playersInfo, nflWeek, matchupsInfo;
 
     let gameSelection = nflWeek.nflWeek[0][0].gameID;
+    let nflMatchups = nflWeek.nflWeek;
+    let week = nflWeek.week;
+
     let leagueManagers = {};
     const year = parseInt(leagueData.season);
-
     for(const managerID in managers) {
 		const manager = managers[managerID];
 
@@ -27,8 +29,9 @@
 		leagueManagers[manager.roster].push(entryMan);
 	}
 
-    let fantasyStarters = {};
     const managerInfo = {};
+    let fantasyStarters = {};
+    let weekMatchups = matchupsInfo.matchupWeeks[matchupsInfo.week - 1].matchups;
     for(const key in rosterData.rosters) {
         const roster = rosterData.rosters[key];
         const rosterID = roster.roster_id;
@@ -51,11 +54,16 @@
             };
         }
 
-        fantasyStarters[recordManID] = roster.starters;
+        for(const matchup in weekMatchups) {
+            const match = weekMatchups[matchup];
+            for(const managerKey in match) {
+                const managerWeek = match[managerKey];
+                if(managerWeek.recordManID == recordManID) {
+                    fantasyStarters[recordManID] = managerWeek.starters;
+                }
+            }
+        }
     }
-
-    let nflMatchups = nflWeek.nflWeek;
-    let week = nflWeek.week;
 
 </script>
 
@@ -91,7 +99,7 @@
             <Scoreboard {nflMatchups} {week} bind:gameSelection={gameSelection} />
         </div>
         <div class="gameBox">
-            <GameBox {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} {managerInfo} bind:gameSelection={gameSelection} />
+            <GameBox {nflTeams} {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} {managerInfo} bind:gameSelection={gameSelection} />
         </div>
     </div>
 </div>

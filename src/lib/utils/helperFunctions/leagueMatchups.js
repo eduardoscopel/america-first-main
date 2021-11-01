@@ -1,5 +1,5 @@
 import { getLeagueData } from "./leagueData"
-import { leagueID } from '$lib/utils/leagueInfo';
+import { leagueID, managers } from '$lib/utils/leagueInfo';
 import { getNflState } from "./nflState"
 import { getLeagueRosters } from "./leagueRosters"
 import { getLeagueUsers } from "./leagueUsers"
@@ -30,6 +30,25 @@ export const getLeagueMatchups = async () => {
 
 	const rosters = rosterRes.rosters;
 
+	let yearManagers = {};
+    const yearP = parseInt(year);
+    for(const managerID in managers) {
+		const manager = managers[managerID];
+
+		const entryMan = {
+			managerID: manager.managerID,
+			rosterID: manager.roster,
+			name: manager.name,
+			status: manager.status,
+			yearsactive: manager.yearsactive,
+		}
+
+		if(!yearManagers[manager.roster] && manager.yearsactive.includes(yearP)) {
+			yearManagers[manager.roster] = [];
+			yearManagers[manager.roster].push(entryMan);
+		}
+	}
+
 	// pull in all matchup data for the season
 	const matchupsPromises = [];
 	for(let i = 1; i < leagueData.settings.playoff_week_start; i++) {
@@ -51,7 +70,7 @@ export const getLeagueMatchups = async () => {
 	const matchupWeeks = [];
 	// process all the matchups
 	for(let i = 1; i < matchupsData.length + 1; i++) {
-		const processed = processMatchups(matchupsData[i - 1], rosters, users, i);
+		const processed = processMatchups(matchupsData[i - 1], yearManagers, rosters, users, i);
 		if(processed) {
 			matchupWeeks.push({
 				matchups: processed.matchups,
@@ -72,7 +91,7 @@ export const getLeagueMatchups = async () => {
 	return matchupsResponse;
 }
 
-const processMatchups = (inputMatchups, rosters, users, week) => {
+const processMatchups = (inputMatchups, yearManagers, rosters, users, week) => {
 	if(!inputMatchups || inputMatchups.length == 0) {
 		return false;
 	}
@@ -82,11 +101,15 @@ const processMatchups = (inputMatchups, rosters, users, week) => {
 			matchups[match.matchup_id] = [];
 		}
 		let user = users[rosters[match.roster_id - 1].owner_id];
+		let recordManager = yearManagers[match.roster_id];
+		let recordManID = recordManager[0].managerID;
 		matchups[match.matchup_id].push({
 			manager: {
 				name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
 				avatar: `https://sleepercdn.com/avatars/thumbs/${user.avatar}`,
+				realname: recordManager[0].name,
 			},
+			recordManID,
 			starters: match.starters,
 			points: match.starters_points,
 		})
