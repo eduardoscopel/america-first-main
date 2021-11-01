@@ -1,39 +1,31 @@
 <script>
-    import { getPlayByPlay, waitForAll } from '$lib/utils/helper'; 
+    import { getPlayByPlay, waitForAll, round } from '$lib/utils/helper'; 
 
-    export let nflMatchups, leagueData, fantasyStarters, playersInfo, gameSelection;
-
-    let gamePlayByPlay;
-    let fantasyPlayByPlay;
+    export let nflMatchups, leagueData, fantasyStarters, managerInfo, playersInfo, gameSelection;
 
     // http://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/situation?lang=en&region=us CURRENT DOWN
     // http://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/plays?lang=en&region=us PLAY BY PLAY
     // http://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/competitors/22/statistics?lang=en&region=us GAME STATS
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436?lang=en&region=us GAME
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2021/types/2/weeks ALL WEEKS
-    
-    const loadPlayByPlay = async (gameSelection, gamePlayByPlay) => {
-        const playByPlayData = await getPlayByPlay(gameSelection).catch((err) => { console.error(err); });
-        gamePlayByPlay = playByPlayData;
+    let startersArray = [];
+    let fantasyPlays;
 
-        getRelevantPlays(gamePlayByPlay, gameSelection);
-    }
-
-    $: loadPlayByPlay(gameSelection, gamePlayByPlay);
-
-    const getRelevantPlays = async (gamePlayByPlay, gameSelection) => {
+    const loadPlayByPlay = async (gameSelection, startersArray) => {
+        let playByPlayData = await getPlayByPlay(gameSelection, true).catch((err) => { console.error(err); });
         // set key to number of API pages for the full PBP
-        let recencyKey = gamePlayByPlay.length;
-        const fantasyRelevantPlays = [];
+        let recencyKey = playByPlayData.length;
+        let fantasyRelevantPlays = [];
         // startersArray will help us match our sleeper playerInfo to espn player APIs, and also check if someone is starting one of the DEFs
-        let startersArray = [];
+        startersArray = [];
         for(const recordManID in fantasyStarters) {
             const starters = fantasyStarters[recordManID];
+
             for(const starter of starters) {
                 const starterInfo = playersInfo.players[starter];
                 const starterEntry = {
                     playerID: starter,
-                    owner: recordManID,
+                    owner: managerInfo[recordManID],
                     fn: starterInfo?.fn || null,
                     ln: starterInfo?.ln || null,
                     pos: starterInfo?.pos || null,
@@ -49,7 +41,7 @@
 
         // work backwards from most recent PBP page
         for(let i = recencyKey; i > 0; i--) {
-            let playsData = gamePlayByPlay[i - 1].items;
+            let playsData = playByPlayData[i - 1].items;
             // work backwards from most recent play
             for(let p = playsData.length; p > 0; p--) {
                 let play = playsData[p - 1];
@@ -129,12 +121,9 @@
                 }
             }
         }
-
-        fantasyPlayByPlay = fantasyRelevantPlays;
-        getFantasyPoints(fantasyRelevantPlays, startersArray);
-    }
-    // now that we've filtered our relevant plays, we calculate the fpts each produced
-    const getFantasyPoints = (fantasyRelevantPlays, startersArray) => {
+        
+        // now that we've filtered our relevant plays, we calculate the fpts each produced
+        let fantasyProducts = [];
         const score = leagueData.scoring_settings;
         // const espnScoringIDs = {        // currently only used for reference while coding - 
         //     2: 'end period',               these specific IDs make it easier to isolate 
@@ -158,7 +147,6 @@
         //     75: '2-min warning',
         // }
 
-        let fantasyProducts = [];
         for(const playKey in fantasyRelevantPlays) {
             const play = fantasyRelevantPlays[playKey];
 
@@ -172,6 +160,7 @@
                         stat: ['fum'],
                         fpts,
                         yards: player.yards,
+                        description: play.description,
                     }                   
                     if(play.teamStartPoss != play.teamEndPoss && score.fum_lost) {      // PENALTY for FUMBLE -> TURNOVER
                         entry.fpts += score.fum_lost;                                   // note that it's not necessarily one or the other
@@ -179,8 +168,8 @@
                     }
                     fantasyProducts.push(entry);
                 } else if(player.statType == 'recoverer'
-                          && player.playType != '9' 
-                          && play.teamStartPoss != play.teamEndPoss) {   
+                        && player.playType != '9' 
+                        && play.teamStartPoss != play.teamEndPoss) {   
                             if(startersArray.filter(s => s.playerID == player.playerInfo.t).length > 0) {                    // FUMBLE RECOVERY PTS - TEAM DEF
                                 const defense = startersArray.filter(s => s.playerID == player.playerInfo.t)[0];
                                 const fpts = (score?.fum_rec || 0);            // NOTE TO-DO: Must distinguish b/t def & st recoveries; also IDP 
@@ -189,6 +178,7 @@
                                     playerInfo: defense.playerInfo,
                                     stat: ['fum_rec'],
                                     fpts,
+                                    description: play.description,
                                 }   
                                 fantasyProducts.push(entryDEF);
                             }
@@ -198,6 +188,7 @@
                                     playerInfo: player.playerInfo,
                                     stat: ['idp_fum_rec'],
                                     fpts: score.idp_fum_rec,
+                                    description: play.description,
                                 }
                                 fantasyProducts.push(entryIDP);
                             }
@@ -209,11 +200,12 @@
                         playerInfo: defense.playerInfo,
                         stat: ['ff'],
                         fpts,
+                        description: play.description,
                     }
                     fantasyProducts.push(entryDEF);
                 } else if(player.statType == 'forcedBy' // TO-DO make sure ALL potential fpts-scoring plays are calculated - we'll filter out the ones the leaague doesn't count later
-                          && player.playType != '53' // no kickoffs or punts (TO-DO: field goals)
-                          && player.playType != '52') {  
+                        && player.playType != '53' // no kickoffs or punts (TO-DO: field goals)
+                        && player.playType != '52') {  
                             if(player.playType == '9') {                        // FUMBLE FORCED PTS - IDP
                                 const fpts = (score?.idp_ff || 0);            
                                 const entryIDP = {
@@ -221,6 +213,7 @@
                                     playerInfo: player.playerInfo,
                                     stat: ['idp_ff'],
                                     fpts,
+                                    description: play.description,
                                 }
                                 fantasyProducts.push(entryIDP);
                             }  
@@ -233,6 +226,7 @@
                         stat: ['rush_yd', 'rush_att'],
                         fpts,
                         yards: player.yards,
+                        description: play.description,
                     }
                     if(player.yards >= 40 && score.rush_40p) {          // RUSH YD BONUS
                         entry.fpts += score.rush_40p;
@@ -247,6 +241,7 @@
                         stat: ['rush_yd', 'rush_att', 'rush_td'],
                         fpts,
                         yards: player.yards,
+                        description: play.description,
                     }
                     if(40 <= player.yards < 50 && score.rush_td_40p) {          // RUSH TD YD BONUS
                         entry.fpts += score.rush_td_40p;
@@ -264,6 +259,7 @@
                             playerInfo: player.playerInfo,
                             stat: ['pass_int', 'pass_att'],
                             fpts,
+                            description: play.description,
                         }  
                         fantasyProducts.push(entry);
                     } 
@@ -276,6 +272,7 @@
                             stat: ['int', 'int_ret_yd'],
                             fpts,
                             yards: player.yards,
+                            description: play.description,
                         }
                         fantasyProducts.push(entryDEF);
                     }             
@@ -289,6 +286,7 @@
                             stat: ['def_td', 'int', 'int_ret_yd'],
                             fpts,
                             yards: player.yards,
+                            description: play.description,
                         }
                         fantasyProducts.push(entryDEF);
                     }    
@@ -300,6 +298,7 @@
                             stat: ['idp_int', 'idp_def_td', 'idp_int_ret_yd'],
                             fpts,
                             yards: player.yards,
+                            description: play.description,
                         }
                         if(player.yards >= 50 && score.bonus_def_int_td_50p) {                  // P6 IDP YD BONUS
                             entryIDP.fpts += score.bonus_def_int_td_50p;
@@ -314,6 +313,7 @@
                             playerInfo: player.playerInfo,
                             stat: ['pass_int', 'pass_inc', 'pass_int_td', 'pass_att'],
                             fpts,
+                            description: play.description,
                         }  
                         fantasyProducts.push(entry);
                     } 
@@ -326,6 +326,7 @@
                             stat: ['pass_yd', 'pass_att', 'pass_cmp'],
                             fpts,
                             yards: player.yards,
+                            description: play.description,
                         }      
                         if(player.yards >= 40 && score.pass_cmp_40p) {          // PASS YD BONUS
                             entry.fpts += score.pass_cmp_40p;
@@ -340,6 +341,7 @@
                             stat: ['rec_yd', 'rec'],
                             fpts,
                             yards: player.yards,
+                            description: play.description,
                         }
                         if(0 < player.yards < 5 && score.rec_0_4) {     // RECEPTION YD BONUS
                             entry.fpts += score.rec_0_4;
@@ -381,6 +383,7 @@
                             stat: ['pass_yd', 'pass_td', 'pass_cmp', 'pass_att'],
                             fpts,
                             yards: player.yards,
+                            description: play.description,
                         }
                         if(40 <= player.yards < 50 && score.pass_td_40p) {          // PASSING TD YD BONUS
                             entry.fpts += score.pass_td_40p;
@@ -398,6 +401,7 @@
                             stat: ['rec_yd', 'rec_td', 'rec'],
                             fpts,
                             yards: player.yards,
+                            description: play.description,
                         }
                         if(40 <= player.yards < 50 && score.rec_td_40p) {          // RECEIVING TD YD BONUS
                             entry.fpts += score.rec_td_40p;
@@ -415,6 +419,7 @@
                         playerInfo: player.playerInfo,
                         stat: ['pass_inc', 'pass_att'],
                         fpts,
+                        description: play.description,
                     }
                     fantasyProducts.push(entry);
                 } else if(player.playType == '7') {         // SACK - QB
@@ -425,6 +430,7 @@
                             playerInfo: player.playerInfo,
                             stat: ['pass_sack'],
                             fpts,
+                            description: play.description,
                         }
                         fantasyProducts.push(entry);
                     }
@@ -437,6 +443,7 @@
                             stat: ['sack', 'sack_yd'],
                             fpts,
                             yards: player.yards,
+                            description: play.description,
                         }
                         fantasyProducts.push(entryDEF);
                     }
@@ -448,6 +455,7 @@
                         stat: ['fgm', 'fgm_yds'],
                         fpts,
                         yards: player.yards,
+                        description: play.description,
                     }
                     if(0 < player.yards < 20 && score.fgm_0_19) {           // FG YD BONUS
                         entry.fpts += score.fgm_0_19;
@@ -482,6 +490,7 @@
                                     playerInfo: player.playerInfo,
                                     stat: ['xpmiss'],
                                     fpts,
+                                    description: play.description,
                                 }   
                                 fantasyProducts.push(entry);                                                                                    
                 } else if(player.playType == '12') {
@@ -494,6 +503,7 @@
                             stat: ['def_kr_yd'],
                             fpts,
                             yards: player.yards,
+                            description: play.description,
                         }
                         fantasyProducts.push(entryDEF);
                     }
@@ -505,16 +515,18 @@
                             stat: ['kr_yd'],
                             fpts,
                             yards: player.yards,
+                            description: play.description,
                         }
                         fantasyProducts.push(entry);
                     }
                 }                         
             }
         }
-        return fantasyProducts;
+        fantasyPlays = fantasyProducts;
+        return fantasyProducts; 
     }
-    $: test = getFantasyPoints();
-    let tess = "ao";
+    $: fantasyProducts = loadPlayByPlay(gameSelection, startersArray);
+
 </script>
 
 <style>
@@ -525,8 +537,63 @@
         width: 966px;
         height: 666px;
 		background-color: var(--f3f3f3);
+        overflow-y: auto;
         box-shadow: 0px 3px 3px -2px var(--boxShadowOne), 0px 3px 4px 0px var(--boxShadowTwo), 0px 1px 8px 0px var(--boxShadowThree);
     }
+
+    .playContainer {
+        display: inline-flexbox;
+        width: 100%;
+        padding: 2px;
+        justify-content: space-evenly;
+        align-content: center;
+    }
+
+    .pointsPositive {
+        display: inline-flex;
+        color: green;
+    }
+
+    .pointsNegative {
+        display: inline-flex;
+        color: darkred;
+    }
+
+    .manager {
+        display: inline-flex;
+        width: auto;
+        justify-content: center;
+        align-content: center;
+    }
+
+    .description {
+        display: flex;
+        width: 66em;
+        justify-content: center;
+        align-content: center;
+    }
+
 </style>
 
-<div class="bigBox">{gameSelection}</div>
+    <div class="bigBox">
+        {#await fantasyProducts}
+            Just wait...
+        {:then fantasyProducts}
+            {#each fantasyProducts as play}
+                {#if play.fpts != 0}
+                    <div class="playContainer">
+                        <div class="{play.fpts > 0 ? "pointsPositive" : "pointsNegative"}">
+                            {round(play.fpts)}
+                        </div>
+                        <div class="manager">
+                            {play.manager.name}
+                        </div>
+                        <div class="description">
+                            {play.description}
+                        </div>
+                    </div>
+                {/if}
+            {/each}
+        {/await}
+            
+    </div>
