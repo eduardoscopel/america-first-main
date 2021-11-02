@@ -7,8 +7,22 @@
     let kickoffDay;
     let kickoffTime;
 
+    let quarterSuper;
+    if(home.status.period == 1) {
+        quarterSuper = 'st';
+    } else if(home.status.period == 2) {
+        quarterSuper = 'nd';
+    } else if(home.status.period == 3) {
+        quarterSuper = 'rd';
+    } else if(home.status.period == 4) {
+        quarterSuper = 'th';
+    } else {
+        quarterSuper = null;
+    }
+
     let gameStatus = {
         quarter: home.status.period,
+        quarterSuper,
         clock: home.status.displayClock,
     }
 
@@ -103,13 +117,13 @@
     }
 
     .teamLogo {
-        display: inline-block;
+        display: inline-flex;
         max-width: 40px;
         padding: 0 1em 0 0;
     }
 
     .teamAbbrev {
-        display: inherit;
+        display: inline-flex;
         position: relative;
         z-index: auto;
         color: #ededed;
@@ -118,14 +132,25 @@
         padding: 0 0 0 0.2em;
     }
 
-    .teamScore {
-        color: #999;
+    .teamScoreContainer {
         display: inline-flex;
         position: absolute;
         z-index: auto;
+        left: 7.7em;
+        width: 2em;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .teamScore {
+        color: #999;
+        display: inline-flex;
+        position: relative;
+        z-index: auto;
         font-weight: 500;
         font-size: 1.05em;
-        padding: 0 0 0 7em;
+        align-items: center;
+        justify-content: center;
     }
 
     :global(.scoresBlock:hover) {
@@ -135,22 +160,24 @@
 
     .gameComplete {
         display: inline-flex;
-        position: absolute;
+        position: relative;
         align-items: center;
-        padding: 7.75em 0 0 2em;
         font-size: 1.05em;
         justify-content: center;
+        color: #ededed;
+        top: 1.25em;
     }
 
     .gameStatusWrapper {
-        display: flex;
+        display: inline-flex;
+        flex-direction: column;
         position: absolute;
         z-index: auto;
-        padding: 0 0 0 11.75em;
-        line-height: 1em;
         align-items: center;
         justify-content: center;
-        top: 0em;
+        top: 1.75em;
+        right: 0.6em;
+        width: 6.5em;
     }
 
     .gameStatusPeriod {
@@ -160,19 +187,18 @@
         font-size: 1.05em;
         align-content: center;
         justify-content: center;
-        padding: 1.75em 0 0 0;
+        color: #ededed;
     }
 
     .gameStatusClock {
         display: inline-flex;
-        position: absolute;
+        position: relative;
         z-index: auto;
         font-size: 1.05em;
         align-content: center;
         justify-content: center;
-        padding: 7.75em 0 0 0;
-        width: 5em;
-        left: 9.75em;
+        top: 1.25em;
+        color: #ededed;
     }
 </style>
 
@@ -180,18 +206,22 @@
     <div class="teamsBlock">
         <img class="teamLogo" src="https://sleepercdn.com/images/team_logos/nfl/{home.sleeperID.toLowerCase()}.png" alt="{home.sleeperID}"/>
         <div class="teamAbbrev">{home.sleeperID}</div>
-        <div class="teamScore">{home.score}</div>
+        <div class="teamScoreContainer">
+            <div class="teamScore">{home.score}</div>
+        </div>
     </div>
     <br>
     <div class="teamsBlock">
         <img class="teamLogo" src="https://sleepercdn.com/images/team_logos/nfl/{away.sleeperID.toLowerCase()}.png" alt="{away.sleeperID}"/>
         <div class="teamAbbrev">{away.sleeperID}</div>
-        <div class="teamScore">{away.score}</div>
+        <div class="teamScoreContainer">
+            <div class="teamScore">{away.score}</div>
+        </div>
     </div>
     <div class="gameStatusWrapper">
         {#if !isComplete}
             <div class="gameStatusPeriod">
-                {gameStatus.quarter}
+                {gameStatus.quarter}{gameStatus.quarterSuper}
             </div>
             <div class="gameStatusClock">
                 {gameStatus.clock}

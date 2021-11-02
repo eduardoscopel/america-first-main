@@ -92,7 +92,12 @@
                             }
                         }
                         const espnPlayerData = await waitForAll(...playerJsonPromises).catch((err) => { console.error(err); });
-                        const espnPlayerTeamID = espnPlayerData[0].team.$ref.slice(82, 84);
+                        let espnPlayerTeamID
+                        if(espnPlayerData[0].team.$ref.slice(82, 84)[1] != '?') {
+                            espnPlayerTeamID = espnPlayerData[0].team.$ref.slice(82, 84);
+                        } else {
+                            espnPlayerTeamID = espnPlayerData[0].team.$ref.slice(82, 83);
+                        }
                         let playerTeam;
                         for(const key in nflTeams) {
                             if(nflTeams[key].espnID == espnPlayerTeamID) {
@@ -130,12 +135,14 @@
                           startersArray.filter(s => s.playerID == away).length > 0)
                           && (play.type.id == 7 || play.type.id == 9 || play.type.id == 26 ||
                               play.type.id == 36 || play.type.id == 52 || play.type.id == 53 ||
-                              play.teamStartPoss != play.teamEndPoss)
+                              play.type.id == 32 || play.teamStartPoss != play.teamEndPoss ||
+                              (play.type.id == 60 && play.alternativeText.includes('BLOCKED')))
                           && play.participants[playerKey].type != 'passer'
                           && play.participants[playerKey].type != 'receiver'
                           && play.participants[playerKey].type != 'rusher'
                           && play.participants[playerKey].type != 'punter') {
-                            if (startersArray.filter(s => s.playerID == home).length > 0 && playerTeam == home) {
+                            if(startersArray.filter(s => s.playerID == home).length > 0
+                               && (playerTeam == home || ((play.type.id == 60 && play.alternativeText.includes('BLOCKED')) && playerTeam == away))) {
                                 const defense = startersArray.filter(s => s.playerID == home)[0];
                                 const relevantEntry = {
                                     playerInfo: defense,
@@ -146,17 +153,18 @@
                                     oppDef: away,
                                 }
                                 playEntry.relevantDEF.push(relevantEntry);
-                            } else if(startersArray.filter(s => s.playerID == away).length > 0 && playerTeam == away) {
-                                const defense = startersArray.filter(s => s.playerID == away)[0];
-                                const relevantEntry = {
-                                    playerInfo: defense,
-                                    manager: defense.owner,
-                                    statType: play.participants[playerKey].type,
-                                    yards: play.statYardage, 
-                                    playType: play.type.id,
-                                    oppDef: home,
-                                }
-                                playEntry.relevantDEF.push(relevantEntry);
+                            } else if(startersArray.filter(s => s.playerID == away).length > 0 
+                                      && (playerTeam == away || ((play.type.id == 60 && play.alternativeText.includes('BLOCKED')) && playerTeam == home))) {
+                                        const defense = startersArray.filter(s => s.playerID == away)[0];
+                                        const relevantEntry = {
+                                            playerInfo: defense,
+                                            manager: defense.owner,
+                                            statType: play.participants[playerKey].type,
+                                            yards: play.statYardage, 
+                                            playType: play.type.id,
+                                            oppDef: home,
+                                        }
+                                        playEntry.relevantDEF.push(relevantEntry);
                             }
                         }
                     }
@@ -182,10 +190,12 @@
         //     21: 'timeout',
         //     24: 'completed pass',
         //     26: 'interception',
+        //     32: 'kick six'
         //     36: 'pick six',
         //     52: 'punt',
         //     53: 'kickoff',
         //     59: 'FG good',
+        //     60: 'FG miss'
         //     66: 'end game',
         //     67: 'pass TD', 
         //     68: 'rush TD',
@@ -196,13 +206,13 @@
         for(const playKey in fantasyRelevantPlays) {
             const play = fantasyRelevantPlays[playKey];
 
-            if(play.relevantDEF.length > 0) {                   // TEAM DEF
+            if(play.relevantDEF.length > 0) {                   // TEAM DEF/ST FPTS
                 for(const relevantKey in play.relevantDEF) {
                     const player = play.relevantDEF[relevantKey];
                     if(player.statType == 'recoverer'
-                       && player.playType != '9'
+                       && player.playType != 9
                        && play.teamStartPoss != play.teamEndPoss) {                    // FUMBLE RECOVERY PTS - TEAM DEF
-                            const fpts = (score?.fum_rec || 0);            // NOTE TO-DO: Must distinguish b/t def & st recoveries; also IDP 
+                            const fpts = (score?.fum_rec || 0);            // NOTE TO-DO: Must distinguish b/t def & st recoveries
                             const entryDEF = {
                                 side: 'defense',
                                 manager: player.manager,
@@ -238,7 +248,7 @@
                         }
                         fantasyProducts.push(entryDEF);
                     }
-                    if(player.playType == '26' && player.statType == 'returner') {            // INT TEAM DEF
+                    if(player.playType == 26 && player.statType == 'returner') {            // INT TEAM DEF
                         const fpts = (score?.int || 0) + player.yards * (score?.int_ret_yd || 0);
                         const entryDEF = {
                             side: 'defense',
@@ -251,7 +261,7 @@
                         }
                         fantasyProducts.push(entryDEF);
                     } 
-                    if(player.playType == '36' && player.statType == 'scorer') {        // P6 TEAM DEF
+                    if(player.playType == 36 && player.statType == 'scorer') {        // P6 TEAM DEF
                         const fpts = (score?.def_td || 0) + (score?.int || 0) + player.yards * (score?.int_ret_yd || 0);
                         const entryDEF = {
                             side: 'defense',
@@ -264,7 +274,7 @@
                         }
                         fantasyProducts.push(entryDEF);
                     }   
-                    if(player.playType == '53' && player.statType == 'returner') {                  // KICKOFF RETURN YDS TEAM DEF/ST
+                    if(player.playType == 53 && player.statType == 'returner') {                  // KICKOFF RETURN YDS TEAM DEF/ST
                         const fpts = player.yards * (score?.def_kr_yd || 0);
                         const entryDEF = {
                             side: 'defense',
@@ -277,13 +287,39 @@
                         }
                         fantasyProducts.push(entryDEF);
                     }      
-                    if(player.playType == '52' && player.statType == 'returner') {                  // PUNT - TEAM DEF/ST
+                    if(player.playType == 52 && player.statType == 'returner') {                  // PUNT - TEAM DEF/ST
                         const fpts = player.yards * (score?.def_pr_yd || 0) + (score?.def_forced_punts || 0);
                         const entryDEF = {
                             side: 'defense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
-                            stat: ['def_pr_yd', 'def_forced-punt'],
+                            stat: ['def_pr_yd', 'def_forced_punt'],
+                            fpts,
+                            yards: player.yards,
+                            description: play.description,
+                        }
+                        fantasyProducts.push(entryDEF);
+                    }    
+                    if(player.playType == 32 && player.statType == 'returner') {                  // KICK 6 - TEAM DEF/ST
+                        const fpts = player.yards * (score?.def_kr_yd || 0) + (score?.def_st_td || 0);
+                        const entryDEF = {
+                            side: 'defense',
+                            manager: player.manager,
+                            playerInfo: player.playerInfo,
+                            stat: ['def_kr_yd', 'def_st_td'],
+                            fpts,
+                            yards: player.yards,
+                            description: play.description,
+                        }
+                        fantasyProducts.push(entryDEF);
+                    }    
+                    if(player.playType == 60 && play.description.includes('BLOCKED')) {                  // BLOCKED FIELD GOAL - TEAM DEF/ST
+                        const fpts = (score?.blk_kick || 0);   // TO-DO: add blk kick return yards (ESPN's statYardage norrmally represents kick distance)
+                        const entryDEF = {
+                            side: 'defense',
+                            manager: player.manager,
+                            playerInfo: player.playerInfo,
+                            stat: ['blk_kick'],
                             fpts,
                             yards: player.yards,
                             description: play.description,
@@ -293,7 +329,7 @@
                 }
             }
 
-            if(play.relevantPlayers.length > 0) {
+            if(play.relevantPlayers.length > 0) {                   // OFFENSIVE & IDP FPTS 
                 for(const relevantKey in play.relevantPlayers) {
                     const player = play.relevantPlayers[relevantKey];       // NOTE TO-DO: ACCOUNT FOR PENALTIES (unclear how/when penalties screw with ESPN's yardage value)
                     if(player.statType == 'fumbler') {                  // FUMBLE 
@@ -313,7 +349,7 @@
                         }
                         fantasyProducts.push(entry);
                     } else if(player.statType == 'recoverer'
-                            && player.playType != '9' 
+                            && player.playType != 9 
                             && play.teamStartPoss != play.teamEndPoss) {   
                                 if(score.idp_fum_rec) {                                 // FUMBLE RECOVERY IDP
                                     const entryIDP = {
@@ -327,9 +363,9 @@
                                     fantasyProducts.push(entryIDP);
                                 }
                     } else if(player.statType == 'forcedBy' // TO-DO make sure ALL potential fpts-scoring plays are calculated - we'll filter out the ones the leaague doesn't count later
-                            && player.playType != '53' // no kickoffs or punts (TO-DO: field goals)
-                            && player.playType != '52') {  
-                                if(player.playType == '9') {                        // FUMBLE FORCED PTS - IDP
+                            && player.playType != 53 // no kickoffs or punts (TO-DO: field goals)
+                            && player.playType != 52) {  
+                                if(player.playType == 9) {                        // FUMBLE FORCED PTS - IDP
                                     const fpts = (score?.idp_ff || 0);            
                                     const entryIDP = {
                                         side: 'defense',
@@ -342,7 +378,7 @@
                                     fantasyProducts.push(entryIDP);
                                 }  
                     }
-                    if(player.playType == '5' && player.statType == 'rusher') {         // RUSH
+                    if(player.playType == 5 && player.statType == 'rusher') {         // RUSH
                         const fpts = player.yards * (score?.rush_yd || 0) + (score?.rush_att || 0);
                         const entry = {
                             side: 'offense',
@@ -358,7 +394,7 @@
                             entry.stat.push('rush_40p');
                         }
                         fantasyProducts.push(entry);
-                    } else if(player.playType == '68' && player.statType == 'rusher') {            // RUSH TD  NOTE TO-DO: ACCOUNT FOR LATERALS (SAME WITH REC TDs)
+                    } else if(player.playType == 68 && player.statType == 'rusher') {            // RUSH TD  NOTE TO-DO: ACCOUNT FOR LATERALS (SAME WITH REC TDs)
                         const fpts = player.yards * (score?.rush_yd || 0) + (score?.rush_att || 0) + (score?.rush_td || 0);
                         const entry = {
                             side: 'offense',
@@ -377,7 +413,7 @@
                             entry.stat.push('rush_td_50p');
                         }
                         fantasyProducts.push(entry);
-                    } else if(player.playType == '26') {          // INTERCEPTION
+                    } else if(player.playType == 26) {          // INTERCEPTION
                         if(player.statType == 'passer') {                       // INT QB PENALTY
                             const fpts = (score?.pass_int || 0) + (score?.pass_att || 0);
                             const entry = {
@@ -390,7 +426,7 @@
                             }  
                             fantasyProducts.push(entry);
                         }       
-                    } else if(player.playType == '36') {            // PICK SIX 
+                    } else if(player.playType == 36) {            // PICK SIX 
                         if(player.statType == 'scorer' && (score.idp_int || score.idp_def_td || score.idp_int_ret_yd)) {        // P6 IDP
                             const fpts = (score?.idp_int || 0) + (score?.idp_def_td || 0) + player.yards * (score?.idp_int_ret_yd || 0);
                             const entryIDP = {
@@ -420,7 +456,7 @@
                             }  
                             fantasyProducts.push(entry);
                         } 
-                    } else if(player.playType == '24') {          // COMPLETE PASS
+                    } else if(player.playType == 24) {          // COMPLETE PASS
                         if(player.statType == 'passer') {
                             const fpts = player.yards * (score?.pass_yd || 0) + (score?.pass_att || 0) + (score?.pass_cmp || 0);
                             const entry = {
@@ -479,7 +515,7 @@
                             }
                             fantasyProducts.push(entry);
                         }         
-                    } else if(player.playType == '67') {                         // PASSING TD
+                    } else if(player.playType == 67) {                         // PASSING TD
                         if(player.statType == 'passer') {
                             const fpts = player.yards * (score?.pass_yd || 0) + (score?.pass_td || 0) + (score?.pass_cmp || 0) + (score?.pass_att || 0);
                             const entry = {
@@ -519,7 +555,7 @@
                             }
                             fantasyProducts.push(entry);
                         }
-                    } else if(player.playType == '3' && player.statType == 'passer') {         // INCOMPLETE PASS
+                    } else if(player.playType == 3 && player.statType == 'passer') {         // INCOMPLETE PASS
                         const fpts = (score?.pass_inc || 0) + (score?.pass_att || 0);
                         const entry = {
                             side: 'offense',
@@ -530,7 +566,7 @@
                             description: play.description,
                         }
                         fantasyProducts.push(entry);
-                    } else if(player.playType == '7') {         // SACK - QB
+                    } else if(player.playType == 7) {         // SACK - QB
                         if(player.statType == 'passer' && score.pass_sack) {
                             const fpts = score.pass_sack;
                             const entry = {
@@ -543,7 +579,7 @@
                             }
                             fantasyProducts.push(entry);
                         }
-                    } else if(player.playType == '59' && player.statType == 'kicker') {         // MADE FIELD GOAL
+                    } else if(player.playType == 59 && player.statType == 'kicker') {         // MADE FIELD GOAL
                         const fpts = (score?.fgm || 0) + player.yards * (score?.fgm_yds || 0);
                         const entry = {
                             side: 'offense',
@@ -575,9 +611,36 @@
                                 entry.fpts += score.fgm_50p;
                                 entry.stat.push(score.fgm_50p);
                             } 
-                        }   // TO-DO (maybe) NOTE: ADD IF OTHER KINDS OF TOUCHDOWNS  ALSO NOT SURE IF THIS WORKS             //  MISSED EXTRA POINT
+                        }        
                         fantasyProducts.push(entry);
-                    } else if(((player.playType == '68' || player.playType == '67') || play.scoringType == 'touchdown') 
+                    } else if(player.playType == 60 && player.statType == 'kicker') {           // MISSED FIELD GOAL
+                        const fpts = (score?.fgmiss || 0);
+                        const entry = {
+                            side: 'offense',
+                            manager: player.manager,
+                            playerInfo: player.playerInfo,
+                            stat: ['fgmiss'],
+                            fpts,
+                            yards: player.yards,
+                            description: play.description,
+                        }   
+                        if(0 < player.yards < 20 && score.fgmiss_0_19) {           // MISSED FG YD PENALTY
+                            entry.fpts += score.fgmiss_0_19;
+                            entry.stat.push(score.fgmiss_0_19);
+                        } else if(19 < player.yards < 30 && score.fgmiss_20_29) {
+                            entry.fpts += score.fgmiss_20_29;
+                            entry.stat.push(score.fgmiss_20_29);     
+                        } else if(29 < player.yards < 40 && score.fgmiss_30_39) {
+                            entry.fpts += score.fgmiss_30_39;
+                            entry.stat.push(score.fgmiss_30_39); 
+                        } else if(39 < player.yards < 50 && score.fgmiss_40_49) {
+                            entry.fpts += score.fgmiss_40_49;
+                            entry.stat.push(score.fgmiss_40_49);    
+                        } else if(player.yards >= 50 && score.fgmiss_50p) {
+                            entry.fpts += score.fgmiss_50p;
+                            entry.stat.push(score.fgmiss_50p);  
+                        }                                                         // TO-DO (maybe) NOTE: ADD IF OTHER KINDS OF TOUCHDOWNS  ALSO NOT SURE IF THIS WORKS       
+                    } else if(((player.playType == 68 || player.playType == 67) || play.scoringType == 'touchdown') // MISSED PAT
                                 && play.scoreValue == 6 
                                 && player.statType == 'patScorer'
                                 && score.xpmiss) {
@@ -591,7 +654,7 @@
                                         description: play.description,
                                     }   
                                     fantasyProducts.push(entry);                                                                                    
-                    } else if(player.playType == '12') {
+                    } else if(player.playType == 12) {
                         if(player.statType == 'returner') {
                             const fpts = player.yards * (score?.kr_yd || 0);
                             const entry = {
