@@ -776,7 +776,7 @@
     .playerName {
         display: inline-flex;
         align-items: center;
-        width: 12em;
+        width: 15em;
         color: #ededed;
         justify-content: left;
         align-content: center;

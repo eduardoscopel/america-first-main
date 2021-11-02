@@ -96,6 +96,16 @@
 </script>
 
 <style>
+    .showSelected {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 1100px;
+        min-height: 100%;
+		background-color: var(--f3f3f3);
+        padding: 0 0.5em;
+    }
+
     .scoresBlock {
         position: relative;
         z-index: auto;
@@ -104,14 +114,12 @@
         max-width: 1100px;
         min-height: 100%;
 		background-color: var(--f3f3f3);
-		box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 40%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 8px 0px rgb(0 0 0 / 24%);
     }
 
     .teamsBlock {
         display: inline-flex;
         position: relative;
         z-index: auto;
-        background-color: var(--f3f3f3);
         padding: 0.7em;
         align-items: center;
     }
@@ -155,7 +163,7 @@
 
     :global(.scoresBlock:hover) {
         cursor: pointer;
-        opacity: 1;
+        background-color: #181818;
     }
 
     .gameComplete {
@@ -201,35 +209,36 @@
         color: #ededed;
     }
 </style>
-
-<div class="scoresBlock" on:click={() => changeGameSelection(gameID)}>
-    <div class="teamsBlock">
-        <img class="teamLogo" src="https://sleepercdn.com/images/team_logos/nfl/{home.sleeperID.toLowerCase()}.png" alt="{home.sleeperID}"/>
-        <div class="teamAbbrev">{home.sleeperID}</div>
-        <div class="teamScoreContainer">
-            <div class="teamScore">{home.score}</div>
+<div class="showSelected" style="{gameSelection == gameID ? "background-color: #222222" : null}">
+    <div class="scoresBlock" on:click={() => changeGameSelection(gameID)}>
+        <div class="teamsBlock">
+            <img class="teamLogo" src="https://sleepercdn.com/images/team_logos/nfl/{home.sleeperID.toLowerCase()}.png" alt="{home.sleeperID}"/>
+            <div class="teamAbbrev">{home.sleeperID}</div>
+            <div class="teamScoreContainer">
+                <div class="teamScore">{home.score}</div>
+            </div>
         </div>
-    </div>
-    <br>
-    <div class="teamsBlock">
-        <img class="teamLogo" src="https://sleepercdn.com/images/team_logos/nfl/{away.sleeperID.toLowerCase()}.png" alt="{away.sleeperID}"/>
-        <div class="teamAbbrev">{away.sleeperID}</div>
-        <div class="teamScoreContainer">
-            <div class="teamScore">{away.score}</div>
+        <br>
+        <div class="teamsBlock">
+            <img class="teamLogo" src="https://sleepercdn.com/images/team_logos/nfl/{away.sleeperID.toLowerCase()}.png" alt="{away.sleeperID}"/>
+            <div class="teamAbbrev">{away.sleeperID}</div>
+            <div class="teamScoreContainer">
+                <div class="teamScore">{away.score}</div>
+            </div>
         </div>
-    </div>
-    <div class="gameStatusWrapper">
-        {#if !isComplete}
-            <div class="gameStatusPeriod">
-                {gameStatus.quarter}{gameStatus.quarterSuper}
-            </div>
-            <div class="gameStatusClock">
-                {gameStatus.clock}
-            </div>
-        {:else}
-            <div class="gameComplete">
-                Final
-            </div>
-        {/if}
+        <div class="gameStatusWrapper">
+            {#if !isComplete}
+                <div class="gameStatusPeriod">
+                    {gameStatus.quarter}{gameStatus.quarterSuper}
+                </div>
+                <div class="gameStatusClock">
+                    {gameStatus.clock}
+                </div>
+            {:else}
+                <div class="gameComplete">
+                    Final
+                </div>
+            {/if}
+        </div>
     </div>
 </div>
