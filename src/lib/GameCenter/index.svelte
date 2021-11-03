@@ -1,6 +1,7 @@
 <script>
     import { getNflScoreboard, managers, nflTeams } from '$lib/utils/helper'; 
     import Scoreboard from './Scoreboard.svelte';
+    import PlayByPlay from './PlayByPlay.svelte';
     import GameBox from './GameBox.svelte';
 
 
@@ -88,10 +89,24 @@
         flex-direction: column;
     }
 
+    .centerWrapper {
+        display: inline-flex;
+        flex-direction: column;
+        position:relative;
+        left: 1em;
+        width: 63%;
+    }
+
     .gameBox {
         display: inline-flex;
         position: relative;
-        left: 1em;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .playByPlay {
+        display: inline-flex;
+        position: relative;
     }
 </style>
 
@@ -100,8 +115,13 @@
         <div class="scoreboard">
             <Scoreboard {nflMatchups} {week} bind:gameSelection={gameSelection} />
         </div>
-        <div class="gameBox">
-            <GameBox {nflTeams} {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} {managerInfo} bind:gameSelection={gameSelection} />
+        <div class="centerWrapper">
+            <div class="gameBox">
+                <GameBox {nflTeams} {nflMatchups} {playersInfo} {fantasyStarters} {managerInfo} bind:gameSelection={gameSelection} />
+            </div>
+            <div class="playByPlay">
+                <PlayByPlay {nflTeams} {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} {managerInfo} bind:gameSelection={gameSelection} />
+            </div>
         </div>
     </div>
 </div>
