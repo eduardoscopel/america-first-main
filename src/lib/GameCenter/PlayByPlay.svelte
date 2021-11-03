@@ -1011,7 +1011,7 @@
         z-index: auto;
         margin: 0.5em 0;
         width: auto;
-        height: 130.7em;
+        height: 79em;
 		background-color: var(--f3f3f3);
         overflow-y: auto;
     }

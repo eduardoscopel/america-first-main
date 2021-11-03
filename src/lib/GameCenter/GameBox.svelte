@@ -5,6 +5,7 @@
         let game = nflMatchups.filter(m => m[0].gameID == gameSelection)[0];
         let home = game[0].sleeperID;
         let away = game[1].sleeperID;
+        changePlayer('flush');
         return {home, away};
     }
     $: game = displayGame(gameSelection);
@@ -24,6 +25,7 @@
                         pos: starterInfo.pos,
                         t: starterInfo.t,
                         avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                        teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t.toLowerCase()}.png`,
                     }
                     if(!gameStarters[recordManID]) {
                         gameStarters[recordManID] = [];
@@ -56,11 +58,15 @@
     $: gameManagers = displayManagers(gameStarters);
 
     let viewPlayer;
-    const changePlayer = (playerID) => {
-        for(const recordManID in gameStarters) {
+    export const changePlayer = (playerID) => {
+        if(playerID == 'flush') {
+            viewPlayer = null;
+        } else {
+            for(const recordManID in gameStarters) {
             if(gameStarters[recordManID].find(s => s.playerID == playerID)) {
                 viewPlayer = gameStarters[recordManID].find(s => s.playerID == playerID);
             }
+        }
         }
         return viewPlayer;
     }
@@ -90,6 +96,58 @@
         border-radius: 1em;
         background-color: var(--f3f3f3);
         right: -6em;
+        padding: 0.2em;
+    }
+
+    .viewPlayerBlock {
+        position: relative;
+        display: inline-flex;
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .viewPlayerProfile {
+        position: relative;
+        display: inline-flex;
+        height: 64px;
+    }
+
+    .viewPlayerInfo {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        height: 64px;
+    }
+
+    .viewPlayerName {
+        position: relative;
+        display: inline-flex;
+        top: 0.4em;
+        font-size: 1.2em;
+        width: 9em;
+        justify-content: flex-start;
+    }
+
+    .viewPlayerAvatar {
+        display: inline-flex;
+        position: relative;
+        align-items: center;
+        width: auto;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .viewDefenseAvatar {
+        display: inline-flex;
+        position: relative;
+        align-items: center;
+        width: auto;
+        justify-content: center;
+        height: 100%;
+        margin: 0 1.04em;
+        top: 0.2em;
     }
 
     .gameManagers {
@@ -202,6 +260,78 @@
         height: 100%;
         padding: 0.75em;
     }
+
+    .pos {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 8px;
+        max-width: 30px;
+        min-width: 30px;
+		height: 30px;
+        position: relative;
+        top: 0.2em;
+	}
+
+    .t {
+        display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 8px;
+        max-width: 30px;
+        min-width: 30px;
+		height: 30px;
+        position: relative;
+        top: 0.2em;
+    }
+
+    .QB {
+		background-color: var(--QB);
+	}
+
+	.WR {
+		background-color: var(--WR);
+	}
+
+	.RB {
+		background-color: var(--RB);
+	}
+
+	.TE {
+		background-color: var(--TE);
+	}
+
+	.FLEX {
+		background: linear-gradient(to right, var(--WR), var(--WR) 33.33%, var(--RB) 33.33%, var(--RB) 66.66%, var(--TE) 66.66%);
+	}
+
+	.WRRB {
+		background: linear-gradient(to right, var(--WR), var(--WR) 50%, var(--RB) 50%);
+	}
+
+	.K {
+		background-color: var(--K);
+	}
+
+	.DEF {
+		background-color: var(--DEF);
+	}
+
+    .DL, .DE, .DT {
+        background-color: var(--DL);
+    }
+
+    .LB {
+        background-color: var(--LB);
+    }
+
+    .DB, .CB, .SS, .FS {
+        background-color: var(--DB);
+    }
+
+    .IDP {
+        background: linear-gradient(to right, var(--DL), var(--DL) 33.33%, var(--LB) 33.33%, var(--LB) 66.66%, var(--DB) 66.66%);
+    }
 </style>
 
 <div class="bigBox">
@@ -211,15 +341,15 @@
             {#each gameManagers as manager}
                 <div class="managerBlock">
                     <div class="managerInfo">
-                        <img class="managerAvatar" src="{manager.info.avatar}" alt="avatar">
+                        <img class="managerAvatar" src="{manager.info.avatar}" alt="">
                         <div class="managerName">{manager.info.name}</div>
                     </div>
                     <div class="managerStarters">
                         {#each manager.starters as starter}
                             {#if starter.playerID == game.home || starter.playerID == game.away}
-                                <img class="defenseAvatar" src="{starter.avatar}" alt="starter" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
+                                <img class="defenseAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
                             {:else}
-                                <img class="playerAvatar" src="{starter.avatar}" alt="starter" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
+                                <img class="playerAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
                             {/if}
                         {/each}
                     </div>
@@ -228,6 +358,20 @@
         </div>
     </div>
     <div class="viewPlayer">
-        {viewPlayer?.avatar || ''} {viewPlayer?.fn || ''} {viewPlayer?.ln || ''}
+        <div class="viewPlayerBlock">
+            <div class="viewPlayerProfile">
+                {#if viewPlayer?.pos != 'DEF'}
+                    <img class="viewPlayerAvatar" src="{viewPlayer?.avatar}" alt="">
+                    <div class="viewPlayerName">{viewPlayer?.fn || ''} {viewPlayer?.ln || ''}</div>
+                {:else}
+                    <img class="viewDefenseAvatar" src="{viewPlayer?.avatar}" alt="">
+                    <div class="viewPlayerName">{viewPlayer?.ln + ' Defense' || ''}</div>  
+                {/if}
+            </div>
+            <div class="viewPlayerInfo">
+                <img class="t" src="{viewPlayer?.teamAvatar || ''}" alt="">
+                <div class="pos {viewPlayer?.pos}">{viewPlayer?.pos || ''}</div>
+            </div>
+        </div>
     </div>
 </div>
