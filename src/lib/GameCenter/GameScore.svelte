@@ -89,6 +89,7 @@
         kickoffTime = timezoneShift(timezone, timeUnshifted);
 
         gameStatus.quarter = kickoffDay;
+        gameStatus.quarterSuper = '';
         gameStatus.clock = kickoffTime;
     }
 
@@ -114,6 +115,11 @@
         max-width: 1100px;
         min-height: 100%;
 		background-color: var(--f3f3f3);
+    }
+
+    :global(.scoresBlock:hover) {
+        cursor: pointer;
+        background-color: #181818;
     }
 
     .teamsBlock {
@@ -161,11 +167,6 @@
         justify-content: center;
     }
 
-    :global(.scoresBlock:hover) {
-        cursor: pointer;
-        background-color: #181818;
-    }
-
     .gameComplete {
         display: inline-flex;
         position: relative;
@@ -210,7 +211,7 @@
     }
 </style>
 <div class="showSelected" style="{gameSelection == gameID ? "background-color: #222222" : null}">
-    <div class="scoresBlock" on:click={() => changeGameSelection(gameID)}>
+    <div class="scoresBlock" on:click={() => changeGameSelection(gameID)} style="{gameSelection == gameID ? "background-color: #181818" : null}">
         <div class="teamsBlock">
             <img class="teamLogo" src="https://sleepercdn.com/images/team_logos/nfl/{home.sleeperID.toLowerCase()}.png" alt="{home.sleeperID}"/>
             <div class="teamAbbrev">{home.sleeperID}</div>

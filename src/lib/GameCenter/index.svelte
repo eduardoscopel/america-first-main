@@ -90,6 +90,8 @@
 
     .gameBox {
         display: inline-flex;
+        position: relative;
+        left: 1em;
     }
 </style>
 
