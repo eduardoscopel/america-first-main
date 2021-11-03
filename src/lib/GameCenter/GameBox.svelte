@@ -9,16 +9,10 @@
     }
     $: game = displayGame(gameSelection);
 
-    const displayManagers = (game) => {
-        let gameManagers = [];
-        const gameManager = {};
-        // let game = nflMatchups.filter(m => m[0].gameID == gameSelection)[0];
-        // let home = game[0].sleeperID;
-        // let away = game[1].sleeperID;
-
+    const findStarters = (game) => {
+        const gameStarters = {};
         for(const recordManID in fantasyStarters) {
             const starters = fantasyStarters[recordManID];
-            let gameStarters = [];
             for(const starter of starters) {
                 const starterInfo = playersInfo.players[starter];
                 if(starter != '0' && (starterInfo.t == game.home || starterInfo.t == game.away)) {
@@ -31,14 +25,27 @@
                         t: starterInfo.t,
                         avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                     }
-                    gameStarters.push(starterEntry);
+                    if(!gameStarters[recordManID]) {
+                        gameStarters[recordManID] = [];
+                    }
+                    gameStarters[recordManID].push(starterEntry);
                 }
             }
-            if(gameStarters.length > 0) {
+        }
+        return gameStarters;
+    }
+    $: gameStarters = findStarters(game);
+
+    const displayManagers = (gameStarters) => {
+        let gameManagers = [];
+        const gameManager = {};
+
+        for(const recordManID in gameStarters) {
+            if(gameStarters[recordManID].length > 0) {
                 if(!gameManager[recordManID]){
                     gameManager[recordManID] = {
                         info: managerInfo[recordManID],
-                        starters: gameStarters,
+                        starters: gameStarters[recordManID],
                     }
                 }
                 gameManagers.push(gameManager[recordManID]);
@@ -46,7 +53,17 @@
         }
         return gameManagers;
     }
-    $: gameManagers = displayManagers(game);
+    $: gameManagers = displayManagers(gameStarters);
+
+    let viewPlayer;
+    const changePlayer = (playerID) => {
+        for(const recordManID in gameStarters) {
+            if(gameStarters[recordManID].find(s => s.playerID == playerID)) {
+                viewPlayer = gameStarters[recordManID].find(s => s.playerID == playerID);
+            }
+        }
+        return viewPlayer;
+    }
 
 </script>
 
@@ -200,9 +217,9 @@
                     <div class="managerStarters">
                         {#each manager.starters as starter}
                             {#if starter.playerID == game.home || starter.playerID == game.away}
-                                <img class="defenseAvatar" src="{starter.avatar}" alt="starter">
+                                <img class="defenseAvatar" src="{starter.avatar}" alt="starter" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
                             {:else}
-                                <img class="playerAvatar" src="{starter.avatar}" alt="starter">
+                                <img class="playerAvatar" src="{starter.avatar}" alt="starter" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
                             {/if}
                         {/each}
                     </div>
@@ -211,6 +228,6 @@
         </div>
     </div>
     <div class="viewPlayer">
-
+        {viewPlayer?.avatar || ''} {viewPlayer?.fn || ''} {viewPlayer?.ln || ''}
     </div>
 </div>
