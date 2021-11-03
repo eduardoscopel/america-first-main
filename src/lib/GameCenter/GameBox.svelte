@@ -1,5 +1,9 @@
 <script>
-    export let nflTeams, nflMatchups, playersInfo, fantasyStarters, managerInfo, gameSelection;
+    import {round} from '$lib/utils/helper'; 
+
+    export let nflTeams, nflMatchups, leagueData, playersInfo, fantasyStarters, managerInfo, fantasyProducts, gameSelection;
+    
+    const score = leagueData.scoring_settings;
 
     const displayGame = (gameSelection) => {
         let game = nflMatchups.filter(m => m[0].gameID == gameSelection)[0];
@@ -63,14 +67,96 @@
             viewPlayer = null;
         } else {
             for(const recordManID in gameStarters) {
-            if(gameStarters[recordManID].find(s => s.playerID == playerID)) {
-                viewPlayer = gameStarters[recordManID].find(s => s.playerID == playerID);
+                if(gameStarters[recordManID].find(s => s.playerID == playerID)) {
+                    viewPlayer = gameStarters[recordManID].find(s => s.playerID == playerID);
+                }
             }
         }
-        }
+        getDisplayStats(viewPlayer);
         return viewPlayer;
     }
+    const getDisplayStats = async (viewPlayer) => {
+        let newFantasyProducts = await fantasyProducts;
+        const viewPlayerStats = {};
+        let recordedStats = [];
+        if(newFantasyProducts.length > 0) {
+            for(const products of newFantasyProducts) {
+                for(const play of products) {
+                    if(play.playerInfo.playerID == viewPlayer.playerID) {
+                        if(!viewPlayerStats[viewPlayer.playerID]) {
+                            viewPlayerStats[viewPlayer.playerID] = {
+                                fpts: play.fpts,
+                                stats: [],
+                            }
+                        } else {
+                            viewPlayerStats[viewPlayer.playerID].fpts += play.fpts;
+                        }
+                        for(const stat of play.stat) {
+                            if(!recordedStats.includes(stat)) {
+                                recordedStats.push(stat);
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            displayStats = null;
+        }
+        
+        if(viewPlayer.pos == 'DEF') {               // TEAM DEF/ST
+            for(const stat of recordedStats) {
+                if(!stat.includes('idp') && !stat.includes('pass') && !stat.includes('rush') && !stat.includes('xp') && !stat.includes('fgm')) {
+                    if((stat.startsWith('yds_allow') || stat == 'def_kr_yd' || stat == 'def_pr_yd') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Yds Alw:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('Yds Alw:');
+                    } else if(stat.startsWith('pts_allow') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Pts Alw:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('Pts Alw:');
+                    } else if(stat == 'int' && !viewPlayerStats[viewPlayer.playerID].stats.includes('INT:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('INTs');
+                    } else if(stat == 'int_ret_yd' && !viewPlayerStats[viewPlayer.playerID].stats.includes('INT Yds:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('INT Yds:');
+                    } else if((stat == 'sack' || stat == 'bonus_sack_2p') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Sack:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('Sacks:');
+                    } else if(stat == 'sack_yd' && !viewPlayerStats[viewPlayer.playerID].stats.includes('Sack Yds:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('Sack Yds:');
+                    } else if((stat == 'ff' || stat == 'def_st_ff') && !viewPlayerStats[viewPlayer.playerID].stats.includes('FF:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('FF:');
+                    } else if(stat == 'def_st_ff' && !viewPlayerStats[viewPlayer.playerID].stats.includes('Pts Allowed:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('Pts Allowed:');
+                    } else if(stat == 'blk_kick' && !viewPlayerStats[viewPlayer.playerID].stats.includes('Blk Kick:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('Blk Kick:');
+                    } else if(stat == 'def_pass_def' && !viewPlayerStats[viewPlayer.playerID].stats.includes('Pass D:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('Pass D:');
+                    } else if((stat == 'def_st_fum_rec' || stat == 'fum_rec') && !viewPlayerStats[viewPlayer.playerID].stats.includes('FR:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('FR:');
+                    } else if((stat == 'def_td' || stat == 'def_st_td' || stat == 'fum_rec_td' || stat.startsWith('def_bonus')) && !viewPlayerStats[viewPlayer.playerID].stats.includes('TD:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('TD:');
+                    } else if(stat == 'def_forced_punts' && !viewPlayerStats[viewPlayer.playerID].stats.includes('PNT:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('PNT:');
+                    } else if(stat == 'def_4_and_stop' && !viewPlayerStats[viewPlayer.playerID].stats.includes('4D:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('4D:');
+                    } else if(stat == 'def_3_and_out' && !viewPlayerStats[viewPlayer.playerID].stats.includes('3&O:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('3&O:');
+                    } else if(stat == 'safe' && !viewPlayerStats[viewPlayer.playerID].stats.includes('SFTY:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('SFTY:');
+                    } else if(stat == 'def_2pt' && !viewPlayerStats[viewPlayer.playerID].stats.includes('2PTR:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('2PTR:');
+                    } else if((stat == 'blk_kick_ret_yd' || stat == 'fg_ret_yd' || stat == 'fum_ret_yd') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Ret Yds:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('Ret Yds:');
+                    } else if(stat.includes('tkl') && stat != 'bonus_tkl_10p' && !viewPlayerStats[viewPlayer.playerID].stats.includes('TKL:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('TKL:');
+                    } else if(stat == 'qb_hit' && !viewPlayerStats[viewPlayer.playerID].stats.includes('QBH:')) {
+                        viewPlayerStats[viewPlayer.playerID].stats.push('QBH:');
+                    }
+                }
+            }
+        }
 
+        let displayStats = [];
+        displayStats.push(viewPlayerStats[viewPlayer.playerID]);
+
+        return displayStats;
+    }
+    $: displayStats = getDisplayStats(viewPlayer);
 </script>
 
 <style>
@@ -88,6 +174,40 @@
         padding: 0.5em;
     }
 
+    .fptsContainer {
+        position: relative;
+        display: inline-flex;
+        border-radius: 1em;
+        height: 64px;
+        width: 64px;
+        border: 0.25px solid #777;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.2em;
+        font-weight: 600;
+        color: #ededed;
+    }
+
+    .statsContainer {
+        position: relative;
+        display: inline-flex;
+        flex-wrap: wrap;
+        flex-direction: column;
+        justify-content: space-around;
+        align-content: space-around;
+        align-items: flex-end;
+        color: #ededed;
+        left: 0.5em;
+        font-size: 0.88em;
+        font-weight: 420;
+    }
+
+    .stat {
+        position: relative;
+        display: inline-flex;
+        color: #ededed;
+    }
+
     .viewPlayer {
         position: relative;
         display: inline-flex;
@@ -103,7 +223,24 @@
         position: relative;
         display: inline-flex;
         align-items: flex-start;
+        flex-direction: column;
         width: 100%;
+    }
+
+    .viewPlayerTop {
+        position: relative;
+        display: inline-flex;
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .viewPlayerBottom {
+        position: relative;
+        display: inline-flex;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+        padding: 0 0.8em;
     }
 
     .viewPlayerProfile {
@@ -128,6 +265,7 @@
         font-size: 1.2em;
         width: 9em;
         justify-content: flex-start;
+        color: #ededed;
     }
 
     .viewPlayerAvatar {
@@ -359,19 +497,41 @@
     </div>
     <div class="viewPlayer">
         <div class="viewPlayerBlock">
-            <div class="viewPlayerProfile">
-                {#if viewPlayer?.pos != 'DEF'}
-                    <img class="viewPlayerAvatar" src="{viewPlayer?.avatar}" alt="">
-                    <div class="viewPlayerName">{viewPlayer?.fn || ''} {viewPlayer?.ln || ''}</div>
-                {:else}
-                    <img class="viewDefenseAvatar" src="{viewPlayer?.avatar}" alt="">
-                    <div class="viewPlayerName">{viewPlayer?.ln + ' Defense' || ''}</div>  
-                {/if}
+            <div class="viewPlayerTop">
+                <div class="viewPlayerProfile">
+                    {#if viewPlayer?.pos != 'DEF'}
+                        <img class="viewPlayerAvatar" src="{viewPlayer?.avatar}" alt="">
+                        <div class="viewPlayerName">{viewPlayer?.fn || ''} {viewPlayer?.ln || ''}</div>
+                    {:else}
+                        <img class="viewDefenseAvatar" src="{viewPlayer?.avatar}" alt="">
+                        <div class="viewPlayerName">{viewPlayer?.ln + ' Defense' || ''}</div>  
+                    {/if}
+                </div>
+                <div class="viewPlayerInfo">
+                    <img class="t" src="{viewPlayer?.teamAvatar || ''}" alt="">
+                    <div class="pos {viewPlayer?.pos}">{viewPlayer?.pos || ''}</div>
+                </div>
             </div>
-            <div class="viewPlayerInfo">
-                <img class="t" src="{viewPlayer?.teamAvatar || ''}" alt="">
-                <div class="pos {viewPlayer?.pos}">{viewPlayer?.pos || ''}</div>
-            </div>
+            {#if viewPlayer}
+                <div class="viewPlayerBottom">                       
+                    {#await displayStats}
+                        {''}
+                    {:then displayStats} 
+                        {#if displayStats}
+                            {#each displayStats as player}
+                                <div class="fptsContainer">{round(player.fpts)}</div>
+                                <div class="statsContainer">
+                                    {#each player.stats as statCat}  
+                                        <div class="stat">{statCat}</div>
+                                    {/each}
+                                </div>
+                            {/each}
+                        {:else}
+                            No points yet...
+                        {/if}
+                    {/await}         
+                </div>
+            {/if}
         </div>
     </div>
 </div>

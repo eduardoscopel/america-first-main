@@ -7,6 +7,7 @@
 
     export let leagueData, rosterData, users, playersInfo, nflWeek, matchupsInfo;
 
+    let fantasyProducts = [];
     let gameSelection = nflWeek.nflWeek[0][0].gameID;
     let nflMatchups = nflWeek.nflWeek;
     let week = nflWeek.week;
@@ -117,10 +118,10 @@
         </div>
         <div class="centerWrapper">
             <div class="gameBox">
-                <GameBox {nflTeams} {nflMatchups} {playersInfo} {fantasyStarters} {managerInfo} bind:gameSelection={gameSelection} />
+                <GameBox {nflTeams} {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} {managerInfo} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} />
             </div>
             <div class="playByPlay">
-                <PlayByPlay {nflTeams} {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} {managerInfo} bind:gameSelection={gameSelection} />
+                <PlayByPlay {nflTeams} {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} {managerInfo} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} />
             </div>
         </div>
     </div>

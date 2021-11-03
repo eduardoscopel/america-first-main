@@ -1,7 +1,7 @@
 <script>
     import { getPlayByPlay, waitForAll, round } from '$lib/utils/helper'; 
 
-    export let nflTeams, nflMatchups, leagueData, fantasyStarters, managerInfo, playersInfo, gameSelection;
+    export let nflTeams, nflMatchups, leagueData, fantasyStarters, managerInfo, playersInfo, gameSelection, fantasyProducts;
 
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/situation?lang=en&region=us CURRENT DOWN
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/plays?lang=en&region=us PLAY BY PLAY
