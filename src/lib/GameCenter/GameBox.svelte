@@ -79,7 +79,8 @@
         let newFantasyProducts = await fantasyProducts;
         const viewPlayerStats = {};
         let recordedStats = [];
-        if(newFantasyProducts.length > 0) {
+        let displayStats = [];
+        if(newFantasyProducts.length > 0 && viewPlayer != null) {
             for(const products of newFantasyProducts) {
                 for(const play of products) {
                     if(play.playerInfo.playerID == viewPlayer.playerID) {
@@ -87,6 +88,7 @@
                             viewPlayerStats[viewPlayer.playerID] = {
                                 fpts: play.fpts,
                                 stats: [],
+                                statInfo: {},
                             }
                         } else {
                             viewPlayerStats[viewPlayer.playerID].fpts += play.fpts;
@@ -94,66 +96,107 @@
                         for(const stat of play.stat) {
                             if(!recordedStats.includes(stat)) {
                                 recordedStats.push(stat);
+                                viewPlayerStats[viewPlayer.playerID].statInfo[stat] = {
+                                    stat,
+                                    occurs: 1,
+                                    fpts: play.fpts,
+                                }
+                            } else {
+                                viewPlayerStats[viewPlayer.playerID].statInfo[stat].occurs ++;
+                                viewPlayerStats[viewPlayer.playerID].statInfo[stat].fpts += play.fpts;
                             }
                         }
                     }
                 }
             }
-        } else {
-            displayStats = null;
-        }
-        
-        if(viewPlayer.pos == 'DEF') {               // TEAM DEF/ST
-            for(const stat of recordedStats) {
-                if(!stat.includes('idp') && !stat.includes('pass') && !stat.includes('rush') && !stat.includes('xp') && !stat.includes('fgm')) {
-                    if((stat.startsWith('yds_allow') || stat == 'def_kr_yd' || stat == 'def_pr_yd') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Yds Alw:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('Yds Alw:');
-                    } else if(stat.startsWith('pts_allow') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Pts Alw:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('Pts Alw:');
-                    } else if(stat == 'int' && !viewPlayerStats[viewPlayer.playerID].stats.includes('INT:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('INTs');
-                    } else if(stat == 'int_ret_yd' && !viewPlayerStats[viewPlayer.playerID].stats.includes('INT Yds:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('INT Yds:');
-                    } else if((stat == 'sack' || stat == 'bonus_sack_2p') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Sack:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('Sacks:');
-                    } else if(stat == 'sack_yd' && !viewPlayerStats[viewPlayer.playerID].stats.includes('Sack Yds:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('Sack Yds:');
-                    } else if((stat == 'ff' || stat == 'def_st_ff') && !viewPlayerStats[viewPlayer.playerID].stats.includes('FF:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('FF:');
-                    } else if(stat == 'def_st_ff' && !viewPlayerStats[viewPlayer.playerID].stats.includes('Pts Allowed:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('Pts Allowed:');
-                    } else if(stat == 'blk_kick' && !viewPlayerStats[viewPlayer.playerID].stats.includes('Blk Kick:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('Blk Kick:');
-                    } else if(stat == 'def_pass_def' && !viewPlayerStats[viewPlayer.playerID].stats.includes('Pass D:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('Pass D:');
-                    } else if((stat == 'def_st_fum_rec' || stat == 'fum_rec') && !viewPlayerStats[viewPlayer.playerID].stats.includes('FR:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('FR:');
-                    } else if((stat == 'def_td' || stat == 'def_st_td' || stat == 'fum_rec_td' || stat.startsWith('def_bonus')) && !viewPlayerStats[viewPlayer.playerID].stats.includes('TD:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('TD:');
-                    } else if(stat == 'def_forced_punts' && !viewPlayerStats[viewPlayer.playerID].stats.includes('PNT:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('PNT:');
-                    } else if(stat == 'def_4_and_stop' && !viewPlayerStats[viewPlayer.playerID].stats.includes('4D:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('4D:');
-                    } else if(stat == 'def_3_and_out' && !viewPlayerStats[viewPlayer.playerID].stats.includes('3&O:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('3&O:');
-                    } else if(stat == 'safe' && !viewPlayerStats[viewPlayer.playerID].stats.includes('SFTY:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('SFTY:');
-                    } else if(stat == 'def_2pt' && !viewPlayerStats[viewPlayer.playerID].stats.includes('2PTR:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('2PTR:');
-                    } else if((stat == 'blk_kick_ret_yd' || stat == 'fg_ret_yd' || stat == 'fum_ret_yd') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Ret Yds:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('Ret Yds:');
-                    } else if(stat.includes('tkl') && stat != 'bonus_tkl_10p' && !viewPlayerStats[viewPlayer.playerID].stats.includes('TKL:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('TKL:');
-                    } else if(stat == 'qb_hit' && !viewPlayerStats[viewPlayer.playerID].stats.includes('QBH:')) {
-                        viewPlayerStats[viewPlayer.playerID].stats.push('QBH:');
+
+            if(viewPlayer.pos == 'DEF') {               // TEAM DEF/ST
+                for(const stat of recordedStats) {
+                    if(!stat.includes('idp') && !stat.includes('pass') && !stat.includes('rush') && !stat.includes('xp') && !stat.includes('fgm')) {
+                        if((stat.startsWith('yds_allow') || stat == 'def_kr_yd' || stat == 'def_pr_yd') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Yds Alw:')) {
+                            const statCat = 'Yds Alw:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('Yds Alw:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat]; 
+                        } else if(stat.startsWith('pts_allow') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Pts Alw:')) {
+                            const statCat = 'Pts Alw:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('Pts Alw:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat]; 
+                        } else if(stat == 'int' && !viewPlayerStats[viewPlayer.playerID].stats.includes('INT:')) {
+                            const statCat = 'INT:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('INTs');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat]; 
+                        } else if(stat == 'int_ret_yd' && !viewPlayerStats[viewPlayer.playerID].stats.includes('INT Yds:')) {
+                            const statCat = 'INT Yds:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('INT Yds:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if((stat == 'sack' || stat == 'bonus_sack_2p') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Sack:')) {
+                            const statCat = 'Sack:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('Sacks:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if(stat == 'sack_yd' && !viewPlayerStats[viewPlayer.playerID].stats.includes('Sack Yds:')) {
+                            const statCat = 'Sack Yds:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('Sack Yds:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if((stat == 'ff' || stat == 'def_st_ff') && !viewPlayerStats[viewPlayer.playerID].stats.includes('FF:')) {
+                            const statCat = 'FF:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('FF:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if(stat == 'blk_kick' && !viewPlayerStats[viewPlayer.playerID].stats.includes('Blk Kick:')) {
+                            const statCat = 'Blk Kick:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('Blk Kick:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if(stat == 'def_pass_def' && !viewPlayerStats[viewPlayer.playerID].stats.includes('Pass D:')) {
+                            const statCat = 'Pass D:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('Pass D:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if((stat == 'def_st_fum_rec' || stat == 'fum_rec') && !viewPlayerStats[viewPlayer.playerID].stats.includes('FR:')) {
+                            const statCat = 'FR:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('FR:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if((stat == 'def_td' || stat == 'def_st_td' || stat == 'fum_rec_td' || stat.startsWith('def_bonus')) && !viewPlayerStats[viewPlayer.playerID].stats.includes('TD:')) {
+                            const statCat = 'TD:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('TD:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if(stat == 'def_forced_punts' && !viewPlayerStats[viewPlayer.playerID].stats.includes('PNT:')) {
+                            const statCat = 'PNT:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('PNT:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if(stat == 'def_4_and_stop' && !viewPlayerStats[viewPlayer.playerID].stats.includes('4D:')) {
+                            const statCat = '4D:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('4D:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if(stat == 'def_3_and_out' && !viewPlayerStats[viewPlayer.playerID].stats.includes('3&O:')) {
+                            const statCat = '3&O:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('3&O:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if(stat == 'safe' && !viewPlayerStats[viewPlayer.playerID].stats.includes('SFTY:')) {
+                            const statCat = 'SFTY:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('SFTY:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if(stat == 'def_2pt' && !viewPlayerStats[viewPlayer.playerID].stats.includes('2PTR:')) {
+                            const statCat = '2PTR:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('2PTR:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if((stat == 'blk_kick_ret_yd' || stat == 'fg_ret_yd' || stat == 'fum_ret_yd') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Ret Yds:')) {
+                            const statCat = 'Ret Yds:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('Ret Yds:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if(stat.includes('tkl') && stat != 'bonus_tkl_10p' && !viewPlayerStats[viewPlayer.playerID].stats.includes('TKL:')) {
+                            const statCat = 'TKL:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('TKL:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        } else if(stat == 'qb_hit' && !viewPlayerStats[viewPlayer.playerID].stats.includes('QBH:')) {
+                            const statCat = 'QBH:';
+                            viewPlayerStats[viewPlayer.playerID].stats.push('QBH:');
+                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
+                        }
                     }
                 }
             }
+            displayStats.push(viewPlayerStats[viewPlayer.playerID]);
+        } else {
+            displayStats = null;
         }
-
-        let displayStats = [];
-        displayStats.push(viewPlayerStats[viewPlayer.playerID]);
-
         return displayStats;
     }
     $: displayStats = getDisplayStats(viewPlayer);
@@ -522,7 +565,7 @@
                                 <div class="fptsContainer">{round(player.fpts)}</div>
                                 <div class="statsContainer">
                                     {#each player.stats as statCat}  
-                                        <div class="stat">{statCat}</div>
+                                        <div class="stat">{statCat} {round(player.statInfo[statCat].fpts)}</div>
                                     {/each}
                                 </div>
                             {/each}

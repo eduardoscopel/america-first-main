@@ -960,39 +960,65 @@
             }
             fantasyProducts.push(fantasyPlay[play.playID]);
         }
-        // if DEF started, push entry for their starting points
+        // if DEF started, push entry for their starting points (pts/yds separated for later tallying)
         if(startersArray.filter(s => s.playerID == home).length > 0 || startersArray.filter(s => s.playerID == away).length > 0) {
             if(startersArray.filter(s => s.playerID == home).length > 0) {
-                const fpts = (score?.pts_allow_0 || 0) + (score?.yds_allow_0_100 || 0);
+                const fptsPTS = (score?.pts_allow_0 || 0);
+                const fptsYDS = (score?.yds_allow_0_100 || 0);
                 const team = startersArray.filter(s => s.playerID == home)[0];
-                const entryDEF = {
+                const entryDEFpts = {
                     side: 'defense',
                     manager: team.owner,
                     playerInfo: team,
-                    stat: ['pts_allow_0', 'yds_allow_0_100'],
-                    fpts,
-                    description: 'GAME BEGINS - DEF has allowed 0 points, 0 yards',
-                    shortDesc: 'DEF Starting',
+                    stat: ['pts_allow_0'],
+                    fpts: fptsPTS,
+                    description: 'GAME BEGINS - DEF has allowed 0 points',
+                    shortDesc: 'Points Allowed (0)',
+                }   
+                const entryDEFyds = {
+                    side: 'defense',
+                    manager: team.owner,
+                    playerInfo: team,
+                    stat: ['yds_allow_0_100'],
+                    fpts: fptsYDS,
+                    description: 'GAME BEGINS - DEF has allowed 0 yards',
+                    shortDesc: 'Yards Allowed (0)',
                 }   
                 fantasyPlay[9999999] = [];
-                fantasyPlay[9999999].push(entryDEF);
+                fantasyPlay[9999999].push(entryDEFpts);
+                fantasyPlay[9999998] = [];
+                fantasyPlay[9999998].push(entryDEFyds);
                 fantasyProducts.push(fantasyPlay[9999999]);
+                fantasyProducts.push(fantasyPlay[9999998]);
             }
             if(startersArray.filter(s => s.playerID == away).length > 0) {
-                const fpts = (score?.pts_allow_0 || 0) + (score?.yds_allow_0_100 || 0);
+                const fptsPTS = (score?.pts_allow_0 || 0);
+                const fptsYDS = (score?.yds_allow_0_100 || 0);
                 const team = startersArray.filter(s => s.playerID == away)[0];
                 const entryDEF = {
                     side: 'defense',
                     manager: team.owner,
                     playerInfo: team,
-                    stat: ['pts_allow_0', 'yds_allow_0_100'],
-                    fpts,
-                    description: 'GAME BEGINS - DEF has allowed 0 points, 0 yards',
-                    shortDesc: 'DEF Starting',
+                    stat: ['pts_allow_0'],
+                    fpts: fptsPTS,
+                    description: 'GAME BEGINS - DEF has allowed 0 points',
+                    shortDesc: 'Points Allowed (0)',
+                }   
+                const entryDEFyds = {
+                    side: 'defense',
+                    manager: team.owner,
+                    playerInfo: team,
+                    stat: ['yds_allow_0_100'],
+                    fpts: fptsYDS,
+                    description: 'GAME BEGINS - DEF has allowed 0 yards',
+                    shortDesc: 'Yards Allowed (0)',
                 }   
                 fantasyPlay[9999999] = [];
                 fantasyPlay[9999999].push(entryDEF);
+                fantasyPlay[9999998] = [];
+                fantasyPlay[9999998].push(entryDEFyds);
                 fantasyProducts.push(fantasyPlay[9999999]);
+                fantasyProducts.push(fantasyPlay[9999998]);
             }
         }
         
