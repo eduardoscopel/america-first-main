@@ -77,121 +77,46 @@
     }
     const getDisplayStats = async (viewPlayer) => {
         let newFantasyProducts = await fantasyProducts;
+        // reverse array so that most recent plays are LAST; runningTotal was summed and added to the product objects from most recent to least, so the LEAST recent plays have the MOST current/final totals
+        let reversedProducts = newFantasyProducts.reverse();            // EXCEPT: def points and yards allowed; with those, the MOST recent plays have the MOST current/final totals
         const viewPlayerStats = {};
         let recordedStats = [];
         let displayStats = [];
-        if(newFantasyProducts.length > 0 && viewPlayer != null) {
-            for(const products of newFantasyProducts) {
+        if(reversedProducts.length > 0 && viewPlayer != null) {
+            for(const products of reversedProducts) {
                 for(const play of products) {
                     if(play.playerInfo.playerID == viewPlayer.playerID) {
                         if(!viewPlayerStats[viewPlayer.playerID]) {
                             viewPlayerStats[viewPlayer.playerID] = {
-                                fpts: play.fpts,
+                                totalFpts: play.fpts,
                                 stats: [],
                                 statInfo: {},
                             }
-                        } else {
-                            viewPlayerStats[viewPlayer.playerID].fpts += play.fpts;
-                        }
-                        for(const stat of play.stat) {
-                            if(!recordedStats.includes(stat)) {
-                                recordedStats.push(stat);
-                                viewPlayerStats[viewPlayer.playerID].statInfo[stat] = {
-                                    stat,
-                                    occurs: 1,
-                                    fpts: play.fpts,
+                            for(let i = 0; i < play.runningTotals.length; i++) {
+                                if(play.runningTotals[i].statDesc != 'PTS ALW:' && play.runningTotals[i].statDesc != 'YDS ALW:') {
+                                    viewPlayerStats[viewPlayer.playerID].stats.push(play.runningTotals[i]);
+                                    recordedStats.push(play.runningTotals[i].statDesc);
+                                } else {
+                                    viewPlayerStats[viewPlayer.playerID].statInfo[play.runningTotals[i].statDesc] = play.runningTotals[i];
                                 }
-                            } else {
-                                viewPlayerStats[viewPlayer.playerID].statInfo[stat].occurs ++;
-                                viewPlayerStats[viewPlayer.playerID].statInfo[stat].fpts += play.fpts;
+                            }
+                        } else {
+                            viewPlayerStats[viewPlayer.playerID].totalFpts += play.fpts;
+                            for(let i = 0; i < play.runningTotals.length; i++) {
+                                if(!recordedStats.includes(play.runningTotals[i].statDesc) && play.runningTotals[i].statDesc != 'PTS ALW:' && play.runningTotals[i].statDesc != 'YDS ALW:') {
+                                    viewPlayerStats[viewPlayer.playerID].stats.push(play.runningTotals[i]);
+                                    recordedStats.push(play.runningTotals[i].statDesc);
+                                } else if(play.runningTotals[i].statDesc == 'PTS ALW:' || play.runningTotals[i].statDesc == 'YDS ALW:') {
+                                    viewPlayerStats[viewPlayer.playerID].statInfo[play.runningTotals[i].statDesc] = play.runningTotals[i];
+                                }
                             }
                         }
                     }
                 }
             }
-
-            if(viewPlayer.pos == 'DEF') {               // TEAM DEF/ST
-                for(const stat of recordedStats) {
-                    if(!stat.includes('idp') && !stat.includes('pass') && !stat.includes('rush') && !stat.includes('xp') && !stat.includes('fgm')) {
-                        if((stat.startsWith('yds_allow') || stat == 'def_kr_yd' || stat == 'def_pr_yd') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Yds Alw:')) {
-                            const statCat = 'Yds Alw:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('Yds Alw:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat]; 
-                        } else if(stat.startsWith('pts_allow') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Pts Alw:')) {
-                            const statCat = 'Pts Alw:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('Pts Alw:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat]; 
-                        } else if(stat == 'int' && !viewPlayerStats[viewPlayer.playerID].stats.includes('INT:')) {
-                            const statCat = 'INT:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('INTs');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat]; 
-                        } else if(stat == 'int_ret_yd' && !viewPlayerStats[viewPlayer.playerID].stats.includes('INT Yds:')) {
-                            const statCat = 'INT Yds:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('INT Yds:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if((stat == 'sack' || stat == 'bonus_sack_2p') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Sack:')) {
-                            const statCat = 'Sack:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('Sacks:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if(stat == 'sack_yd' && !viewPlayerStats[viewPlayer.playerID].stats.includes('Sack Yds:')) {
-                            const statCat = 'Sack Yds:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('Sack Yds:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if((stat == 'ff' || stat == 'def_st_ff') && !viewPlayerStats[viewPlayer.playerID].stats.includes('FF:')) {
-                            const statCat = 'FF:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('FF:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if(stat == 'blk_kick' && !viewPlayerStats[viewPlayer.playerID].stats.includes('Blk Kick:')) {
-                            const statCat = 'Blk Kick:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('Blk Kick:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if(stat == 'def_pass_def' && !viewPlayerStats[viewPlayer.playerID].stats.includes('Pass D:')) {
-                            const statCat = 'Pass D:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('Pass D:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if((stat == 'def_st_fum_rec' || stat == 'fum_rec') && !viewPlayerStats[viewPlayer.playerID].stats.includes('FR:')) {
-                            const statCat = 'FR:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('FR:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if((stat == 'def_td' || stat == 'def_st_td' || stat == 'fum_rec_td' || stat.startsWith('def_bonus')) && !viewPlayerStats[viewPlayer.playerID].stats.includes('TD:')) {
-                            const statCat = 'TD:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('TD:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if(stat == 'def_forced_punts' && !viewPlayerStats[viewPlayer.playerID].stats.includes('PNT:')) {
-                            const statCat = 'PNT:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('PNT:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if(stat == 'def_4_and_stop' && !viewPlayerStats[viewPlayer.playerID].stats.includes('4D:')) {
-                            const statCat = '4D:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('4D:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if(stat == 'def_3_and_out' && !viewPlayerStats[viewPlayer.playerID].stats.includes('3&O:')) {
-                            const statCat = '3&O:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('3&O:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if(stat == 'safe' && !viewPlayerStats[viewPlayer.playerID].stats.includes('SFTY:')) {
-                            const statCat = 'SFTY:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('SFTY:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if(stat == 'def_2pt' && !viewPlayerStats[viewPlayer.playerID].stats.includes('2PTR:')) {
-                            const statCat = '2PTR:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('2PTR:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if((stat == 'blk_kick_ret_yd' || stat == 'fg_ret_yd' || stat == 'fum_ret_yd') && !viewPlayerStats[viewPlayer.playerID].stats.includes('Ret Yds:')) {
-                            const statCat = 'Ret Yds:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('Ret Yds:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if(stat.includes('tkl') && stat != 'bonus_tkl_10p' && !viewPlayerStats[viewPlayer.playerID].stats.includes('TKL:')) {
-                            const statCat = 'TKL:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('TKL:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        } else if(stat == 'qb_hit' && !viewPlayerStats[viewPlayer.playerID].stats.includes('QBH:')) {
-                            const statCat = 'QBH:';
-                            viewPlayerStats[viewPlayer.playerID].stats.push('QBH:');
-                            viewPlayerStats[viewPlayer.playerID].statInfo[statCat] = viewPlayerStats[viewPlayer.playerID].statInfo[stat];
-                        }
-                    }
-                }
+            // now push the DEF pts/yds allow totals objs into the viewPlayer stats array
+            for(const stat in viewPlayerStats[viewPlayer.playerID].statInfo) {
+                viewPlayerStats[viewPlayer.playerID].stats.push(viewPlayerStats[viewPlayer.playerID].statInfo[stat]);
             }
             displayStats.push(viewPlayerStats[viewPlayer.playerID]);
         } else {
@@ -220,6 +145,15 @@
     .fptsContainer {
         position: relative;
         display: inline-flex;
+        height: 100%;
+        width: 25%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .fptsBox {
+        position: relative;
+        display: inline-flex;
         border-radius: 1em;
         height: 64px;
         width: 64px;
@@ -238,11 +172,21 @@
         flex-direction: column;
         justify-content: space-around;
         align-content: space-around;
-        align-items: flex-end;
+        align-items: center;
         color: #ededed;
-        left: 0.5em;
-        font-size: 0.88em;
+        font-size: 0.82em;
         font-weight: 420;
+        height: 100%;
+        width: 75%;
+        overflow: hidden;
+    }
+
+    .statWrap {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        margin: 0 0.3em;
+        line-height: 1.2em;
     }
 
     .stat {
@@ -255,7 +199,7 @@
         position: relative;
         display: inline-flex;
         width: 35%;
-        height: 25%;
+        height: 30%;
         border-radius: 1em;
         background-color: var(--f3f3f3);
         right: -6em;
@@ -275,15 +219,16 @@
         display: inline-flex;
         align-items: flex-start;
         width: 100%;
+        height: 40%;
     }
 
     .viewPlayerBottom {
         position: relative;
         display: inline-flex;
-        width: 100%;
-        height: 100%;
+        width: 92%;
+        height: 60%;
         align-items: center;
-        padding: 0 0.8em;
+        padding: 0.2em 0.8em;
     }
 
     .viewPlayerProfile {
@@ -562,10 +507,15 @@
                     {:then displayStats} 
                         {#if displayStats}
                             {#each displayStats as player}
-                                <div class="fptsContainer">{round(player.fpts)}</div>
+                                <div class="fptsContainer">
+                                    <div class="fptsBox">{round(player.totalFpts)}</div>
+                                </div>
                                 <div class="statsContainer">
                                     {#each player.stats as statCat}  
-                                        <div class="stat">{statCat} {round(player.statInfo[statCat].fpts)}</div>
+                                        <div class="statWrap">
+                                            <div class="stat">{statCat.statDesc} {statCat.metric}</div>
+                                            <div class="stat" style="justify-content: center">({round(statCat.fpts)})</div>
+                                        </div>
                                     {/each}
                                 </div>
                             {/each}
