@@ -15,7 +15,8 @@
         let playByPlayData = await getPlayByPlay(gameSelection, true).catch((err) => { console.error(err); });
         // set key to number of API pages for the full PBP
         let recencyKey = playByPlayData.length;
-        let fantasyRelevantPlays = [];
+        let fantasyRelevantPlaysForward = [];
+        let defYdsThreshBreakers = [];
         // startersArray will help us match our sleeper playerInfo to espn player APIs, and also check if someone is starting one of the DEFs
         startersArray = [];
         for(const recordManID in fantasyStarters) {
@@ -46,13 +47,12 @@
         let homeDefYdsAllowed = 0;
         let awayDefYdsAllowed = 0;
         const score = leagueData.scoring_settings;
-
-        // work backwards from most recent PBP page
-        for(let i = recencyKey; i > 0; i--) {
-            let playsData = playByPlayData[i - 1].items;
-            // work backwards from most recent play
-            for(let p = playsData.length; p > 0; p--) {
-                let play = playsData[p - 1];
+        // start with first page
+        for(let j = 0; j < recencyKey; j++) {
+            let playsData = playByPlayData[j].items;
+            // start with first play on page
+            for(let k = 0; k < playsData.length; k++) {
+                let play = playsData[k];
                 // which team made the play
                 let espnTeamID
                 if(play.participants && play.participants[0].statistics) {
@@ -68,14 +68,19 @@
                         espnTeamID = play.team.$ref.slice(82, 83);
                     }
                 }
-
-
-
                 let playTeam;
                 for(const key in nflTeams) {
                     if(nflTeams[key].espnID == espnTeamID) {
                         playTeam = key;
+                        break;
                     }
+                }
+                // flagging penalty-negated plays
+                let noPlay = new Boolean (false);
+                if(play.alternativeText.includes('No Play.')) {
+                    noPlay = true;
+                } else {
+                    noPlay = false;
                 }
                 // flagging scoring plays & tracking DEF points allowed
                 let scoringPlay = new Boolean (false);
@@ -106,27 +111,10 @@
                     scoreValue = 0;
                     scoreAgainstDEF = false;
                 }
-                // tracking DEF yards allowed TO-DO: adjust for penalties
-                if(playTeam == home && startersArray.filter(s => s.playerID == away).length > 0 
-                   && (play.type.id == 5 || play.type.id == 7 || play.type.id == 24 || play.type.id == 67 || play.type.id == 68) || (play.type.id == 52 && score.def_pr_yd) || (play.type.id == 53 && score.def_kr_yd)
-                   && !play.alternativeText.includes('No play.')) {
-
-                    awayDefYdsAllowed += play.statYardage;
-                    if((play.type.id == 52 && score.def_pr_yd) || (play.type.id == 53 && score.def_kr_yd)) {
-                        homeDefYdsAllowed = homeDefYdsAllowed - play.statYardage;
-                    }
-                } else if(playTeam == away && startersArray.filter(s => s.playerID == home).length > 0
-                          && (play.type.id == 5 || play.type.id == 7 || play.type.id == 24 || play.type.id == 67 || play.type.id == 68) || (play.type.id == 52 && score.def_pr_yd) || (play.type.id == 53 && score.def_kr_yd)
-                          && !play.alternativeText.includes('No play.')) {
-                              
-                            homeDefYdsAllowed += play.statYardage;
-                            if((play.type.id == 52 && score.def_pr_yd) || (play.type.id == 53 && score.def_kr_yd)) {
-                                awayDefYdsAllowed = awayDefYdsAllowed - play.statYardage;
-                            }
-                }
                 // the play object with all necessary info
                 const playEntry = {
                     playID: play.id,
+                    order: play.sequenceNumber,
                     playType: play.type.id,
                     team: playTeam,
                     description: play.alternativeText,
@@ -139,7 +127,72 @@
                     scoreAgainstDEF,
                     teamStartPoss: play.start.team?.$ref || null,
                     teamEndPoss: play?.end.team?.$ref || null,
+                    noPlay,
                 }
+                // tracking DEF yards allowed TO-DO account for penalties that didn't negate play
+                if(playTeam == home && startersArray.filter(s => s.playerID == away).length > 0 
+                   && (play.type.id == 5 || play.type.id == 7 || play.type.id == 24 || play.type.id == 67 || play.type.id == 68 || (play.type.id == 52 && score.def_pr_yd) || (play.type.id == 53 && score.def_kr_yd))
+                   && noPlay == false) {
+
+                    let oldYA = awayDefYdsAllowed;
+                    awayDefYdsAllowed += play.statYardage;
+                    // check if threshold broken
+                    if((oldYA < 100 && awayDefYdsAllowed >= 100) || (oldYA < 200 && awayDefYdsAllowed >= 200) || (oldYA < 300 && awayDefYdsAllowed >= 300) || (oldYA < 350 && awayDefYdsAllowed >= 350) ||
+                      (oldYA < 400 && awayDefYdsAllowed >= 400) || (oldYA < 450 && awayDefYdsAllowed >= 450) || (oldYA < 500 && awayDefYdsAllowed >= 500) || (oldYA < 550 && awayDefYdsAllowed >= 550)) {
+                        defYdsThreshBreakers.push({
+                            old: oldYA,
+                            new: awayDefYdsAllowed,
+                            playInfo: playEntry,
+                            defense: away,
+                        });
+                    }
+
+                    if(startersArray.filter(s => s.playerID == home).length > 0 && ((play.type.id == 52 && score.def_pr_yd) || (play.type.id == 53 && score.def_kr_yd))) {
+                        let oldYA = homeDefYdsAllowed;
+                        homeDefYdsAllowed = homeDefYdsAllowed - play.statYardage;
+                        // check if threshold broken
+                        if((homeDefYdsAllowed < 100 && oldYA >= 100) || (homeDefYdsAllowed < 200 && oldYA >= 200) || (homeDefYdsAllowed < 300 && oldYA >= 300) || (homeDefYdsAllowed < 350 && oldYA >= 350) ||
+                            (homeDefYdsAllowed < 400 && oldYA >= 400) || (homeDefYdsAllowed < 450 && oldYA >= 450) || (homeDefYdsAllowed < 500 && oldYA >= 500) || (homeDefYdsAllowed < 550 && oldYA >= 550)) {
+                            defYdsThreshBreakers.push({
+                                old: oldYA,
+                                new: homeDefYdsAllowed,
+                                playInfo: playEntry,
+                                defense: home,
+                            });
+                        }
+                    }
+                } else if(playTeam == away && startersArray.filter(s => s.playerID == home).length > 0
+                          && (play.type.id == 5 || play.type.id == 7 || play.type.id == 24 || play.type.id == 67 || play.type.id == 68 || (play.type.id == 52 && score.def_pr_yd) || (play.type.id == 53 && score.def_kr_yd))
+                          && noPlay == false) {
+                            
+                            let oldYA = homeDefYdsAllowed;  
+                            homeDefYdsAllowed += play.statYardage;
+                            // check if threshold broken
+                            if((oldYA < 100 && homeDefYdsAllowed >= 100) || (oldYA < 200 && homeDefYdsAllowed >= 200) || (oldYA < 300 && homeDefYdsAllowed >= 300) || (oldYA < 350 && homeDefYdsAllowed >= 350) ||
+                               (oldYA < 400 && homeDefYdsAllowed >= 400) || (oldYA < 450 && homeDefYdsAllowed >= 450) || (oldYA < 500 && homeDefYdsAllowed >= 500) || (oldYA < 550 && homeDefYdsAllowed >= 550)) {
+                                defYdsThreshBreakers.push({
+                                    old: oldYA,
+                                    new: homeDefYdsAllowed,
+                                    playInfo: playEntry,
+                                    defense: home,
+                                });
+                            }
+                            if(startersArray.filter(s => s.playerID == away).length > 0 && ((play.type.id == 52 && score.def_pr_yd) || (play.type.id == 53 && score.def_kr_yd))) {
+                                let oldYA = awayDefYdsAllowed;
+                                awayDefYdsAllowed = awayDefYdsAllowed - play.statYardage;
+                                // check if threshold broken
+                                if((awayDefYdsAllowed < 100 && oldYA >= 100) || (awayDefYdsAllowed < 200 && oldYA >= 200) || (awayDefYdsAllowed < 300 && oldYA >= 300) || (awayDefYdsAllowed < 350 && oldYA >= 350) ||
+                                   (awayDefYdsAllowed < 400 && oldYA >= 400) || (awayDefYdsAllowed < 450 && oldYA >= 450) || (awayDefYdsAllowed < 500 && oldYA >= 500) || (awayDefYdsAllowed < 550 && oldYA >= 550)) {
+                                    defYdsThreshBreakers.push({
+                                        old: oldYA,
+                                        new: homeDefYdsAllowed,
+                                        playInfo: playEntry,
+                                        defense: away,
+                                    });
+                                }
+                            }
+                }
+
                 // some "plays" in API don't have participants (ex. coin-toss)
                 if(play.participants) {
                     // loop thru every player involved in play
@@ -202,19 +255,15 @@
                             }
                             playEntry.relevantPlayers.push(relevantEntry);
                         } 
-                        if((startersArray.filter(s => s.playerID == home).length > 0 ||  // plays relevant to DEF if someone started a DEF
-                          startersArray.filter(s => s.playerID == away).length > 0)
-                          && (play.type.id == 7 || play.type.id == 9 || play.type.id == 26 ||
-                              play.type.id == 36 || play.type.id == 52 || play.type.id == 53 ||
-                              play.type.id == 32 || play.teamStartPoss != play.teamEndPoss ||
-                              (play.type.id == 60 && play.alternativeText.includes('BLOCKED')))
-                          && play.participants[playerKey].type != 'passer'
-                          && play.participants[playerKey].type != 'receiver'
-                          && play.participants[playerKey].type != 'rusher'
-                          && play.participants[playerKey].type != 'punter') {
-                            if(startersArray.filter(s => s.playerID == home).length > 0
-                               && (playerTeam == home || ((play.type.id == 60 && play.alternativeText.includes('BLOCKED')) && playerTeam == away))) {
-                                const defense = startersArray.filter(s => s.playerID == home)[0];
+                        // flagging DEF-relevant plays
+                        if((startersArray.filter(s => s.playerID == home).length > 0 ||  // someone started a DEF
+                            startersArray.filter(s => s.playerID == away).length > 0)
+                            && (play.type.id == 7 || play.type.id == 9 || play.type.id == 26 ||     // play was of a defensive type
+                                play.type.id == 36 || play.type.id == 52 || play.type.id == 53 ||   // TO-DO need to be able to catch yardage threshold breaks
+                                play.type.id == 32 || (play.type.id == 60 && play.alternativeText.includes('BLOCKED')))
+                            && noPlay == false) {                                                       // no penalty
+                            if(startersArray.filter(s => s.playerID == away).length > 0 && playTeam == home) {
+                                const defense = startersArray.filter(s => s.playerID == away)[0];
                                 const relevantEntry = {
                                     playerInfo: defense,
                                     manager: defense.owner,
@@ -224,26 +273,25 @@
                                     oppDef: away,
                                 }
                                 playEntry.relevantDEF.push(relevantEntry);
-                            } else if(startersArray.filter(s => s.playerID == away).length > 0 
-                                      && (playerTeam == away || ((play.type.id == 60 && play.alternativeText.includes('BLOCKED')) && playerTeam == home))) {
-                                        const defense = startersArray.filter(s => s.playerID == away)[0];
-                                        const relevantEntry = {
-                                            playerInfo: defense,
-                                            manager: defense.owner,
-                                            statType: play.participants[playerKey].type,
-                                            yards: play.statYardage, 
-                                            playType: play.type.id,
-                                            oppDef: home,
-                                        }
-                                        playEntry.relevantDEF.push(relevantEntry);
+                            } else if(startersArray.filter(s => s.playerID == home).length > 0 && playTeam == away) {
+                                const defense = startersArray.filter(s => s.playerID == home)[0];
+                                const relevantEntry = {
+                                    playerInfo: defense,
+                                    manager: defense.owner,
+                                    statType: play.participants[playerKey].type,
+                                    yards: play.statYardage, 
+                                    playType: play.type.id,
+                                    oppDef: home,
+                                }
+                                playEntry.relevantDEF.push(relevantEntry);
                             }
                         }
                     }
+                    // only push on plays involving starters, and not called back for penalty (deal with those separately)
+                    if(noPlay == false && (playEntry.relevantPlayers.length > 0 || playEntry.relevantDEF.length >  0 || playEntry.scoringPlay == true)) {
+                        fantasyRelevantPlaysForward.push(playEntry);
+                    } 
                 }
-                // only push on plays involving starters
-                if(playEntry.relevantPlayers.length > 0 || playEntry.relevantDEF.length >  0 || playEntry.scoringPlay == true) {
-                    fantasyRelevantPlays.push(playEntry);
-                } 
             }
         }
         
@@ -382,6 +430,7 @@
             return {DEFscore, DEFthreshold, DEFdescription};
         }
 
+        let fantasyRelevantPlays = fantasyRelevantPlaysForward.slice().reverse();
         for(const playKey in fantasyRelevantPlays) {
             const play = fantasyRelevantPlays[playKey];
             // create play-array to group fpts by multiple players in one play
@@ -398,6 +447,7 @@
                     const fpts = curDEFscore.DEFscore - oldDEFscore.DEFscore;
                     const statPTS = 'PTS ALW:';
                     const entryDEF = {
+                        order: play.order,
                         side: 'defense',
                         manager: defense.owner,
                         playerInfo: defense,
@@ -424,6 +474,7 @@
                     const fpts = curDEFscore.DEFscore - oldDEFscore.DEFscore;
                     const statPTS = 'PTS ALW:';
                     const entryDEF = {
+                        order: play.order,
                         side: 'defense',
                         manager: defense.owner,
                         playerInfo: defense,
@@ -444,61 +495,6 @@
                     homeDefPtsAllowed = oldHomeDefPtsAllowed;     
                 }
             }
-            if(play.team == home && startersArray.filter(s => s.playerID == away).length > 0                    // TEAM DEF YARDS ALLOWED
-               && (play.playType == 5 || play.playType == 7 || play.playType == 24 || play.playType == 67 || play.playType == 68)) {
-                let oldAwayDefYdsAllowed = awayDefYdsAllowed - play.yards;
-                let curDEFscore = calculateDefYardsAllowed(awayDefYdsAllowed);
-                let oldDEFscore = calculateDefYardsAllowed(oldAwayDefYdsAllowed);
-                const defense = startersArray.filter(s => s.playerID == away)[0];
-                const fpts = curDEFscore.DEFscore - oldDEFscore.DEFscore;
-                const statYDS = 'YDS ALW:';
-                const entryDEF = {
-                    side: 'defense',
-                    manager: defense.owner,
-                    playerInfo: defense,
-                    stat: [curDEFscore.DEFthreshold],
-                    runningTotals: [],
-                    fpts,
-                    description: play.description,
-                    shortDesc: curDEFscore.DEFdescription,
-                }   
-                if(score.yds_allow) {
-                    entryDEF.stat.push('yds_allow');
-                } 
-                if(fpts != 0) {
-                    let runningTotal = pushRunningTotal(fpts, statYDS, curDEFscore.DEFthreshold, awayDefYdsAllowed); 
-                    entryDEF.runningTotals.push(runningTotal);
-                    fantasyPlay[play.playID].push(entryDEF);
-                }                
-                awayDefYdsAllowed = oldAwayDefYdsAllowed;
-            } else if(play.team == away && startersArray.filter(s => s.playerID == home).length > 0
-                      && (play.playType == 5 || play.playType == 7 || play.playType == 24 || play.playType == 67 || play.playType == 68)) {
-                        let oldHomeDefYdsAllowed = homeDefYdsAllowed - play.yards;
-                        let curDEFscore = calculateDefYardsAllowed(homeDefYdsAllowed);
-                        let oldDEFscore = calculateDefYardsAllowed(oldHomeDefYdsAllowed);
-                        const defense = startersArray.filter(s => s.playerID == home)[0];
-                        const fpts = curDEFscore.DEFscore - oldDEFscore.DEFscore;
-                        const statYDS = 'YDS ALW:';               
-                        const entryDEF = {
-                            side: 'defense',
-                            manager: defense.owner,
-                            playerInfo: defense,
-                            stat: [curDEFscore.DEFthreshold],
-                            runningTotals: [],
-                            fpts,
-                            description: play.description,
-                            shortDesc: curDEFscore.DEFdescription,
-                        }   
-                        if(score.yds_allow) {
-                            entryDEF.stat.push('yds_allow');
-                        } 
-                        if(fpts != 0) {
-                            let runningTotal = pushRunningTotal(fpts, statYDS, curDEFscore.DEFthreshold, homeDefYdsAllowed); 
-                            entryDEF.runningTotals.push(runningTotal);
-                            fantasyPlay[play.playID].push(entryDEF);
-                        }
-                        homeDefYdsAllowed = oldHomeDefYdsAllowed;
-            }
             if(play.relevantDEF.length > 0) {                   // TEAM DEF/ST FPTS
                 let sackRecorded = new Boolean (false);
                 for(const relevantKey in play.relevantDEF) {
@@ -509,6 +505,7 @@
                             const fpts = (score?.fum_rec || 0);            // NOTE TO-DO: Must distinguish b/t def & st recoveries
                             const statDesc = 'FR:';
                             const entryDEF = {
+                                order: play.order,
                                 side: 'defense',
                                 manager: player.manager,
                                 playerInfo: player.playerInfo,
@@ -529,6 +526,7 @@
                             const fpts = (score?.def_st_ff || 0);
                             const stat = 'FF(ST):';
                             const entryDEF = {
+                                order: play.order,
                                 side: 'defense',
                                 manager: player.manager,
                                 playerInfo: player.playerInfo,
@@ -547,6 +545,7 @@
                             const fpts = (score?.ff || 0); 
                             const stat = 'FF(D):';
                             const entryDEF = {
+                                order: play.order,
                                 side: 'defense',
                                 manager: player.manager,
                                 playerInfo: player.playerInfo,
@@ -570,6 +569,7 @@
                         const statSack = 'SACK:';
                         const statSackYDS = 'SACK YDS:';
                         const entryDEF = {
+                            order: play.order,
                             side: 'defense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
@@ -598,6 +598,7 @@
                         const statINT = 'INT:';
                         const statINTyds = 'INT YDS:';
                         const entryDEF = {
+                            order: play.order,
                             side: 'defense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
@@ -627,6 +628,7 @@
                         const statINTyds = 'INT YDS:';
                         const statDefTD = 'TD(D):';
                         const entryDEF = {
+                            order: play.order,
                             side: 'defense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
@@ -655,6 +657,7 @@
                         const fpts = player.yards * (score?.def_kr_yd || 0);
                         const stat = 'KO YDS:';
                         const entryDEF = {
+                            order: play.order,
                             side: 'defense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
@@ -678,6 +681,7 @@
                         const statPunt = 'PUNT:';
                         const statPuntReturn = 'PUNT YDS:';
                         const entryDEF = {
+                            order: play.order,
                             side: 'defense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
@@ -705,6 +709,7 @@
                         const statKick = 'KO YDS:';
                         const statTD = 'TD(ST):';
                         const entryDEF = {
+                            order: play.order,
                             side: 'defense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
@@ -729,6 +734,7 @@
                         const fpts = (score?.blk_kick || 0);   // TO-DO: add blk kick return yards (ESPN's statYardage norrmally represents kick distance)
                         const stat = 'BLK:';
                         const entryDEF = {
+                            order: play.order,
                             side: 'defense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
@@ -755,6 +761,7 @@
                         const fpts = (score?.fum || 0);             // PENALTY for FUMBLE FORCED
                         const statFF = 'FUM:';
                         const entry = {
+                            order: play.order,
                             side: 'offense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
@@ -786,6 +793,7 @@
                                 if(score.idp_fum_rec) {                                 // FUMBLE RECOVERY IDP
                                     const stat = 'FR:';
                                     const entryIDP = {
+                                        order: play.order,
                                         side: 'defense',
                                         manager: player.manager,
                                         playerInfo: player.playerInfo,
@@ -808,6 +816,7 @@
                                     const fpts = (score?.idp_ff || 0);       
                                     const stat = 'FF:';
                                     const entryIDP = {
+                                        order: play.order,
                                         side: 'defense',
                                         manager: player.manager,
                                         playerInfo: player.playerInfo,
@@ -831,6 +840,7 @@
                         const statRun = 'RUSH:';
                         const statRunYDS = 'RUSH YDS:';
                         const entry = {
+                            order: play.order,
                             side: 'offense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
@@ -868,6 +878,7 @@
                         const statRunYDS = 'RUSH YDS:';
                         const statRunTD = 'RUSH TD:';
                         const entry = {
+                            order: play.order,
                             side: 'offense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
@@ -918,6 +929,7 @@
                             const statPass = 'PASS:';
                             const statInc = 'INCMP:';
                             const entry = {
+                                order: play.order,
                                 side: 'offense',
                                 manager: player.manager,
                                 playerInfo: player.playerInfo,
@@ -951,6 +963,7 @@
                             const statINTyds = 'INT YDS:';
                             const statTD = 'INT TD:';
                             const entryIDP = {
+                                order: play.order,
                                 side: 'defense',
                                 manager: player.manager,
                                 playerInfo: player.playerInfo,
@@ -995,6 +1008,7 @@
                             const statInc = 'INCMP:';
                             const statTD = 'PICK 6:';
                             const entry = {
+                                order: play.order,
                                 side: 'offense',
                                 manager: player.manager,
                                 playerInfo: player.playerInfo,
@@ -1032,6 +1046,7 @@
                             const statPass = 'PASS:';
                             const statCmp = 'CMP:';
                             const entry = {
+                                order: play.order,
                                 side: 'offense',
                                 manager: player.manager,
                                 playerInfo: player.playerInfo,
@@ -1069,6 +1084,7 @@
                             const fptsRec = (score?.rec || 0);
                             const statRec = 'REC:';
                             const entry = {
+                                order: play.order,
                                 side: 'offense',
                                 manager: player.manager,
                                 playerInfo: player.playerInfo,
@@ -1143,6 +1159,7 @@
                             const statCmp = 'CMP:';
                             const statTD = 'PASS TD:';
                             const entry = {
+                                order: play.order,
                                 side: 'offense',
                                 manager: player.manager,
                                 playerInfo: player.playerInfo,
@@ -1196,6 +1213,7 @@
                             const statTD = 'REC TD:';
                             const statRec = 'REC:';
                             const entry = {
+                                order: play.order,
                                 side: 'offense',
                                 manager: player.manager,
                                 playerInfo: player.playerInfo,
@@ -1244,6 +1262,7 @@
                         const statPass = 'PASS:';
                         const statInc = 'INCMP:';
                         const entry = {
+                            order: play.order,
                             side: 'offense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
@@ -1267,6 +1286,7 @@
                             const fpts = score.pass_sack;
                             const stat = 'SACK:';
                             const entry = {
+                                order: play.order,
                                 side: 'offense',
                                 manager: player.manager,
                                 playerInfo: player.playerInfo,
@@ -1289,6 +1309,7 @@
                         const statFG = 'FG:';
                         const statFGyds = 'FG YDS:';
                         const entry = {
+                            order: play.order,
                             side: 'offense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
@@ -1368,6 +1389,7 @@
                         const fpts = (score?.fgmiss || 0);
                         const statFG = 'FG MISS:';
                         const entry = {
+                            order: play.order,
                             side: 'offense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
@@ -1431,6 +1453,7 @@
                                     const fpts = (score?.xpmiss || 0);
                                     const stat = 'PAT MISS:';
                                     const entry = {
+                                        order: play.order,
                                         side: 'offense',
                                         manager: player.manager,
                                         playerInfo: player.playerInfo,
@@ -1451,6 +1474,7 @@
                                     const fpts = (score?.xpm || 0);
                                     const stat = 'PAT:';
                                     const entry = {
+                                        order: play.order,
                                         side: 'offense',
                                         manager: player.manager,
                                         playerInfo: player.playerInfo,
@@ -1470,6 +1494,7 @@
                             const fpts = player.yards * (score?.kr_yd || 0);
                             const stat = 'KO YDS:';
                             const entry = {
+                                order: play.order,
                                 side: 'offense',
                                 manager: player.manager,
                                 playerInfo: player.playerInfo,
@@ -1491,6 +1516,64 @@
             }
             fantasyProducts.push(fantasyPlay[play.playID]);
         }
+        // loop thru def-thresh plays                                                               // TEAM DEF YDS ALLOWED
+        for(const playKey in defYdsThreshBreakers) {
+            const play = defYdsThreshBreakers[playKey];
+            if(!fantasyPlay[play.playInfo.playID]) {
+                fantasyPlay[play.playInfo.playID] = [];
+            }
+            if(play.defense == away) {
+                let curDEFscore = calculateDefYardsAllowed(play.new);
+                let oldDEFscore = calculateDefYardsAllowed(play.old);
+                const defense = startersArray.filter(s => s.playerID == away)[0];
+                const fpts = curDEFscore.DEFscore - oldDEFscore.DEFscore;
+                const statYDS = 'YDS ALW:';
+                const entryDEF = {
+                    order: play.playInfo.order,
+                    side: 'defense',
+                    manager: defense.owner,
+                    playerInfo: defense,
+                    stat: [curDEFscore.DEFthreshold],
+                    runningTotals: [],
+                    fpts,
+                    description: play.playInfo.description,
+                    shortDesc: curDEFscore.DEFdescription,
+                }   
+                if(score.yds_allow) {
+                    entryDEF.stat.push('yds_allow');
+                } 
+                if(fpts != 0) {
+                    let runningTotal = pushRunningTotal(fpts, statYDS, curDEFscore.DEFthreshold, play.new); 
+                    entryDEF.runningTotals.push(runningTotal);
+                    fantasyPlay[play.playInfo.playID].push(entryDEF);
+                }                
+            } else if(play.defense == home) {
+                let curDEFscore = calculateDefYardsAllowed(play.new);
+                let oldDEFscore = calculateDefYardsAllowed(play.old);
+                const defense = startersArray.filter(s => s.playerID == home)[0];
+                const fpts = curDEFscore.DEFscore - oldDEFscore.DEFscore;
+                const statYDS = 'YDS ALW:';               
+                const entryDEF = {
+                    order: play.playInfo.order,
+                    side: 'defense',
+                    manager: defense.owner,
+                    playerInfo: defense,
+                    stat: [curDEFscore.DEFthreshold],
+                    runningTotals: [],
+                    fpts,
+                    description: play.description,
+                    shortDesc: curDEFscore.DEFdescription,
+                }   
+                if(score.yds_allow) {
+                    entryDEF.stat.push('yds_allow');
+                } 
+                if(fpts != 0) {
+                    let runningTotal = pushRunningTotal(fpts, statYDS, curDEFscore.DEFthreshold, play.new); 
+                    entryDEF.runningTotals.push(runningTotal);
+                    fantasyPlay[play.playInfo.playID].push(entryDEF);
+                }
+            }
+        }
         // if DEF started, push entry for their starting points (pts/yds separated for later tallying)
         if(startersArray.filter(s => s.playerID == home).length > 0 || startersArray.filter(s => s.playerID == away).length > 0) {
             if(startersArray.filter(s => s.playerID == home).length > 0) {
@@ -1500,6 +1583,7 @@
                 const statPTS = 'PTS ALW:';
                 const statYDS = 'YDS ALW:';
                 const entryDEFpts = {
+                    order: 1,
                     side: 'defense',
                     manager: team.owner,
                     playerInfo: team,
@@ -1514,6 +1598,7 @@
                     entryDEFpts.runningTotals.push(runningTotal);
                 } 
                 const entryDEFyds = {
+                    order: 1,
                     side: 'defense',
                     manager: team.owner,
                     playerInfo: team,
@@ -1541,6 +1626,7 @@
                 const statPTS = 'PTS ALW:';
                 const statYDS = 'YDS ALW:';
                 const entryDEF = {
+                    order: 2,
                     side: 'defense',
                     manager: team.owner,
                     playerInfo: team,
@@ -1555,6 +1641,7 @@
                     entryDEF.runningTotals.push(runningTotal);
                 }
                 const entryDEFyds = {
+                    order: 2,
                     side: 'defense',
                     manager: team.owner,
                     playerInfo: team,
@@ -1576,6 +1663,8 @@
                 fantasyProducts.push(fantasyPlay[9999998]);
             }
         }
+
+        fantasyProducts = fantasyProducts.sort((a, b) => b[0]?.order - a[0]?.order);
         
         return fantasyProducts; 
     }
