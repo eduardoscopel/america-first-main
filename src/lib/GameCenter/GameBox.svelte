@@ -30,6 +30,8 @@
                         t: starterInfo.t,
                         avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                         teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t.toLowerCase()}.png`,
+                        teamColor: `background-color: #${nflTeams[starterInfo.t].color}6b`,
+                        teamAltColor: `background-color: #${nflTeams[starterInfo.t].alternateColor}6b`,
                     }
                     if(!gameStarters[recordManID]) {
                         gameStarters[recordManID] = [];
@@ -92,51 +94,6 @@
         } else {
             displayStats = null;
         }
-
-        // let reversedProducts = newFantasyProducts.reverse();            // EXCEPT: def points and yards allowed; with those, the MOST recent plays have the MOST current/final totals
-        // const viewPlayerStats = {};
-        // let recordedStats = [];
-        // let displayStats = [];
-        // if(reversedProducts.length > 0 && viewPlayer != null) {
-        //     for(const products of reversedProducts) {
-        //         for(const play of products) {
-        //             if(play.playerInfo.playerID == viewPlayer.playerID) {
-        //                 if(!viewPlayerStats[viewPlayer.playerID]) {
-        //                     viewPlayerStats[viewPlayer.playerID] = {
-        //                         totalFpts: play.fpts,
-        //                         stats: [],
-        //                         statInfo: {},
-        //                     }
-        //                     for(let i = 0; i < play.runningTotals.length; i++) {
-        //                         if(play.runningTotals[i].statDesc != 'PTS ALW:' && play.runningTotals[i].statDesc != 'YDS ALW:') {
-        //                             viewPlayerStats[viewPlayer.playerID].stats.push(play.runningTotals[i]);
-        //                             recordedStats.push(play.runningTotals[i].statDesc);
-        //                         } else {
-        //                             viewPlayerStats[viewPlayer.playerID].statInfo[play.runningTotals[i].statDesc] = play.runningTotals[i];
-        //                         }
-        //                     }
-        //                 } else {
-        //                     viewPlayerStats[viewPlayer.playerID].totalFpts += play.fpts;
-        //                     for(let i = 0; i < play.runningTotals.length; i++) {
-        //                         if(!recordedStats.includes(play.runningTotals[i].statDesc) && play.runningTotals[i].statDesc != 'PTS ALW:' && play.runningTotals[i].statDesc != 'YDS ALW:') {
-        //                             viewPlayerStats[viewPlayer.playerID].stats.push(play.runningTotals[i]);
-        //                             recordedStats.push(play.runningTotals[i].statDesc);
-        //                         } else if(play.runningTotals[i].statDesc == 'PTS ALW:' || play.runningTotals[i].statDesc == 'YDS ALW:') {
-        //                             viewPlayerStats[viewPlayer.playerID].statInfo[play.runningTotals[i].statDesc] = play.runningTotals[i];
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        //     // now push the DEF pts/yds allow totals objs into the viewPlayer stats array
-        //     for(const stat in viewPlayerStats[viewPlayer.playerID].statInfo) {
-        //         viewPlayerStats[viewPlayer.playerID].stats.push(viewPlayerStats[viewPlayer.playerID].statInfo[stat]);
-        //     }
-        //     displayStats.push(viewPlayerStats[viewPlayer.playerID]);
-        // } else {
-        //     displayStats = null;
-        // }
         return displayStats;
     }
     $: displayStats = getDisplayStats(viewPlayer);
@@ -186,8 +143,7 @@
         flex-wrap: wrap;
         flex-direction: column;
         justify-content: space-around;
-        align-content: space-around;
-        align-items: center;
+        align-content: flex-start;
         color: #ededed;
         font-size: 0.82em;
         font-weight: 420;
@@ -199,15 +155,36 @@
     .statWrap {
         position: relative;
         display: inline-flex;
-        flex-direction: column;
-        margin: 0 0.3em;
+        flex-direction: row;
         line-height: 1.2em;
+        align-items: center;
+        width: 100%;
+        margin: 0 4%;
+        justify-content: center;
     }
 
-    .stat {
+    .statCat {
         position: relative;
         display: inline-flex;
         color: #ededed;
+        justify-content: flex-start;
+        width: 50%;
+    }
+
+    .statMetric {
+        position: relative;
+        display: inline-flex;
+        color: #ededed;
+        width: 25%;
+        justify-content: center;
+    }
+
+    .statFpts {
+        position: relative;
+        display: inline-flex;
+        color: #ededed;
+        width: 25%;
+        justify-content: center;
     }
 
     .viewPlayer {
@@ -527,9 +504,10 @@
                                 </div>
                                 <div class="statsContainer">
                                     {#each player.stats as statCat}  
-                                        <div class="statWrap">
-                                            <div class="stat">{statCat.statDesc} {statCat.metric}</div>
-                                            <div class="stat" style="justify-content: center">({round(statCat.fpts)})</div>
+                                        <div class="statWrap" style="{viewPlayer.teamColor}">
+                                            <div class="statCat">{statCat.statDesc}</div>
+                                            <div class="statMetric">{statCat.metric}</div>
+                                            <div class="statFpts">{round(statCat.fpts)}</div>
                                         </div>
                                     {/each}
                                 </div>
