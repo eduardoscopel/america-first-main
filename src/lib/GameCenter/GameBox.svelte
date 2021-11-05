@@ -77,51 +77,66 @@
     }
     const getDisplayStats = async (viewPlayer) => {
         let newFantasyProducts = await fantasyProducts;
-        // reverse array so that most recent plays are LAST; runningTotal was summed and added to the product objects from most recent to least, so the LEAST recent plays have the MOST current/final totals
-        let reversedProducts = newFantasyProducts.reverse();            // EXCEPT: def points and yards allowed; with those, the MOST recent plays have the MOST current/final totals
         const viewPlayerStats = {};
-        let recordedStats = [];
         let displayStats = [];
-        if(reversedProducts.length > 0 && viewPlayer != null) {
-            for(const products of reversedProducts) {
-                for(const play of products) {
-                    if(play.playerInfo.playerID == viewPlayer.playerID) {
-                        if(!viewPlayerStats[viewPlayer.playerID]) {
-                            viewPlayerStats[viewPlayer.playerID] = {
-                                totalFpts: play.fpts,
-                                stats: [],
-                                statInfo: {},
-                            }
-                            for(let i = 0; i < play.runningTotals.length; i++) {
-                                if(play.runningTotals[i].statDesc != 'PTS ALW:' && play.runningTotals[i].statDesc != 'YDS ALW:') {
-                                    viewPlayerStats[viewPlayer.playerID].stats.push(play.runningTotals[i]);
-                                    recordedStats.push(play.runningTotals[i].statDesc);
-                                } else {
-                                    viewPlayerStats[viewPlayer.playerID].statInfo[play.runningTotals[i].statDesc] = play.runningTotals[i];
-                                }
-                            }
-                        } else {
-                            viewPlayerStats[viewPlayer.playerID].totalFpts += play.fpts;
-                            for(let i = 0; i < play.runningTotals.length; i++) {
-                                if(!recordedStats.includes(play.runningTotals[i].statDesc) && play.runningTotals[i].statDesc != 'PTS ALW:' && play.runningTotals[i].statDesc != 'YDS ALW:') {
-                                    viewPlayerStats[viewPlayer.playerID].stats.push(play.runningTotals[i]);
-                                    recordedStats.push(play.runningTotals[i].statDesc);
-                                } else if(play.runningTotals[i].statDesc == 'PTS ALW:' || play.runningTotals[i].statDesc == 'YDS ALW:') {
-                                    viewPlayerStats[viewPlayer.playerID].statInfo[play.runningTotals[i].statDesc] = play.runningTotals[i];
-                                }
-                            }
-                        }
-                    }
-                }
+        if(newFantasyProducts.length > 0 && viewPlayer != null) {
+            let runningTotals = newFantasyProducts[newFantasyProducts.length - 1];
+            viewPlayerStats[viewPlayer.playerID] = {
+                stats: [],
+                totalFpts: runningTotals[viewPlayer.playerID].totalFpts,
             }
-            // now push the DEF pts/yds allow totals objs into the viewPlayer stats array
-            for(const stat in viewPlayerStats[viewPlayer.playerID].statInfo) {
-                viewPlayerStats[viewPlayer.playerID].stats.push(viewPlayerStats[viewPlayer.playerID].statInfo[stat]);
+            for(const stat in runningTotals[viewPlayer.playerID].stats) {
+                viewPlayerStats[viewPlayer.playerID].stats.push(runningTotals[viewPlayer.playerID].stats[stat]);
             }
             displayStats.push(viewPlayerStats[viewPlayer.playerID]);
         } else {
             displayStats = null;
         }
+
+        // let reversedProducts = newFantasyProducts.reverse();            // EXCEPT: def points and yards allowed; with those, the MOST recent plays have the MOST current/final totals
+        // const viewPlayerStats = {};
+        // let recordedStats = [];
+        // let displayStats = [];
+        // if(reversedProducts.length > 0 && viewPlayer != null) {
+        //     for(const products of reversedProducts) {
+        //         for(const play of products) {
+        //             if(play.playerInfo.playerID == viewPlayer.playerID) {
+        //                 if(!viewPlayerStats[viewPlayer.playerID]) {
+        //                     viewPlayerStats[viewPlayer.playerID] = {
+        //                         totalFpts: play.fpts,
+        //                         stats: [],
+        //                         statInfo: {},
+        //                     }
+        //                     for(let i = 0; i < play.runningTotals.length; i++) {
+        //                         if(play.runningTotals[i].statDesc != 'PTS ALW:' && play.runningTotals[i].statDesc != 'YDS ALW:') {
+        //                             viewPlayerStats[viewPlayer.playerID].stats.push(play.runningTotals[i]);
+        //                             recordedStats.push(play.runningTotals[i].statDesc);
+        //                         } else {
+        //                             viewPlayerStats[viewPlayer.playerID].statInfo[play.runningTotals[i].statDesc] = play.runningTotals[i];
+        //                         }
+        //                     }
+        //                 } else {
+        //                     viewPlayerStats[viewPlayer.playerID].totalFpts += play.fpts;
+        //                     for(let i = 0; i < play.runningTotals.length; i++) {
+        //                         if(!recordedStats.includes(play.runningTotals[i].statDesc) && play.runningTotals[i].statDesc != 'PTS ALW:' && play.runningTotals[i].statDesc != 'YDS ALW:') {
+        //                             viewPlayerStats[viewPlayer.playerID].stats.push(play.runningTotals[i]);
+        //                             recordedStats.push(play.runningTotals[i].statDesc);
+        //                         } else if(play.runningTotals[i].statDesc == 'PTS ALW:' || play.runningTotals[i].statDesc == 'YDS ALW:') {
+        //                             viewPlayerStats[viewPlayer.playerID].statInfo[play.runningTotals[i].statDesc] = play.runningTotals[i];
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     // now push the DEF pts/yds allow totals objs into the viewPlayer stats array
+        //     for(const stat in viewPlayerStats[viewPlayer.playerID].statInfo) {
+        //         viewPlayerStats[viewPlayer.playerID].stats.push(viewPlayerStats[viewPlayer.playerID].statInfo[stat]);
+        //     }
+        //     displayStats.push(viewPlayerStats[viewPlayer.playerID]);
+        // } else {
+        //     displayStats = null;
+        // }
         return displayStats;
     }
     $: displayStats = getDisplayStats(viewPlayer);

@@ -1,5 +1,6 @@
 <script>
     import { getPlayByPlay, waitForAll, round } from '$lib/utils/helper'; 
+import { run } from 'svelte/internal';
 
     export let nflTeams, nflMatchups, leagueData, fantasyStarters, managerInfo, playersInfo, gameSelection, fantasyProducts;
 
@@ -299,9 +300,18 @@
         let fantasyProducts = [];
         let fantasyPlay = {};
         const runningTotals = {};
-        const pushRunningTotal = (fpts, statDesc, stat, metric) => {
-            if(!runningTotals[stat]) {
-                runningTotals[stat] = {
+        const pushRunningTotal = (fpts, statDesc, stat, metric, playerID) => {
+            if(!runningTotals[playerID]) {
+                runningTotals[playerID] = {
+                    stats: {},
+                    totalFpts: fpts,
+                    filter: 'password',
+                }
+            } else {
+                runningTotals[playerID].totalFpts += fpts;
+            }
+            if(!runningTotals[playerID].stats[statDesc]) {
+                runningTotals[playerID].stats[statDesc] = {
                     fpts: fpts,
                     occurs: 1,
                     metric: metric,
@@ -309,13 +319,18 @@
                     statDesc,
                 }
             } else {
-                runningTotals[stat].fpts += fpts;
-                runningTotals[stat].occurs ++;
+                runningTotals[playerID].stats[statDesc].fpts += fpts;
+                runningTotals[playerID].stats[statDesc].occurs ++;
                 if(statDesc != 'PTS ALW:' && statDesc != 'YDS ALW:') {
-                    runningTotals[stat].metric += metric;
+                    runningTotals[playerID].stats[statDesc].metric += metric;
+                } else {
+                    if(runningTotals[playerID].stats[statDesc].metric < metric) {
+                        runningTotals[playerID].stats[statDesc].metric = metric;
+                    }
                 }
             }
-            let runningTotal = runningTotals[stat];
+           
+            let runningTotal = runningTotals[playerID].stats[statDesc];
             return runningTotal;
         }
         // const espnScoringIDs = {        // currently only used for reference while coding - 
@@ -461,7 +476,7 @@
                         entryDEF.stat.push('pts_allow');
                     } 
                     if(fpts != 0) {
-                        let runningTotal = pushRunningTotal(fpts, statPTS, curDEFscore.DEFthreshold, awayDefPtsAllowed); 
+                        let runningTotal = pushRunningTotal(fpts, statPTS, curDEFscore.DEFthreshold, awayDefPtsAllowed, defense.playerID); 
                         entryDEF.runningTotals.push(runningTotal);
                         fantasyPlay[play.playID].push(entryDEF);
                     }
@@ -488,7 +503,7 @@
                         entryDEF.stat.push('pts_allow');
                     } 
                     if(fpts != 0) {
-                        let runningTotal = pushRunningTotal(fpts, statPTS, curDEFscore.DEFthreshold, homeDefPtsAllowed); 
+                        let runningTotal = pushRunningTotal(fpts, statPTS, curDEFscore.DEFthreshold, homeDefPtsAllowed, defense.playerID); 
                         entryDEF.runningTotals.push(runningTotal);
                         fantasyPlay[play.playID].push(entryDEF);
                     }
@@ -516,7 +531,7 @@
                                 shortDesc: 'Fumble Recovery',
                             }   
                             if(fpts != 0) {
-                                let runningTotal = pushRunningTotal(fpts, statDesc, entryDEF.stat[0], 1); 
+                                let runningTotal = pushRunningTotal(fpts, statDesc, entryDEF.stat[0], 1, player.playerInfo.playerID); 
                                 entryDEF.runningTotals.push(runningTotal);
                             }
                             fantasyPlay[play.playID].push(entryDEF);
@@ -537,7 +552,7 @@
                                 shortDesc: 'Forced Fumble',
                             }
                             if(fpts != 0) {
-                                let runningTotal = pushRunningTotal(fpts, stat, entryDEF.stat[0], 1); 
+                                let runningTotal = pushRunningTotal(fpts, stat, entryDEF.stat[0], 1, player.playerInfo.playerID); 
                                 entryDEF.runningTotals.push(runningTotal);
                             }
                             fantasyPlay[play.playID].push(entryDEF);
@@ -556,7 +571,7 @@
                                 shortDesc: 'Forced Fumble',
                             }
                             if(fpts != 0) {
-                                let runningTotal = pushRunningTotal(fpts, stat, entryDEF.stat[0], 1); 
+                                let runningTotal = pushRunningTotal(fpts, stat, entryDEF.stat[0], 1, player.playerInfo.playerID); 
                                 entryDEF.runningTotals.push(runningTotal);
                             }
                             fantasyPlay[play.playID].push(entryDEF);
@@ -581,11 +596,11 @@
                             shortDesc: 'Sack',
                         }
                         if(fptsSack != 0) {
-                            let runningTotal = pushRunningTotal(fptsSack, statSack, entryDEF.stat[0], 1); 
+                            let runningTotal = pushRunningTotal(fptsSack, statSack, entryDEF.stat[0], 1, player.playerInfo.playerID); 
                             entryDEF.runningTotals.push(runningTotal);
                         }
                         if(fptsSackYDS != 0) {
-                            let runningTotal = pushRunningTotal(fptsSackYDS, statSackYDS, entryDEF.stat[1], player.yards); 
+                            let runningTotal = pushRunningTotal(fptsSackYDS, statSackYDS, entryDEF.stat[1], player.yards, player.playerInfo.playerID); 
                             entryDEF.runningTotals.push(runningTotal);
                         }
                         fantasyPlay[play.playID].push(entryDEF);
@@ -610,11 +625,11 @@
                             shortDesc: 'Interception',
                         }
                         if(fptsINT != 0) {
-                            let runningTotal = pushRunningTotal(fptsINT, statINT, entryDEF.stat[0], 1); 
+                            let runningTotal = pushRunningTotal(fptsINT, statINT, entryDEF.stat[0], 1, player.playerInfo.playerID); 
                             entryDEF.runningTotals.push(runningTotal);
                         }
                         if(fptsINTyds != 0) {
-                            let runningTotal = pushRunningTotal(fptsINTyds, statINTyds, entryDEF.stat[1], player.yards); 
+                            let runningTotal = pushRunningTotal(fptsINTyds, statINTyds, entryDEF.stat[1], player.yards, player.playerInfo.playerID); 
                             entryDEF.runningTotals.push(runningTotal);
                         }
                         fantasyPlay[play.playID].push(entryDEF);
@@ -640,15 +655,15 @@
                             shortDesc: 'Pick Six',
                         }
                         if(fptsINT != 0) {
-                            let runningTotal = pushRunningTotal(fptsINT, statINT, entryDEF.stat[1], 1); 
+                            let runningTotal = pushRunningTotal(fptsINT, statINT, entryDEF.stat[1], 1, player.playerInfo.playerID); 
                             entryDEF.runningTotals.push(runningTotal);
                         }
                         if(fptsINTyds != 0) {
-                            let runningTotal = pushRunningTotal(fptsINTyds, statINTyds, entryDEF.stat[2], player.yards); 
+                            let runningTotal = pushRunningTotal(fptsINTyds, statINTyds, entryDEF.stat[2], player.yards, player.playerInfo.playerID); 
                             entryDEF.runningTotals.push(runningTotal);
                         }
                         if(fptsDefTD != 0) {
-                            let runningTotal = pushRunningTotal(fptsDefTD, statDefTD, entryDEF.stat[0], 1); 
+                            let runningTotal = pushRunningTotal(fptsDefTD, statDefTD, entryDEF.stat[0], 1, player.playerInfo.playerID); 
                             entryDEF.runningTotals.push(runningTotal);
                         }
                         fantasyPlay[play.playID].push(entryDEF);
@@ -669,7 +684,7 @@
                             shortDesc: 'Kickoff Return',
                         }
                         if(fpts != 0) {
-                            let runningTotal = pushRunningTotal(fpts, stat, entryDEF.stat[0], player.yards); 
+                            let runningTotal = pushRunningTotal(fpts, stat, entryDEF.stat[0], player.yards, player.playerInfo.playerID); 
                             entryDEF.runningTotals.push(runningTotal);
                         }
                         fantasyPlay[play.playID].push(entryDEF);
@@ -693,11 +708,11 @@
                             shortDesc: 'Punt',
                         }
                         if(fptsPunt != 0) {
-                            let runningTotal = pushRunningTotal(fptsPunt, statPunt, entryDEF.stat[1], 1); 
+                            let runningTotal = pushRunningTotal(fptsPunt, statPunt, entryDEF.stat[1], 1, player.playerInfo.playerID); 
                             entryDEF.runningTotals.push(runningTotal);
                         }
                         if(fptsPuntReturn != 0) {
-                            let runningTotal = pushRunningTotal(fptsPuntReturn, statPuntReturn, entryDEF.stat[0], player.yards); 
+                            let runningTotal = pushRunningTotal(fptsPuntReturn, statPuntReturn, entryDEF.stat[0], player.yards, player.playerInfo.playerID); 
                             entryDEF.runningTotals.push(runningTotal);
                         }
                         fantasyPlay[play.playID].push(entryDEF);
@@ -721,11 +736,11 @@
                             shortDesc: 'Kick Six',
                         }
                         if(fptsKick != 0) {
-                            let runningTotal = pushRunningTotal(fptsKick, statKick, entryDEF.stat[0], player.yards); 
+                            let runningTotal = pushRunningTotal(fptsKick, statKick, entryDEF.stat[0], player.yards, player.playerInfo.playerID); 
                             entryDEF.runningTotals.push(runningTotal);
                         }
                         if(fptsTD != 0) {
-                            let runningTotal = pushRunningTotal(fptsTD, statTD, entryDEF.stat[1], 1); 
+                            let runningTotal = pushRunningTotal(fptsTD, statTD, entryDEF.stat[1], 1, player.playerInfo.playerID); 
                             entryDEF.runningTotals.push(runningTotal);
                         }
                         fantasyPlay[play.playID].push(entryDEF);
@@ -746,7 +761,7 @@
                             shortDesc: 'Blocked Field Goal',
                         }
                         if(fpts != 0) {
-                            let runningTotal = pushRunningTotal(fpts, stat, entryDEF.stat[0], 1); 
+                            let runningTotal = pushRunningTotal(fpts, stat, entryDEF.stat[0], 1, player.playerInfo.playerID); 
                             entryDEF.runningTotals.push(runningTotal);
                         }
                         fantasyPlay[play.playID].push(entryDEF);
@@ -773,7 +788,7 @@
                             shortDesc: 'Fumble',
                         }       
                         if(fpts != 0) {
-                            let runningTotal = pushRunningTotal(fpts, statFF, entry.stat[0], 1); 
+                            let runningTotal = pushRunningTotal(fpts, statFF, entry.stat[0], 1, player.playerInfo.playerID); 
                             entry.runningTotals.push(runningTotal);
                         }            
                         if(play.teamStartPoss != play.teamEndPoss && score.fum_lost) {      // PENALTY for FUMBLE -> TURNOVER
@@ -782,7 +797,7 @@
                             entry.shortDesc += ' (Fumble Turnover)';
                             const statFL = 'FUM TO:';
                             if(score.fum_lost != 0) {
-                                let runningTotal = pushRunningTotal(score.fum_lost, statFL, entry.stat[1], 1); 
+                                let runningTotal = pushRunningTotal(score.fum_lost, statFL, entry.stat[1], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                         }
@@ -804,7 +819,7 @@
                                         shortDesc: 'Fumble Recovery',
                                     }
                                     if(entryIDP.fpts != 0) {
-                                        let runningTotal = pushRunningTotal(entryIDP.fpts, stat, entryIDP.stat[0], 1); 
+                                        let runningTotal = pushRunningTotal(entryIDP.fpts, stat, entryIDP.stat[0], 1, player.playerInfo.playerID); 
                                         entryIDP.runningTotals.push(runningTotal);
                                     }
                                     fantasyPlay[play.playID].push(entryIDP);
@@ -827,7 +842,7 @@
                                         shortDesc: 'Forced Fumble',
                                     }
                                     if(fpts != 0) {
-                                        let runningTotal = pushRunningTotal(fpts, stat, entryIDP.stat[0], 1); 
+                                        let runningTotal = pushRunningTotal(fpts, stat, entryIDP.stat[0], 1, player.playerInfo.playerID); 
                                         entryIDP.runningTotals.push(runningTotal);
                                     }
                                     fantasyPlay[play.playID].push(entryIDP);
@@ -852,11 +867,11 @@
                             shortDesc: 'Rush',
                         }
                         if(fptsRun != 0) {
-                            let runningTotal = pushRunningTotal(fptsRun, statRun, entry.stat[1], 1); 
+                            let runningTotal = pushRunningTotal(fptsRun, statRun, entry.stat[1], 1, player.playerInfo.playerID); 
                             entry.runningTotals.push(runningTotal);
                         }
                         if(fptsRunYDS != 0) {
-                            let runningTotal = pushRunningTotal(fptsRunYDS, statRunYDS, entry.stat[0], player.yards); 
+                            let runningTotal = pushRunningTotal(fptsRunYDS, statRunYDS, entry.stat[0], player.yards, player.playerInfo.playerID); 
                             entry.runningTotals.push(runningTotal);
                         }
                         if(player.yards >= 40 && score.rush_40p) {          // RUSH YD BONUS
@@ -864,7 +879,7 @@
                             entry.stat.push('rush_40p');
                             const stat = 'RUSH(40):';
                             if(fptsRun != 0) {
-                                let runningTotal = pushRunningTotal(score.rush_40p, stat, entry.stat[2], 1); 
+                                let runningTotal = pushRunningTotal(score.rush_40p, stat, entry.stat[2], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                         }
@@ -890,15 +905,15 @@
                             shortDesc: 'Rushing Touchdown',
                         }
                         if(fptsRun != 0) {
-                            let runningTotal = pushRunningTotal(fptsRun, statRun, entry.stat[1], 1); 
+                            let runningTotal = pushRunningTotal(fptsRun, statRun, entry.stat[1], 1, player.playerInfo.playerID); 
                             entry.runningTotals.push(runningTotal);
                         }
                         if(fptsRunYDS != 0) {
-                            let runningTotal = pushRunningTotal(fptsRunYDS, statRunYDS, entry.stat[0], player.yards); 
+                            let runningTotal = pushRunningTotal(fptsRunYDS, statRunYDS, entry.stat[0], player.yards, player.playerInfo.playerID); 
                             entry.runningTotals.push(runningTotal);
                         }
                         if(fptsRunTD != 0) {
-                            let runningTotal = pushRunningTotal(fptsRunTD, statRunTD, entry.stat[2], 1); 
+                            let runningTotal = pushRunningTotal(fptsRunTD, statRunTD, entry.stat[2], 1, player.playerInfo.playerID); 
                             entry.runningTotals.push(runningTotal);
                         }
                         if(40 <= player.yards && player.yards < 50 && score.rush_td_40p) {          // RUSH TD YD BONUS
@@ -906,7 +921,7 @@
                             entry.stat.push('rush_td_40p');
                             const stat = 'RUSH(TD40):';
                             if(score.rush_td_40p != 0) {
-                                let runningTotal = pushRunningTotal(score.rush_td_40p, stat, entry.stat[3], 1); 
+                                let runningTotal = pushRunningTotal(score.rush_td_40p, stat, entry.stat[3], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                         } else if(player.yards >= 50 && score.rush_td_50p) {
@@ -914,7 +929,7 @@
                             entry.stat.push('rush_td_50p');
                             const stat = 'RUSH(TD50):';
                             if(score.rush_td_50p != 0) {
-                                let runningTotal = pushRunningTotal(score.rush_td_50p, stat, entry.stat[3], 1); 
+                                let runningTotal = pushRunningTotal(score.rush_td_50p, stat, entry.stat[3], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                         }
@@ -940,15 +955,15 @@
                                 shortDesc: 'Interception Thrown',
                             }  
                             if(fptsINT != 0) {
-                                let runningTotal = pushRunningTotal(fptsINT, statINT, entry.stat[0], 1); 
+                                let runningTotal = pushRunningTotal(fptsINT, statINT, entry.stat[0], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(fptsPass != 0) {
-                                let runningTotal = pushRunningTotal(fptsPass, statPass, entry.stat[1], 1); 
+                                let runningTotal = pushRunningTotal(fptsPass, statPass, entry.stat[1], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(fptsInc != 0) {
-                                let runningTotal = pushRunningTotal(fptsInc, statInc, entry.stat[2], 1); 
+                                let runningTotal = pushRunningTotal(fptsInc, statInc, entry.stat[2], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             fantasyPlay[play.playID].push(entry);
@@ -975,15 +990,15 @@
                                 shortDesc: 'Pick Six',
                             }
                             if(fptsINT != 0) {
-                                let runningTotal = pushRunningTotal(fptsINT, statINT, entryIDP.stat[0], 1); 
+                                let runningTotal = pushRunningTotal(fptsINT, statINT, entryIDP.stat[0], 1, player.playerInfo.playerID); 
                                 entryIDP.runningTotals.push(runningTotal);
                             }
                             if(fptsINTyds != 0) {
-                                let runningTotal = pushRunningTotal(fptsINTyds, statINTyds, entryIDP.stat[2], player.yards); 
+                                let runningTotal = pushRunningTotal(fptsINTyds, statINTyds, entryIDP.stat[2], player.yards, player.playerInfo.playerID); 
                                 entryIDP.runningTotals.push(runningTotal);
                             }
                             if(fptsTD != 0) {
-                                let runningTotal = pushRunningTotal(fptsTD, statTD, entryIDP.stat[1], 1); 
+                                let runningTotal = pushRunningTotal(fptsTD, statTD, entryIDP.stat[1], 1, player.playerInfo.playerID); 
                                 entryIDP.runningTotals.push(runningTotal);
                             }
                             if(player.yards >= 50 && score.bonus_def_int_td_50p) {                  // P6 IDP YD BONUS
@@ -991,7 +1006,7 @@
                                 entryIDP.stat.push('bonus_def_int_td_50p');
                                 const stat = 'INT TD(50):';
                                 if(score.bonus_def_int_td_50p != 0) {
-                                    let runningTotal = pushRunningTotal(score.bonus_def_int_td_50p, stat, entryIDP.stat[3], 1); 
+                                    let runningTotal = pushRunningTotal(score.bonus_def_int_td_50p, stat, entryIDP.stat[3], 1, player.playerInfo.playerID); 
                                     entryIDP.runningTotals.push(runningTotal);
                                 }
                             }
@@ -1019,19 +1034,19 @@
                                 shortDesc: 'Pick Six Thrown',
                             }  
                             if(fptsINT != 0) {
-                                let runningTotal = pushRunningTotal(fptsINT, statINT, entry.stat[0], 1); 
+                                let runningTotal = pushRunningTotal(fptsINT, statINT, entry.stat[0], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(fptsPass != 0) {
-                                let runningTotal = pushRunningTotal(fptsPass, statPass, entry.stat[3], 1); 
+                                let runningTotal = pushRunningTotal(fptsPass, statPass, entry.stat[3], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(fptsInc != 0) {
-                                let runningTotal = pushRunningTotal(fptsInc, statInc, entry.stat[1], 1); 
+                                let runningTotal = pushRunningTotal(fptsInc, statInc, entry.stat[1], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(fptsTD != 0) {
-                                let runningTotal = pushRunningTotal(fptsTD, statTD, entry.stat[2], 1); 
+                                let runningTotal = pushRunningTotal(fptsTD, statTD, entry.stat[2], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             fantasyPlay[play.playID].push(entry);
@@ -1058,15 +1073,15 @@
                                 shortDesc: 'Pass Complete',
                             }   
                             if(fptsYDS != 0) {
-                                let runningTotal = pushRunningTotal(fptsYDS, statYDS, entry.stat[0], player.yards); 
+                                let runningTotal = pushRunningTotal(fptsYDS, statYDS, entry.stat[0], player.yards, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(fptsPass != 0) {
-                                let runningTotal = pushRunningTotal(fptsPass, statPass, entry.stat[1], 1); 
+                                let runningTotal = pushRunningTotal(fptsPass, statPass, entry.stat[1], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(fptsCmp != 0) {
-                                let runningTotal = pushRunningTotal(fptsCmp, statCmp, entry.stat[2], 1); 
+                                let runningTotal = pushRunningTotal(fptsCmp, statCmp, entry.stat[2], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }   
                             if(player.yards >= 40 && score.pass_cmp_40p) {          // PASS YD BONUS
@@ -1074,7 +1089,7 @@
                                 entry.stat.push('pass_cmp_40p');
                                 const stat = 'CMP(40):';
                                 if(score.pass_cmp_40p != 0) {
-                                    let runningTotal = pushRunningTotal(score.pass_cmp_40p, stat, entry.stat[3], 1); 
+                                    let runningTotal = pushRunningTotal(score.pass_cmp_40p, stat, entry.stat[3], 1, player.playerInfo.playerID); 
                                     entry.runningTotals.push(runningTotal);
                                 }
                             }
@@ -1096,7 +1111,7 @@
                                 shortDesc: 'Reception',
                             }
                             if(fptsRec != 0) {
-                                let runningTotal = pushRunningTotal(fptsRec, statRec, entry.stat[1], 1); 
+                                let runningTotal = pushRunningTotal(fptsRec, statRec, entry.stat[1], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(0 < player.yards && player.yards < 5 && score.rec_0_4) {     // RECEPTION YD BONUS
@@ -1120,28 +1135,28 @@
                             }
                             const statYDS = 'REC YDS:';
                             if(entry.fpts != 0) {
-                                let runningTotal = pushRunningTotal(entry.fpts, statYDS, entry.stat[0], player.yards); 
+                                let runningTotal = pushRunningTotal(entry.fpts, statYDS, entry.stat[0], player.yards, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(player.playerInfo.pos == 'RB' && score.bonus_rec_rb) {   // RECEPTION POS BONUS
                                 entry.fpts += score.bonus_rec_rb;
                                 entry.stat.push('bonus_rec_rb');
                                 if(score.bonus_rec_rb != 0) {
-                                    let runningTotal = pushRunningTotal(score.bonus_rec_rb, statRec, entry.stat[2], 0); 
+                                    let runningTotal = pushRunningTotal(score.bonus_rec_rb, statRec, entry.stat[2], 0, player.playerInfo.playerID); 
                                     entry.runningTotals.push(runningTotal);
                                 }
                             } else if(player.playerInfo.pos == 'TE' && score.bonus_rec_te) {   
                                 entry.fpts += score.bonus_rec_te;
                                 entry.stat.push('bonus_rec_te');
                                 if(score.bonus_rec_te != 0) {
-                                    let runningTotal = pushRunningTotal(score.bonus_rec_te, statRec, entry.stat[2], 0); 
+                                    let runningTotal = pushRunningTotal(score.bonus_rec_te, statRec, entry.stat[2], 0, player.playerInfo.playerID); 
                                     entry.runningTotals.push(runningTotal);
                                 }
                             } else if(player.playerInfo.pos == 'WR' && score.bonus_rec_wr) {   
                                 entry.fpts += score.bonus_rec_wr;
                                 entry.stat.push('bonus_rec_wr');
                                 if(score.bonus_rec_wr != 0) {
-                                    let runningTotal = pushRunningTotal(score.bonus_rec_wr, statRec, entry.stat[2], 0); 
+                                    let runningTotal = pushRunningTotal(score.bonus_rec_wr, statRec, entry.stat[2], 0, player.playerInfo.playerID); 
                                     entry.runningTotals.push(runningTotal);
                                 }
                             }
@@ -1171,19 +1186,19 @@
                                 shortDesc: 'Passing Touchdown',
                             }
                             if(fptsYDS != 0) {
-                                let runningTotal = pushRunningTotal(fptsYDS, statYDS, entry.stat[0], player.yards); 
+                                let runningTotal = pushRunningTotal(fptsYDS, statYDS, entry.stat[0], player.yards, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(fptsPass != 0) {
-                                let runningTotal = pushRunningTotal(fptsPass, statPass, entry.stat[3], 1); 
+                                let runningTotal = pushRunningTotal(fptsPass, statPass, entry.stat[3], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(fptsCmp != 0) {
-                                let runningTotal = pushRunningTotal(fptsCmp, statCmp, entry.stat[2], 1); 
+                                let runningTotal = pushRunningTotal(fptsCmp, statCmp, entry.stat[2], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(fptsTD != 0) {
-                                let runningTotal = pushRunningTotal(fptsTD, statTD, entry.stat[1], 1); 
+                                let runningTotal = pushRunningTotal(fptsTD, statTD, entry.stat[1], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(40 <= player.yards && player.yards < 50 && score.pass_td_40p) {          // PASSING TD YD BONUS
@@ -1191,7 +1206,7 @@
                                 entry.stat.push('pass_td_40p');
                                 const stat = 'Pass TD(40):';
                                 if(score.pass_td_40p != 0) {
-                                    let runningTotal = pushRunningTotal(score.pass_td_40p, stat, entry.stat[4], 1); 
+                                    let runningTotal = pushRunningTotal(score.pass_td_40p, stat, entry.stat[4], 1, player.playerInfo.playerID); 
                                     entry.runningTotals.push(runningTotal);
                                 }
                             } else if(player.yards >= 50 && score.pass_td_50p) {
@@ -1199,7 +1214,7 @@
                                 entry.stat.push('pass_td_50p');
                                 const stat = 'Pass TD(50):';
                                 if(score.pass_td_50p != 0) {
-                                    let runningTotal = pushRunningTotal(score.pass_td_50p, stat, entry.stat[4], 1); 
+                                    let runningTotal = pushRunningTotal(score.pass_td_50p, stat, entry.stat[4], 1, player.playerInfo.playerID); 
                                     entry.runningTotals.push(runningTotal);
                                 }
                             }
@@ -1225,15 +1240,15 @@
                                 shortDesc: 'Receiving Touchdown',
                             }
                             if(fptsYDS != 0) {
-                                let runningTotal = pushRunningTotal(fptsYDS, statYDS, entry.stat[0], player.yards); 
+                                let runningTotal = pushRunningTotal(fptsYDS, statYDS, entry.stat[0], player.yards, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(fptsRec != 0) {
-                                let runningTotal = pushRunningTotal(fptsRec, statRec, entry.stat[2], 1); 
+                                let runningTotal = pushRunningTotal(fptsRec, statRec, entry.stat[2], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(fptsTD != 0) {
-                                let runningTotal = pushRunningTotal(fptsTD, statTD, entry.stat[1], 1); 
+                                let runningTotal = pushRunningTotal(fptsTD, statTD, entry.stat[1], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(40 <= player.yards && player.yards < 50 && score.rec_td_40p) {          // RECEIVING TD YD BONUS
@@ -1241,7 +1256,7 @@
                                 entry.stat.push('rec_td_40p');
                                 const stat = 'REC TD(40):';
                                 if(score.rec_td_40p != 0) {
-                                    let runningTotal = pushRunningTotal(score.rec_td_40p, stat, entry.stat[3], 1); 
+                                    let runningTotal = pushRunningTotal(score.rec_td_40p, stat, entry.stat[3], 1, player.playerInfo.playerID); 
                                     entry.runningTotals.push(runningTotal);
                                 }
                             } else if(player.yards >= 50 && score.rec_td_50p) {
@@ -1249,7 +1264,7 @@
                                 entry.stat.push('rec_td_50p');
                                 const stat = 'REC TD(50):';
                                 if(score.rec_td_50p != 0) {
-                                    let runningTotal = pushRunningTotal(score.rec_td_50p, stat, entry.stat[3], 1); 
+                                    let runningTotal = pushRunningTotal(score.rec_td_50p, stat, entry.stat[3], 1, player.playerInfo.playerID); 
                                     entry.runningTotals.push(runningTotal);
                                 }
                             }
@@ -1273,11 +1288,11 @@
                             shortDesc: 'Pass Incomplete',
                         }
                         if(fptsPass != 0) {
-                            let runningTotal = pushRunningTotal(fptsPass, statPass, entry.stat[1], 1); 
+                            let runningTotal = pushRunningTotal(fptsPass, statPass, entry.stat[1], 1, player.playerInfo.playerID); 
                             entry.runningTotals.push(runningTotal);
                         }
                         if(fptsInc != 0) {
-                            let runningTotal = pushRunningTotal(fptsInc, statInc, entry.stat[0], 1); 
+                            let runningTotal = pushRunningTotal(fptsInc, statInc, entry.stat[0], 1, player.playerInfo.playerID); 
                             entry.runningTotals.push(runningTotal);
                         }
                         fantasyPlay[play.playID].push(entry);
@@ -1297,7 +1312,7 @@
                                 shortDesc: 'Sacked',
                             }
                             if(fpts != 0) {
-                                let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], 1); 
+                                let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             fantasyPlay[play.playID].push(entry);
@@ -1321,11 +1336,11 @@
                             shortDesc: 'Field Goal Made',
                         }
                         if(fptsFG != 0) {
-                            let runningTotal = pushRunningTotal(fptsFG, statFG, entry.stat[0], 1); 
+                            let runningTotal = pushRunningTotal(fptsFG, statFG, entry.stat[0], 1, player.playerInfo.playerID); 
                             entry.runningTotals.push(runningTotal);
                         }
                         if(fptsFGyds != 0) {
-                            let runningTotal = pushRunningTotal(fptsFGyds, statFGyds, entry.stat[1], player.yards); 
+                            let runningTotal = pushRunningTotal(fptsFGyds, statFGyds, entry.stat[1], player.yards, player.playerInfo.playerID); 
                             entry.runningTotals.push(runningTotal);
                         }
                         if(0 < player.yards && player.yards < 20 && score.fgm_0_19) {           // FG YD BONUS
@@ -1333,7 +1348,7 @@
                             entry.stat.push(score.fgm_0_19);
                             const stat = 'FG(0-19):';
                             if(score.fgm_0_19 != 0) {
-                                let runningTotal = pushRunningTotal(score.fgm_0_19, stat, entry.stat[2], 1); 
+                                let runningTotal = pushRunningTotal(score.fgm_0_19, stat, entry.stat[2], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                         } else if(19 < player.yards && player.yards < 30 && score.fgm_20_29) {
@@ -1341,7 +1356,7 @@
                             entry.stat.push(score.fgm_20_29);
                             const stat = 'FG(20-29):';
                             if(score.fgm_20_29 != 0) {
-                                let runningTotal = pushRunningTotal(score.fgm_20_29, stat, entry.stat[2], 1); 
+                                let runningTotal = pushRunningTotal(score.fgm_20_29, stat, entry.stat[2], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                         } else if(29 < player.yards) {
@@ -1351,7 +1366,7 @@
                                 const sleepStat = 'score.fgm_yds_over_30';
                                 const stat = 'FG(30+):';
                                 if(score.fgm_yds_over_30 != 0) {
-                                    let runningTotal = pushRunningTotal(score.fgm_yards_over_30, stat, sleepStat, 1); 
+                                    let runningTotal = pushRunningTotal(score.fgm_yards_over_30, stat, sleepStat, 1, player.playerInfo.playerID); 
                                     entry.runningTotals.push(runningTotal);
                                 }
                             }
@@ -1361,7 +1376,7 @@
                                 const sleepStat = 'score.fgm_30_39';
                                 const stat = 'FG(30-39):';
                                 if(score.fgm_30_39 != 0) {
-                                    let runningTotal = pushRunningTotal(score.fgm_30_39, stat, sleepStat, 1); 
+                                    let runningTotal = pushRunningTotal(score.fgm_30_39, stat, sleepStat, 1, player.playerInfo.playerID); 
                                     entry.runningTotals.push(runningTotal);
                                 }
                             } else if(39 < player.yards && player.yards < 50 && score.fgm_40_49) {
@@ -1370,7 +1385,7 @@
                                 const sleepStat = 'score.fgm_40_49';
                                 const stat = 'FG(40-49):';
                                 if(score.fgm_40_49 != 0) {
-                                    let runningTotal = pushRunningTotal(score.fgm_40_49, stat, sleepStat, 1); 
+                                    let runningTotal = pushRunningTotal(score.fgm_40_49, stat, sleepStat, 1, player.playerInfo.playerID); 
                                     entry.runningTotals.push(runningTotal);
                                 }
                             } else if(player.yards >= 50 && score.fgm_50p) {
@@ -1379,7 +1394,7 @@
                                 const sleepStat = 'score.fgm_50p';
                                 const stat = 'FG(50+):';
                                 if(score.fgm_50p != 0) {
-                                    let runningTotal = pushRunningTotal(score.fgm_50p, stat, sleepStat, 1); 
+                                    let runningTotal = pushRunningTotal(score.fgm_50p, stat, sleepStat, 1, player.playerInfo.playerID); 
                                     entry.runningTotals.push(runningTotal);
                                 }
                             } 
@@ -1401,7 +1416,7 @@
                             shortDesc: 'Field Goal Missed',
                         }   
                         if(fpts != 0) {
-                            let runningTotal = pushRunningTotal(fpts, statFG, entry.stat[0], 1); 
+                            let runningTotal = pushRunningTotal(fpts, statFG, entry.stat[0], 1, player.playerInfo.playerID); 
                             entry.runningTotals.push(runningTotal);
                         }
                         if(0 < player.yards && player.yards < 20 && score.fgmiss_0_19) {           // MISSED FG YD PENALTY
@@ -1409,7 +1424,7 @@
                             entry.stat.push(score.fgmiss_0_19);
                             const stat = 'FG MISS(0-19):';
                             if(score.fgmiss_0_19 != 0) {
-                                let runningTotal = pushRunningTotal(score.fgmiss_0_19, stat, entry.stat[1], 1); 
+                                let runningTotal = pushRunningTotal(score.fgmiss_0_19, stat, entry.stat[1], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                         } else if(19 < player.yards && player.yards < 30 && score.fgmiss_20_29) {
@@ -1417,7 +1432,7 @@
                             entry.stat.push(score.fgmiss_20_29);  
                             const stat = 'FG MISS(20-29):';
                             if(score.fgmiss_20_29 != 0) {
-                                let runningTotal = pushRunningTotal(score.fgmiss_20_29, stat, entry.stat[1], 1); 
+                                let runningTotal = pushRunningTotal(score.fgmiss_20_29, stat, entry.stat[1], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                         } else if(29 < player.yards && player.yards < 40 && score.fgmiss_30_39) {
@@ -1425,7 +1440,7 @@
                             entry.stat.push(score.fgmiss_30_39); 
                             const stat = 'FG MISS(30-39):';
                             if(score.fgmiss_30_39 != 0) {
-                                let runningTotal = pushRunningTotal(score.fgmiss_30_39, stat, entry.stat[1], 1); 
+                                let runningTotal = pushRunningTotal(score.fgmiss_30_39, stat, entry.stat[1], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                         } else if(39 < player.yards && player.yards < 50 && score.fgmiss_40_49) {
@@ -1433,7 +1448,7 @@
                             entry.stat.push(score.fgmiss_40_49);    
                             const stat = 'FG MISS(40-49):';
                             if(score.fgmiss_40_49 != 0) {
-                                let runningTotal = pushRunningTotal(score.fgmiss_40_49, stat, entry.stat[1], 1); 
+                                let runningTotal = pushRunningTotal(score.fgmiss_40_49, stat, entry.stat[1], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                         } else if(player.yards >= 50 && score.fgmiss_50p) {
@@ -1441,7 +1456,7 @@
                             entry.stat.push(score.fgmiss_50p);  
                             const stat = 'FG MISS(50+):';
                             if(score.fgmiss_50p != 0) {
-                                let runningTotal = pushRunningTotal(score.fgmiss_50p, stat, entry.stat[1], 1); 
+                                let runningTotal = pushRunningTotal(score.fgmiss_50p, stat, entry.stat[1], 1, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                         } 
@@ -1464,7 +1479,7 @@
                                         shortDesc: 'PAT Missed',
                                     }   
                                     if(fpts != 0) {
-                                        let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], 1); 
+                                        let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], 1, player.playerInfo.playerID); 
                                         entry.runningTotals.push(runningTotal);
                                     }
                                     fantasyPlay[play.playID].push(entry);                                                                                    
@@ -1485,7 +1500,7 @@
                                         shortDesc: 'PAT Made',
                                     }   
                                     if(fpts != 0) {
-                                        let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], 1); 
+                                        let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], 1, player.playerInfo.playerID); 
                                         entry.runningTotals.push(runningTotal);
                                     }
                                     fantasyPlay[play.playID].push(entry);                                                                                    
@@ -1506,7 +1521,7 @@
                                 shortDesc: 'Kick Return',
                             }
                             if(fpts != 0) {
-                                let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], player.yards); 
+                                let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], player.yards, player.playerInfo.playerID); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             fantasyPlay[play.playID].push(entry);
@@ -1543,7 +1558,7 @@
                     entryDEF.stat.push('yds_allow');
                 } 
                 if(fpts != 0) {
-                    let runningTotal = pushRunningTotal(fpts, statYDS, curDEFscore.DEFthreshold, play.new); 
+                    let runningTotal = pushRunningTotal(fpts, statYDS, curDEFscore.DEFthreshold, play.new, defense.playerID); 
                     entryDEF.runningTotals.push(runningTotal);
                     fantasyPlay[play.playInfo.playID].push(entryDEF);
                 }                
@@ -1568,7 +1583,7 @@
                     entryDEF.stat.push('yds_allow');
                 } 
                 if(fpts != 0) {
-                    let runningTotal = pushRunningTotal(fpts, statYDS, curDEFscore.DEFthreshold, play.new); 
+                    let runningTotal = pushRunningTotal(fpts, statYDS, curDEFscore.DEFthreshold, play.new, defense.playerID); 
                     entryDEF.runningTotals.push(runningTotal);
                     fantasyPlay[play.playInfo.playID].push(entryDEF);
                 }
@@ -1594,7 +1609,7 @@
                     shortDesc: 'Points Allowed (0)',
                 }   
                 if(fptsPTS != 0) {
-                    let runningTotal = pushRunningTotal(fptsPTS, statPTS, entryDEFpts.stat[0], 0); 
+                    let runningTotal = pushRunningTotal(fptsPTS, statPTS, entryDEFpts.stat[0], 0, team.playerID); 
                     entryDEFpts.runningTotals.push(runningTotal);
                 } 
                 const entryDEFyds = {
@@ -1609,7 +1624,7 @@
                     shortDesc: 'Yards Allowed (0)',
                 }   
                 if(fptsYDS != 0) {
-                    let runningTotal = pushRunningTotal(fptsYDS, statYDS, entryDEFyds.stat[0], 0); 
+                    let runningTotal = pushRunningTotal(fptsYDS, statYDS, entryDEFyds.stat[0], 0, team.playerID); 
                     entryDEFyds.runningTotals.push(runningTotal);
                 }
                 fantasyPlay[9999999] = [];
@@ -1637,7 +1652,7 @@
                     shortDesc: 'Points Allowed (0)',
                 }   
                 if(fptsPTS != 0) {
-                    let runningTotal = pushRunningTotal(fptsPTS, statPTS, entryDEF.stat[0], 0); 
+                    let runningTotal = pushRunningTotal(fptsPTS, statPTS, entryDEF.stat[0], 0, team.playerID); 
                     entryDEF.runningTotals.push(runningTotal);
                 }
                 const entryDEFyds = {
@@ -1652,7 +1667,7 @@
                     shortDesc: 'Yards Allowed (0)',
                 }   
                 if(fptsYDS != 0) {
-                    let runningTotal = pushRunningTotal(fptsYDS, statYDS, entryDEFyds.stat[0], 0); 
+                    let runningTotal = pushRunningTotal(fptsYDS, statYDS, entryDEFyds.stat[0], 0, team.playerID); 
                     entryDEFyds.runningTotals.push(runningTotal);
                 }
                 fantasyPlay[9999999] = [];
@@ -1665,6 +1680,7 @@
         }
 
         fantasyProducts = fantasyProducts.sort((a, b) => b[0]?.order - a[0]?.order);
+        fantasyProducts.push(runningTotals);
         
         return fantasyProducts; 
     }
@@ -1811,7 +1827,7 @@
             {:else}
                 {#each fantasyProducts as fantasyProduct}
                     <div class="playContainer">
-                        {#if fantasyProduct[0] && fantasyProduct[0]?.fpts != 0}
+                        {#if  Object.keys(fantasyProduct)[0]?.filter != 'password' && fantasyProduct[0] && fantasyProduct[0]?.fpts != 0}
                             {#each fantasyProduct as play}
                                 <div class="playMainRow">
                                     <div class="{play.fpts > 0 ? "pointsPositive" : "pointsNegative"}">
