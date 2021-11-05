@@ -31,7 +31,10 @@
                         avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                         teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t.toLowerCase()}.png`,
                         teamColor: `background-color: #${nflTeams[starterInfo.t].color}6b`,
-                        teamAltColor: `background-color: #${nflTeams[starterInfo.t].alternateColor}6b`,
+                        teamAltColor: `background-color: #${nflTeams[starterInfo.t].alternateColor}52`,
+                    }
+                    if(nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
+                        starterEntry.teamAltColor = `background-color: #ffffff52`;
                     }
                     if(!gameStarters[recordManID]) {
                         gameStarters[recordManID] = [];
@@ -506,7 +509,7 @@
                                     {#each player.stats as statCat}  
                                         <div class="statWrap" style="{viewPlayer.teamColor}">
                                             <div class="statCat">{statCat.statDesc}</div>
-                                            <div class="statMetric">{statCat.metric}</div>
+                                            <div class="statMetric" style="{viewPlayer.teamAltColor}">{statCat.metric}</div>
                                             <div class="statFpts">{round(statCat.fpts)}</div>
                                         </div>
                                     {/each}
