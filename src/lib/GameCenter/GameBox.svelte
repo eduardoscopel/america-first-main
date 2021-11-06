@@ -1,9 +1,15 @@
 <script>
-    import {round} from '$lib/utils/helper'; 
+    import AllManagers from '$lib/Managers/AllManagers.svelte';
+import {round} from '$lib/utils/helper'; 
 
-    export let nflTeams, nflMatchups, leagueData, playersInfo, fantasyStarters, managerInfo, fantasyProducts, gameSelection;
+    export let nflTeams, nflMatchups, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, fantasyProducts, gameSelection;
     
     const score = leagueData.scoring_settings;
+    // create top 10 points-scorers arrays for each position
+    const positionRankArrays = {};
+    for(const position in positionLeaders) {
+        positionRankArrays[position] = positionLeaders[position].slice(0, 10);
+    }
 
     const displayGame = (gameSelection) => {
         let game = nflMatchups.filter(m => m[0].gameID == gameSelection)[0];
@@ -67,6 +73,7 @@
     $: gameManagers = displayManagers(gameStarters);
 
     let viewPlayer;
+    let positionLB;
     export const changePlayer = (playerID) => {
         if(playerID == 'flush') {
             viewPlayer = null;
@@ -89,17 +96,25 @@
             viewPlayerStats[viewPlayer.playerID] = {
                 stats: [],
                 totalFpts: runningTotals[viewPlayer.playerID].totalFpts,
+                playerID: viewPlayer.playerID,
             }
             for(const stat in runningTotals[viewPlayer.playerID].stats) {
                 viewPlayerStats[viewPlayer.playerID].stats.push(runningTotals[viewPlayer.playerID].stats[stat]);
             }
             displayStats.push(viewPlayerStats[viewPlayer.playerID]);
+            positionLB = runningTotals[viewPlayer.playerID].pos;
         } else {
             displayStats = null;
         }
         return displayStats;
     }
     $: displayStats = getDisplayStats(viewPlayer);
+
+    const getPositionLeaders = (positionLB) => {
+        let positionLeaderboard = positionRankArrays[positionLB];
+        return positionLeaderboard;
+    }
+    $: positionLeaderboard = getPositionLeaders(positionLB);
 </script>
 
 <style>
@@ -110,11 +125,16 @@
         flex-wrap: wrap;
         z-index: auto;
         margin: 0.2em 0.2em 0.8em 0.2em;
-        width: 99%;
+        width: 100%;
         height: 40em;
 		background-color: #222;
         border-radius: 1em;
         padding: 0.5em;
+        align-content: center;
+        align-self: center;
+        align-items: center;
+        justify-content: center;
+        justify-items: center;
     }
 
     .fptsContainer {
@@ -193,11 +213,10 @@
     .viewPlayer {
         position: relative;
         display: inline-flex;
-        width: 35%;
+        width: 70%;
         height: 30%;
         border-radius: 1em;
         background-color: var(--f3f3f3);
-        right: -6em;
         padding: 0.2em;
     }
 
@@ -271,14 +290,78 @@
         top: 0.2em;
     }
 
+    .posPlayerName {
+        position: relative;
+        display: inline-flex;
+        top: 0.4em;
+        font-size: 1.2em;
+        width: 9em;
+        justify-content: flex-start;
+        color: #ededed;
+    }
+
+    .posPlayerAvatar {
+        display: inline-flex;
+        position: relative;
+        align-items: center;
+        width: 55px;
+        height: fit-content;
+        justify-content: center;
+    }
+
+    .posDefenseAvatar {
+        display: inline-flex;
+        position: relative;
+        align-items: center;
+        width: 45px;
+        justify-content: center;
+        height: fit-content;
+        margin: 0 1.04em;
+        top: 0.2em;
+    }
+
+    .leaderboardPOS {
+        display: inline-flex;
+        flex-direction: column;
+        position: relative;
+        height: 70%;
+        width: 100%;
+        border-radius: 1em;
+        background-color: var(--f3f3f3);
+        align-content: center;
+        justify-content: center;
+        align-self: center
+    }
+
+    .bigBoxRightWrap {
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        width: 50%;
+        height: 100%;
+        align-items: center;
+    }
+
+    .bigBoxLeftWrap {
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        width: 50%;
+        height: 100%;
+        align-items: center;
+    }
+
     .gameManagers {
         position: relative;
         display: inline-flex;
         flex-direction: column;
-        width: auto;
+        width: 100%;
         height: 100%;
         border-radius: 1em;
         background-color: var(--f3f3f3);
+        align-self: center;
     }
 
     .managerBlock {
@@ -360,6 +443,14 @@
         cursor: pointer;
         background-color: #181818;
         border: 0.5px solid #ededed;
+    }
+
+    .leaderboardRow {
+        position: relative;
+        display: inline-flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
     }
 
     .heading {
@@ -456,71 +547,98 @@
 </style>
 
 <div class="bigBox">
-    <div class="gameManagers">
-        <div class="heading">Starters</div>
-        <div class="container">
-            {#each gameManagers as manager}
-                <div class="managerBlock">
-                    <div class="managerInfo">
-                        <img class="managerAvatar" src="{manager.info.avatar}" alt="">
-                        <div class="managerName">{manager.info.name}</div>
+    <div class="bigBoxLeftWrap">
+        <div class="gameManagers">
+            <div class="heading">Starters</div>
+            <div class="container">
+                {#each gameManagers as manager}
+                    <div class="managerBlock">
+                        <div class="managerInfo">
+                            <img class="managerAvatar" src="{manager.info.avatar}" alt="">
+                            <div class="managerName">{manager.info.name}</div>
+                        </div>
+                        <div class="managerStarters">
+                            {#each manager.starters as starter}
+                                {#if starter.playerID == game.home || starter.playerID == game.away}
+                                    <img class="defenseAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
+                                {:else}
+                                    <img class="playerAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
+                                {/if}
+                            {/each}
+                        </div>
                     </div>
-                    <div class="managerStarters">
-                        {#each manager.starters as starter}
-                            {#if starter.playerID == game.home || starter.playerID == game.away}
-                                <img class="defenseAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
-                            {:else}
-                                <img class="playerAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
-                            {/if}
-                        {/each}
-                    </div>
-                </div>
-            {/each}
+                {/each}
+            </div>
         </div>
     </div>
-    <div class="viewPlayer">
-        <div class="viewPlayerBlock">
-            <div class="viewPlayerTop">
-                <div class="viewPlayerProfile">
-                    {#if viewPlayer?.pos != 'DEF'}
-                        <img class="viewPlayerAvatar" src="{viewPlayer?.avatar}" alt="">
-                        <div class="viewPlayerName">{viewPlayer?.fn || ''} {viewPlayer?.ln || ''}</div>
-                    {:else}
-                        <img class="viewDefenseAvatar" src="{viewPlayer?.avatar}" alt="">
-                        <div class="viewPlayerName">{viewPlayer?.ln + ' Defense' || ''}</div>  
-                    {/if}
-                </div>
-                <div class="viewPlayerInfo">
-                    <img class="t" src="{viewPlayer?.teamAvatar || ''}" alt="">
-                    <div class="pos {viewPlayer?.pos}">{viewPlayer?.pos || ''}</div>
-                </div>
-            </div>
-            {#if viewPlayer}
-                <div class="viewPlayerBottom">                       
-                    {#await displayStats}
-                        {''}
-                    {:then displayStats} 
-                        {#if displayStats}
-                            {#each displayStats as player}
-                                <div class="fptsContainer">
-                                    <div class="fptsBox">{round(player.totalFpts)}</div>
-                                </div>
-                                <div class="statsContainer">
-                                    {#each player.stats as statCat}  
-                                        <div class="statWrap" style="{viewPlayer.teamColor}">
-                                            <div class="statCat">{statCat.statDesc}</div>
-                                            <div class="statMetric" style="{viewPlayer.teamAltColor}">{statCat.metric}</div>
-                                            <div class="statFpts">{round(statCat.fpts)}</div>
-                                        </div>
-                                    {/each}
-                                </div>
-                            {/each}
+    <div class="bigBoxRightWrap">
+        <div class="viewPlayer">
+            <div class="viewPlayerBlock">
+                <div class="viewPlayerTop">
+                    <div class="viewPlayerProfile">
+                        {#if viewPlayer?.pos != 'DEF'}
+                            <img class="viewPlayerAvatar" src="{viewPlayer?.avatar}" alt="">
+                            <div class="viewPlayerName">{viewPlayer?.fn || ''} {viewPlayer?.ln || ''}</div>
                         {:else}
-                            No points yet...
+                            <img class="viewDefenseAvatar" src="{viewPlayer?.avatar}" alt="">
+                            <div class="viewPlayerName">{viewPlayer?.ln + ' Defense' || ''}</div>  
                         {/if}
-                    {/await}         
+                    </div>
+                    <div class="viewPlayerInfo">
+                        <img class="t" src="{viewPlayer?.teamAvatar || ''}" alt="">
+                        <div class="pos {viewPlayer?.pos}">{viewPlayer?.pos || ''}</div>
+                    </div>
                 </div>
-            {/if}
+                {#if viewPlayer}
+                    <div class="viewPlayerBottom">                       
+                        {#await displayStats}
+                            {''}
+                        {:then displayStats} 
+                            {#if displayStats}
+                                {#each displayStats as player}
+                                    <div class="fptsContainer">
+                                        <div class="fptsBox">{round(player.totalFpts)}</div>
+                                    </div>
+                                    <div class="statsContainer">
+                                        {#each player.stats as statCat}  
+                                            <div class="statWrap" style="{viewPlayer.teamColor}">
+                                                <div class="statCat">{statCat.statDesc}</div>
+                                                <div class="statMetric" style="{viewPlayer.teamAltColor}">{statCat.metric}</div>
+                                                <div class="statFpts">{round(statCat.fpts)}</div>
+                                            </div>
+                                        {/each}
+                                    </div>
+                                {/each}
+                            {:else}
+                                No points yet...
+                            {/if}
+                        {/await}         
+                    </div>
+                {/if}
+            </div>
+        </div>
+        <div class="leaderboardPOS">
+            <div class="heading">
+                Leaderboard
+            </div>
+            <div class="container">
+                {#if positionLeaderboard && positionLeaderboard.length > 0}
+                    {#each positionLeaderboard as positionLeader}
+                        <div class="leaderboardRow">
+                            {#if positionLB != 'DEF'}
+                                <img class="posPlayerAvatar" src="{positionLeader.avatar}" alt="">
+                                <div class="posPlayerName">{positionLeader.playerInfo.fn || ''} {positionLeader.playerInfo.ln || ''}</div>
+                            {:else}
+                                <img class="posDefenseAvatar" src="{positionLeader.avatar}" alt="">
+                                <div class="posPlayerName">{positionLeader.playerInfo.ln + ' Defense' || ''}</div>  
+                            {/if}
+                            {round(positionLeader.fpts)}
+                        </div>
+                    {/each}
+                {:else}
+                    No leaders yet...
+                {/if}
+            </div>
         </div>
     </div>
 </div>
