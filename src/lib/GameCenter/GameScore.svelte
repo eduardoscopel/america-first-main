@@ -101,8 +101,6 @@
         position: relative;
         z-index: 1;
         width: 100%;
-        max-width: 1100px;
-        min-height: 100%;
 		background-color: var(--f3f3f3);
         padding: 0 0.5em;
     }
@@ -112,8 +110,6 @@
         z-index: auto;
         margin: 0.5em 0;
         width: 100%;
-        max-width: 1100px;
-        min-height: 100%;
 		background-color: var(--f3f3f3);
     }
 

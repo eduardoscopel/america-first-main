@@ -10,7 +10,8 @@
     let fantasyProducts = [];
     let gameSelection = nflWeek.nflWeek[0][0].gameID;
     let nflMatchups = nflWeek.nflWeek;
-    let week = nflWeek.week;
+    const week = nflWeek.week;
+    const season = leagueData.season;
 
     let leagueManagers = {};
     const year = parseInt(leagueData.season);
@@ -105,6 +106,7 @@
 <style>
     .mainWrapper {
         width: 100%;
+        height: 100%;
         position: relative;
         display: inline-flex;
         flex-direction: column;
@@ -114,6 +116,7 @@
 
     .mainConstrained {
         width: 100%;
+        height: 130em;
         max-width: 1500px;
         margin: 0 auto 4em;
         background-color: var(--f3f3f3);
@@ -123,19 +126,59 @@
         position: relative;
     }
 
+    .weekInfo {
+        position: relative;
+        display: inline-flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        height: 5%;
+        width: 100%;
+        color: #ededed;
+        font-size: 1.5em;
+        font-weight: 500;
+    }
+
+    .weekInfoSeason {
+        position: relative;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 50%;
+    }
+
+    .weekInfoWeek {
+        position: relative;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 50%;
+    }
+
     .scoreboard {
         position: relative;
         display: inline-flex;
-        width: 287px;
+        height: 95%;
         flex-direction: column;
+        justify-content: center;
+    }
+
+    .leftWrapper {
+        display: inline-flex;
+        flex-direction: column;
+        position:relative;
+        width: 20%;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
     }
 
     .centerWrapper {
         display: inline-flex;
         flex-direction: column;
         position:relative;
-        width: 63%;
-        margin: auto;
+        width: 60%;
+        margin: 0 1em;
         align-content: center;
         align-self: center;
         align-items: center;
@@ -163,8 +206,14 @@
 
 <div class="mainWrapper">
     <div class="mainConstrained">
-        <div class="scoreboard">
-            <Scoreboard {nflMatchups} {week} bind:gameSelection={gameSelection} />
+        <div class="leftWrapper">
+            <div class="weekInfo">
+                <div class="weekInfoSeason">{season}</div>
+                <div class="weekInfoWeek">Week {week}</div>
+            </div>
+            <div class="scoreboard">
+                <Scoreboard {nflMatchups} {week} bind:gameSelection={gameSelection} />
+            </div>
         </div>
         <div class="centerWrapper">
             <div class="gameBox">

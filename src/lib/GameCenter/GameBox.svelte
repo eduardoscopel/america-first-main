@@ -74,6 +74,7 @@ import {round} from '$lib/utils/helper';
 
     let viewPlayer;
     let positionLB;
+    let leaderboardHeading = 'Position';
     export const changePlayer = (playerID) => {
         if(playerID == 'flush') {
             viewPlayer = null;
@@ -103,6 +104,25 @@ import {round} from '$lib/utils/helper';
             }
             displayStats.push(viewPlayerStats[viewPlayer.playerID]);
             positionLB = runningTotals[viewPlayer.playerID].pos;
+            if(positionLB == 'DEF') {
+                leaderboardHeading = 'Defense';
+            } else if(positionLB == 'QB') {
+                leaderboardHeading = 'Quarterback';
+            } else if(positionLB == 'RB') {
+                leaderboardHeading = 'Running Back';
+            } else if(positionLB == 'WR') {
+                leaderboardHeading = 'Wide Receiver';
+            } else if(positionLB == 'TE') {
+                leaderboardHeading = 'Tight End';
+            } else if(positionLB == 'K') {
+                leaderboardHeading = 'Kicker';
+            } else if(positionLB == 'DB') {
+                leaderboardHeading = 'Defensive Back';
+            } else if(positionLB == 'DL') {
+                leaderboardHeading = 'Defensive Lineman';
+            } else if(positionLB == 'LB') {
+                leaderboardHeading = 'Linebacker';
+            }
         } else {
             displayStats = null;
         }
@@ -126,10 +146,10 @@ import {round} from '$lib/utils/helper';
         z-index: auto;
         margin: 0.2em 0.2em 0.8em 0.2em;
         width: 100%;
-        height: 40em;
+        height: 45em;
 		background-color: #222;
         border-radius: 1em;
-        padding: 0.5em;
+        padding: 1%;
         align-content: center;
         align-self: center;
         align-items: center;
@@ -150,8 +170,8 @@ import {round} from '$lib/utils/helper';
         position: relative;
         display: inline-flex;
         border-radius: 1em;
-        height: 64px;
-        width: 64px;
+        height: 70%;
+        width: 70%;
         border: 0.25px solid #777;
         justify-content: center;
         align-items: center;
@@ -171,7 +191,8 @@ import {round} from '$lib/utils/helper';
         font-size: 0.82em;
         font-weight: 420;
         height: 100%;
-        width: 75%;
+        width: 71%;
+        margin: 0 4% 0 0;
         overflow: hidden;
     }
 
@@ -213,42 +234,50 @@ import {round} from '$lib/utils/helper';
     .viewPlayer {
         position: relative;
         display: inline-flex;
-        width: 70%;
-        height: 30%;
+        width: 90%;
+        height: 24%;
         border-radius: 1em;
         background-color: var(--f3f3f3);
-        padding: 0.2em;
+        padding: 2%;
+        margin: 0 0 1% 0;
     }
 
     .viewPlayerBlock {
         position: relative;
         display: inline-flex;
-        align-items: flex-start;
+        align-items: center;
         flex-direction: column;
         width: 100%;
+        height: 100%;
+        align-content: center;
+        justify-content: center;
     }
 
     .viewPlayerTop {
         position: relative;
         display: inline-flex;
-        align-items: flex-start;
+        align-items: center;
+        justify-content: center;
         width: 100%;
-        height: 40%;
+        height: 39%;
+        margin: 0 0 1% 0;
     }
 
     .viewPlayerBottom {
         position: relative;
         display: inline-flex;
-        width: 92%;
-        height: 60%;
+        width: 100%;
+        height: 59%;
+        margin: 1% 0 0 0;
         align-items: center;
-        padding: 0.2em 0.8em;
+        justify-content: center;
     }
 
     .viewPlayerProfile {
         position: relative;
         display: inline-flex;
-        height: 64px;
+        height: 100%;
+        width: 80%;
     }
 
     .viewPlayerInfo {
@@ -257,7 +286,8 @@ import {round} from '$lib/utils/helper';
         flex-direction: column;
         align-items: center;
         justify-content: space-between;
-        height: 64px;
+        height: 100%;
+        width: 20%;
     }
 
     .viewPlayerName {
@@ -290,13 +320,62 @@ import {round} from '$lib/utils/helper';
         top: 0.2em;
     }
 
+    .posPlayerRank {
+        position: relative;
+        display: inline-flex;
+        color: #ededed;
+        align-items: center;
+        font-weight: 420;
+        width: 3%;
+        margin: 0 0 0 1%;
+        justify-content: center;
+    }
+
+    .posPlayerProfile {
+        position: relative;
+        display: inline-flex;
+        height: 100%;
+        width: 48%;
+        margin: 0 1%;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .posPlayerManager {
+        position: relative;
+        display: inline-flex;
+        color: #ededed;
+        align-items: center;
+        font-style: italic;
+        font-size: 0.7em;
+        overflow: hidden;
+        width: 33%;
+        margin: 0 1%;
+        justify-content: center;
+    }
+
+    .posPlayerFpts {
+        position: relative;
+        display: inline-flex;
+        color: #ededed;
+        align-items: center;
+        width: 8%;
+        font-size: 0.85em;
+        font-weight: 500;
+        margin: 0 1%;
+        justify-content: center;
+    }
+
     .posPlayerName {
         position: relative;
         display: inline-flex;
-        top: 0.4em;
-        font-size: 1.2em;
-        width: 9em;
+        font-size: 0.85em;
+        font-weight: 500;
+        width: 72%;
+        height: 100%;
         justify-content: flex-start;
+        flex-wrap: wrap;
+        align-items: center;
         color: #ededed;
     }
 
@@ -304,8 +383,18 @@ import {round} from '$lib/utils/helper';
         display: inline-flex;
         position: relative;
         align-items: center;
-        width: 55px;
-        height: fit-content;
+        width: auto;
+        height: 100%;
+        justify-content: center;
+    }
+
+    .posPlayerAvatarHolder {
+        display: inline-flex;
+        position: relative;
+        align-items: center;
+        width: 22%;
+        margin: 0 4% 0 2%;
+        height: 100%;
         justify-content: center;
     }
 
@@ -313,11 +402,9 @@ import {round} from '$lib/utils/helper';
         display: inline-flex;
         position: relative;
         align-items: center;
-        width: 45px;
+        width: auto;
         justify-content: center;
-        height: fit-content;
-        margin: 0 1.04em;
-        top: 0.2em;
+        height: 100%;
     }
 
     .leaderboardPOS {
@@ -325,12 +412,36 @@ import {round} from '$lib/utils/helper';
         flex-direction: column;
         position: relative;
         height: 70%;
-        width: 100%;
+        width: 95%;
+        margin: 1% 0 0 1%;
         border-radius: 1em;
+        padding: 2%;
         background-color: var(--f3f3f3);
         align-content: center;
         justify-content: center;
         align-self: center
+    }
+
+    .leaderboardContainer {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        height: 93%;
+        margin: 1% 0 0 0;
+    }
+
+    .leaderboardRow {
+        position: relative;
+        display: inline-flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        border: 0.25px solid #343434;
+        border-radius: 1em;
+        width: 100%;
+        height: 8.25%;
     }
 
     .bigBoxRightWrap {
@@ -357,7 +468,8 @@ import {round} from '$lib/utils/helper';
         position: relative;
         display: inline-flex;
         flex-direction: column;
-        width: 100%;
+        width: 99%;
+        margin: 0 1% 0 0;
         height: 100%;
         border-radius: 1em;
         background-color: var(--f3f3f3);
@@ -445,22 +557,15 @@ import {round} from '$lib/utils/helper';
         border: 0.5px solid #ededed;
     }
 
-    .leaderboardRow {
-        position: relative;
-        display: inline-flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: flex-start;
-    }
-
     .heading {
         position: relative;
         display: inline-flex;
         color: #ededed;
         font-weight: 430;
         font-size: 1.4em;
-        margin: 0.2em;
+        height: 6%;
         justify-content: center;
+        align-items: center;
     }
 
     .container {
@@ -477,24 +582,20 @@ import {round} from '$lib/utils/helper';
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		border-radius: 8px;
-        max-width: 30px;
-        min-width: 30px;
-		height: 30px;
+		border-radius: 0.5em;
+        width: 40%;
+		height: 40%;
         position: relative;
-        top: 0.2em;
 	}
 
     .t {
         display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		border-radius: 8px;
-        max-width: 30px;
-        min-width: 30px;
-		height: 30px;
+		border-radius: 0.5em;
+        width: 40%;
+		height: auto;
         position: relative;
-        top: 0.2em;
     }
 
     .QB {
@@ -619,24 +720,32 @@ import {round} from '$lib/utils/helper';
         </div>
         <div class="leaderboardPOS">
             <div class="heading">
-                Leaderboard
+                {leaderboardHeading} Leaderboard
             </div>
-            <div class="container">
+            <div class="leaderboardContainer">
                 {#if positionLeaderboard && positionLeaderboard.length > 0}
-                    {#each positionLeaderboard as positionLeader}
+                    {#each positionLeaderboard as positionLeader, ix}
                         <div class="leaderboardRow">
-                            {#if positionLB != 'DEF'}
-                                <img class="posPlayerAvatar" src="{positionLeader.avatar}" alt="">
-                                <div class="posPlayerName">{positionLeader.playerInfo.fn || ''} {positionLeader.playerInfo.ln || ''}</div>
-                            {:else}
-                                <img class="posDefenseAvatar" src="{positionLeader.avatar}" alt="">
-                                <div class="posPlayerName">{positionLeader.playerInfo.ln + ' Defense' || ''}</div>  
-                            {/if}
-                            {round(positionLeader.fpts)}
+                            <div class="posPlayerRank">{ix + 1}</div>
+                            <div class="posPlayerProfile">
+                                {#if positionLB != 'DEF'}
+                                    <div class="posPlayerAvatarHolder">
+                                        <img class="posPlayerAvatar" src="{positionLeader.avatar}" alt="">
+                                    </div>
+                                    <div class="posPlayerName">{positionLeader.playerInfo.fn || ''} {positionLeader.playerInfo.ln || ''}</div>
+                                {:else}
+                                    <div class="posPlayerAvatarHolder">
+                                        <img class="posDefenseAvatar" src="{positionLeader.avatar}" alt="">
+                                    </div>
+                                    <div class="posPlayerName">{positionLeader.playerInfo.ln + ' DEF' || ''}</div>  
+                                {/if}
+                            </div>
+                            <div class="posPlayerManager">{positionLeader.manager.name}</div>
+                            <div class="posPlayerFpts">{round(positionLeader.fpts)}</div>
                         </div>
                     {/each}
                 {:else}
-                    No leaders yet...
+                    No leaderboard yet...
                 {/if}
             </div>
         </div>

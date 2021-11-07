@@ -23,10 +23,13 @@
         position: relative;
         display: inline-flex;
         flex-direction: column;
-        padding: 10px;
+        padding: 0.75em;
+        margin: 0.5em;
         z-index: auto;
-        width: 267px;
-        min-height: 100%;
+        width: 16.75em;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
 		box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 40%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 8px 0px rgb(0 0 0 / 24%);
     }
 </style>
