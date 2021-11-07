@@ -8,7 +8,7 @@
     export let leagueData, rosterData, users, playersInfo, nflWeek, matchupsInfo;
 
     let fantasyProducts = [];
-    let gameSelection = nflWeek.nflWeek[0][0].gameID;
+    let gameSelection;
     let nflMatchups = nflWeek.nflWeek;
     const week = nflWeek.week;
     const season = leagueData.season;

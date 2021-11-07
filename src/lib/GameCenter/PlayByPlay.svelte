@@ -1,8 +1,7 @@
 <script>
     import { getPlayByPlay, waitForAll, round } from '$lib/utils/helper'; 
-import { run } from 'svelte/internal';
 
-    export let nflTeams, nflMatchups, leagueData, fantasyStarters, managerInfo, playersInfo, gameSelection, fantasyProducts;
+    export let nflTeams, nflMatchups, leagueData, fantasyStarters, managerInfo, playersInfo, gameSelection=nflMatchups[0][0].gameID, fantasyProducts;
 
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/situation?lang=en&region=us CURRENT DOWN
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/plays?lang=en&region=us PLAY BY PLAY
@@ -12,7 +11,7 @@ import { run } from 'svelte/internal';
     // 4035687
     let startersArray = [];
 
-    export const loadPlayByPlay = async (gameSelection, startersArray) => {
+    const loadPlayByPlay = async (gameSelection, startersArray) => {
         let playByPlayData = await getPlayByPlay(gameSelection, true).catch((err) => { console.error(err); });
         // set key to number of API pages for the full PBP
         let recencyKey = playByPlayData.length;
@@ -1685,9 +1684,12 @@ import { run } from 'svelte/internal';
         
         return fantasyProducts; 
     }
-    $: fantasyProducts = loadPlayByPlay(gameSelection, startersArray);
-    
 
+    const displayByPlay = async (gameSelection, startersArray) => {
+        fantasyProducts = await loadPlayByPlay(gameSelection, startersArray);   
+        return fantasyProducts;
+    }
+    $: fantasyProducts = displayByPlay(gameSelection, startersArray);   
 </script>
 
 <style>

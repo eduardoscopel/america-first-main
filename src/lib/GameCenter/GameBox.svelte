@@ -1,8 +1,7 @@
 <script>
-    import AllManagers from '$lib/Managers/AllManagers.svelte';
-import {round} from '$lib/utils/helper'; 
+    import {round} from '$lib/utils/helper'; 
 
-    export let nflTeams, nflMatchups, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, fantasyProducts, gameSelection;
+    export let nflTeams, nflMatchups, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, fantasyProducts, gameSelection=nflMatchups[0][0].gameID;;
     
     const score = leagueData.scoring_settings;
     let freshGame = new Boolean (false);
