@@ -1,9 +1,10 @@
 <script>
     import {round} from '$lib/utils/helper'; 
 
-    export let nflTeams, nflMatchups, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, matchSelection = 1, fantasyProducts, gameSelection = nflMatchups[0][0].gameID;;
+    export let nflTeams, nflMatchups, week, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, matchSelection = 1, fantasyProducts, gameSelection = nflMatchups[0][0].gameID;;
     
     const score = leagueData.scoring_settings;
+    const positions = leagueData.roster_positions.filter(p => p != 'BN');
     let freshGame = new Boolean (false);
     let positionLB;
     let leaderboardHeading = 'Game';
@@ -19,16 +20,6 @@
     // assign managers for selected matchID
     const displayMatch = (matchSelection) => {
         let match = weekMatchups[matchSelection];
-        let home = {
-            matchInfo: match[0],
-            manager: managerInfo[match[0].recordManID],
-            fpts: match[0].totalFpts,
-        }
-        let away = {
-            matchInfo: match[1],
-            manager: managerInfo[match[1].recordManID],
-            fpts: match[1].totalFpts,
-        }
         const matchStarters = {};
         for(const opponent in match) {
             for(const starter of match[opponent].starters) {
@@ -37,12 +28,14 @@
                     const starterEntry = {
                         playerID: starter,
                         fpts: match[opponent].points[match[opponent].starters.indexOf(starter)],
+                        rosterSpot: positions[match[opponent].starters.indexOf(starter)],
                         owner: managerInfo[match[opponent].recordManID],
                         recordManID: match[opponent].recordManID,
                         fn: starterInfo.fn,
                         ln: starterInfo.ln,
                         pos: starterInfo.pos,
                         t: starterInfo.t,
+                        projection: parseInt(starterInfo.wi[week].p),
                         avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                         teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t.toLowerCase()}.png`,
                         teamColor: `background-color: #${nflTeams[starterInfo.t].color}6b`,
@@ -57,6 +50,18 @@
                     matchStarters[match[opponent].recordManID].push(starterEntry);
                 }
             }
+        }
+        let home = {
+            matchInfo: match[0],
+            manager: managerInfo[match[0].recordManID],
+            fpts: match[0].totalFpts,
+            starters: matchStarters[match[0].recordManID],
+        }
+        let away = {
+            matchInfo: match[1],
+            manager: managerInfo[match[1].recordManID],
+            fpts: match[1].totalFpts,
+            starters: matchStarters[match[1].recordManID],
         }
         freshGame = true;
         positionLB = matchStarters;
@@ -722,14 +727,24 @@
         width: auto;
     }
 
-    .container {
+    .matchContainer {
+        position: relative;
+        display: inline-flex;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: flex-start;
+        height: 86%;
+        padding: 2%;
+    }
+
+    .gameContainer {
         position: relative;
         display: inline-flex;
         flex-direction: column;
         justify-content: space-around;
         align-items: flex-start;
-        height: 84%;
-        padding: 1%;
+        height: 86%;
+        padding: 2%;
     }
 
     .pos {
@@ -799,11 +814,109 @@
     .IDP {
         background: linear-gradient(to right, var(--DL), var(--DL) 33.33%, var(--LB) 33.33%, var(--LB) 66.66%, var(--DB) 66.66%);
     }
+
+    .rosterWrap {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        height: 100%;
+        width: 44%;
+        justify-content: space-evenly;
+        align-items: center;
+    }
+
+    .rosterPlayerInfo {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+        font-size: 0.85em;
+        font-weight: 500;
+        color: #ededed;
+    }
+
+    .rosterPlayer {
+        position: relative;
+        display: inline-flex;
+        flex-direction: row;
+        height: 50%;
+        width: 100%;
+        align-items: center;
+    }
+
+    .rosterAvatar {
+        position: relative;
+        display: inline-flex;
+        flex-direction: row;
+        height: 100%;
+        width: auto;
+        align-items: center;
+    }
+
+    .rosterAvatar:hover {
+        cursor: pointer;
+        background-color: #181818;
+        border: 0.5px solid #ededed;
+        border-radius: 1em;
+    }
+
+    .rosterRow {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        flex-direction: row;
+        height: 8%;
+        width: 100%;
+    }
+    
+    .avatarHolder {
+        position: relative;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: row;
+        height: 100%;
+        width: 35%;
+    }
+
+    .positionsWrap {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        height: 100%;
+        width: 12%;
+        justify-content: space-evenly;
+        align-items: center;
+    }
+
+    .rosterPosition {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 8%;
+        width: 100%;
+        border-radius: 25%;
+        font-weight: 900;
+    }
+
+    .rosterRowBox {
+    	position: absolute;
+        display: inline-flex;
+        align-items: center;
+        flex-direction: column;
+        height: 100%;
+        width: 835%;
+        border: 0.25px solid #555;
+        border-radius: 1em;
+    }
 </style>
 
 <div class="bigBox">
     <div class="bigBoxLeftWrap">
         <div class="gameManagers">
+            <!-- shows specific NFL games -->
             {#if showGame == true}
                 <div class="gameHeader">
                     <div class="gameOpponent">
@@ -822,7 +935,7 @@
                         <img class="gameAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{game.away.sleeperID.toLowerCase()}.png" alt="{game.away.sleeperID}">
                     </div>
                 </div>
-                <div class="container">
+                <div class="gameContainer">
                     {#each gameManagers as manager}
                         <div class="managerBlock">
                             <div class="managerInfo">
@@ -841,14 +954,14 @@
                         </div>
                     {/each}
                 </div>
-            {:else if showMatch == true}
+                <!-- shows league matchups -->
+            {:else if showMatch == true}        
                 <div class="gameHeader">
                     <div class="matchOpponent">
                         <div class="matchTop">
                             <img class="gameAvatar" src="{match.home.manager.avatar}" alt="" style="border: 1px solid #777; border-radius: 50%; height: 90%; width: auto;">
                             <div class="gameTeamWrapper">
                                 <div class="gameTeam" style="align-items: center;">{match.home.manager.realname}</div>
-                                <!-- <div class="gameTeam" style="align-items: flex-start;">{game.homeTeam.ln}</div> -->
                             </div>
                         </div>
                         <div class="gameTeam" style="align-items: center; font-style: italic; color: #999; margin: -2% 0 0 0;">{match.home.manager.name}</div>
@@ -858,31 +971,53 @@
                         <div class="matchTop">
                             <div class="gameTeamWrapper">
                                 <div class="gameTeam" style="align-items: center;">{match.away.manager.realname}</div>
-                                <!-- <div class="gameTeam" style="align-items: flex-start;">{game.awayTeam.ln}</div> -->
                             </div>
                             <img class="gameAvatar" src="{match.away.manager.avatar}" alt="" style="border: 1px solid #777; border-radius: 50%; height: 90%; width: auto;">
                         </div>
                         <div class="gameTeam" style="align-items: center; font-style: italic; color: #999; margin: -2% 0 0 0;">{match.away.manager.name}</div>
                     </div>
                 </div>
-                <div class="container">
-                    {#each gameManagers as manager}
-                        <div class="managerBlock">
-                            <div class="managerInfo">
-                                <img class="managerAvatar" src="{manager.info.avatar}" alt="">
-                                <div class="managerName">{manager.info.name}</div>
+                <div class="matchContainer">
+                    <div class="rosterWrap">
+                        {#each match.home.starters as starter}
+                            <div class="rosterRow" style="justify-content: flex-start;">
+                                <div class="avatarHolder">
+                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="z-index: 1; {viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                </div>
+                                <div class="rosterPlayerInfo">
+                                    <div class="rosterPlayer" style="justify-content: flex-start; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
+                                    <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">
+                                        <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
+                                        <div style="display: inline-flex; color: #999; justify-content: flex-end; margin: 0 5% 0 0;">({round(starter.projection)})</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="managerStarters">
-                                {#each manager.starters as starter}
-                                    {#if starter.playerID == game.home || starter.playerID == game.away}
-                                        <img class="defenseAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
-                                    {:else}
-                                        <img class="playerAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
-                                    {/if}
-                                {/each}
+                        {/each}
+                    </div>
+                    <div class="positionsWrap">
+                        {#each positions as position}
+                            <div class="rosterPosition {position}">
+                                <div class="rosterRowBox"></div>
+                                {position}
                             </div>
-                        </div>
-                    {/each}
+                        {/each}
+                    </div>
+                    <div class="rosterWrap">
+                        {#each match.away.starters as starter}
+                            <div class="rosterRow" style="justify-content: flex-end;">
+                                <div class="rosterPlayerInfo">
+                                    <div class="rosterPlayer" style="justify-content: flex-end; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
+                                    <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%;"}">
+                                        <div style="display: inline-flex; color: #999; justify-content: flex-start; margin: 0 0 0 5%;">({round(starter.projection)})</div>  
+                                        <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
+                                    </div>
+                                </div>                                
+                                <div class="avatarHolder">
+                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                </div>
+                            </div>
+                        {/each}
+                    </div>
                 </div>
             {/if}
         </div>
