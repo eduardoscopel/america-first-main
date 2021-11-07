@@ -48,7 +48,7 @@ export const getAwards = async () => {
 
 		if(user) {
 			currentManagers[recordManID] = {
-				avatar: `https://sleepercdn.com/avatars/thumbs/${user.avatar}`,
+				avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
 				name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
 				realname: recordManager[0].name,
 			}
@@ -445,7 +445,11 @@ const buildDivisionsAndManagers = ({usersData, previousRosters, leagueMetadata, 
 			ownerID: roster.owner_id,
 		}
 		if(user) {
-			prevManagers[recordManID].avatar = `https://sleepercdn.com/avatars/thumbs/${user.avatar}`;
+			if(user.avatar != null) {
+				prevManagers[recordManID].avatar = `https://sleepercdn.com/avatars/thumbs/${user.avatar}`;
+			} else {
+				prevManagers[recordManID].avatar = `https://sleepercdn.com/images/v2/icons/player_default.webp`;
+			}
 			prevManagers[recordManID].name = user.metadata.team_name ? user.metadata.team_name : user.display_name;
 			prevManagers[recordManID].realname = recordManager[0].name;
 		}

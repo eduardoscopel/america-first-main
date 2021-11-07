@@ -91,26 +91,7 @@ import {round} from '$lib/utils/helper';
                     viewPlayer = gameStarters[recordManID].find(s => s.playerID == playerID);
                 }
             }
-        }
-        getDisplayStats(viewPlayer);
-        return viewPlayer;
-    }
-    const getDisplayStats = async (viewPlayer) => {
-        let newFantasyProducts = await fantasyProducts;
-        const viewPlayerStats = {};
-        let displayStats = [];
-        if(newFantasyProducts.length > 0 && viewPlayer != null) {
-            let runningTotals = newFantasyProducts[newFantasyProducts.length - 1];
-            viewPlayerStats[viewPlayer.playerID] = {
-                stats: [],
-                totalFpts: runningTotals[viewPlayer.playerID].totalFpts,
-                playerID: viewPlayer.playerID,
-            }
-            for(const stat in runningTotals[viewPlayer.playerID].stats) {
-                viewPlayerStats[viewPlayer.playerID].stats.push(runningTotals[viewPlayer.playerID].stats[stat]);
-            }
-            displayStats.push(viewPlayerStats[viewPlayer.playerID]);
-            positionLB = runningTotals[viewPlayer.playerID].pos;
+            positionLB = viewPlayer.pos;
             if(positionLB == 'DEF') {
                 leaderboardHeading = 'Defense';
             } else if(positionLB == 'QB') {
@@ -130,6 +111,25 @@ import {round} from '$lib/utils/helper';
             } else if(positionLB == 'LB') {
                 leaderboardHeading = 'Linebacker';
             }
+        }
+        getDisplayStats(viewPlayer);
+        return viewPlayer;
+    }
+    const getDisplayStats = async (viewPlayer) => {
+        let newFantasyProducts = await fantasyProducts;
+        const viewPlayerStats = {};
+        let displayStats = [];
+        if(newFantasyProducts.length > 0 && viewPlayer != null) {
+            let runningTotals = newFantasyProducts[newFantasyProducts.length - 1];
+            viewPlayerStats[viewPlayer.playerID] = {
+                stats: [],
+                totalFpts: runningTotals[viewPlayer.playerID].totalFpts,
+                playerID: viewPlayer.playerID,
+            }
+            for(const stat in runningTotals[viewPlayer.playerID].stats) {
+                viewPlayerStats[viewPlayer.playerID].stats.push(runningTotals[viewPlayer.playerID].stats[stat]);
+            }
+            displayStats.push(viewPlayerStats[viewPlayer.playerID]);
         } else {
             displayStats = null;
         }
@@ -551,7 +551,7 @@ import {round} from '$lib/utils/helper';
         padding: 0.175em;
     }
 
-    :global(.playerAvatar:hover) {
+    .playerAvatar:hover {
         cursor: pointer;
         background-color: #181818;
         border: 0.5px solid #ededed;
@@ -570,7 +570,7 @@ import {round} from '$lib/utils/helper';
         padding: 0.175em;
     }
 
-    :global(.defenseAvatar:hover) {
+    .defenseAvatar:hover {
         cursor: pointer;
         background-color: #181818;
         border: 0.5px solid #ededed;
@@ -747,16 +747,16 @@ import {round} from '$lib/utils/helper';
                         <div class="leaderboardRow" style="{positionLeader.playerID == viewPlayer?.playerID ? "background-color: #181818; border: 0.5px solid #ededed; font-weight: 700;" : null}">
                             <div class="posPlayerRank">{ix + 1}</div>
                             <div class="posPlayerProfile">
-                                {#if positionLB != 'DEF'}
-                                    <div class="posPlayerAvatarHolder">
-                                        <img class="posPlayerAvatar" src="{positionLeader.avatar}" alt="">
-                                    </div>
-                                    <div class="posPlayerName">{positionLeader.fn || ''} {positionLeader.ln || ''}</div>
-                                {:else}
+                                {#if positionLeader.pos == 'DEF'}
                                     <div class="posPlayerAvatarHolder">
                                         <img class="posDefenseAvatar" src="{positionLeader.avatar}" alt="">
                                     </div>
-                                    <div class="posPlayerName">{positionLeader.ln + ' DEF' || ''}</div>  
+                                    <div class="posPlayerName">{positionLeader.ln + ' DEF' || ''}</div> 
+                                {:else}
+                                    <div class="posPlayerAvatarHolder">
+                                        <img class="posPlayerAvatar" src="{positionLeader.avatar}" alt="">
+                                    </div>
+                                    <div class="posPlayerName">{positionLeader.fn || ''} {positionLeader.ln || ''}</div> 
                                 {/if}
                             </div>
                             <div class="posPlayerManager">{positionLeader.owner.name}</div>

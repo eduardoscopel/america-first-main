@@ -45,6 +45,7 @@ export const getAuthor = (rosters, users, author) => {
 
 export const getAvatar = (users, author) => {
     let user = null;
+    let userAvatar;
     for(const userKey of Object.keys(users)) {
         if(users[userKey].display_name.toLowerCase() == author.toLowerCase()) {
             user = users[userKey];
@@ -55,7 +56,13 @@ export const getAvatar = (users, author) => {
         return 'managers/question.jpg';
     }
 
-    return `https://sleepercdn.com/avatars/thumbs/${user.avatar}`;
+    if(user.avatar != null) {
+        userAvatar = `https://sleepercdn.com/avatars/thumbs/${user.avatar}`;
+    } else {
+        userAvatar = `https://sleepercdn.com/images/v2/icons/player_default.webp`;
+    }
+
+    return userAvatar;
 }
 
 export const parseDate = (rawDate) => {

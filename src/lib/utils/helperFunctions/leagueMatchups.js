@@ -106,7 +106,7 @@ const processMatchups = (inputMatchups, yearManagers, rosters, users, week) => {
 		matchups[match.matchup_id].push({
 			manager: {
 				name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
-				avatar: `https://sleepercdn.com/avatars/thumbs/${user.avatar}`,
+				avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
 				realname: recordManager[0].name,
 			},
 			recordManID,

@@ -184,7 +184,7 @@ const processPlayoffMatchup = (bracket, matchups, rosters, users, consolationMs,
             matchup.push({
                 manager: {
                     name: t1user.metadata.team_name ? t1user.metadata.team_name : t1user.display_name,
-                    avatar: `https://sleepercdn.com/avatars/thumbs/${t1user.avatar}`,
+                    avatar: t1user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${t1user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
                 },
                 starters: t1Matchup?.starters,
                 points: t1Matchup?.starters_points,
@@ -234,7 +234,7 @@ const processPlayoffMatchup = (bracket, matchups, rosters, users, consolationMs,
             matchup.push({
                 manager: {
                     name: t2user.metadata.team_name ? t2user.metadata.team_name : t2user.display_name,
-                    avatar: `https://sleepercdn.com/avatars/thumbs/${t2user.avatar}`,
+                    avatar: t2user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${t2user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
                 },
                 starters: t2Matchup?.starters,
                 points: t2Matchup?.starters_points,
