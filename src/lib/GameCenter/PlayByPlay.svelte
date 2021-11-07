@@ -21,7 +21,7 @@ import { run } from 'svelte/internal';
         // startersArray will help us match our sleeper playerInfo to espn player APIs, and also check if someone is starting one of the DEFs
         startersArray = [];
         for(const recordManID in fantasyStarters) {
-            const starters = fantasyStarters[recordManID];
+            const starters = fantasyStarters[recordManID].starters;
 
             for(const starter of starters) {
                 if(starter != '0') {

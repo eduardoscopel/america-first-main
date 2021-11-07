@@ -5,6 +5,10 @@ import {round} from '$lib/utils/helper';
     export let nflTeams, nflMatchups, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, fantasyProducts, gameSelection;
     
     const score = leagueData.scoring_settings;
+    let freshGame = new Boolean (false);
+    let positionLB;
+    let leaderboardHeading = 'Game';
+
     // create top 10 points-scorers arrays for each position
     const positionRankArrays = {};
     for(const position in positionLeaders) {
@@ -15,6 +19,7 @@ import {round} from '$lib/utils/helper';
         let game = nflMatchups.filter(m => m[0].gameID == gameSelection)[0];
         let home = game[0].sleeperID;
         let away = game[1].sleeperID;
+        freshGame = true;
         changePlayer('flush');
         return {home, away};
     }
@@ -23,13 +28,15 @@ import {round} from '$lib/utils/helper';
     const findStarters = (game) => {
         const gameStarters = {};
         for(const recordManID in fantasyStarters) {
-            const starters = fantasyStarters[recordManID];
+            const starters = fantasyStarters[recordManID].starters;
             for(const starter of starters) {
                 const starterInfo = playersInfo.players[starter];
                 if(starter != '0' && (starterInfo.t == game.home || starterInfo.t == game.away)) {
                     const starterEntry = {
                         playerID: starter,
+                        fpts: fantasyStarters[recordManID].startersPoints[starters.indexOf(starter)],
                         owner: managerInfo[recordManID],
+                        recordManID,
                         fn: starterInfo.fn,
                         ln: starterInfo.ln,
                         pos: starterInfo.pos,
@@ -49,6 +56,8 @@ import {round} from '$lib/utils/helper';
                 }
             }
         }
+        positionLB = gameStarters;
+        leaderboardHeading = `${game.home} v ${game.away}`;
         return gameStarters;
     }
     $: gameStarters = findStarters(game);
@@ -73,8 +82,6 @@ import {round} from '$lib/utils/helper';
     $: gameManagers = displayManagers(gameStarters);
 
     let viewPlayer;
-    let positionLB;
-    let leaderboardHeading = 'Position';
     export const changePlayer = (playerID) => {
         if(playerID == 'flush') {
             viewPlayer = null;
@@ -131,7 +138,18 @@ import {round} from '$lib/utils/helper';
     $: displayStats = getDisplayStats(viewPlayer);
 
     const getPositionLeaders = (positionLB) => {
-        let positionLeaderboard = positionRankArrays[positionLB];
+        let positionLeaderboard = [];
+        if(freshGame == false) {
+            positionLeaderboard = positionRankArrays[positionLB];
+        } else if(freshGame == true) {
+            for(const recordManID in positionLB) {
+                for(const starter of positionLB[recordManID]) {
+                    positionLeaderboard.push(starter);
+                }
+            }
+            positionLeaderboard = positionLeaderboard.sort((a, b) => b.fpts - a.fpts).slice(0, 10);
+            freshGame = false;
+        }
         return positionLeaderboard;
     }
     $: positionLeaderboard = getPositionLeaders(positionLB);
@@ -426,7 +444,7 @@ import {round} from '$lib/utils/helper';
         position: relative;
         display: inline-flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: center;
         height: 93%;
         margin: 1% 0 0 0;
@@ -442,6 +460,7 @@ import {round} from '$lib/utils/helper';
         border-radius: 1em;
         width: 100%;
         height: 8.25%;
+        margin: 0.7% 0;
     }
 
     .bigBoxRightWrap {
@@ -725,22 +744,22 @@ import {round} from '$lib/utils/helper';
             <div class="leaderboardContainer">
                 {#if positionLeaderboard && positionLeaderboard.length > 0}
                     {#each positionLeaderboard as positionLeader, ix}
-                        <div class="leaderboardRow">
+                        <div class="leaderboardRow" style="{positionLeader.playerID == viewPlayer?.playerID ? "background-color: #181818; border: 0.5px solid #ededed; font-weight: 700;" : null}">
                             <div class="posPlayerRank">{ix + 1}</div>
                             <div class="posPlayerProfile">
                                 {#if positionLB != 'DEF'}
                                     <div class="posPlayerAvatarHolder">
                                         <img class="posPlayerAvatar" src="{positionLeader.avatar}" alt="">
                                     </div>
-                                    <div class="posPlayerName">{positionLeader.playerInfo.fn || ''} {positionLeader.playerInfo.ln || ''}</div>
+                                    <div class="posPlayerName">{positionLeader.fn || ''} {positionLeader.ln || ''}</div>
                                 {:else}
                                     <div class="posPlayerAvatarHolder">
                                         <img class="posDefenseAvatar" src="{positionLeader.avatar}" alt="">
                                     </div>
-                                    <div class="posPlayerName">{positionLeader.playerInfo.ln + ' DEF' || ''}</div>  
+                                    <div class="posPlayerName">{positionLeader.ln + ' DEF' || ''}</div>  
                                 {/if}
                             </div>
-                            <div class="posPlayerManager">{positionLeader.manager.name}</div>
+                            <div class="posPlayerManager">{positionLeader.owner.name}</div>
                             <div class="posPlayerFpts">{round(positionLeader.fpts)}</div>
                         </div>
                     {/each}

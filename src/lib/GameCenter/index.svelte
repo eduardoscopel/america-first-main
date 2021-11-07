@@ -63,7 +63,10 @@
             for(const managerKey in match) {
                 const managerWeek = match[managerKey];
                 if(managerWeek.recordManID == recordManID) {
-                    fantasyStarters[recordManID] = managerWeek.starters;
+                    fantasyStarters[recordManID] = {
+                        starters: managerWeek.starters,
+                        startersPoints: managerWeek.points,
+                    }
                 }
             }
         }
@@ -84,9 +87,11 @@
                         playerID: managerWeek.starters[i],
                         pos: playersInfo.players[managerWeek.starters[i]].pos,
                         fpts: managerWeek.points[i],
-                        manager: managerWeek.manager,
+                        owner: managerWeek.manager,
                         recordManID: managerWeek.recordManID,
-                        playerInfo: playersInfo.players[managerWeek.starters[i]],
+                        fn: playersInfo.players[managerWeek.starters[i]].fn,
+                        ln: playersInfo.players[managerWeek.starters[i]].ln,
+                        t: playersInfo.players[managerWeek.starters[i]].t,
                         avatar: playersInfo.players[managerWeek.starters[i]].pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${managerWeek.starters[i].toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${managerWeek.starters[i]}.jpg`,
                         teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${playersInfo.players[managerWeek.starters[i]].t.toLowerCase()}.png`,
                         teamColor: `background-color: #${nflTeams[playersInfo.players[managerWeek.starters[i]].t].color}6b`,
