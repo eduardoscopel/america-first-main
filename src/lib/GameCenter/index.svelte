@@ -3,12 +3,14 @@
     import Scoreboard from './Scoreboard.svelte';
     import PlayByPlay from './PlayByPlay.svelte';
     import GameBox from './GameBox.svelte';
+    import ManagerBoard from './ManagerBoard.svelte';
 
 
     export let leagueData, rosterData, users, playersInfo, nflWeek, matchupsInfo;
 
     let fantasyProducts = [];
     let gameSelection;
+    let matchSelection;
     let nflMatchups = nflWeek.nflWeek;
     const week = nflWeek.week;
     const season = leagueData.season;
@@ -22,6 +24,7 @@
 			managerID: manager.managerID,
 			rosterID: manager.roster,
 			name: manager.name,
+            abbreviation: manager.abbreviation,
 			status: manager.status,
 			yearsactive: manager.yearsactive,
 		}
@@ -49,12 +52,16 @@
                 avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
                 name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
                 realname: recordManager[0].name,
+                abbreviation: recordManager[0].abbreviation,
+                rosterID,
             };
         } else {
             managerInfo[recordManID] = {
                 avatar: `https://sleepercdn.com/images/v2/icons/player_default.webp`,
                 name: 'Unknown Manager',
                 realname: 'John Q. Rando',
+                abbreviation: 'JQR',
+                rosterID,
             };
         }
         // get starters
@@ -121,12 +128,11 @@
 
     .mainConstrained {
         width: 100%;
-        height: 130em;
+        height: 132em;
         max-width: 1500px;
         margin: 0 auto 4em;
         background-color: var(--f3f3f3);
         display: inline-flex;
-        align-items: baseline;
         align-content: center;
         position: relative;
     }
@@ -168,6 +174,14 @@
         justify-content: center;
     }
 
+    .managerboard {
+        position: relative;
+        display: inline-flex;
+        height: 95%;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
     .leftWrapper {
         display: inline-flex;
         flex-direction: column;
@@ -182,12 +196,21 @@
         display: inline-flex;
         flex-direction: column;
         position:relative;
-        width: 60%;
-        margin: 0 1em;
+        width: 58%;
+        margin: 0 1%;
         align-content: center;
         align-self: center;
         align-items: center;
         justify-content: center;
+    }
+    .rightWrapper {
+        display: inline-flex;
+        flex-direction: column;
+        position:relative;
+        width: 20%;
+        height: 100%;
+        justify-content: flex-start;
+        align-items: center;
     }
 
     .gameBox {
@@ -206,6 +229,7 @@
         flex-direction: column;
         position: relative;
         align-items: center;
+        width: 102%;
     }
 </style>
 
@@ -226,6 +250,12 @@
             </div>
             <div class="playByPlay">
                 <PlayByPlay {nflTeams} {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} {managerInfo} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} />
+            </div>
+        </div>
+        <div class="rightWrapper">
+            <div class="weekInfo"></div>
+            <div class="managerboard">
+                <ManagerBoard {weekMatchups} {managerInfo} bind:matchSelection={matchSelection} />
             </div>
         </div>
     </div>

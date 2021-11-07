@@ -112,6 +112,9 @@ const processMatchups = (inputMatchups, yearManagers, rosters, users, week) => {
 			recordManID,
 			starters: match.starters,
 			points: match.starters_points,
+			matchID: match.matchup_id,
+			rosterID: match.roster_id,
+			totalFpts: match.points,
 		})
 	}
 	return {matchups, week};

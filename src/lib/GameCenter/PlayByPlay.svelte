@@ -1,7 +1,7 @@
 <script>
     import { getPlayByPlay, waitForAll, round } from '$lib/utils/helper'; 
 
-    export let nflTeams, nflMatchups, leagueData, fantasyStarters, managerInfo, playersInfo, gameSelection=nflMatchups[0][0].gameID, fantasyProducts;
+    export let nflTeams, nflMatchups, leagueData, fantasyStarters, managerInfo, playersInfo, gameSelection = nflMatchups[0][0].gameID, fantasyProducts;
 
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/situation?lang=en&region=us CURRENT DOWN
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/plays?lang=en&region=us PLAY BY PLAY
@@ -1699,7 +1699,7 @@
         flex-direction: column;
         z-index: auto;
         margin: 0.5em 0;
-        width: auto;
+        width: 100%;
         height: 79em;
 		background-color: var(--f3f3f3);
         overflow-y: auto;
@@ -1707,13 +1707,14 @@
     }
 
     .playContainer {
-        width: 99%;
+        width: 100%;
+        position: relative;
         display: inline-flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         background-color: #222;
-        margin: 0.2em;
+        margin: 0.3% 0;
         border-radius: 1em;
     }
 
@@ -1722,7 +1723,7 @@
         background-color: var(--f3f3f3);
         position: relative;
         padding: 0.5em;
-        margin: 0.2em;
+        margin: 0.3% 1.5%;
         border-radius: 0.8em;
         font-size: 1.1em;
         font-weight: 420;
@@ -1752,14 +1753,16 @@
     }
 
     .managerContainer {
-        width: 50%;
+        width: 45%;
         justify-content: flex-end;
         display: inline-flex;
+        position: relative;
     }
 
     .manager {
         display: inline-flex;
-        width: auto;
+        position: relative;
+        width: 100%;
         color: #ededed;
         justify-content: flex-end;
         align-items: center;
@@ -1789,8 +1792,9 @@
 
     .playerName {
         display: inline-flex;
+        position: relative;
         align-items: center;
-        width: 15em;
+        width: 38%;
         color: #ededed;
         justify-content: left;
         align-content: center;
@@ -1799,25 +1803,25 @@
     .shortDescription {
         display: inline-flex;
         position: relative;
-        left: 2.5em;
         align-items: center;
-        width: 16em;
+        width: 35%;
         color: #ededed;
         justify-content: center;
         align-content: center;
+        font-size: 0.9em;
         font-weight: 400;
         font-style: italic;
     }
 
     .description {
-        display: flex;
-        width: 66em;
+        display: inline-flex;
+        position: relative;
+        width: 96%;
         font-size: 0.85em;
         font-weight: 600;
         color: #b7b7b7;
         justify-content: center;
         align-content: center;
-        padding: 0 1em;
     }
 
 </style>
