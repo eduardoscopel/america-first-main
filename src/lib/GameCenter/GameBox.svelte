@@ -1,24 +1,82 @@
 <script>
     import {round} from '$lib/utils/helper'; 
 
-    export let nflTeams, nflMatchups, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, fantasyProducts, gameSelection = nflMatchups[0][0].gameID;;
+    export let nflTeams, nflMatchups, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, matchSelection = 1, fantasyProducts, gameSelection = nflMatchups[0][0].gameID;;
     
     const score = leagueData.scoring_settings;
     let freshGame = new Boolean (false);
     let positionLB;
     let leaderboardHeading = 'Game';
 
+    let showGame = new Boolean (true);      // NFL games
+    let showMatch = new Boolean (false);    // League matchups
+
     // create top 10 points-scorers arrays for each position
     const positionRankArrays = {};
     for(const position in positionLeaders) {
         positionRankArrays[position] = positionLeaders[position].slice(0, 10);
     }
+    // assign managers for selected matchID
+    const displayMatch = (matchSelection) => {
+        let match = weekMatchups[matchSelection];
+        let home = {
+            matchInfo: match[0],
+            manager: managerInfo[match[0].recordManID],
+            fpts: match[0].totalFpts,
+        }
+        let away = {
+            matchInfo: match[1],
+            manager: managerInfo[match[1].recordManID],
+            fpts: match[1].totalFpts,
+        }
+        const matchStarters = {};
+        for(const opponent in match) {
+            for(const starter of match[opponent].starters) {
+                if(starter != '0') {
+                    const starterInfo = playersInfo.players[starter];
+                    const starterEntry = {
+                        playerID: starter,
+                        fpts: match[opponent].points[match[opponent].starters.indexOf(starter)],
+                        owner: managerInfo[match[opponent].recordManID],
+                        recordManID: match[opponent].recordManID,
+                        fn: starterInfo.fn,
+                        ln: starterInfo.ln,
+                        pos: starterInfo.pos,
+                        t: starterInfo.t,
+                        avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                        teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t.toLowerCase()}.png`,
+                        teamColor: `background-color: #${nflTeams[starterInfo.t].color}6b`,
+                        teamAltColor: `background-color: #${nflTeams[starterInfo.t].alternateColor}52`,
+                    }
+                    if(nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
+                        starterEntry.teamAltColor = `background-color: #ffffff52`;
+                    }
+                    if(!matchStarters[match[opponent].recordManID]) {
+                        matchStarters[match[opponent].recordManID] = [];
+                    }
+                    matchStarters[match[opponent].recordManID].push(starterEntry);
+                }
+            }
+        }
+        freshGame = true;
+        positionLB = matchStarters;
+        leaderboardHeading = `${managerInfo[home.matchInfo.recordManID].abbreviation} v ${managerInfo[away.matchInfo.recordManID].abbreviation}`;
 
+        showMatch = true;
+        showGame = false;
+        changePlayer('flush');
+        return {home, away};
+    }
+    $: match = displayMatch(matchSelection);
+
+    // assign teams for selected gameID
     const displayGame = (gameSelection) => {
         let game = nflMatchups.filter(m => m[0].gameID == gameSelection)[0];
-        let home = game[0].sleeperID;
-        let away = game[1].sleeperID;
+        let home = game[0].team;
+        let away = game[1].team;
         freshGame = true;
+        showMatch = false;
+        showGame = true;
         changePlayer('flush');
         return {home, away};
     }
@@ -30,7 +88,7 @@
             const starters = fantasyStarters[recordManID].starters;
             for(const starter of starters) {
                 const starterInfo = playersInfo.players[starter];
-                if(starter != '0' && (starterInfo.t == game.home || starterInfo.t == game.away)) {
+                if(starter != '0' && (starterInfo.t == game.home.sleeperID || starterInfo.t == game.away.sleeperID)) {
                     const starterEntry = {
                         playerID: starter,
                         fpts: fantasyStarters[recordManID].startersPoints[starters.indexOf(starter)],
@@ -56,7 +114,7 @@
             }
         }
         positionLB = gameStarters;
-        leaderboardHeading = `${game.home} v ${game.away}`;
+        leaderboardHeading = `${game.home.sleeperID} v ${game.away.sleeperID}`;
         return gameStarters;
     }
     $: gameStarters = findStarters(game);
@@ -586,14 +644,92 @@
         align-items: center;
     }
 
+    .gameHeader {
+        display: inline-flex;
+        flex-direction: row;
+        position: relative;
+        width: 96%;
+        height: 10%;
+        padding: 2%;
+        justify-content: space-around;
+    }
+
+    .gameOpponent {
+        display: inline-flex;
+        flex-direction: row;
+        position: relative;
+        height: 100%;
+        width: 47.5%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .matchOpponent {
+        display: inline-flex;
+        flex-direction: column;
+        position: relative;
+        height: 100%;
+        width: 47.5%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .matchTop {
+        display: inline-flex;
+        flex-direction: row;
+        position: relative;
+        height: 75%;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .versus {
+        display: inline-flex;
+        position: relative;
+        height: 100%;
+        width: 5%;
+        align-items: center;
+        justify-content: center;
+        font-style: italic;
+        font-weight: 420;
+        color: #999;
+    }
+
+    .gameTeamWrapper {
+        display: inline-flex;
+        flex-direction: column;
+        position: relative;
+        height: 100%;
+        margin: 0 2.5%;
+        justify-content: center;
+    }
+
+    .gameTeam {
+        display: inline-flex;
+        flex-direction: row;
+        position: relative;
+        height: 100%;
+        color: #ededed;
+        font-weight: 700;
+    }
+
+    .gameAvatar {
+        display: inline-flex;
+        flex-direction: row;
+        position: relative;
+        height: 100%;
+        width: auto;
+    }
+
     .container {
         position: relative;
         display: inline-flex;
         flex-direction: column;
         justify-content: space-around;
         align-items: flex-start;
-        height: 100%;
-        padding: 0.75em;
+        height: 84%;
+        padding: 1%;
     }
 
     .pos {
@@ -668,26 +804,87 @@
 <div class="bigBox">
     <div class="bigBoxLeftWrap">
         <div class="gameManagers">
-            <div class="heading">Starters</div>
-            <div class="container">
-                {#each gameManagers as manager}
-                    <div class="managerBlock">
-                        <div class="managerInfo">
-                            <img class="managerAvatar" src="{manager.info.avatar}" alt="">
-                            <div class="managerName">{manager.info.name}</div>
-                        </div>
-                        <div class="managerStarters">
-                            {#each manager.starters as starter}
-                                {#if starter.playerID == game.home || starter.playerID == game.away}
-                                    <img class="defenseAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
-                                {:else}
-                                    <img class="playerAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
-                                {/if}
-                            {/each}
+            {#if showGame == true}
+                <div class="gameHeader">
+                    <div class="gameOpponent">
+                        <img class="gameAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{game.home.sleeperID.toLowerCase()}.png" alt="{game.home.sleeperID}">
+                        <div class="gameTeamWrapper" style="align-items: flex-start;">
+                            <div class="gameTeam" style="align-items: flex-end;">{game.home.fn}</div>
+                            <div class="gameTeam" style="align-items: flex-start;">{game.home.ln}</div>
                         </div>
                     </div>
-                {/each}
-            </div>
+                    <div class="versus">VS</div>
+                    <div class="gameOpponent">
+                        <div class="gameTeamWrapper" style="align-items: flex-end;">
+                            <div class="gameTeam" style="align-items: flex-end;">{game.away.fn}</div>
+                            <div class="gameTeam" style="align-items: flex-start;">{game.away.ln}</div>
+                        </div>
+                        <img class="gameAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{game.away.sleeperID.toLowerCase()}.png" alt="{game.away.sleeperID}">
+                    </div>
+                </div>
+                <div class="container">
+                    {#each gameManagers as manager}
+                        <div class="managerBlock">
+                            <div class="managerInfo">
+                                <img class="managerAvatar" src="{manager.info.avatar}" alt="">
+                                <div class="managerName">{manager.info.name}</div>
+                            </div>
+                            <div class="managerStarters">
+                                {#each manager.starters as starter}
+                                    {#if starter.playerID == game.home.sleeperID || starter.playerID == game.away.sleeperID}
+                                        <img class="defenseAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
+                                    {:else}
+                                        <img class="playerAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
+                                    {/if}
+                                {/each}
+                            </div>
+                        </div>
+                    {/each}
+                </div>
+            {:else if showMatch == true}
+                <div class="gameHeader">
+                    <div class="matchOpponent">
+                        <div class="matchTop">
+                            <img class="gameAvatar" src="{match.home.manager.avatar}" alt="" style="border: 1px solid #777; border-radius: 50%; height: 90%; width: auto;">
+                            <div class="gameTeamWrapper">
+                                <div class="gameTeam" style="align-items: center;">{match.home.manager.realname}</div>
+                                <!-- <div class="gameTeam" style="align-items: flex-start;">{game.homeTeam.ln}</div> -->
+                            </div>
+                        </div>
+                        <div class="gameTeam" style="align-items: center; font-style: italic; color: #999; margin: -2% 0 0 0;">{match.home.manager.name}</div>
+                    </div>
+                    <div class="versus">VS</div>
+                    <div class="matchOpponent">
+                        <div class="matchTop">
+                            <div class="gameTeamWrapper">
+                                <div class="gameTeam" style="align-items: center;">{match.away.manager.realname}</div>
+                                <!-- <div class="gameTeam" style="align-items: flex-start;">{game.awayTeam.ln}</div> -->
+                            </div>
+                            <img class="gameAvatar" src="{match.away.manager.avatar}" alt="" style="border: 1px solid #777; border-radius: 50%; height: 90%; width: auto;">
+                        </div>
+                        <div class="gameTeam" style="align-items: center; font-style: italic; color: #999; margin: -2% 0 0 0;">{match.away.manager.name}</div>
+                    </div>
+                </div>
+                <div class="container">
+                    {#each gameManagers as manager}
+                        <div class="managerBlock">
+                            <div class="managerInfo">
+                                <img class="managerAvatar" src="{manager.info.avatar}" alt="">
+                                <div class="managerName">{manager.info.name}</div>
+                            </div>
+                            <div class="managerStarters">
+                                {#each manager.starters as starter}
+                                    {#if starter.playerID == game.home || starter.playerID == game.away}
+                                        <img class="defenseAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
+                                    {:else}
+                                        <img class="playerAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
+                                    {/if}
+                                {/each}
+                            </div>
+                        </div>
+                    {/each}
+                </div>
+            {/if}
         </div>
     </div>
     <div class="bigBoxRightWrap">

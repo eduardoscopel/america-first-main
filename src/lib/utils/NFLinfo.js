@@ -3,6 +3,7 @@
 export const nflTeams = {           
     ARI: {
         espnID: 22,
+        sleeperID: "ARI",
         fn: "Arizona",
         ln: "Cardinals",
         color: "A40227",
@@ -11,14 +12,16 @@ export const nflTeams = {
     },
     ATL: {
         espnID: 1,
+        sleeperID: "ATL",
         fn: "Atlanta",
-        ln: "Cardinals",
+        ln: "Falcons",
         color: "000000",
         alternateColor: "000000",
         status: "active",
     },
     BAL: {
         espnID: 33,
+        sleeperID: "BAL",
         fn: "Baltimore",
         ln: "Ravens",
         color: "2B025B",
@@ -27,6 +30,7 @@ export const nflTeams = {
     },
     BUF: {
         espnID: 2,
+        sleeperID: "BUF",
         fn: "Buffalo",
         ln: "Bills",
         color: "04407F",
@@ -35,6 +39,7 @@ export const nflTeams = {
     },
     CAR: {
         espnID: 29,
+        sleeperID: "CAR",
         fn: "Carolina",
         ln: "Panthers",
         color: "2177B0",
@@ -43,6 +48,7 @@ export const nflTeams = {
     },
     CHI: {
         espnID: 3,
+        sleeperID: "CHI",
         fn: "Chicago",
         ln: "Bears",
         color: "152644",
@@ -51,6 +57,7 @@ export const nflTeams = {
     },
     CIN: {
         espnID: 4,
+        sleeperID: "CIN",
         fn: "Cincinnati",
         ln: "Bengals",
         color: "FF2700",
@@ -59,6 +66,7 @@ export const nflTeams = {
     },
     CLE: {
         espnID: 5,
+        sleeperID: "CLE",
         fn: "Cleveland",
         ln: "Browns",
         color: "4C230E",
@@ -67,6 +75,7 @@ export const nflTeams = {
     },
     DAL: {
         espnID: 6,
+        sleeperID: "DAL",
         fn: "Dallas",
         ln: "Cowboys",
         color: "002E4D",
@@ -75,6 +84,7 @@ export const nflTeams = {
     },
     DEN: {
         espnID: 7,
+        sleeperID: "DEN",
         fn: "Denver",
         ln: "Broncos",
         color: "002E4D",
@@ -83,6 +93,7 @@ export const nflTeams = {
     },
     DET: {
         espnID: 8,
+        sleeperID: "DET",
         fn: "Detroit",
         ln: "Lions",
         color: "035C98",
@@ -91,6 +102,7 @@ export const nflTeams = {
     },
     GB: {
         espnID: 9,
+        sleeperID: "GB",
         fn: "Green Bay",
         ln: "Packers",
         color: "204E32",
@@ -99,6 +111,7 @@ export const nflTeams = {
     },
     HOU: {
         espnID: 34,
+        sleeperID: "HOU",
         fn: "Houston",
         ln: "Texans",
         color: "00133F",
@@ -107,6 +120,7 @@ export const nflTeams = {
     },
     IND: {
         espnID: 11,
+        sleeperID: "IND",
         fn: "Indianapolis",
         ln: "Colts",
         color: "00417E",
@@ -115,6 +129,7 @@ export const nflTeams = {
     },
     JAX: {
         espnID: 30,
+        sleeperID: "JAX",
         fn: "Jacksonville",
         ln: "Jaguars",
         color: "00839C",
@@ -123,6 +138,7 @@ export const nflTeams = {
     },
     KC: {
         espnID: 12,
+        sleeperID: "KC",
         fn: "Kansas City",
         ln: "Chiefs",
         color: "BE1415",
@@ -131,6 +147,7 @@ export const nflTeams = {
     },
     LAC: {
         espnID: 24,
+        sleeperID: "LAC",
         fn: "Los Angeles",
         fn2: ["San Diego", "SD", 2016],
         ln: "Chargers",
@@ -140,6 +157,7 @@ export const nflTeams = {
     },
     LAR: {
         espnID: 14,
+        sleeperID: "LAR",
         fn: "Los Angeles",
         fn2: ["St. Louis", "STL", 2015],
         ln: "Rams",
@@ -149,6 +167,7 @@ export const nflTeams = {
     },
     LV: {
         espnID: 13,
+        sleeperID: "LV",
         fn: "Las Vegas",
         fn2: ["Oakland", "OAK", 2019],
         ln: "Raiders",
@@ -158,6 +177,7 @@ export const nflTeams = {
     },
     MIA: {
         espnID: 15,
+        sleeperID: "MIA",
         fn: "Miami",
         ln: "Dolphins",
         color: "006B79",
@@ -166,6 +186,7 @@ export const nflTeams = {
     },
     MIN: {
         espnID: 16,
+        sleeperID: "MIN",
         fn: "Minnesota",
         ln: "Vikings",
         color: "240A67",
@@ -174,6 +195,7 @@ export const nflTeams = {
     },
     NE: {
         espnID: 17,
+        sleeperID: "NE",
         fn: "New England",
         ln: "Patriots",
         color: "02244A",
@@ -182,6 +204,7 @@ export const nflTeams = {
     },
     NO: {
         espnID: 18,
+        sleeperID: "NO",
         fn: "New Orleans",
         ln: "Saints",
         color: "020202",
@@ -190,6 +213,7 @@ export const nflTeams = {
     },
     NYG: {
         espnID: 19,
+        sleeperID: "NYG",
         fn: "New York",
         ln: "Giants",
         color: "052570",
@@ -198,6 +222,7 @@ export const nflTeams = {
     },
     NYJ: {
         espnID: 20,
+        sleeperID: "NYJ",
         fn: "New York",
         ln: "Jets",
         color: "174032",
@@ -206,6 +231,7 @@ export const nflTeams = {
     },
     OAK: {
         espnID: 13,
+        sleeperID: "OAK",
         fn: "Oakland",
         ln: "Raiders",
         color: "000000",
@@ -215,6 +241,7 @@ export const nflTeams = {
     },
     PHI: {
         espnID: 21,
+        sleeperID: "PHI",
         fn: "Philadelphia",
         ln: "Eagles",
         color: "06424D",
@@ -223,6 +250,7 @@ export const nflTeams = {
     },
     PIT: {
         espnID: 23,
+        sleeperID: "PIT",
         fn: "Pittsburgh",
         ln: "Steelers",
         color: "000000",
@@ -231,6 +259,7 @@ export const nflTeams = {
     },
     SEA: {
         espnID: 26,
+        sleeperID: "SEA",
         fn: "Seattle",
         ln: "Seahawks",
         color: "224970",
@@ -239,6 +268,7 @@ export const nflTeams = {
     },
     SF: {
         espnID: 25,
+        sleeperID: "SF",
         fn: "San Francisco",
         ln: "49ers",
         color: "981324",
@@ -247,6 +277,7 @@ export const nflTeams = {
     },
     TB: {
         espnID: 27,
+        sleeperID: "TB",
         fn: "Tampa Bay",
         ln: "Buccaneers",
         color: "A80D08",
@@ -255,6 +286,7 @@ export const nflTeams = {
     },
     TEN: {
         espnID: 10,
+        sleeperID: "TEN",
         fn: "Tennessee",
         fn2: ["Houston", "HOU", 1996],
         ln: "Titans",
@@ -263,16 +295,9 @@ export const nflTeams = {
         alternateColor: "4b92db",
         status: "active",
     },
-    TB: {
-        espnID: 27,
-        fn: "Tampa Bay",
-        ln: "Buccaneers",
-        color: "A80D08",
-        alternateColor: "34302b",
-        status: "active",
-    },
     WAS: {
         espnID: 28,
+        sleeperID: "WAS",
         fn: "Washington",
         ln: "Football Team",
         ln2: ["Redskins", 2018],

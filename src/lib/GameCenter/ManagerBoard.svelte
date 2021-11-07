@@ -12,33 +12,20 @@
 
         matchesObj[matchID] = {
             matchID,
-            home: null,
-            away: null,
-        }
-
-        for(const key in matchTeams) {
-            for(const recordManID in managerInfo) {
-                if(managerInfo[recordManID].rosterID == matchTeams[key].rosterID) {
-                    if(matchesObj[matchID].home == null) {
-                        matchesObj[matchID].home = {
-                            recordManID,
-                            rosterID: managerInfo[recordManID].rosterID,
-                            matchInfo: matchTeams[key],
-                            fpts: matchTeams[key].totalFpts,
-                            manager: managerInfo[recordManID],
-                        }
-                    } else {
-                        matchesObj[matchID].away = {
-                            recordManID,
-                            rosterID: managerInfo[recordManID].rosterID,
-                            matchInfo: matchTeams[key],
-                            fpts: matchTeams[key].totalFpts,
-                            manager: managerInfo[recordManID],
-                        }
-                        break;
-                    }
-                }
-            }
+            home: {
+                recordManID: matchTeams[0].recordManID,
+                fpts: matchTeams[0].totalFpts,
+                matchInfo: matchTeams[0],
+                rosterID: matchTeams[0].rosterID,
+                manager: managerInfo[matchTeams[0].recordManID],
+            },
+            away: {
+                recordManID: matchTeams[1].recordManID,
+                fpts: matchTeams[1].totalFpts,
+                matchInfo: matchTeams[1],
+                rosterID: matchTeams[1].rosterID,
+                manager: managerInfo[matchTeams[1].recordManID],
+            },
         }
 
         matchScores.push(matchesObj[matchID]);
