@@ -674,8 +674,7 @@
         flex-direction: column;
         position: relative;
         height: 100%;
-        width: 47.5%;
-        align-items: center;
+        width: 48.5%;
         justify-content: center;
     }
 
@@ -693,12 +692,13 @@
         display: inline-flex;
         position: relative;
         height: 100%;
-        width: 5%;
-        align-items: center;
+        width: 3%;
         justify-content: center;
         font-style: italic;
         font-weight: 420;
+        font-size: 0.8em;
         color: #999;
+        align-items: center;
     }
 
     .gameTeamWrapper {
@@ -735,6 +735,7 @@
         align-items: flex-start;
         height: 86%;
         padding: 2%;
+        top: -2%;
     }
 
     .gameContainer {
@@ -743,6 +744,7 @@
         flex-direction: column;
         justify-content: space-around;
         align-items: flex-start;
+        margin: 5% 0 0 0;
         height: 86%;
         padding: 2%;
     }
@@ -911,6 +913,30 @@
         border: 0.25px solid #555;
         border-radius: 1em;
     }
+
+    .totalPointsWrap {
+        position: relative;
+        display: inline-flex;
+        justify-content: space-around;
+        flex-direction: row;
+        width: 100%;
+        height: 100%;
+        top: -3.5%;
+    }
+
+    .totalPoints {
+        position: relative;
+        display: inline-flex;
+        width: 25%;
+        height: 145%;
+        border: 0.25px solid #777;
+        border-radius: 0.9em;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.2em;
+        color: #ededed;
+    }
 </style>
 
 <div class="bigBox">
@@ -926,7 +952,7 @@
                             <div class="gameTeam" style="align-items: flex-start;">{game.home.ln}</div>
                         </div>
                     </div>
-                    <div class="versus">VS</div>
+                    <div class="versus">V</div>
                     <div class="gameOpponent">
                         <div class="gameTeamWrapper" style="align-items: flex-end;">
                             <div class="gameTeam" style="align-items: flex-end;">{game.away.fn}</div>
@@ -958,24 +984,28 @@
             {:else if showMatch == true}        
                 <div class="gameHeader">
                     <div class="matchOpponent">
-                        <div class="matchTop">
+                        <div class="matchTop" style="justify-content: flex-start;">
                             <img class="gameAvatar" src="{match.home.manager.avatar}" alt="" style="border: 1px solid #777; border-radius: 50%; height: 90%; width: auto;">
                             <div class="gameTeamWrapper">
-                                <div class="gameTeam" style="align-items: center;">{match.home.manager.realname}</div>
+                                <div class="gameTeam" style="margin: 5% 0;">{match.home.manager.realname}</div>
                             </div>
                         </div>
-                        <div class="gameTeam" style="align-items: center; font-style: italic; color: #999; margin: -2% 0 0 0;">{match.home.manager.name}</div>
+                        <div class="gameTeam" style="align-items: center; font-size: 0.75em; font-style: italic; color: #999; top: -40%; left: 30%; width: 69%; line-height: 1em;">{match.home.manager.name}</div>
                     </div>
-                    <div class="versus">VS</div>
+                    <div class="versus">V</div>
                     <div class="matchOpponent">
-                        <div class="matchTop">
+                        <div class="matchTop" style="justify-content: flex-end;">
                             <div class="gameTeamWrapper">
-                                <div class="gameTeam" style="align-items: center;">{match.away.manager.realname}</div>
+                                <div class="gameTeam" style="margin: 5% 0;">{match.away.manager.realname}</div>
                             </div>
                             <img class="gameAvatar" src="{match.away.manager.avatar}" alt="" style="border: 1px solid #777; border-radius: 50%; height: 90%; width: auto;">
                         </div>
-                        <div class="gameTeam" style="align-items: center; font-style: italic; color: #999; margin: -2% 0 0 0;">{match.away.manager.name}</div>
+                        <div class="gameTeam" style="align-items: center; justify-content: flex-end; font-size: 0.75em; font-style: italic; color: #999; top: -40%; width: 69%; line-height: 1em;">{match.away.manager.name}</div>
                     </div>
+                </div>
+                <div class="totalPointsWrap">
+                    <div class="totalPoints">{round(match.home.fpts)}</div>
+                    <div class="totalPoints">{round(match.away.fpts)}</div>
                 </div>
                 <div class="matchContainer">
                     <div class="rosterWrap">

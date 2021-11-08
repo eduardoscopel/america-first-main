@@ -92,6 +92,8 @@
                     scoringType = play.scoringType.name;
                     if(play.scoreValue == 6 && (play.alternativeText.includes('extra point is GOOD') || play.alternativeText.includes('Kick)'))) {
                         scoreValue = 7;
+                    } else if(play.scoreValue == 6 && play.alternativeText.includes('TWO-POINT CONVERSION') && play.alternativeText.includes('SUCCEEDS')) {
+                        scoreValue = 8;
                     } else {
                         scoreValue = play.scoreValue;
                     }
@@ -136,6 +138,11 @@
 
                     let oldYA = awayDefYdsAllowed;
                     awayDefYdsAllowed += play.statYardage;
+
+                    if(play.alternativeText.includes('PENALTY') && play.alternativeText.includes('Roughing the Passer') && play.alternativeText.includes('enforced')) {
+                        awayDefYdsAllowed = awayDefYdsAllowed - 15;
+                    }
+
                     // check if threshold broken
                     if((oldYA < 100 && awayDefYdsAllowed >= 100) || (oldYA < 200 && awayDefYdsAllowed >= 200) || (oldYA < 300 && awayDefYdsAllowed >= 300) || (oldYA < 350 && awayDefYdsAllowed >= 350) ||
                       (oldYA < 400 && awayDefYdsAllowed >= 400) || (oldYA < 450 && awayDefYdsAllowed >= 450) || (oldYA < 500 && awayDefYdsAllowed >= 500) || (oldYA < 550 && awayDefYdsAllowed >= 550)) {
@@ -150,6 +157,10 @@
                     if(startersArray.filter(s => s.playerID == home).length > 0 && ((play.type.id == 52 && score.def_pr_yd) || (play.type.id == 53 && score.def_kr_yd))) {
                         let oldYA = homeDefYdsAllowed;
                         homeDefYdsAllowed = homeDefYdsAllowed - play.statYardage;
+
+                        if(play.alternativeText.includes('PENALTY') && play.alternativeText.includes('Roughing the Passer') && play.alternativeText.includes('enforced')) {
+                            homeDefYdsAllowed = homeDefYdsAllowed - 15;
+                        }
                         // check if threshold broken
                         if((homeDefYdsAllowed < 100 && oldYA >= 100) || (homeDefYdsAllowed < 200 && oldYA >= 200) || (homeDefYdsAllowed < 300 && oldYA >= 300) || (homeDefYdsAllowed < 350 && oldYA >= 350) ||
                             (homeDefYdsAllowed < 400 && oldYA >= 400) || (homeDefYdsAllowed < 450 && oldYA >= 450) || (homeDefYdsAllowed < 500 && oldYA >= 500) || (homeDefYdsAllowed < 550 && oldYA >= 550)) {
@@ -234,6 +245,9 @@
                         // Catching exceptions with different names
                         if(espnMatch.fn == 'Michael' && espnMatch.ln == 'Pittman Jr.' && espnMatch.pos == 'WR') {
                             espnMatch.ln = 'Pittman';
+                        }
+                        if(espnMatch.pos == 'PK') {
+                            espnMatch.pos = 'K';
                         }
                         let sleeperMatch = startersArray.filter(s => s.fn == espnMatch.fn && s.ln == espnMatch.ln && s.pos == espnMatch.pos);
                         // if the current player involved in the play is a starter, we combine the sleeper and espn info for their entry in the playEntry
@@ -514,27 +528,52 @@
                 let sackRecorded = new Boolean (false);
                 for(const relevantKey in play.relevantDEF) {
                     const player = play.relevantDEF[relevantKey];
+                    let fumblerTeam;
+                    if(player.statType == 'fumbler') {
+                        fumblerTeam = player.playerInfo.t;
+                    }
                     if(player.statType == 'recoverer'
                        && player.playType != 9
-                       && play.teamStartPoss != play.teamEndPoss) {                    // FUMBLE RECOVERY PTS - TEAM DEF
-                            const fpts = (score?.fum_rec || 0);            // NOTE TO-DO: Must distinguish b/t def & st recoveries
-                            const statDesc = 'FR:';
-                            const entryDEF = {
-                                order: play.order,
-                                side: 'defense',
-                                manager: player.manager,
-                                playerInfo: player.playerInfo,
-                                stat: ['fum_rec'],
-                                runningTotals: [],
-                                fpts,
-                                description: play.description,
-                                shortDesc: 'Fumble Recovery',
-                            }   
-                            if(fpts != 0) {
-                                let runningTotal = pushRunningTotal(fpts, statDesc, entryDEF.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                entryDEF.runningTotals.push(runningTotal);
+                       && player.playerInfo.t != fumblerTeam) {                    
+                            if(player.playType == 52 || player.playType == 53 || player.playType == 60) {       // FUMBLE RECOVERY PTS - SPECIAL TEAM
+                                const fpts = (score?.def_st_fum_rec || 0);           
+                                const statDesc = 'FR:';
+                                const entryDEF = {
+                                    order: play.order,
+                                    side: 'defense',
+                                    manager: player.manager,
+                                    playerInfo: player.playerInfo,
+                                    stat: ['def_st_fum_rec'],
+                                    runningTotals: [],
+                                    fpts,
+                                    description: play.description,
+                                    shortDesc: 'ST Fumble Recovery',
+                                }   
+                                if(fpts != 0) {
+                                    let runningTotal = pushRunningTotal(fpts, statDesc, entryDEF.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                fantasyPlay[play.playID].push(entryDEF);
+                            } else {                                                                    // FUMBLE RECOVERY PTS - TEAM DEF
+                                const fpts = (score?.fum_rec || 0);            // NOTE TO-DO: May need to rethink how TEAM DEF pts scored for this
+                                const statDesc = 'FR:';
+                                const entryDEF = {
+                                    order: play.order,
+                                    side: 'defense',
+                                    manager: player.manager,
+                                    playerInfo: player.playerInfo,
+                                    stat: ['fum_rec'],
+                                    runningTotals: [],
+                                    fpts,
+                                    description: play.description,
+                                    shortDesc: 'Fumble Recovery',
+                                }   
+                                if(fpts != 0) {
+                                    let runningTotal = pushRunningTotal(fpts, statDesc, entryDEF.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                fantasyPlay[play.playID].push(entryDEF);
                             }
-                            fantasyPlay[play.playID].push(entryDEF);
                     } 
                     if(player.statType == 'forcedBy') {          // FORCED FUMBLE PTS - TEAM ST
                         if(player.playType == 52 || player.playType == 53 || player.playType == 60) {
@@ -791,13 +830,14 @@
                             let runningTotal = pushRunningTotal(fpts, statFF, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
                             entry.runningTotals.push(runningTotal);
                         }            
-                        if(play.teamStartPoss != play.teamEndPoss && score.fum_lost) {      // PENALTY for FUMBLE -> TURNOVER
-                            entry.fpts += score.fum_lost;                                   // note that it's not necessarily one or the other
+                        if(!play.description.includes(`recovered by ${player.playerInfo.t}`)) {      // PENALTY for FUMBLE -> TURNOVER
+                            entry.fpts += (score?.fum_lost || 0); 
+                            const fptsFUMTO = (score?.fum_lost || 0);                                  
                             entry.stat.push('fum_lost');
-                            entry.shortDesc += ' (Fumble Turnover)';
+                            entry.shortDesc += ' & Turnover';
                             const statFL = 'FUM TO:';
-                            if(score.fum_lost != 0) {
-                                let runningTotal = pushRunningTotal(score.fum_lost, statFL, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                            if(fptsFUMTO != 0) {
+                                let runningTotal = pushRunningTotal(fptsFUMTO, statFL, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                 entry.runningTotals.push(runningTotal);
                             }
                         }
@@ -847,6 +887,67 @@
                                     }
                                     fantasyPlay[play.playID].push(entryIDP);
                                 }  
+                    }
+                    if(play.description.includes('TWO-POINT CONVERSION') && play.description.includes('SUCCEEDS')) {            // 2-PT CONVERSIONS
+                        if(player.statType == 'patPasser') {                                                                    // 2-PT PASS
+                            const fpts = (score?.pass_2pt || 0) + (score?.pass_att || 0) + (score?.pass_cmp || 0);
+                            const fpts2PT = (score?.pass_2pt || 0);
+                            const fptsATT = (score?.pass_att || 0);
+                            const fptsCMP = (score?.pass_cmp || 0);
+                            const stat2PT = '2PT PASS:';
+                            const statATT = 'PASS:';
+                            const statCMP = 'CMP:';
+                            const entry = {
+                                order: play.order,
+                                side: 'offense',
+                                manager: player.manager,
+                                playerInfo: player.playerInfo,
+                                stat: ['pass_2pt', 'pass_att', 'pass_comp'],
+                                runningTotals: [],
+                                fpts,
+                                description: play.description,
+                                shortDesc: '2-PT Conversion (Pass)',
+                            }
+                            if(fpts2PT != 0) {
+                                let runningTotal = pushRunningTotal(fpts2PT, stat2PT, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                entry.runningTotals.push(runningTotal);
+                            }
+                            if(fptsATT != 0) {
+                                let runningTotal = pushRunningTotal(fptsATT, statATT, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                entry.runningTotals.push(runningTotal);
+                            }
+                            if(fptsCMP != 0) {
+                                let runningTotal = pushRunningTotal(fptsCMP, statCMP, entry.stat[2], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                entry.runningTotals.push(runningTotal);
+                            }
+                            fantasyPlay[play.playID].push(entry);
+                        } else if(player.statType == 'patScorer' && play.description.includes('complete. ATTEMPT SUCCEEDS')) {                             // 2-PT RECEPTION
+                            const fpts = (score?.rec_2pt || 0) + (score?.rec || 0);
+                            const fpts2PT = (score?.rec_2pt || 0);
+                            const fptsREC = (score?.rec || 0);
+                            const stat2PT = '2PT REC:';
+                            const statREC = 'REC:';
+                            const entry = {
+                                order: play.order,
+                                side: 'offense',
+                                manager: player.manager,
+                                playerInfo: player.playerInfo,
+                                stat: ['rec_2pt', 'rec'],
+                                runningTotals: [],
+                                fpts,
+                                description: play.description,
+                                shortDesc: '2-PT Conversion (Reception)',
+                            }
+                            if(fpts2PT != 0) {
+                                let runningTotal = pushRunningTotal(fpts2PT, stat2PT, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                entry.runningTotals.push(runningTotal);
+                            }
+                            if(fptsREC != 0) {
+                                let runningTotal = pushRunningTotal(fptsREC, statREC, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                entry.runningTotals.push(runningTotal);
+                            }
+                            fantasyPlay[play.playID].push(entry);
+                        }
                     }
                     if(player.playType == 5 && player.statType == 'rusher') {         // RUSH
                         const fpts = player.yards * (score?.rush_yd || 0) + (score?.rush_att || 0);
@@ -1053,10 +1154,14 @@
                         } 
                     } else if(player.playType == 24) {          // COMPLETE PASS
                         if(player.statType == 'passer') {
-                            const fpts = player.yards * (score?.pass_yd || 0) + (score?.pass_att || 0) + (score?.pass_cmp || 0);
+                            let adjustedYards = player.yards;
+                            if(play.description.includes('PENALTY') && play.description.includes('Roughing the Passer') && play.description.includes('enforced')) {
+                                adjustedYards = adjustedYards - 15;
+                            }
+                            const fpts = adjustedYards * (score?.pass_yd || 0) + (score?.pass_att || 0) + (score?.pass_cmp || 0);
                             const fptsPass = (score?.pass_att || 0);
                             const fptsCmp = (score?.pass_cmp || 0);
-                            const fptsYDS = player.yards * (score?.pass_yd || 0);
+                            const fptsYDS = adjustedYards * (score?.pass_yd || 0);
                             const statYDS = 'PASS YDS:';
                             const statPass = 'PASS:';
                             const statCmp = 'CMP:';
@@ -1068,12 +1173,12 @@
                                 stat: ['pass_yd', 'pass_att', 'pass_cmp'],
                                 runningTotals: [],
                                 fpts,
-                                yards: player.yards,
+                                yards: adjustedYards,
                                 description: play.description,
                                 shortDesc: 'Pass Complete',
                             }   
                             if(fptsYDS != 0) {
-                                let runningTotal = pushRunningTotal(fptsYDS, statYDS, entry.stat[0], player.yards, player.playerInfo.playerID, player.playerInfo.pos); 
+                                let runningTotal = pushRunningTotal(fptsYDS, statYDS, entry.stat[0], adjustedYards, player.playerInfo.playerID, player.playerInfo.pos); 
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(fptsPass != 0) {
@@ -1084,7 +1189,7 @@
                                 let runningTotal = pushRunningTotal(fptsCmp, statCmp, entry.stat[2], 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                 entry.runningTotals.push(runningTotal);
                             }   
-                            if(player.yards >= 40 && score.pass_cmp_40p) {          // PASS YD BONUS
+                            if(adjustedYards >= 40 && score.pass_cmp_40p) {          // PASS YD BONUS
                                 entry.fpts += score.pass_cmp_40p;
                                 entry.stat.push('pass_cmp_40p');
                                 const stat = 'CMP(40):';
@@ -1463,8 +1568,9 @@
                         fantasyPlay[play.playID].push(entry);                                                        // TO-DO (maybe) NOTE: ADD IF OTHER KINDS OF TOUCHDOWNS  ALSO NOT SURE IF THIS WORKS;       
                     } else if(((player.playType == 68 || player.playType == 67) || play.scoringType == 'touchdown') // MISSED PAT
                                 && !play.description.includes('extra point is GOOD')
+                                && play.description.includes('extra point is No Good')
                                 && !play.description.includes('Kick)')
-                                && player.statType == 'patScorer') {
+                                && (player.statType == 'patScorer' || player.statType == 'kicker')) {
                                     const fpts = (score?.xpmiss || 0);
                                     const stat = 'PAT MISS:';
                                     const entry = {
