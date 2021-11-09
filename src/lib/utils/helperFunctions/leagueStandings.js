@@ -1,4 +1,4 @@
-import { leagueID } from '$lib/utils/leagueInfo';
+import { leagueID, managers } from '$lib/utils/leagueInfo';
 import { getNflState } from "./nflState"
 import { getLeagueData } from "./leagueData"
 import { getLeagueRosters } from "./leagueRosters"
@@ -22,6 +22,20 @@ export const getLeagueStandings = async () => {
 	let medianMatch = new Boolean (false);
 	if(leagueData.settings.league_average_match == 1) {
 		medianMatch = true;
+	}
+	const yearManagers = {};
+	for(const managerID in managers) {
+		const manager = managers[managerID];
+		const year = parseInt(yearData);
+		if(manager.yearsactive.includes(year)) {
+			yearManagers[manager.roster] = {
+				managerID: manager.managerID,
+				rosterID: manager.roster,
+				name: manager.name,
+				status: manager.status,
+				yearsactive: manager.yearsactive,
+			}
+		}
 	}
 
 	// if the season hasn't started, standings can't be created
@@ -63,7 +77,7 @@ export const getLeagueStandings = async () => {
 	let standings = {};
 	// process all the matchups
 	for(const matchup of matchupsData) {
-		standings = processStandings(matchup, standings, rosters.rosters, medianMatch);
+		standings = processStandings(matchup, standings, rosters.rosters, medianMatch, yearManagers);
 	}
 
 	const response = {
@@ -78,7 +92,7 @@ export const getLeagueStandings = async () => {
 	return response;
 }
 
-const processStandings = (matchup, standingsData, rosters, medianMatch) => {
+const processStandings = (matchup, standingsData, rosters, medianMatch, yearManagers) => {
 	const matchups = {};
 	let scoresArray = [];
 	for(const match of matchup) {
@@ -91,6 +105,7 @@ const processStandings = (matchup, standingsData, rosters, medianMatch) => {
 		if(!standingsData[rosterID]) {
 			standingsData[rosterID] = {
 				rosterID,
+				recordManID: yearManagers[rosterID].managerID,
 				wins: 0,
 				losses: 0,
 				ties: 0,

@@ -1,7 +1,7 @@
 <script>
     import MatchScore from "./MatchScore.svelte";
 
-    export let weekMatchups, managerInfo, matchSelection;
+    export let weekMatchups, managerInfo, matchSelection, completeGames, playersInfo;
 
     let matchScores = [];
     const matchesObj = {};
@@ -9,6 +9,18 @@
     for(const matchup in weekMatchups) {
         const matchTeams = weekMatchups[matchup];
         let matchID = matchTeams[0].matchID;
+
+        let toPlay = {
+            0: matchTeams[0].starters.length,
+            1: matchTeams[1].starters.length,
+        };
+        for(let i = 0; i < matchTeams.length; i++) {
+            for(const starter of matchTeams[i].starters) {
+                if(starter == '0' || completeGames.includes(starter) || completeGames.includes(playersInfo.players[starter].t)) {
+                    toPlay[i] --;
+                }
+            }
+        }
 
         matchesObj[matchID] = {
             matchID,
@@ -18,6 +30,7 @@
                 matchInfo: matchTeams[0],
                 rosterID: matchTeams[0].rosterID,
                 manager: managerInfo[matchTeams[0].recordManID],
+                toPlay: toPlay[0],
             },
             away: {
                 recordManID: matchTeams[1].recordManID,
@@ -25,6 +38,7 @@
                 matchInfo: matchTeams[1],
                 rosterID: matchTeams[1].rosterID,
                 manager: managerInfo[matchTeams[1].recordManID],
+                toPlay: toPlay[1],
             },
         }
 

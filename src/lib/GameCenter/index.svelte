@@ -6,9 +6,10 @@
     import ManagerBoard from './ManagerBoard.svelte';
 
 
-    export let leagueData, rosterData, users, playersInfo, nflWeek, matchupsInfo;
+    export let leagueData, rosterData, users, playersInfo, nflWeek, matchupsInfo, standingsData;
 
     let fantasyProducts = [];
+    let completeGames = [];
     let gameSelection;
     let matchSelection;
     let nflMatchups = nflWeek.nflWeek;
@@ -238,15 +239,15 @@
         <div class="leftWrapper">
             <div class="weekInfo">
                 <div class="weekInfoSeason">{season}</div>
-                <div class="weekInfoWeek">Week {week}</div>
+                <div class="weekInfoWeek">Week {matchupsInfo.week}</div>
             </div>
             <div class="scoreboard">
-                <Scoreboard {nflMatchups} {week} bind:gameSelection={gameSelection} />
+                <Scoreboard {nflMatchups} {week} bind:gameSelection={gameSelection} {completeGames} />
             </div>
         </div>
         <div class="centerWrapper">
             <div class="gameBox">
-                <GameBox {nflTeams} {nflMatchups} {week} {leagueData} {playersInfo} {fantasyStarters} {positionLeaders} {managerInfo} {weekMatchups} bind:matchSelection={matchSelection} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} />
+                <GameBox {nflTeams} {nflMatchups} {week} {leagueData} {playersInfo} {fantasyStarters} {positionLeaders} {managerInfo} {weekMatchups} {standingsData} bind:matchSelection={matchSelection} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} />
             </div>
             <div class="playByPlay">
                 <PlayByPlay {nflTeams} {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} {managerInfo} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} />
@@ -255,7 +256,7 @@
         <div class="rightWrapper">
             <div class="weekInfo"></div>
             <div class="managerboard">
-                <ManagerBoard {weekMatchups} {managerInfo} bind:matchSelection={matchSelection} />
+                <ManagerBoard {weekMatchups} {managerInfo} {completeGames} {playersInfo} bind:matchSelection={matchSelection} />
             </div>
         </div>
     </div>

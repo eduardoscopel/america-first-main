@@ -1,5 +1,5 @@
 <script>
-    export let gameID, home, away, gameSelection = gameID;
+    export let gameID, home, away, gameSelection = gameID, completeGames;
 
     let timezone = 'CST';
     let isComplete = home.status.type.completed;
@@ -29,6 +29,8 @@
     if(isComplete == true) {
         gameStatus.quarter = "Final";
         gameStatus.clock = "";
+        completeGames.push(home.sleeperID);
+        completeGames.push(away.sleeperID);
     }
     let newGameSelection
     const changeGameSelection = (gameID) => {

@@ -2,7 +2,7 @@
     import {round} from '$lib/utils/helper'; 
 import { each } from 'svelte/internal';
 
-    export let nflTeams, nflMatchups, week, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, matchSelection = 1, fantasyProducts, gameSelection = nflMatchups[0][0].gameID;;
+    export let nflTeams, nflMatchups, week, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, standingsData, matchSelection = 1, fantasyProducts, gameSelection = nflMatchups[0][0].gameID;;
     
     const score = leagueData.scoring_settings;
     const positions = leagueData.roster_positions.filter(p => p != 'BN');
@@ -58,17 +58,39 @@ import { each } from 'svelte/internal';
                 }
             }
         }
+        let records = {
+            0: null,
+            1: null,
+        }
+        for(let i = 0; i < match.length; i++) {
+            for(const key in standingsData.standingsInfo) {
+                if(standingsData.standingsInfo[key].recordManID == match[i].recordManID) {
+                    records[i] = {
+                        wins: standingsData.standingsInfo[key].wins,
+                        ties: standingsData.standingsInfo[key].ties,
+                        losses: standingsData.standingsInfo[key].losses,
+                        showTies: new Boolean (false),
+                    }
+                    if(records[i].ties != 0) {
+                        records[i].showTies = true;
+                    }
+                    break;
+                }
+            }
+        }
         let home = {
             matchInfo: match[0],
             manager: managerInfo[match[0].recordManID],
             fpts: match[0].totalFpts,
             starters: matchStarters[match[0].recordManID],
+            record: records[0],
         }
         let away = {
             matchInfo: match[1],
             manager: managerInfo[match[1].recordManID],
             fpts: match[1].totalFpts,
             starters: matchStarters[match[1].recordManID],
+            record: records[1],
         }
         freshGame = true;
         positionLB = matchStarters;
@@ -888,6 +910,7 @@ import { each } from 'svelte/internal';
         height: 50%;
         width: 100%;
         align-items: center;
+        line-height: 0.5em;
     }
 
     .rosterAvatar {
@@ -1032,6 +1055,7 @@ import { each } from 'svelte/internal';
                                             </div>
                                             <div class="rosterPlayerInfo">
                                                 <div class="rosterPlayer" style="justify-content: flex-start; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
+                                                <div class="rosterPlayer" style="justify-content: flex-start; color: #999; font-size: 0.75em; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%; line-height: 1em;"}">{starter.owner.name}</div>
                                                 <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">
                                                     <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
                                                     <div style="display: inline-flex; color: #999; justify-content: flex-end; margin: 0 5% 0 0;">({round(starter.projection)})</div>
@@ -1042,7 +1066,7 @@ import { each } from 'svelte/internal';
                                 </div>
                                 <div class="positionsWrap" style="justify-content: flex-start;">
                                     <div class="rosterPosition {nflPositions[ix]}" style="height: {100 / row}%;">
-                                        <div class="rosterRowBox" style="top: 0%; height: {100 * row}%"></div>
+                                        <div class="rosterRowBox" style="top: -2%; height: {100 * row}%"></div>
                                         {nflPositions[ix]}
                                     </div>
                                 </div>
@@ -1051,6 +1075,7 @@ import { each } from 'svelte/internal';
                                         <div class="rosterRow" style="justify-content: flex-end; height: {100 / row}%;">
                                             <div class="rosterPlayerInfo">
                                                 <div class="rosterPlayer" style="justify-content: flex-end; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
+                                                <div class="rosterPlayer" style="justify-content: flex-end; color: #999; font-size: 0.75em; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%; line-height: 1em;"}">{starter.owner.name}</div>
                                                 <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%;"}">
                                                     <div style="display: inline-flex; color: #999; justify-content: flex-start; margin: 0 0 0 5%;">({round(starter.projection)})</div>  
                                                     <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
@@ -1097,6 +1122,7 @@ import { each } from 'svelte/internal';
                             </div>
                         </div>
                         <div class="gameTeam" style="align-items: center; font-size: 0.75em; font-style: italic; color: #999; top: -40%; left: 30%; width: 69%; line-height: 1em;">{match.home.manager.name}</div>
+                        <div class="gameTeam" style="align-items: center; font-size: 0.75em; font-style: italic; color: #999; top: -40%; left: 30%; width: 69%; line-height: 1em;">{match.home.record.showTies == true ? '(' + match.home.record.wins + ' - ' + match.home.record.ties + ' - ' + match.home.record.losses + ')' : '(' + match.home.record.wins + ' - ' + match.home.record.losses + ')'}</div>
                     </div>
                     <div class="versus">V</div>
                     <div class="matchOpponent">
@@ -1107,6 +1133,7 @@ import { each } from 'svelte/internal';
                             <img class="gameAvatar" src="{match.away.manager.avatar}" alt="" style="border: 1px solid #777; border-radius: 50%; height: 90%; width: auto;">
                         </div>
                         <div class="gameTeam" style="align-items: center; justify-content: flex-end; font-size: 0.75em; font-style: italic; color: #999; top: -40%; width: 69%; line-height: 1em;">{match.away.manager.name}</div>
+                        <div class="gameTeam" style="align-items: center; justify-content: flex-end; font-size: 0.75em; font-style: italic; color: #999; top: -40%; width: 69%; line-height: 1em;">{match.away.record.showTies == true ? '(' + match.away.record.wins + ' - ' + match.away.record.ties + ' - ' + match.away.record.losses + ')' : '(' + match.away.record.wins + ' - ' + match.away.record.losses + ')'}</div>
                     </div>
                 </div>
                 <div class="totalPointsWrap">

@@ -1,6 +1,10 @@
 <script>
     export let matchID, home, away, matchSelection = matchID;
 
+    let isComplete = new Boolean (false);
+    if(home.toPlay == 0 && away.toPlay == 0) {
+        isComplete = true;
+    }
 
     let newMatchSelection
     const changeMatchSelection = (matchID) => {
@@ -142,19 +146,19 @@
                 <div class="teamScore">{away.fpts}</div>
             </div>
         </div>
-        <!-- <div class="gameStatusWrapper">
+        <div class="gameStatusWrapper">
             {#if !isComplete}
                 <div class="gameStatusPeriod">
-                    {gameStatus.quarter}{gameStatus.quarterSuper}
+                    To Play: {home.toPlay}
                 </div>
                 <div class="gameStatusClock">
-                    {gameStatus.clock}
+                    To Play: {away.toPlay}
                 </div>
             {:else}
                 <div class="gameComplete">
                     Final
                 </div>
             {/if}
-        </div> -->
+        </div>
     </div>
 </div>
