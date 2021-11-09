@@ -234,6 +234,7 @@
                         for(const key in nflTeams) {
                             if(nflTeams[key].espnID == espnPlayerTeamID) {
                                 playerTeam = key;
+                                break;
                             }
                         }
                         // full name & position should be enough identifying info to match our sleeper info to espn's player API
@@ -354,10 +355,11 @@
         //     7: 'sack',
         //     8: 'penalty',
         //     9: 'fumble offense recovery',
-        //     12: 'kickoff return offense', onside kick?
+        //     12: 'kickoff return for yards'.
         //     21: 'timeout',
         //     24: 'completed pass',
         //     26: 'interception',
+        //     29: 'fumble turnover'
         //     32: 'kick six'
         //     36: 'pick six',
         //     52: 'punt',
@@ -534,7 +536,7 @@
                     }
                     if(player.statType == 'recoverer'
                        && player.playType != 9
-                       && player.playerInfo.t != fumblerTeam) {                    
+                       && (player.playerInfo.t != fumblerTeam || player.playType == 29)) {                    
                             if(player.playType == 52 || player.playType == 53 || player.playType == 60) {       // FUMBLE RECOVERY PTS - SPECIAL TEAM
                                 const fpts = (score?.def_st_fum_rec || 0);           
                                 const statDesc = 'FR:';
@@ -617,17 +619,21 @@
                         }
                     }
                     if(player.statType == 'sackedBy' && sackRecorded == false) {            // SACK - TEAM DEF
-                        const fpts = (score?.sack || 0) + player.yards * (score?.sack_yd || 0);
+                        const fpts = (score?.sack || 0) + player.yards * (score?.sack_yd || 0) + (score?.qb_hit || 0) + (score?.tkl || 0);
                         const fptsSack = (score?.sack || 0);
-                        const fptsSackYDS = player.yards * (score?.sack_yd || 0);
+                        const fptsSackYDS = player.yards * (score?.sack_yd || 0);           
+                        const fptsQBHIT = (score?.qb_hit || 0);
+                        const fptsTKL = (score?.tkl || 0);
                         const statSack = 'SACK:';
                         const statSackYDS = 'SACK YDS:';
+                        const statQBHIT = 'QB HIT:';
+                        const statTKL = 'TKL:'
                         const entryDEF = {
                             order: play.order,
                             side: 'defense',
                             manager: player.manager,
                             playerInfo: player.playerInfo,
-                            stat: ['sack', 'sack_yd'],
+                            stat: ['sack', 'sack_yd', 'qb_hit', 'tkl'],
                             runningTotals: [],
                             fpts,
                             yards: player.yards,
@@ -640,6 +646,14 @@
                         }
                         if(fptsSackYDS != 0) {
                             let runningTotal = pushRunningTotal(fptsSackYDS, statSackYDS, entryDEF.stat[1], player.yards, player.playerInfo.playerID, player.playerInfo.pos); 
+                            entryDEF.runningTotals.push(runningTotal);
+                        }
+                        if(fptsQBHIT != 0) {
+                            let runningTotal = pushRunningTotal(fptsQBHIT, statQBHIT, entryDEF.stat[2], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                            entryDEF.runningTotals.push(runningTotal);
+                        }
+                        if(fptsTKL != 0) {
+                            let runningTotal = pushRunningTotal(fptsTKL, statTKL, entryDEF.stat[3], 1, player.playerInfo.playerID, player.playerInfo.pos); 
                             entryDEF.runningTotals.push(runningTotal);
                         }
                         fantasyPlay[play.playID].push(entryDEF);
@@ -707,9 +721,9 @@
                         }
                         fantasyPlay[play.playID].push(entryDEF);
                     }   
-                    if(player.playType == 53 && player.statType == 'returner') {                  // KICKOFF RETURN YDS TEAM DEF/ST
+                    if((player.playType == 53 || player.playType == 12) && player.statType == 'returner') {                  // KICKOFF RETURN YDS TEAM DEF/ST
                         const fpts = player.yards * (score?.def_kr_yd || 0);
-                        const stat = 'KO YDS:';
+                        const stat = 'KR YDS:';
                         const entryDEF = {
                             order: play.order,
                             side: 'defense',
@@ -1450,7 +1464,7 @@
                         }
                         if(0 < player.yards && player.yards < 20 && score.fgm_0_19) {           // FG YD BONUS
                             entry.fpts += score.fgm_0_19;
-                            entry.stat.push(score.fgm_0_19);
+                            entry.stat.push('fgm_0_19');
                             const stat = 'FG(0-19):';
                             if(score.fgm_0_19 != 0) {
                                 let runningTotal = pushRunningTotal(score.fgm_0_19, stat, entry.stat[2], 1, player.playerInfo.playerID, player.playerInfo.pos); 
@@ -1458,27 +1472,26 @@
                             }
                         } else if(19 < player.yards && player.yards < 30 && score.fgm_20_29) {
                             entry.fpts += score.fgm_20_29;
-                            entry.stat.push(score.fgm_20_29);
+                            entry.stat.push('fgm_20_29');
                             const stat = 'FG(20-29):';
                             if(score.fgm_20_29 != 0) {
                                 let runningTotal = pushRunningTotal(score.fgm_20_29, stat, entry.stat[2], 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                 entry.runningTotals.push(runningTotal);
                             }
-                        } else if(29 < player.yards) {
-                            if(score.fgm_yds_over_30) {
-                                entry.fpts += score.fgm_yds_over_30;
-                                entry.stat.push(score.fgm_yds_over_30);
-                                const sleepStat = 'score.fgm_yds_over_30';
-                                const stat = 'FG(30+):';
-                                if(score.fgm_yds_over_30 != 0) {
-                                    let runningTotal = pushRunningTotal(score.fgm_yards_over_30, stat, sleepStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                    entry.runningTotals.push(runningTotal);
-                                }
+                        } else if(29 < player.yards) {       
+                            entry.fpts += ((score?.fgm_yds_over_30 || 0) * (player.yards - 30));
+                            const newFpts = (score?.fgm_yds_over_30 || 0) * (player.yards - 30);
+                            entry.stat.push('fgm_yds_over_30');
+                            const sleepStat = 'fgm_yds_over_30';
+                            const stat = 'FG(30+):';
+                            if(score.fgm_yds_over_30 != 0) {
+                                let runningTotal = pushRunningTotal(newFpts, stat, sleepStat, player.yards - 30, player.playerInfo.playerID, player.playerInfo.pos); 
+                                entry.runningTotals.push(runningTotal);
                             }
                             if(player.yards < 40 && score.fgm_30_39) {
                                 entry.fpts += score.fgm_30_39;
-                                entry.stat.push(score.fgm_30_39);
-                                const sleepStat = 'score.fgm_30_39';
+                                entry.stat.push('fgm_30_39');
+                                const sleepStat = 'fgm_30_39';
                                 const stat = 'FG(30-39):';
                                 if(score.fgm_30_39 != 0) {
                                     let runningTotal = pushRunningTotal(score.fgm_30_39, stat, sleepStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
@@ -1486,8 +1499,8 @@
                                 }
                             } else if(39 < player.yards && player.yards < 50 && score.fgm_40_49) {
                                 entry.fpts += score.fgm_40_49;
-                                entry.stat.push(score.fgm_40_49);
-                                const sleepStat = 'score.fgm_40_49';
+                                entry.stat.push('fgm_40_49');
+                                const sleepStat = 'fgm_40_49';
                                 const stat = 'FG(40-49):';
                                 if(score.fgm_40_49 != 0) {
                                     let runningTotal = pushRunningTotal(score.fgm_40_49, stat, sleepStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
@@ -1495,8 +1508,8 @@
                                 }
                             } else if(player.yards >= 50 && score.fgm_50p) {
                                 entry.fpts += score.fgm_50p;
-                                entry.stat.push(score.fgm_50p);
-                                const sleepStat = 'score.fgm_50p';
+                                entry.stat.push('fgm_50p');
+                                const sleepStat = 'fgm_50p';
                                 const stat = 'FG(50+):';
                                 if(score.fgm_50p != 0) {
                                     let runningTotal = pushRunningTotal(score.fgm_50p, stat, sleepStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
@@ -1526,7 +1539,7 @@
                         }
                         if(0 < player.yards && player.yards < 20 && score.fgmiss_0_19) {           // MISSED FG YD PENALTY
                             entry.fpts += score.fgmiss_0_19;
-                            entry.stat.push(score.fgmiss_0_19);
+                            entry.stat.push('fgmiss_0_19');
                             const stat = 'FG MISS(0-19):';
                             if(score.fgmiss_0_19 != 0) {
                                 let runningTotal = pushRunningTotal(score.fgmiss_0_19, stat, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
@@ -1534,7 +1547,7 @@
                             }
                         } else if(19 < player.yards && player.yards < 30 && score.fgmiss_20_29) {
                             entry.fpts += score.fgmiss_20_29;
-                            entry.stat.push(score.fgmiss_20_29);  
+                            entry.stat.push('fgmiss_20_29');  
                             const stat = 'FG MISS(20-29):';
                             if(score.fgmiss_20_29 != 0) {
                                 let runningTotal = pushRunningTotal(score.fgmiss_20_29, stat, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
@@ -1542,7 +1555,7 @@
                             }
                         } else if(29 < player.yards && player.yards < 40 && score.fgmiss_30_39) {
                             entry.fpts += score.fgmiss_30_39;
-                            entry.stat.push(score.fgmiss_30_39); 
+                            entry.stat.push('fgmiss_30_39'); 
                             const stat = 'FG MISS(30-39):';
                             if(score.fgmiss_30_39 != 0) {
                                 let runningTotal = pushRunningTotal(score.fgmiss_30_39, stat, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
@@ -1550,7 +1563,7 @@
                             }
                         } else if(39 < player.yards && player.yards < 50 && score.fgmiss_40_49) {
                             entry.fpts += score.fgmiss_40_49;
-                            entry.stat.push(score.fgmiss_40_49);    
+                            entry.stat.push('fgmiss_40_49');    
                             const stat = 'FG MISS(40-49):';
                             if(score.fgmiss_40_49 != 0) {
                                 let runningTotal = pushRunningTotal(score.fgmiss_40_49, stat, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
@@ -1558,7 +1571,7 @@
                             }
                         } else if(player.yards >= 50 && score.fgmiss_50p) {
                             entry.fpts += score.fgmiss_50p;
-                            entry.stat.push(score.fgmiss_50p);  
+                            entry.stat.push('fgmiss_50p');  
                             const stat = 'FG MISS(50+):';
                             if(score.fgmiss_50p != 0) {
                                 let runningTotal = pushRunningTotal(score.fgmiss_50p, stat, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 

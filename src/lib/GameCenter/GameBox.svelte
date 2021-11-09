@@ -1,10 +1,17 @@
 <script>
     import {round} from '$lib/utils/helper'; 
+import { each } from 'svelte/internal';
 
     export let nflTeams, nflMatchups, week, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, matchSelection = 1, fantasyProducts, gameSelection = nflMatchups[0][0].gameID;;
     
     const score = leagueData.scoring_settings;
     const positions = leagueData.roster_positions.filter(p => p != 'BN');
+    const nflPositions = [];
+    for(const position in positions) {
+        if(!nflPositions.includes(positions[position]) && positions[position] != 'FLEX') {
+            nflPositions.push(positions[position]);
+        }
+    }
     let freshGame = new Boolean (false);
     let positionLB;
     let leaderboardHeading = 'Game';
@@ -87,8 +94,28 @@
     }
     $: game = displayGame(gameSelection);
 
+    const positionGameStarters = {
+        positions: {},
+        rowHeights: {},
+    };
+    for(const nflPosition of nflPositions){
+        positionGameStarters.positions[nflPosition] = [];
+    }
     const findStarters = (game) => {
         const gameStarters = {};
+        if(!positionGameStarters[game.home.sleeperID]) {
+            positionGameStarters[game.home.sleeperID] = {
+                starters: [],
+            };
+        }
+        if(!positionGameStarters[game.away.sleeperID]) {
+            positionGameStarters[game.away.sleeperID] = {
+                starters: [],
+            };
+        }
+        if(!positionGameStarters.rowHeights[gameSelection]) {
+            positionGameStarters.rowHeights[gameSelection] = [];
+        }
         for(const recordManID in fantasyStarters) {
             const starters = fantasyStarters[recordManID].starters;
             for(const starter of starters) {
@@ -103,6 +130,7 @@
                         ln: starterInfo.ln,
                         pos: starterInfo.pos,
                         t: starterInfo.t,
+                        projection: parseInt(starterInfo.wi[week].p),
                         avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                         teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t.toLowerCase()}.png`,
                         teamColor: `background-color: #${nflTeams[starterInfo.t].color}6b`,
@@ -115,9 +143,25 @@
                         gameStarters[recordManID] = [];
                     }
                     gameStarters[recordManID].push(starterEntry);
+                    if(!positionGameStarters.positions[starterInfo.pos].includes(starterEntry)) {
+                        positionGameStarters.positions[starterInfo.pos].push(starterEntry);
+                    }
                 }
             }
         }
+
+        if(positionGameStarters[game.home.sleeperID].starters.length == 0) {
+            for(const pos in positionGameStarters.positions) {
+                positionGameStarters[game.home.sleeperID].starters.push(positionGameStarters.positions[pos].filter(s => s.t == game.home.sleeperID));
+                positionGameStarters[game.away.sleeperID].starters.push(positionGameStarters.positions[pos].filter(s => s.t == game.away.sleeperID));
+                if(positionGameStarters.positions[pos].filter(s => s.t == game.home.sleeperID).length >= positionGameStarters.positions[pos].filter(s => s.t == game.away.sleeperID).length) {
+                    positionGameStarters.rowHeights[gameSelection].push(positionGameStarters.positions[pos].filter(s => s.t == game.home.sleeperID).length);
+                } else {
+                    positionGameStarters.rowHeights[gameSelection].push(positionGameStarters.positions[pos].filter(s => s.t == game.away.sleeperID).length);
+                }
+            }
+        }
+
         positionLB = gameStarters;
         leaderboardHeading = `${game.home.sleeperID} v ${game.away.sleeperID}`;
         return gameStarters;
@@ -744,7 +788,6 @@
         flex-direction: column;
         justify-content: space-around;
         align-items: flex-start;
-        margin: 5% 0 0 0;
         height: 86%;
         padding: 2%;
     }
@@ -871,6 +914,15 @@
         height: 8%;
         width: 100%;
     }
+
+    .positionGroup {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        width: 44%;
+        height: 100%;
+    }
     
     .avatarHolder {
         position: relative;
@@ -937,6 +989,13 @@
         font-size: 1.2em;
         color: #ededed;
     }
+
+    .gameRow {
+        position: relative;
+        display: inline-flex;
+        width: 100%;
+        align-items: center;
+    }
 </style>
 
 <div class="bigBox">
@@ -962,6 +1021,53 @@
                     </div>
                 </div>
                 <div class="gameContainer">
+                    {#each positionGameStarters.rowHeights[gameSelection] as row, ix}
+                        {#if row != 0}
+                            <div class="gameRow" style="height: {8 * row}%">
+                                <div class="positionGroup">
+                                    {#each positionGameStarters[game.home.sleeperID].starters[ix] as starter}
+                                        <div class="rosterRow" style="justify-content: flex-start; height: {100 / row}%">
+                                            <div class="avatarHolder">
+                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="z-index: 1; {viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                            </div>
+                                            <div class="rosterPlayerInfo">
+                                                <div class="rosterPlayer" style="justify-content: flex-start; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
+                                                <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">
+                                                    <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
+                                                    <div style="display: inline-flex; color: #999; justify-content: flex-end; margin: 0 5% 0 0;">({round(starter.projection)})</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {/each}
+                                </div>
+                                <div class="positionsWrap" style="justify-content: flex-start;">
+                                    <div class="rosterPosition {nflPositions[ix]}" style="height: {100 / row}%;">
+                                        <div class="rosterRowBox" style="top: 0%; height: {100 * row}%"></div>
+                                        {nflPositions[ix]}
+                                    </div>
+                                </div>
+                                <div class="positionGroup">
+                                    {#each positionGameStarters[game.away.sleeperID].starters[ix] as starter}
+                                        <div class="rosterRow" style="justify-content: flex-end; height: {100 / row}%;">
+                                            <div class="rosterPlayerInfo">
+                                                <div class="rosterPlayer" style="justify-content: flex-end; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
+                                                <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%;"}">
+                                                    <div style="display: inline-flex; color: #999; justify-content: flex-start; margin: 0 0 0 5%;">({round(starter.projection)})</div>  
+                                                    <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
+                                                </div>
+                                            </div>                                
+                                            <div class="avatarHolder">
+                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                            </div>
+                                        </div>
+                                    {/each}
+                                </div>
+                            </div>
+                        {/if}
+                    {/each}
+                </div>
+<!--
+                <div class="gameContainer">
                     {#each gameManagers as manager}
                         <div class="managerBlock">
                             <div class="managerInfo">
@@ -979,7 +1085,7 @@
                             </div>
                         </div>
                     {/each}
-                </div>
+                </div> -->
                 <!-- shows league matchups -->
             {:else if showMatch == true}        
                 <div class="gameHeader">
