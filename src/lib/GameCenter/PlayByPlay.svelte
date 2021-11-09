@@ -48,16 +48,67 @@
         let awayDefYdsAllowed = 0;
         const score = leagueData.scoring_settings;
 
-        // extracts enforced penalty yardage from play description (ie. for when 'half the distance to the goal')
-        const getTruePenalty = (description) => {
+        // extracts enforced penalty yardage from play description 
+        const getTruePenalty = (sleeperID, description) => {
             let truePenaltyYards;
-            if(description.includes('(15 Yards)')) {
-                truePenaltyYards = description.substring(description.indexOf('(15 Yards)') + 12, description.indexOf('(15 Yards)') + 14);
-                if(truePenaltyYards[truePenaltyYards.length - 1] == ' ') {
-                    truePenaltyYards = truePenaltyYards.slice(0, 1);
+            if(sleeperID == 'HOU') {
+                sleeperID = 'HST';
+            }
+
+            if(description.includes(`PENALTY on ${sleeperID}`)) {
+                if(description.includes('Roughing the Passer')) {
+                    if(description.includes('(15 Yards)')) {
+                        truePenaltyYards = description.substring(description.indexOf('(15 Yards)') + 12, description.indexOf('(15 Yards)') + 14);
+                        if(truePenaltyYards[truePenaltyYards.length - 1] == ' ') {
+                            truePenaltyYards = truePenaltyYards.slice(0, 1);
+                        }
+                        truePenaltyYards = parseInt(truePenaltyYards);
+                    } else {
+                        truePenaltyYards = 15;
+                    }
                 }
-                truePenaltyYards = parseInt(truePenaltyYards);
-            } 
+                if(description.includes('Unsportsmanlike Conduct')) {
+                    if(description.includes('(15 Yards)')) {
+                        truePenaltyYards = description.substring(description.indexOf('(15 Yards)') + 12, description.indexOf('(15 Yards)') + 14);
+                        if(truePenaltyYards[truePenaltyYards.length - 1] == ' ') {
+                            truePenaltyYards = truePenaltyYards.slice(0, 1);
+                        }
+                        truePenaltyYards = parseInt(truePenaltyYards);
+                    } else {
+                        truePenaltyYards = 15;
+                    }
+                }
+                if(description.includes('Face Mask (15 Yards)')) {
+                    truePenaltyYards = description.substring(description.indexOf('(15 Yards)') + 12, description.indexOf('(15 Yards)') + 14);
+                    if(truePenaltyYards[truePenaltyYards.length - 1] == ' ') {
+                        truePenaltyYards = truePenaltyYards.slice(0, 1);
+                    }
+                    truePenaltyYards = parseInt(truePenaltyYards);
+                } else {
+                    truePenaltyYards = 15;
+                }
+                if(description.includes('Unnecessary Roughness')
+                    && description.indexOf('Unnecessary Roughness') - description.indexOf(`PENALTY on ${sleeperID}`) > 0 
+                    && description.indexOf('Unnecessary Roughness') - description.indexOf(`PENALTY on ${sleeperID}`) < 50) {
+                    if(description.includes('(15 Yards)')) {
+                        truePenaltyYards = description.substring(description.indexOf('(15 Yards)') + 12, description.indexOf('(15 Yards)') + 14);
+                        if(truePenaltyYards[truePenaltyYards.length - 1] == ' ') {
+                            truePenaltyYards = truePenaltyYards.slice(0, 1);
+                        }
+                        truePenaltyYards = parseInt(truePenaltyYards);
+                    } else {
+                        truePenaltyYards = 15;
+                    }
+                }
+                if(description.includes('Taunting') 
+                    && description.indexOf('Taunting') - description.indexOf(`PENALTY on ${sleeperID}`) > 0 
+                    && description.indexOf('Taunting') - description.indexOf(`PENALTY on ${sleeperID}`) < 50){
+                    truePenaltyYards = 10;
+                }
+            } else {
+                truePenaltyYards = 0;
+            }
+
             return truePenaltyYards;
         }
 
@@ -145,6 +196,8 @@
                     teamStartPoss: play.start.team?.$ref || null,
                     teamEndPoss: play?.end.team?.$ref || null,
                     noPlay,
+                    penalty: new Boolean (false),
+                    penaltyInfo: [],
                 }
                 // tracking DEF yards allowed TO-DO account for penalties that didn't negate play
                 if((startersArray.filter(s => s.playerID == home).length > 0 || startersArray.filter(s => s.playerID == away).length > 0) && noPlay == false) {
@@ -158,43 +211,17 @@
                             } else if((play.type.id == 52 && score.def_pr_yd) || (play.type.id == 53 && score.def_kr_yd)) {
                                 awayDefYdsAllowed = awayDefYdsAllowed - play.statYardage;
                             }
-                            if(play.alternativeText.includes('PENALTY')) {
-                                let penaltyCheck = away;
-                                if(penaltyCheck == 'HOU') {
-                                    penaltyCheck = 'HST';
-                                }
-                                if(play.alternativeText.includes(`PENALTY on ${penaltyCheck}`) && play.alternativeText.includes('enforced')) {
-                                    if(play.alternativeText.includes('Roughing the Passer')) {
-                                        if(play.alternativeText.includes('(15 Yards)')) {
-                                            let truePenaltyYards = getTruePenalty(play.alternativeText)
-                                            awayDefYdsAllowed = awayDefYdsAllowed - truePenaltyYards;
-                                        } else {
-                                            awayDefYdsAllowed = awayDefYdsAllowed - 15;
-                                        }
-                                    }
-                                    if(play.alternativeText.includes('Unsportsmanlike Conduct')) {
-                                        if(play.alternativeText.includes('(15 Yards)')) {
-                                            let truePenaltyYards = getTruePenalty(play.alternativeText)
-                                            awayDefYdsAllowed = awayDefYdsAllowed - truePenaltyYards;
-                                        } else {
-                                            awayDefYdsAllowed = awayDefYdsAllowed - 15;
-                                        }
-                                    }  
-                                    if(play.alternativeText.includes('Face Mask (15 Yards)')) {
-                                        let truePenaltyYards = getTruePenalty(play.alternativeText);
-                                        awayDefYdsAllowed = awayDefYdsAllowed - truePenaltyYards;
-                                    }    
-                                    if(play.alternativeText.includes('Unnecessary Roughness')) {
-                                        if(play.alternativeText.includes('(15 Yards)')) {
-                                            let truePenaltyYards = getTruePenalty(play.alternativeText)
-                                            awayDefYdsAllowed = awayDefYdsAllowed - truePenaltyYards;
-                                        } else {
-                                            awayDefYdsAllowed = awayDefYdsAllowed - 15;
-                                        }
-                                    }                                  
+                            if(play.alternativeText.includes('PENALTY') && play.alternativeText.includes('enforced')) {
+                                let truePenaltyYards = getTruePenalty(away, play.alternativeText);
+                                awayDefYdsAllowed = awayDefYdsAllowed - truePenaltyYards;
+                                if(truePenaltyYards > 0) {
+                                    playEntry.penalty = true;
+                                    playEntry.penaltyInfo.push({
+                                        yards: truePenaltyYards,
+                                        against: away,
+                                    });
                                 }
                             }
-
                             // check if threshold broken
                             if((oldYA < 100 && awayDefYdsAllowed >= 100) || (oldYA < 200 && awayDefYdsAllowed >= 200) || (oldYA < 300 && awayDefYdsAllowed >= 300) || (oldYA < 350 && awayDefYdsAllowed >= 350) ||
                             (oldYA < 400 && awayDefYdsAllowed >= 400) || (oldYA < 450 && awayDefYdsAllowed >= 450) || (oldYA < 500 && awayDefYdsAllowed >= 500) || (oldYA < 550 && awayDefYdsAllowed >= 550)) {
@@ -211,40 +238,15 @@
                             let oldYA = homeDefYdsAllowed;
                             homeDefYdsAllowed = homeDefYdsAllowed - play.statYardage;
 
-                            if(play.alternativeText.includes('PENALTY')) {
-                                let penaltyCheck = home;
-                                if(penaltyCheck == 'HOU') {
-                                    penaltyCheck = 'HST';
-                                }
-                                if(play.alternativeText.includes(`PENALTY on ${penaltyCheck}`) && play.alternativeText.includes('enforced')) {
-                                    // if(play.alternativeText.includes('Roughing the Passer')) {
-                                    //     if(play.alternativeText.includes('(15 Yards)')) {
-                                    //         let truePenaltyYards = getTruePenalty(play.alternativeText)
-                                    //         homeDefYdsAllowed = homeDefYdsAllowed - truePenaltyYards;
-                                    //     } else {
-                                    //         homeDefYdsAllowed = homeDefYdsAllowed - 15;
-                                    //     }
-                                    // }
-                                    if(play.alternativeText.includes('Unsportsmanlike Conduct')) {
-                                        if(play.alternativeText.includes('(15 Yards)')) {
-                                            let truePenaltyYards = getTruePenalty(play.alternativeText)
-                                            homeDefYdsAllowed = homeDefYdsAllowed - truePenaltyYards;
-                                        } else {
-                                            homeDefYdsAllowed = homeDefYdsAllowed - 15;
-                                        }
-                                    }    
-                                    if(play.alternativeText.includes('Face Mask (15 Yards)')) {
-                                        let truePenaltyYards = getTruePenalty(play.alternativeText);
-                                        homeDefYdsAllowed = homeDefYdsAllowed - truePenaltyYards;
-                                    }    
-                                    if(play.alternativeText.includes('Unnecessary Roughness')) {
-                                        if(play.alternativeText.includes('(15 Yards)')) {
-                                            let truePenaltyYards = getTruePenalty(play.alternativeText)
-                                            homeDefYdsAllowed = homeDefYdsAllowed - truePenaltyYards;
-                                        } else {
-                                            homeDefYdsAllowed = homeDefYdsAllowed - 15;
-                                        }
-                                    }    
+                            if(play.alternativeText.includes('PENALTY') && play.alternativeText.includes('enforced')) {
+                                let truePenaltyYards = getTruePenalty(home, play.alternativeText);
+                                homeDefYdsAllowed += truePenaltyYards;
+                                if(truePenaltyYards > 0) {
+                                    playEntry.penalty = true;
+                                    playEntry.penaltyInfo.push({
+                                        yards: truePenaltyYards,
+                                        against: home,
+                                    });
                                 }
                             }
                             // check if threshold broken
@@ -267,40 +269,15 @@
                             } else if((play.type.id == 52 && score.def_pr_yd) || (play.type.id == 53 && score.def_kr_yd)) {
                                 homeDefYdsAllowed = homeDefYdsAllowed - play.statYardage;
                             }
-                            if(play.alternativeText.includes('PENALTY')) {
-                                let penaltyCheck = home;
-                                if(penaltyCheck == 'HOU') {
-                                    penaltyCheck = 'HST';
-                                }
-                                if(play.alternativeText.includes(`PENALTY on ${penaltyCheck}`) && play.alternativeText.includes('enforced')) {
-                                    if(play.alternativeText.includes('Roughing the Passer')) {
-                                        if(play.alternativeText.includes('(15 Yards)')) {
-                                            let truePenaltyYards = getTruePenalty(play.alternativeText)
-                                            homeDefYdsAllowed = homeDefYdsAllowed - truePenaltyYards;
-                                        } else {
-                                            homeDefYdsAllowed = homeDefYdsAllowed - 15;
-                                        }
-                                    }
-                                    if(play.alternativeText.includes('Unsportsmanlike Conduct')) {
-                                        if(play.alternativeText.includes('(15 Yards)')) {
-                                            let truePenaltyYards = getTruePenalty(play.alternativeText)
-                                            homeDefYdsAllowed = homeDefYdsAllowed - truePenaltyYards;
-                                        } else {
-                                            homeDefYdsAllowed = homeDefYdsAllowed - 15;
-                                        }
-                                    }  
-                                    if(play.alternativeText.includes('Face Mask (15 Yards)')) {
-                                        let truePenaltyYards = getTruePenalty(play.alternativeText);
-                                        homeDefYdsAllowed = homeDefYdsAllowed - truePenaltyYards;
-                                    }   
-                                    if(play.alternativeText.includes('Unnecessary Roughness')) {
-                                        if(play.alternativeText.includes('(15 Yards)')) {
-                                            let truePenaltyYards = getTruePenalty(play.alternativeText)
-                                            homeDefYdsAllowed = homeDefYdsAllowed - truePenaltyYards;
-                                        } else {
-                                            homeDefYdsAllowed = homeDefYdsAllowed - 15;
-                                        }
-                                    }      
+                            if(play.alternativeText.includes('PENALTY') && play.alternativeText.includes('enforced')) {
+                                let truePenaltyYards = getTruePenalty(home, play.alternativeText);
+                                homeDefYdsAllowed = homeDefYdsAllowed - truePenaltyYards;
+                                if(truePenaltyYards > 0) {
+                                    playEntry.penalty = true;
+                                    playEntry.penaltyInfo.push({
+                                        yards: truePenaltyYards,
+                                        against: home,
+                                    });
                                 }
                             }
                             // check if threshold broken
@@ -319,40 +296,15 @@
                             let oldYA = awayDefYdsAllowed;
                             awayDefYdsAllowed = awayDefYdsAllowed - play.statYardage;
 
-                            if(play.alternativeText.includes('PENALTY')) {
-                                let penaltyCheck = away;
-                                if(penaltyCheck == 'HOU') {
-                                    penaltyCheck = 'HST';
-                                }
-                                if(play.alternativeText.includes(`PENALTY on ${penaltyCheck}`) && play.alternativeText.includes('enforced')) {
-                                    // if(play.alternativeText.includes('Roughing the Passer')) {
-                                    //     if(play.alternativeText.includes('(15 Yards)')) {
-                                    //         let truePenaltyYards = getTruePenalty(play.alternativeText)
-                                    //         awayDefYdsAllowed = awayDefYdsAllowed - truePenaltyYards;
-                                    //     } else {
-                                    //         awayDefYdsAllowed = awayDefYdsAllowed - 15;
-                                    //     }
-                                    // }
-                                    if(play.alternativeText.includes('Unsportsmanlike Conduct')) {
-                                        if(play.alternativeText.includes('(15 Yards)')) {
-                                            let truePenaltyYards = getTruePenalty(play.alternativeText)
-                                            awayDefYdsAllowed = awayDefYdsAllowed - truePenaltyYards;
-                                        } else {
-                                            awayDefYdsAllowed = awayDefYdsAllowed - 15;
-                                        }
-                                    }    
-                                    if(play.alternativeText.includes('Face Mask (15 Yards)')) {
-                                        let truePenaltyYards = getTruePenalty(play.alternativeText);
-                                        awayDefYdsAllowed = awayDefYdsAllowed - truePenaltyYards;
-                                    }    
-                                    if(play.alternativeText.includes('Unnecessary Roughness')) {
-                                        if(play.alternativeText.includes('(15 Yards)')) {
-                                            let truePenaltyYards = getTruePenalty(play.alternativeText)
-                                            awayDefYdsAllowed = awayDefYdsAllowed - truePenaltyYards;
-                                        } else {
-                                            awayDefYdsAllowed = awayDefYdsAllowed - 15;
-                                        }
-                                    }    
+                            if(play.alternativeText.includes('PENALTY') && play.alternativeText.includes('enforced')) {
+                                let truePenaltyYards = getTruePenalty(away, play.alternativeText);
+                                awayDefYdsAllowed += truePenaltyYards;
+                                if(truePenaltyYards > 0) {
+                                    playEntry.penalty = true;
+                                    playEntry.penaltyInfo.push({
+                                        yards: truePenaltyYards,
+                                        against: away,
+                                    });
                                 }
                             }
                             // check if threshold broken
@@ -1129,9 +1081,13 @@
                         }
                     }
                     if((player.playType == 5 || player.playType == 9) && player.statType == 'rusher') {         // RUSH
-                        const fpts = player.yards * (score?.rush_yd || 0) + (score?.rush_att || 0);
+                        let adjustedYards = player.yards;
+                        if(play.penalty == true && play.penaltyInfo.against == player.playerInfo.t) {
+                            adjustedYards = adjustedYards - play.penaltyInfo.filter(p => p.against == player.playerInfo.t)[0].yards;
+                        }
+                        const fpts = adjustedYards * (score?.rush_yd || 0) + (score?.rush_att || 0);
                         const fptsRun = (score?.rush_att || 0);
-                        const fptsRunYDS = player.yards * (score?.rush_yd || 0);
+                        const fptsRunYDS = adjustedYards * (score?.rush_yd || 0);
                         const statRun = 'RUSH:';
                         const statRunYDS = 'RUSH YDS:';
                         const entry = {
@@ -1142,7 +1098,7 @@
                             stat: ['rush_yd', 'rush_att'],
                             runningTotals: [],
                             fpts,
-                            yards: player.yards,
+                            yards: adjustedYards,
                             description: play.description,
                             shortDesc: 'Rush',
                         }
@@ -1151,10 +1107,10 @@
                             entry.runningTotals.push(runningTotal);
                         }
                         if(fptsRunYDS != 0) {
-                            let runningTotal = pushRunningTotal(fptsRunYDS, statRunYDS, entry.stat[0], player.yards, player.playerInfo.playerID, player.playerInfo.pos); 
+                            let runningTotal = pushRunningTotal(fptsRunYDS, statRunYDS, entry.stat[0], adjustedYards, player.playerInfo.playerID, player.playerInfo.pos); 
                             entry.runningTotals.push(runningTotal);
                         }
-                        if(player.yards >= 40 && score.rush_40p) {          // RUSH YD BONUS
+                        if(adjustedYards >= 40 && score.rush_40p) {          // RUSH YD BONUS
                             entry.fpts += score.rush_40p;
                             entry.stat.push('rush_40p');
                             const stat = 'RUSH(40):';
@@ -1346,14 +1302,8 @@
                     } else if(player.playType == 24 || (player.playType == 9 && (player.statType == 'passer' || player.statType == 'receiver'))) {          // COMPLETE PASS
                         if(player.statType == 'passer') {
                             let adjustedYards = player.yards;
-                            if(play.description.includes('PENALTY')) {
-                                let penaltyCheck = player.playerInfo.t;
-                                if(penaltyCheck == 'HOU') {
-                                    penaltyCheck = 'HST';
-                                }
-                                if(play.description.includes(`PENALTY on ${penaltyCheck}`) && play.description.includes('Roughing the Passer') && play.description.includes('enforced')) {
-                                    adjustedYards = adjustedYards - 15;
-                                }
+                            if(play.penalty == true && play.penaltyInfo.against == player.playerInfo.t) {
+                                adjustedYards = adjustedYards - play.penaltyInfo.filter(p => p.against == player.playerInfo.t)[0].yards;
                             }
                             const fpts = adjustedYards * (score?.pass_yd || 0) + (score?.pass_att || 0) + (score?.pass_cmp || 0);
                             const fptsPass = (score?.pass_att || 0);
@@ -1397,9 +1347,13 @@
                             }
                             fantasyPlay[play.playID].push(entry);
                         } else if(player.statType == 'receiver') {              // RECEPTION
-                            const fpts = player.yards * (score?.rec_yd || 0) + (score?.rec || 0);
+                            let adjustedYards = player.yards;
+                            if(play.penalty == true && play.penaltyInfo.against == player.playerInfo.t) {
+                                adjustedYards = adjustedYards - play.penaltyInfo.filter(p => p.against == player.playerInfo.t)[0].yards;
+                            }
+                            const fpts = adjustedYards * (score?.rec_yd || 0) + (score?.rec || 0);
                             const fptsRec = (score?.rec || 0);
-                            const fptsYDS = player.yards * (score?.rec_yd || 0)
+                            const fptsYDS = adjustedYards * (score?.rec_yd || 0)
                             const statRec = 'REC:';
                             const statYDS = 'REC YDS:';
                             const entry = {
@@ -1410,7 +1364,7 @@
                                 stat: ['rec_yd', 'rec'],
                                 runningTotals: [],
                                 fpts,
-                                yards: player.yards,
+                                yards: adjustedYards,
                                 description: play.description,
                                 shortDesc: 'Reception',
                             }
@@ -1419,10 +1373,10 @@
                                 entry.runningTotals.push(runningTotal);
                             }
                             if(fptsYDS != 0) {
-                                let runningTotal = pushRunningTotal(fptsYDS, statYDS, entry.stat[0], player.yards, player.playerInfo.playerID, player.playerInfo.pos); 
+                                let runningTotal = pushRunningTotal(fptsYDS, statYDS, entry.stat[0], adjustedYards, player.playerInfo.playerID, player.playerInfo.pos); 
                                 entry.runningTotals.push(runningTotal);
                             }
-                            if(0 < player.yards && player.yards < 5 && score.rec_0_4) {     // RECEPTION YD BONUS
+                            if(0 < adjustedYards && adjustedYards < 5 && score.rec_0_4) {     // RECEPTION YD BONUS
                                 entry.fpts += score.rec_0_4;
                                 entry.stat.push('rec_0_4');
                                 const sleeperStat = 'rec_0_4';
@@ -1430,7 +1384,7 @@
                                     let runningTotal = pushRunningTotal(score.rec_0_4, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                     entry.runningTotals.push(runningTotal);
                                 }
-                            } else if(4 < player.yards && player.yards < 10 && score.rec_5_9) {
+                            } else if(4 < adjustedYards && adjustedYards < 10 && score.rec_5_9) {
                                 entry.fpts += score.rec_5_9;
                                 entry.stat.push('rec_5_9');
                                 const sleeperStat = 'rec_5_9';
@@ -1438,7 +1392,7 @@
                                     let runningTotal = pushRunningTotal(score.rec_5_9, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                     entry.runningTotals.push(runningTotal);
                                 }
-                            } else if(9 < player.yards && player.yards < 20 && score.rec_10_19) {
+                            } else if(9 < adjustedYards && adjustedYards < 20 && score.rec_10_19) {
                                 entry.fpts += score.rec_10_19;
                                 entry.stat.push('rec_10_19');
                                 const sleeperStat = 'rec_10_19';
@@ -1446,7 +1400,7 @@
                                     let runningTotal = pushRunningTotal(score.rec_10_19, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                     entry.runningTotals.push(runningTotal);
                                 }
-                            } else if(19 < player.yards && player.yards < 30 && score.rec_20_29) {
+                            } else if(19 < adjustedYards && adjustedYards < 30 && score.rec_20_29) {
                                 entry.fpts += score.rec_20_29;
                                 entry.stat.push('rec_20_29');
                                 const sleeperStat = 'rec_20_29';
@@ -1454,7 +1408,7 @@
                                     let runningTotal = pushRunningTotal(score.rec_20_29, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                     entry.runningTotals.push(runningTotal);
                                 }
-                            } else if(29 < player.yards && player.yards < 40 && score.rec_30_39) {
+                            } else if(29 < adjustedYards && adjustedYards < 40 && score.rec_30_39) {
                                 entry.fpts += score.rec_30_39;
                                 entry.stat.push('rec_30_39');
                                 const sleeperStat = 'rec_30_39';
@@ -1462,7 +1416,7 @@
                                     let runningTotal = pushRunningTotal(score.rec_30_39, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                     entry.runningTotals.push(runningTotal);
                                 }
-                            } else if(player.yards >= 40 && score.rec_40p) {
+                            } else if(adjustedYards >= 40 && score.rec_40p) {
                                 entry.fpts += score.rec_40p;
                                 entry.stat.push('rec_40p');
                                 const sleeperStat = 'rec_40p';
