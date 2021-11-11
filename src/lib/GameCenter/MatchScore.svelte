@@ -147,7 +147,7 @@
             </div>
         </div>
         <div class="gameStatusWrapper">
-            {#if !isComplete}
+            {#if isComplete == false}
                 <div class="gameStatusPeriod">
                     To Play: {home.toPlay}
                 </div>

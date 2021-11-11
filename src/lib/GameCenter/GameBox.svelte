@@ -8,7 +8,7 @@ import { each } from 'svelte/internal';
     const positions = leagueData.roster_positions.filter(p => p != 'BN');
     const nflPositions = [];
     for(const position in positions) {
-        if(!nflPositions.includes(positions[position]) && positions[position] != 'FLEX') {
+        if(!nflPositions.includes(positions[position]) && positions[position] != 'FLEX' && positions[position] != 'WRRB_FLEX' && positions[position] != 'REC_FLEX' && positions[position] != 'SUPER_FLEX') {
             nflPositions.push(positions[position]);
         }
     }
@@ -21,8 +21,53 @@ import { each } from 'svelte/internal';
 
     // create top 10 points-scorers arrays for each position
     const positionRankArrays = {};
+    if(positions.includes('FLEX')) {
+        positionRankArrays['FLEX'] = [];
+    }
+    if(positions.includes('WRRB_FLEX')) {
+        positionRankArrays['WRRB_FLEX'] = [];
+    }
+    if(positions.includes('REC_FLEX')) {
+        positionRankArrays['REC_FLEX'] = [];
+    }
+    if(positions.includes('SUPER_FLEX')) {
+        positionRankArrays['SUPER_FLEX'] = [];
+    }
+    
     for(const position in positionLeaders) {
         positionRankArrays[position] = positionLeaders[position].slice(0, 10);
+        if(positions.includes('FLEX') && (position == 'RB' || position == 'WR' || position == 'TE')) {
+            for(let i = 0; i < 10 && i < positionLeaders[position].length; i++) {
+                positionRankArrays['FLEX'].push(positionLeaders[position][i]);
+            }
+        }
+        if(positions.includes('SUPER_FLEX') && (position == 'QB' || position == 'RB' || position == 'WR' || position == 'TE')) {
+            for(let i = 0; i < 10 && i < positionLeaders[position].length; i++) {
+                positionRankArrays['SUPER_FLEX'].push(positionLeaders[position][i]);
+            }
+        }
+        if(positions.includes('WRRB_FLEX') && (position == 'RB' || position == 'WR')) {
+            for(let i = 0; i < 10 && i < positionLeaders[position].length; i++) {
+                positionRankArrays['WRRB_FLEX'].push(positionLeaders[position][i]);
+            }
+        }
+        if(positions.includes('REC_FLEX') && (position == 'WR' || position == 'TE')) {
+            for(let i = 0; i < 10 && i < positionLeaders[position].length; i++) {
+                positionRankArrays['REC_FLEX'].push(positionLeaders[position][i]);
+            }
+        }
+    }
+    if(positionRankArrays['FLEX']) {
+        positionRankArrays['FLEX'] = positionRankArrays['FLEX'].sort((a, b) => b.fpts - a.fpts).slice(0, 10);
+    }
+    if(positionRankArrays['SUPER_FLEX']) {
+        positionRankArrays['SUPER_FLEX'] = positionRankArrays['SUPER_FLEX'].sort((a, b) => b.fpts - a.fpts).slice(0, 10);
+    }
+    if(positionRankArrays['WRRB_FLEX']) {
+        positionRankArrays['WRRB_FLEX'] = positionRankArrays['WRRB_FLEX'].sort((a, b) => b.fpts - a.fpts).slice(0, 10);
+    }
+    if(positionRankArrays['REC_FLEX']) {
+        positionRankArrays['REC_FLEX'] = positionRankArrays['REC_FLEX'].sort((a, b) => b.fpts - a.fpts).slice(0, 10);
     }
     // assign managers for selected matchID
     const displayMatch = (matchSelection) => {
@@ -219,30 +264,36 @@ import { each } from 'svelte/internal';
                     viewPlayer = gameStarters[recordManID].find(s => s.playerID == playerID);
                 }
             }
-            positionLB = viewPlayer.pos;
-            if(positionLB == 'DEF') {
-                leaderboardHeading = 'Defense';
-            } else if(positionLB == 'QB') {
-                leaderboardHeading = 'Quarterback';
-            } else if(positionLB == 'RB') {
-                leaderboardHeading = 'Running Back';
-            } else if(positionLB == 'WR') {
-                leaderboardHeading = 'Wide Receiver';
-            } else if(positionLB == 'TE') {
-                leaderboardHeading = 'Tight End';
-            } else if(positionLB == 'K') {
-                leaderboardHeading = 'Kicker';
-            } else if(positionLB == 'DB') {
-                leaderboardHeading = 'Defensive Back';
-            } else if(positionLB == 'DL') {
-                leaderboardHeading = 'Defensive Lineman';
-            } else if(positionLB == 'LB') {
-                leaderboardHeading = 'Linebacker';
-            }
         }
         getDisplayStats(viewPlayer);
         return viewPlayer;
     }
+
+    const changePosition = (position) => {
+        positionLB = position;
+        if(positionLB == 'DEF') {
+            leaderboardHeading = 'Defense';
+        } else if(positionLB == 'QB') {
+            leaderboardHeading = 'Quarterback';
+        } else if(positionLB == 'RB') {
+            leaderboardHeading = 'Running Back';
+        } else if(positionLB == 'WR') {
+            leaderboardHeading = 'Wide Receiver';
+        } else if(positionLB == 'TE') {
+            leaderboardHeading = 'Tight End';
+        } else if(positionLB == 'K') {
+            leaderboardHeading = 'Kicker';
+        } else if(positionLB == 'DB') {
+            leaderboardHeading = 'Defensive Back';
+        } else if(positionLB == 'DL') {
+            leaderboardHeading = 'Defensive Lineman';
+        } else if(positionLB == 'LB') {
+            leaderboardHeading = 'Linebacker';
+        } else if(positionLB == 'FLEX') {
+            leaderboardHeading = 'FLEX';
+        }
+    }
+
     const getDisplayStats = async (viewPlayer) => {
         let newFantasyProducts = await fantasyProducts;
         const viewPlayerStats = {};
@@ -854,8 +905,16 @@ import { each } from 'svelte/internal';
 		background: linear-gradient(to right, var(--WR), var(--WR) 33.33%, var(--RB) 33.33%, var(--RB) 66.66%, var(--TE) 66.66%);
 	}
 
-	.WRRB {
+	.WRRB_FLEX {
 		background: linear-gradient(to right, var(--WR), var(--WR) 50%, var(--RB) 50%);
+	}
+
+    .REC_FLEX {
+		background: linear-gradient(to right, var(--WR), var(--WR) 50%, var(--TE) 50%);
+	}
+
+    .SUPER_FLEX {
+		background: conic-gradient(var(--RB) 0deg, var(--RB) 90deg, var(--QB) 90deg, var(--QB) 180deg, var(--TE) 180deg, var(--TE) 270deg, var(--WR) 270deg, var(--WR) 360deg);
 	}
 
 	.K {
@@ -878,7 +937,7 @@ import { each } from 'svelte/internal';
         background-color: var(--DB);
     }
 
-    .IDP {
+    .IDP_FLEX {
         background: linear-gradient(to right, var(--DL), var(--DL) 33.33%, var(--LB) 33.33%, var(--LB) 66.66%, var(--DB) 66.66%);
     }
 
@@ -978,6 +1037,20 @@ import { each } from 'svelte/internal';
         font-weight: 900;
     }
 
+    .selectedPosition {
+        position: absolute;
+        display: inline-flex;
+        height: 100%;
+        width: 100%;
+        border-radius: 25%;
+    }
+
+    .selectedPosition:hover {
+        cursor: pointer;
+        border: 0.5px solid #ededed;
+        z-index: 1;
+    }
+
     .rosterRowBox {
     	position: absolute;
         display: inline-flex;
@@ -1068,6 +1141,7 @@ import { each } from 'svelte/internal';
                                     <div class="rosterPosition {nflPositions[ix]}" style="height: {100 / row}%;">
                                         <div class="rosterRowBox" style="top: -2%; height: {100 * row}%"></div>
                                         {nflPositions[ix]}
+                                        <div class="selectedPosition" on:click={() => changePosition(nflPositions[ix])} style="{positionLB == nflPositions[ix] ? "border: 0.5px solid #ededed; border-radius: 1em; z-index: 1;" : null}"></div>
                                     </div>
                                 </div>
                                 <div class="positionGroup">
@@ -1162,6 +1236,7 @@ import { each } from 'svelte/internal';
                             <div class="rosterPosition {position}">
                                 <div class="rosterRowBox"></div>
                                 {position}
+                                <div class="selectedPosition" on:click={() => changePosition(position)} style="{positionLB == position ? "border: 0.5px solid #ededed; border-radius: 1em; z-index: 1;" : null}"></div>
                             </div>
                         {/each}
                     </div>

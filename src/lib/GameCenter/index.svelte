@@ -13,7 +13,7 @@
     let gameSelection;
     let matchSelection;
     let nflMatchups = nflWeek.nflWeek;
-    const week = nflWeek.week;
+    const week = matchupsInfo.week;
     const season = leagueData.season;
 
     let leagueManagers = {};
@@ -239,7 +239,7 @@
         <div class="leftWrapper">
             <div class="weekInfo">
                 <div class="weekInfoSeason">{season}</div>
-                <div class="weekInfoWeek">Week {matchupsInfo.week}</div>
+                <div class="weekInfoWeek">Week {week}</div>
             </div>
             <div class="scoreboard">
                 <Scoreboard {nflMatchups} {week} bind:gameSelection={gameSelection} {completeGames} />
@@ -256,7 +256,7 @@
         <div class="rightWrapper">
             <div class="weekInfo"></div>
             <div class="managerboard">
-                <ManagerBoard {weekMatchups} {managerInfo} {completeGames} {playersInfo} bind:matchSelection={matchSelection} />
+                <ManagerBoard {weekMatchups} {week} {managerInfo} {completeGames} {playersInfo} bind:matchSelection={matchSelection} />
             </div>
         </div>
     </div>
