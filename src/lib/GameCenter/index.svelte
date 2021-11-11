@@ -105,7 +105,15 @@
                         teamColor: `background-color: #${nflTeams[playersInfo.players[managerWeek.starters[i]].t].color}6b`,
                         teamAltColor: `background-color: #${nflTeams[playersInfo.players[managerWeek.starters[i]].t].alternateColor}52`,
                     }
-                    positionLeaders[playersInfo.players[managerWeek.starters[i]].pos].push(entry);
+                    if(playersInfo.players[managerWeek.starters[i]].pos == 'DB' || playersInfo.players[managerWeek.starters[i]].pos == 'CB' || playersInfo.players[managerWeek.starters[i]].pos == 'SS' || playersInfo.players[managerWeek.starters[i]].pos == 'FS') {
+                        positionLeaders['DB'].push(entry);
+                    } else if(playersInfo.players[managerWeek.starters[i]].pos == 'LB') {
+                        positionLeaders['LB'].push(entry);
+                    } else if(playersInfo.players[managerWeek.starters[i]].pos == 'DL' || playersInfo.players[managerWeek.starters[i]].pos == 'DE' || playersInfo.players[managerWeek.starters[i]].pos == 'DT') {
+                        positionLeaders['DL'].push(entry);
+                    } else {
+                        positionLeaders[playersInfo.players[managerWeek.starters[i]].pos].push(entry);
+                    }
                 }
             }
         }
