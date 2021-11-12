@@ -8,10 +8,17 @@
 
     export let leagueData, rosterData, users, playersInfo, nflWeek, matchupsInfo, standingsData;
 
+    let viewPlayerID;
+    let leaderBoardInfo;
     let fantasyProducts = [];
     let completeGames = [];
+
     let gameSelection;
+    let showGameBox = new Boolean (true);
+
     let matchSelection;
+    let showMatchBox = new Boolean (false);
+
     let nflMatchups = nflWeek.nflWeek;
     const week = matchupsInfo.week;
     const season = leagueData.season;
@@ -250,21 +257,21 @@
                 <div class="weekInfoWeek">Week {week}</div>
             </div>
             <div class="scoreboard">
-                <Scoreboard {nflMatchups} {week} bind:gameSelection={gameSelection} {completeGames} />
+                <Scoreboard {nflMatchups} {week} bind:gameSelection={gameSelection} {completeGames} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
             </div>
         </div>
         <div class="centerWrapper">
             <div class="gameBox">
-                <GameBox {nflTeams} {nflMatchups} {week} {leagueData} {playersInfo} {fantasyStarters} {positionLeaders} {managerInfo} {weekMatchups} {standingsData} bind:matchSelection={matchSelection} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} />
+                <GameBox {nflTeams} {nflMatchups} {week} {leagueData} {playersInfo} {fantasyStarters} {positionLeaders} {managerInfo} {weekMatchups} {standingsData} bind:matchSelection={matchSelection} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
             </div>
             <div class="playByPlay">
-                <PlayByPlay {nflTeams} {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} {managerInfo} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} />
+                <PlayByPlay {nflTeams} {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} {managerInfo} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
             </div>
         </div>
         <div class="rightWrapper">
             <div class="weekInfo"></div>
             <div class="managerboard">
-                <ManagerBoard {weekMatchups} {week} {managerInfo} {completeGames} {playersInfo} bind:matchSelection={matchSelection} />
+                <ManagerBoard {weekMatchups} {week} {managerInfo} {completeGames} {playersInfo} bind:matchSelection={matchSelection} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
             </div>
         </div>
     </div>

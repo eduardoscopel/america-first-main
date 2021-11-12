@@ -1,7 +1,7 @@
 <script>
     import { getPlayByPlay, waitForAll, round } from '$lib/utils/helper'; 
 
-    export let nflTeams, nflMatchups, leagueData, fantasyStarters, managerInfo, playersInfo, gameSelection = nflMatchups[0][0].gameID, fantasyProducts;
+    export let nflTeams, nflMatchups, leagueData, fantasyStarters, managerInfo, playersInfo, gameSelection = nflMatchups[0][0].gameID, fantasyProducts, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo;
 
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/situation?lang=en&region=us CURRENT DOWN
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/plays?lang=en&region=us PLAY BY PLAY
@@ -1972,11 +1972,29 @@
         return fantasyProducts; 
     }
 
-    const displayByPlay = async (gameSelection, startersArray) => {
+    const displayByPlay = async (gameSelection, startersArray, leaderBoardInfo) => {
         fantasyProducts = await loadPlayByPlay(gameSelection, startersArray);   
+        if(leaderBoardInfo && leaderBoardInfo.type == 'position') {
+            let runTotal = fantasyProducts.pop();
+
+            if(leaderBoardInfo.spec.includes('FLEX')) {
+                fantasyProducts = fantasyProducts.filter(p => p.some(p => p.playerInfo.pos == 'RB' || p.playerInfo.pos == 'WR' || p.playerInfo.pos == 'TE'));
+            } else if(leaderBoardInfo.spec.includes('SUPER_FLEX')) {
+                fantasyProducts = fantasyProducts.filter(p => p.some(p => p.playerInfo.pos == 'QB' || p.playerInfo.pos == 'RB' || p.playerInfo.pos == 'WR' || p.playerInfo.pos == 'TE'));
+            } else if(leaderBoardInfo.spec.includes('WRRB_FLEX')) {
+                fantasyProducts = fantasyProducts.filter(p => p.some(p => p.playerInfo.pos == 'RB' || p.playerInfo.pos == 'WR'));
+            } else if(leaderBoardInfo.spec.includes('REC_FLEX')) {
+                fantasyProducts = fantasyProducts.filter(p => p.some(p => p.playerInfo.pos == 'WR' || p.playerInfo.pos == 'TE'));
+            } else if(leaderBoardInfo.spec.includes('IDP_FLEX')) {
+                fantasyProducts = fantasyProducts.filter(p => p.some(p => p.playerInfo.pos == 'DB' || p.playerInfo.pos == 'CB' || p.playerInfo.pos == 'SS' || p.playerInfo.pos == 'FS' || p.playerInfo.pos == 'DL' || p.playerInfo.pos == 'DE' || p.playerInfo.pos == 'DT' || p.playerInfo.pos == 'LB'));
+            } else {
+                fantasyProducts = fantasyProducts.filter(p => p.some(p => leaderBoardInfo.spec.includes(p.playerInfo.pos)));
+            }
+            fantasyProducts.push(runTotal);
+        }
         return fantasyProducts;
     }
-    $: fantasyProducts = displayByPlay(gameSelection, startersArray);   
+    $: fantasyProducts = displayByPlay(gameSelection, startersArray, leaderBoardInfo);   
 </script>
 
 <style>

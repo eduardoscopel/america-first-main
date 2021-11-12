@@ -1,5 +1,5 @@
 <script>
-    export let gameID, home, away, gameSelection = gameID, completeGames;
+    export let gameID, home, away, gameSelection = gameID, completeGames, showGameBox, showMatchBox;
 
     let timezone = 'CST';
     let isComplete = home.status.type.completed;
@@ -36,6 +36,8 @@
     const changeGameSelection = (gameID) => {
         newGameSelection = gameID;
         gameSelection = newGameSelection;
+        showGameBox = true;
+        showMatchBox = false;
         return gameSelection;
     }
     
@@ -208,8 +210,8 @@
         color: #ededed;
     }
 </style>
-<div class="showSelected" style="{gameSelection == gameID ? "background-color: #222222" : null}">
-    <div class="scoresBlock" on:click={() => changeGameSelection(gameID)} style="{gameSelection == gameID ? "background-color: #181818" : null}">
+<div class="showSelected" style="{showGameBox == true && gameSelection == gameID ? "background-color: #222222" : null}">
+    <div class="scoresBlock" on:click={() => changeGameSelection(gameID)} style="{showGameBox == true && gameSelection == gameID ? "background-color: #181818" : null}">
         <div class="teamsBlock">
             <img class="teamLogo" src="https://sleepercdn.com/images/team_logos/nfl/{home.sleeperID.toLowerCase()}.png" alt="{home.sleeperID}"/>
             <div class="teamAbbrev">{home.sleeperID}</div>

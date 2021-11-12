@@ -1,5 +1,5 @@
 <script>
-    export let matchID, home, away, matchSelection = matchID;
+    export let matchID, home, away, matchSelection = matchID, showGameBox, showMatchBox;
 
     let isComplete = new Boolean (false);
     if(home.toPlay == 0 && away.toPlay == 0) {
@@ -10,6 +10,8 @@
     const changeMatchSelection = (matchID) => {
         newMatchSelection = matchID;
         matchSelection = newMatchSelection;
+        showMatchBox = true;
+        showGameBox = false;
         return matchSelection;
     }
 
@@ -129,8 +131,8 @@
     }
 </style>
 
-<div class="showSelected" style="{matchSelection == matchID ? "background-color: #222222" : null}">
-    <div class="scoresBlock" on:click={() => changeMatchSelection(matchID)} style="{matchSelection == matchID ? "background-color: #181818" : null}">
+<div class="showSelected" style="{showMatchBox == true && matchSelection == matchID ? "background-color: #222222" : null}">
+    <div class="scoresBlock" on:click={() => changeMatchSelection(matchID)} style="{showMatchBox == true && matchSelection == matchID ? "background-color: #181818" : null}">
         <div class="teamsBlock">
             <img class="teamLogo" src="{home.manager.avatar}" alt="{home.manager.abbreviation}"/>
             <div class="teamAbbrev">{home.manager.abbreviation}</div>

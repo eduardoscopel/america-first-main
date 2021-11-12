@@ -1,7 +1,7 @@
 <script>
     import {round} from '$lib/utils/helper'; 
 
-    export let nflTeams, nflMatchups, week, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, standingsData, matchSelection = 1, fantasyProducts, gameSelection = nflMatchups[0][0].gameID;;
+    export let nflTeams, nflMatchups, week, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, standingsData, matchSelection = 1, fantasyProducts, gameSelection = nflMatchups[0][0].gameID, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo;
     
     const score = leagueData.scoring_settings;
     const positions = leagueData.roster_positions.filter(p => p != 'BN');
@@ -13,9 +13,12 @@
     }
     let freshGame = new Boolean (false);
     let positionLB;
+    let positionPlayFilter = [];
+
+    let leaderBoardType;
+    let leaderBoardSpec;
     let leaderboardHeading = 'Game';
 
-    let showGame = new Boolean (true);      // NFL games
     let showMatch = new Boolean (false);    // League matchups
 
     // create top 10 points-scorers arrays for each position
@@ -155,26 +158,21 @@
         freshGame = true;
         positionLB = matchStarters;
         leaderboardHeading = `${managerInfo[home.matchInfo.recordManID].abbreviation} v ${managerInfo[away.matchInfo.recordManID].abbreviation}`;
-
-        showMatch = true;
-        showGame = false;
-        changePlayer('flush');
-        return {home, away};
+        return {home, away, matchStarters};
     }
     $: match = displayMatch(matchSelection);
 
     // assign teams for selected gameID
-    const displayGame = (gameSelection) => {
+    const selectGame = (gameSelection) => {
         let game = nflMatchups.filter(m => m[0].gameID == gameSelection)[0];
         let home = game[0].team;
         let away = game[1].team;
         freshGame = true;
+
         showMatch = false;
-        showGame = true;
-        changePlayer('flush');
         return {home, away};
     }
-    $: game = displayGame(gameSelection);
+    $: game = selectGame(gameSelection);
 
     const positionGameStarters = {
         positions: {},
@@ -243,7 +241,6 @@
                 }
             }
         }
-
         positionLB = gameStarters;
         leaderboardHeading = `${game.home.sleeperID} v ${game.away.sleeperID}`;
         return gameStarters;
@@ -269,63 +266,90 @@
     }
     $: gameManagers = displayManagers(gameStarters);
 
-    let viewPlayer;
-    export const changePlayer = (playerID) => {
-        if(playerID == 'flush') {
-            viewPlayer = null;
+    export const changePlayer = (viewPlayerID) => {
+        let newViewPlayer;
+        let newGameSelection;
+        if(viewPlayerID == 'flush') {
+            newViewPlayer = null;
         } else {
-            for(const recordManID in gameStarters) {
-                if(gameStarters[recordManID].find(s => s.playerID == playerID)) {
-                    viewPlayer = gameStarters[recordManID].find(s => s.playerID == playerID);
+            // if(showMatch == true) {
+            //     let newGameStarters = null;
+            //     for(const nflMatchup in nflMatchups) {
+            //         for(const team in nflMatchups[nflMatchup]) {
+            //             if(nflMatchups[nflMatchup][team].sleeperID == playersInfo.players[playerID].t) {
+            //                 newGameSelection = nflMatchups[nflMatchup][team].gameID
+            //                 let newGame = displayGame(nflMatchups[nflMatchup][team].gameID);
+            //                 newGameStarters = findStarters(newGame);
+            //                 for(const recordManID in newGameStarters) {
+            //                     if(newGameStarters[recordManID].find(s => s.playerID == playerID)) {
+            //                         newViewPlayer = newGameStarters[recordManID].find(s => s.playerID == playerID);
+            //                         break;
+            //                     }
+            //                 }
+            //                 break;
+            //             }
+            //         }
+            //         if(newGameStarters != null) {
+            //             break;
+            //         }
+            //     }
+            // } else {
+                for(const recordManID in gameStarters) {
+                    if(gameStarters[recordManID].find(s => s.playerID == viewPlayerID)) {
+                        newViewPlayer = gameStarters[recordManID].find(s => s.playerID == viewPlayerID);
+                        break;
+                    }
                 }
-            }
+            // }
         }
+        viewPlayer = newViewPlayer;
         getDisplayStats(viewPlayer);
         return viewPlayer;
     }
+    $: viewPlayer = changePlayer(viewPlayerID);
 
-    const changePosition = (position) => {
-        positionLB = position;
-        if(positionLB == 'DEF') {
-            leaderboardHeading = 'Defense';
-        } else if(positionLB == 'QB') {
-            leaderboardHeading = 'Quarterback';
-        } else if(positionLB == 'RB') {
-            leaderboardHeading = 'Running Back';
-        } else if(positionLB == 'WR') {
-            leaderboardHeading = 'Wide Receiver';
-        } else if(positionLB == 'TE') {
-            leaderboardHeading = 'Tight End';
-        } else if(positionLB == 'K') {
-            leaderboardHeading = 'Kicker';
-        } else if(positionLB == 'DB') {
-            leaderboardHeading = 'Defensive Back';
-        } else if(positionLB == 'DL') {
-            leaderboardHeading = 'Defensive Lineman';
-        } else if(positionLB == 'LB') {
-            leaderboardHeading = 'Linebacker';
-        } else if(positionLB == 'FLEX') {
-            leaderboardHeading = 'FLEX';
-        } else if(positionLB == 'SUPER_FLEX') {
-            leaderboardHeading = 'Super FLEX';
-        } else if(positionLB == 'WRRD_FLEX') {
-            leaderboardHeading = 'WR/RB FLEX';
-        } else if(positionLB == 'REC_FLEX') {
-            leaderboardHeading = 'WR/TE FLEX';
-        } else if(positionLB == 'IDP_FLEX') {
-            leaderboardHeading = 'IDP FLEX';
-        }
-    }
+    // const changePosition = (position) => {
+    //     positionLB = position;
+    //     if(positionLB == 'DEF') {
+    //         leaderboardHeading = 'Defense';
+    //     } else if(positionLB == 'QB') {
+    //         leaderboardHeading = 'Quarterback';
+    //     } else if(positionLB == 'RB') {
+    //         leaderboardHeading = 'Running Back';
+    //     } else if(positionLB == 'WR') {
+    //         leaderboardHeading = 'Wide Receiver';
+    //     } else if(positionLB == 'TE') {
+    //         leaderboardHeading = 'Tight End';
+    //     } else if(positionLB == 'K') {
+    //         leaderboardHeading = 'Kicker';
+    //     } else if(positionLB == 'DB') {
+    //         leaderboardHeading = 'Defensive Back';
+    //     } else if(positionLB == 'DL') {
+    //         leaderboardHeading = 'Defensive Lineman';
+    //     } else if(positionLB == 'LB') {
+    //         leaderboardHeading = 'Linebacker';
+    //     } else if(positionLB == 'FLEX') {
+    //         leaderboardHeading = 'FLEX';
+    //     } else if(positionLB == 'SUPER_FLEX') {
+    //         leaderboardHeading = 'Super FLEX';
+    //     } else if(positionLB == 'WRRB_FLEX') {
+    //         leaderboardHeading = 'WR/RB FLEX';
+    //     } else if(positionLB == 'REC_FLEX') {
+    //         leaderboardHeading = 'WR/TE FLEX';
+    //     } else if(positionLB == 'IDP_FLEX') {
+    //         leaderboardHeading = 'IDP FLEX';
+    //     }
+    // }
 
     const getDisplayStats = async (viewPlayer) => {
         let newFantasyProducts = await fantasyProducts;
         const viewPlayerStats = {};
         let displayStats = [];
-        if(newFantasyProducts.length > 0 && viewPlayer != null) {
+        if(newFantasyProducts.length > 0 && viewPlayer != null  && newFantasyProducts[newFantasyProducts.length - 1][viewPlayer.playerID]) {
             let runningTotals = newFantasyProducts[newFantasyProducts.length - 1];
             viewPlayerStats[viewPlayer.playerID] = {
                 stats: [],
-                totalFpts: runningTotals[viewPlayer.playerID].totalFpts,
+                totalFpts: runningTotals[viewPlayer.playerID]?.totalFpts || null,
                 playerID: viewPlayer.playerID,
             }
             for(const stat in runningTotals[viewPlayer.playerID].stats) {
@@ -355,6 +379,89 @@
         return positionLeaderboard;
     }
     $: positionLeaderboard = getPositionLeaders(positionLB);
+
+    const multiFunction = (playerID, teamID, leaderBoardType, leaderBoardSpec) => {
+        if(playerID != null && teamID != null) {
+            let newGameSelection = null;
+            for(const nflMatchup in nflMatchups) {
+                for(const team in nflMatchups[nflMatchup]) {
+                    if(nflMatchups[nflMatchup][team].sleeperID == teamID) {
+                        newGameSelection = nflMatchups[nflMatchup][team].gameID
+                        break;
+                    }
+                }
+                if(newGameSelection != null) {
+                    break;
+                }
+            }
+            gameSelection = newGameSelection;
+            viewPlayerID = playerID;
+        }
+        if(leaderBoardType != null && leaderBoardSpec != null) {
+            changeLeaderBoard(leaderBoardType, leaderBoardSpec);
+        }
+    }
+
+    const changeLeaderBoard = (leaderBoardType, leaderBoardSpec) => {
+        if(leaderBoardType == 'position') {
+            let newPlayFilter;
+            if(positionPlayFilter.length > 0 && positionPlayFilter.includes(leaderBoardSpec)) {
+                newPlayFilter = positionPlayFilter.filter(p => p != leaderBoardSpec);
+                positionPlayFilter = newPlayFilter;
+            } else {
+                newPlayFilter = positionPlayFilter;
+                newPlayFilter.push(leaderBoardSpec);
+                positionPlayFilter = newPlayFilter;
+            }
+            if(leaderBoardSpec == 'DEF') {
+                leaderboardHeading = 'Defense';
+            } else if(leaderBoardSpec == 'QB') {
+                leaderboardHeading = 'Quarterback';
+            } else if(leaderBoardSpec == 'RB') {
+                leaderboardHeading = 'Running Back';
+            } else if(leaderBoardSpec == 'WR') {
+                leaderboardHeading = 'Wide Receiver';
+            } else if(leaderBoardSpec == 'TE') {
+                leaderboardHeading = 'Tight End';
+            } else if(leaderBoardSpec == 'K') {
+                leaderboardHeading = 'Kicker';
+            } else if(leaderBoardSpec == 'DB') {
+                leaderboardHeading = 'Defensive Back';
+            } else if(leaderBoardSpec == 'DL') {
+                leaderboardHeading = 'Defensive Lineman';
+            } else if(leaderBoardSpec == 'LB') {
+                leaderboardHeading = 'Linebacker';
+            } else if(leaderBoardSpec == 'FLEX') {
+                leaderboardHeading = 'FLEX';
+            } else if(leaderBoardSpec == 'SUPER_FLEX') {
+                leaderboardHeading = 'Super FLEX';
+            } else if(leaderBoardSpec == 'WRRB_FLEX') {
+                leaderboardHeading = 'WR/RB FLEX';
+            } else if(leaderBoardSpec == 'REC_FLEX') {
+                leaderboardHeading = 'WR/TE FLEX';
+            } else if(leaderBoardSpec == 'IDP_FLEX') {
+                leaderboardHeading = 'IDP FLEX';
+            }
+            leaderBoardSpec = positionPlayFilter;
+        } else if(leaderBoardType == 'matchup') {
+            let newMatch = displayMatch(leaderBoardSpec);
+            positionLB = newMatch.matchStarters;
+            leaderboardHeading = `${managerInfo[newMatch.home.matchInfo.recordManID].abbreviation} v ${managerInfo[newMatch.away.matchInfo.recordManID].abbreviation}`;
+        } else if(leaderBoardType == 'nflGame') {
+            let newGameStarters = findStarters(leaderBoardSpec);
+            freshGame = true;
+            positionLB = newGameStarters;
+            leaderboardHeading = `${leaderBoardSpec.home.sleeperID} v ${leaderBoardSpec.away.sleeperID}`;
+        }
+        leaderBoardInfo = {
+            type: leaderBoardType,
+            spec: leaderBoardSpec,
+        }
+        return leaderBoardInfo;
+    }
+
+    $: leaderBoardInfo = changeLeaderBoard(leaderBoardType, leaderBoardSpec);
+
 </script>
 
 <style>
@@ -788,6 +895,22 @@
         justify-content: center;
         align-items: center;
     }
+    .gameHeaderBox {
+        display: inline-flex;
+        position: absolute;
+        z-index: 1;
+        width: 96%;
+        height: 104%;
+        border: 0.25px solid #555;
+        border-radius: 1em;
+        top: 8%;
+    }
+
+    .gameHeaderBox:hover {
+        cursor: pointer;
+        border: 0.5px solid #ededed;
+        border-radius: 1em;
+    }
 
     .gameHeader {
         display: inline-flex;
@@ -831,7 +954,7 @@
     .versus {
         display: inline-flex;
         position: relative;
-        height: 100%;
+        height: 128%;
         width: 3%;
         justify-content: center;
         font-style: italic;
@@ -1138,8 +1261,9 @@
     <div class="bigBoxLeftWrap">
         <div class="gameManagers">
             <!-- shows specific NFL games -->
-            {#if showGame == true}
+            {#if showGameBox == true}
                 <div class="gameHeader">
+                    <div class="gameHeaderBox" style="{showGameBox == true ? "border: 0.5px solid #ededed; border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'nflGame', game)} />
                     <div class="gameOpponent">
                         <img class="gameAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{game.home.sleeperID.toLowerCase()}.png" alt="{game.home.sleeperID}">
                         <div class="gameTeamWrapper" style="align-items: flex-start;">
@@ -1164,7 +1288,7 @@
                                     {#each positionGameStarters[game.home.sleeperID].starters[ix] as starter}
                                         <div class="rosterRow" style="justify-content: flex-start; height: {100 / row}%">
                                             <div class="avatarHolder">
-                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="z-index: 1; {viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null)} style="z-index: 1; {viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
                                             </div>
                                             <div class="rosterPlayerInfo">
                                                 <div class="rosterPlayer" style="justify-content: flex-start; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
@@ -1179,9 +1303,9 @@
                                 </div>
                                 <div class="positionsWrap" style="justify-content: flex-start;">
                                     <div class="rosterPosition {nflPositions[ix]}" style="height: {100 / row}%;">
-                                        <div class="rosterRowBox" style="top: -2%; height: {100 * row}%"></div>
+                                        <div class="rosterRowBox" style="top: -2%; height: {100 * row}%; {positionPlayFilter.length > 0 && positionPlayFilter.includes(nflPositions[ix]) ? "border: 0.5px solid #ededed; border-radius: 1em;" : null}"></div>
                                         {nflPositions[ix]}
-                                        <div class="selectedPosition" on:click={() => changePosition(nflPositions[ix])} style="{positionLB == nflPositions[ix] ? "border: 0.5px solid #ededed; border-radius: 1em; z-index: 1;" : null}"></div>
+                                        <div class="selectedPosition" id="selectedPosition" on:click={() => multiFunction(null, null, 'position', nflPositions[ix])} style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(nflPositions[ix]) ? "border: 0.5px solid #ededed; border-radius: 1em; z-index: 1;" : null}"></div>
                                     </div>
                                 </div>
                                 <div class="positionGroup">
@@ -1196,7 +1320,7 @@
                                                 </div>
                                             </div>                                
                                             <div class="avatarHolder">
-                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
                                             </div>
                                         </div>
                                     {/each}
@@ -1226,13 +1350,14 @@
                     {/each}
                 </div> -->
                 <!-- shows league matchups -->
-            {:else if showMatch == true}        
+            {:else if showMatchBox == true}        
                 <div class="gameHeader">
+                    <div class="gameHeaderBox" style="height: 120%; {showMatchBox == true ? "border: 0.5px solid #ededed; border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'matchup', match.home.matchInfo.matchID)} />
                     <div class="matchOpponent">
-                        <div class="matchTop" style="justify-content: flex-start;">
+                        <div class="matchTop" style="justify-content: flex-start; left: 2%; top: 8%;">
                             <img class="gameAvatar" src="{match.home.manager.avatar}" alt="" style="border: 1px solid #777; border-radius: 50%; height: 90%; width: auto;">
                             <div class="gameTeamWrapper">
-                                <div class="gameTeam" style="margin: 5% 0;">{match.home.manager.realname}</div>
+                                <div class="gameTeam" style="margin: 0 0 5% 0; left: -2%;">{match.home.manager.realname}</div>
                             </div>
                         </div>
                         <div class="gameTeam" style="align-items: center; font-size: 0.75em; font-style: italic; color: #999; top: -40%; left: 30%; width: 69%; line-height: 1em;">{match.home.manager.name}</div>
@@ -1240,9 +1365,9 @@
                     </div>
                     <div class="versus">V</div>
                     <div class="matchOpponent">
-                        <div class="matchTop" style="justify-content: flex-end;">
+                        <div class="matchTop" style="justify-content: flex-end; right: 2%; top: 8%;">
                             <div class="gameTeamWrapper">
-                                <div class="gameTeam" style="margin: 5% 0;">{match.away.manager.realname}</div>
+                                <div class="gameTeam" style="margin: 0 0 5% 0; right: -2%;">{match.away.manager.realname}</div>
                             </div>
                             <img class="gameAvatar" src="{match.away.manager.avatar}" alt="" style="border: 1px solid #777; border-radius: 50%; height: 90%; width: auto;">
                         </div>
@@ -1265,7 +1390,7 @@
                         {#each match.home.starters as starter}
                             <div class="rosterRow" style="justify-content: flex-start;">
                                 <div class="avatarHolder">
-                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="z-index: 1; {viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null)} style="z-index: 1; {viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
                                 </div>
                                 <div class="rosterPlayerInfo">
                                     <div class="rosterPlayer" style="justify-content: flex-start; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
@@ -1280,9 +1405,9 @@
                     <div class="positionsWrap">
                         {#each positions as position}
                             <div class="rosterPosition {position}">
-                                <div class="rosterRowBox"></div>
+                                <div class="rosterRowBox" style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(position)  ? "border: 0.5px solid #ededed; border-radius: 1em;" : null}" />
                                 {position}
-                                <div class="selectedPosition" on:click={() => changePosition(position)} style="{positionLB == position ? "border: 0.5px solid #ededed; border-radius: 1em; z-index: 1;" : null}"></div>
+                                <div class="selectedPosition" on:click={() => multiFunction(null, null, 'position', position)} style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(position) ? "border: 0.5px solid #ededed; border-radius: 1em; z-index: 1;" : null}"></div>
                             </div>
                         {/each}
                     </div>
@@ -1297,7 +1422,7 @@
                                     </div>
                                 </div>                                
                                 <div class="avatarHolder">
-                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
                                 </div>
                             </div>
                         {/each}
