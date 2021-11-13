@@ -19,7 +19,35 @@
     let leaderBoardSpec;
     let leaderboardHeading = 'Game';
 
-    let showMatch = new Boolean (false);    // League matchups
+    const allStarters = {};
+    for(const recordManID in fantasyStarters) {
+        const starters = fantasyStarters[recordManID].starters;
+        allStarters[recordManID] = [];
+        for(const starter of starters) {
+            const starterInfo = playersInfo.players[starter];
+            if(starter != '0') {
+                const starterEntry = {
+                    playerID: starter,
+                    fpts: fantasyStarters[recordManID].startersPoints[starters.indexOf(starter)],
+                    owner: managerInfo[recordManID],
+                    recordManID,
+                    fn: starterInfo.fn,
+                    ln: starterInfo.ln,
+                    pos: starterInfo.pos,
+                    t: starterInfo.t,
+                    projection: starterInfo.wi[week].p,
+                    avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                    teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t.toLowerCase()}.png`,
+                    teamColor: `background-color: #${nflTeams[starterInfo.t].color}6b`,
+                    teamAltColor: `background-color: #${nflTeams[starterInfo.t].alternateColor}52`,
+                }
+                if(nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
+                    starterEntry.teamAltColor = `background-color: #ffffff52`;
+                }
+                allStarters[recordManID].push(starterEntry);
+            }
+        }
+    }
 
     // create top 10 points-scorers arrays for each position
     const positionRankArrays = {};
@@ -169,7 +197,6 @@
         let away = game[1].team;
         freshGame = true;
 
-        showMatch = false;
         return {home, away};
     }
     $: game = selectGame(gameSelection);
@@ -268,78 +295,30 @@
 
     export const changePlayer = (viewPlayerID) => {
         let newViewPlayer;
-        let newGameSelection;
         if(viewPlayerID == 'flush') {
             newViewPlayer = null;
         } else {
-            // if(showMatch == true) {
-            //     let newGameStarters = null;
-            //     for(const nflMatchup in nflMatchups) {
-            //         for(const team in nflMatchups[nflMatchup]) {
-            //             if(nflMatchups[nflMatchup][team].sleeperID == playersInfo.players[playerID].t) {
-            //                 newGameSelection = nflMatchups[nflMatchup][team].gameID
-            //                 let newGame = displayGame(nflMatchups[nflMatchup][team].gameID);
-            //                 newGameStarters = findStarters(newGame);
-            //                 for(const recordManID in newGameStarters) {
-            //                     if(newGameStarters[recordManID].find(s => s.playerID == playerID)) {
-            //                         newViewPlayer = newGameStarters[recordManID].find(s => s.playerID == playerID);
-            //                         break;
-            //                     }
-            //                 }
-            //                 break;
-            //             }
-            //         }
-            //         if(newGameStarters != null) {
-            //             break;
-            //         }
-            //     }
-            // } else {
+            if(showGameBox == true) {
                 for(const recordManID in gameStarters) {
                     if(gameStarters[recordManID].find(s => s.playerID == viewPlayerID)) {
                         newViewPlayer = gameStarters[recordManID].find(s => s.playerID == viewPlayerID);
                         break;
                     }
                 }
-            // }
+            } else if(showMatchBox == true) {
+                for(const recordManID in fantasyStarters) {
+                    if(allStarters[recordManID].find(s => s.playerID == viewPlayerID)) {
+                        newViewPlayer = allStarters[recordManID].find(s => s.playerID == viewPlayerID);
+                        break;
+                    }
+                }
+            }
+
         }
         viewPlayer = newViewPlayer;
-        getDisplayStats(viewPlayer);
         return viewPlayer;
     }
     $: viewPlayer = changePlayer(viewPlayerID);
-
-    // const changePosition = (position) => {
-    //     positionLB = position;
-    //     if(positionLB == 'DEF') {
-    //         leaderboardHeading = 'Defense';
-    //     } else if(positionLB == 'QB') {
-    //         leaderboardHeading = 'Quarterback';
-    //     } else if(positionLB == 'RB') {
-    //         leaderboardHeading = 'Running Back';
-    //     } else if(positionLB == 'WR') {
-    //         leaderboardHeading = 'Wide Receiver';
-    //     } else if(positionLB == 'TE') {
-    //         leaderboardHeading = 'Tight End';
-    //     } else if(positionLB == 'K') {
-    //         leaderboardHeading = 'Kicker';
-    //     } else if(positionLB == 'DB') {
-    //         leaderboardHeading = 'Defensive Back';
-    //     } else if(positionLB == 'DL') {
-    //         leaderboardHeading = 'Defensive Lineman';
-    //     } else if(positionLB == 'LB') {
-    //         leaderboardHeading = 'Linebacker';
-    //     } else if(positionLB == 'FLEX') {
-    //         leaderboardHeading = 'FLEX';
-    //     } else if(positionLB == 'SUPER_FLEX') {
-    //         leaderboardHeading = 'Super FLEX';
-    //     } else if(positionLB == 'WRRB_FLEX') {
-    //         leaderboardHeading = 'WR/RB FLEX';
-    //     } else if(positionLB == 'REC_FLEX') {
-    //         leaderboardHeading = 'WR/TE FLEX';
-    //     } else if(positionLB == 'IDP_FLEX') {
-    //         leaderboardHeading = 'IDP FLEX';
-    //     }
-    // }
 
     const getDisplayStats = async (viewPlayer) => {
         let newFantasyProducts = await fantasyProducts;
@@ -382,19 +361,19 @@
 
     const multiFunction = (playerID, teamID, leaderBoardType, leaderBoardSpec) => {
         if(playerID != null && teamID != null) {
-            let newGameSelection = null;
-            for(const nflMatchup in nflMatchups) {
-                for(const team in nflMatchups[nflMatchup]) {
-                    if(nflMatchups[nflMatchup][team].sleeperID == teamID) {
-                        newGameSelection = nflMatchups[nflMatchup][team].gameID
-                        break;
-                    }
-                }
-                if(newGameSelection != null) {
-                    break;
-                }
-            }
-            gameSelection = newGameSelection;
+            // let newGameSelection = null;
+            // for(const nflMatchup in nflMatchups) {
+            //     for(const team in nflMatchups[nflMatchup]) {
+            //         if(nflMatchups[nflMatchup][team].sleeperID == teamID) {
+            //             newGameSelection = nflMatchups[nflMatchup][team].gameID
+            //             break;
+            //         }
+            //     }
+            //     if(newGameSelection != null) {
+            //         break;
+            //     }
+            // }
+            // gameSelection = newGameSelection;
             viewPlayerID = playerID;
         }
         if(leaderBoardType != null && leaderBoardSpec != null) {
@@ -1339,26 +1318,6 @@
                         {/if}
                     {/each}
                 </div>
-<!--
-                <div class="gameContainer">
-                    {#each gameManagers as manager}
-                        <div class="managerBlock">
-                            <div class="managerInfo">
-                                <img class="managerAvatar" src="{manager.info.avatar}" alt="">
-                                <div class="managerName">{manager.info.name}</div>
-                            </div>
-                            <div class="managerStarters">
-                                {#each manager.starters as starter}
-                                    {#if starter.playerID == game.home.sleeperID || starter.playerID == game.away.sleeperID}
-                                        <img class="defenseAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
-                                    {:else}
-                                        <img class="playerAvatar" src="{starter.avatar}" alt="" on:click={() => changePlayer(starter.playerID)} style="{viewPlayer?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed;" : null}">
-                                    {/if}
-                                {/each}
-                            </div>
-                        </div>
-                    {/each}
-                </div> -->
                 <!-- shows league matchups -->
             {:else if showMatchBox == true}        
                 <div class="gameHeader">
