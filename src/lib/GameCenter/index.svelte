@@ -265,7 +265,7 @@
                 <GameBox {nflTeams} {nflMatchups} {week} {leagueData} {playersInfo} {fantasyStarters} {positionLeaders} {managerInfo} {weekMatchups} {standingsData} bind:matchSelection={matchSelection} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
             </div>
             <div class="playByPlay">
-                <PlayByPlay {nflTeams} {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} {managerInfo} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
+                <PlayByPlay {nflTeams} {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} {managerInfo} {weekMatchups} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:matchSelection={matchSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
             </div>
         </div>
         <div class="rightWrapper">

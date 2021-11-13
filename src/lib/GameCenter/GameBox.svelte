@@ -1304,8 +1304,8 @@
                                                 <div class="rosterPlayer" style="justify-content: flex-start; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                                 <div class="rosterPlayer" style="justify-content: flex-start; color: #999; font-size: 0.75em; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%; line-height: 1em;"}">{starter.owner.name}</div>
                                                 <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">
-                                                    <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
                                                     <div style="display: inline-flex; color: #999; justify-content: flex-end; margin: 0 5% 0 0;">({starter.projection})</div>
+                                                    <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1325,8 +1325,8 @@
                                                 <div class="rosterPlayer" style="justify-content: flex-end; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                                 <div class="rosterPlayer" style="justify-content: flex-end; color: #999; font-size: 0.75em; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%; line-height: 1em;"}">{starter.owner.name}</div>
                                                 <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%;"}">
-                                                    <div style="display: inline-flex; color: #999; justify-content: flex-start; margin: 0 0 0 5%;">({starter.projection})</div>  
-                                                    <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
+                                                    <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>  
+                                                    <div style="display: inline-flex; color: #999; justify-content: flex-start; margin: 0 0 0 5%;">({starter.projection})</div>
                                                 </div>
                                             </div>                                
                                             <div class="avatarHolder">
