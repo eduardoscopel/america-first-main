@@ -1578,7 +1578,6 @@
                     }                      
                 }
             }
-
             // loop thru def-thresh plays                                                               // TEAM DEF YDS ALLOWED
             for(const playKey in defYardsArray) {
                 const play = defYardsArray[playKey];
@@ -1779,7 +1778,6 @@
                     }
                 }
             }
-
             // process every relevant game's play by play for plays relevant to matchup
             for(const gameSelect in relevancyKey.games) {
                 let playByPlayData = await getPlayByPlay(relevancyKey.games[gameSelect], true).catch((err) => { console.error(err); });
@@ -1788,7 +1786,7 @@
                 let defYdsThreshBreakers = [];
 
                 // identify NFL teams in the current game
-                let game = nflMatchups.filter(m => m[0].gameID == gameSelection)[0];
+                let game = nflMatchups.filter(m => m[0].gameID == relevancyKey.games[gameSelect])[0];
 
                 let home = game[0].sleeperID;
                 let homeEspn = game[0].team.espnAbbreviation;
@@ -1811,7 +1809,8 @@
                     if(relevancyKey.starters[recordManID].filter(s => s.playerID == home).length > 0) {
                         homeDefStarted = true;
                         homeDefense = relevancyKey.starters[recordManID].filter(s => s.playerID == home)[0];
-                    } else if(relevancyKey.starters[recordManID].filter(s => s.playerID == away).length > 0) {
+                    } 
+                    if(relevancyKey.starters[recordManID].filter(s => s.playerID == away).length > 0) {
                         awayDefStarted = true;
                         awayDefense = relevancyKey.starters[recordManID].filter(s => s.playerID == away)[0];
                     }
@@ -1892,7 +1891,7 @@
                         // the play object with all necessary info
                         const playEntry = {
                             playID: play.id,
-                            order: play.sequenceNumber,
+                            order: parseInt(play.sequenceNumber),
                             playType: play.type.id,
                             team: playTeam,
                             oppTeam,
@@ -2040,11 +2039,13 @@
                 }
                 let fantasyRelevantPlays = fantasyRelevantPlaysForward.slice().reverse();
                 let fantasyProducts_matchGame = processPlays(fantasyRelevantPlays, defYdsThreshBreakers, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed);
+
                 for(const product of fantasyProducts_matchGame) {
                     fantasyProducts_match.push(product);
                 }
             }
             fantasyProducts = fantasyProducts_match;
+            fantasyProducts = fantasyProducts.filter(p => p.length > 0);
             fantasyProducts = fantasyProducts.sort((a, b) => b[0]?.order - a[0]?.order);
             fantasyProducts.push(runningTotals);
         // nfl game play by play
@@ -2100,7 +2101,8 @@
             if(startersArray.filter(s => s.playerID == home).length > 0) {
                 homeDefStarted = true;
                 homeDefense = startersArray.filter(s => s.playerID == home)[0];
-            } else if(startersArray.filter(s => s.playerID == away).length > 0) {
+            }
+            if(startersArray.filter(s => s.playerID == away).length > 0) {
                 awayDefStarted = true;
                 awayDefense = startersArray.filter(s => s.playerID == away)[0];
             }
@@ -2180,7 +2182,7 @@
                     // the play object with all necessary info
                     const playEntry = {
                         playID: play.id,
-                        order: play.sequenceNumber,
+                        order: parseInt(play.sequenceNumber),
                         playType: play.type.id,
                         team: playTeam,
                         oppTeam,
@@ -2351,6 +2353,8 @@
             let fantasyRelevantPlays = fantasyRelevantPlaysForward.slice().reverse();
             let fantasyProducts_game = processPlays(fantasyRelevantPlays, defYdsThreshBreakers, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed);
             fantasyProducts = fantasyProducts_game;
+            fantasyProducts = fantasyProducts.filter(p => p.length > 0);
+            fantasyProducts = fantasyProducts.sort((a, b) => b[0]?.order - a[0]?.order);
             fantasyProducts.push(runningTotals);
         }
         return fantasyProducts; 
