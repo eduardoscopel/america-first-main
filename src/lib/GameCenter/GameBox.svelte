@@ -398,6 +398,9 @@
             viewPlayerID = playerID;
         }
         if(leaderBoardType != null && leaderBoardSpec != null) {
+            if(leaderBoardType == 'matchup') {
+                matchSelection = leaderBoardSpec;
+            } 
             changeLeaderBoard(leaderBoardType, leaderBoardSpec);
         }
     }
@@ -413,6 +416,7 @@
                 newPlayFilter.push(leaderBoardSpec);
                 positionPlayFilter = newPlayFilter;
             }
+            positionLB = leaderBoardSpec;
             if(leaderBoardSpec == 'DEF') {
                 leaderboardHeading = 'Defense';
             } else if(leaderBoardSpec == 'QB') {
@@ -442,16 +446,22 @@
             } else if(leaderBoardSpec == 'IDP_FLEX') {
                 leaderboardHeading = 'IDP FLEX';
             }
-            leaderBoardSpec = positionPlayFilter;
+            if(positionPlayFilter.length > 0) {
+                leaderBoardSpec = positionPlayFilter;
+            } else {
+                leaderBoardSpec = nflPositions;
+            }
         } else if(leaderBoardType == 'matchup') {
             let newMatch = displayMatch(leaderBoardSpec);
             positionLB = newMatch.matchStarters;
             leaderboardHeading = `${managerInfo[newMatch.home.matchInfo.recordManID].abbreviation} v ${managerInfo[newMatch.away.matchInfo.recordManID].abbreviation}`;
+            positionPlayFilter = [];
         } else if(leaderBoardType == 'nflGame') {
             let newGameStarters = findStarters(leaderBoardSpec);
             freshGame = true;
             positionLB = newGameStarters;
             leaderboardHeading = `${leaderBoardSpec.home.sleeperID} v ${leaderBoardSpec.away.sleeperID}`;
+            positionPlayFilter = [];
         }
         leaderBoardInfo = {
             type: leaderBoardType,
