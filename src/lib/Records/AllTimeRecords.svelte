@@ -2,7 +2,7 @@
     import {round} from '$lib/utils/helper'
   	import RecordsAndRankings from './RecordsAndRankings.svelte'; 
 
-    export let selection, leagueRosterRecords, currentManagers, transactionTotals, leagueWeekRecords, leagueRecordArrays;
+    export let selection, masterSelection, leagueRosterRecords, currentManagers, transactionTotals, leagueWeekRecords, leagueRecordArrays;
 
     let lineupIQs = [];
     const tradesData = [];
@@ -166,6 +166,29 @@
 
 </script>
 
+<style>
+    .headingContainer {
+        display: inline-flex;
+        position: relative;
+        width: 100%;
+        height: 5em;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .headingText {
+        text-align: center;
+        font-size: 2.25em;
+        font-weight: 450;
+        color: #ededed;
+    }
+</style>
+
+<div class="headingContainer">
+    <div class="headingText">All-Time Records</div>
+</div>
+
+
 <RecordsAndRankings
     {currentManagers}   
     blowouts={allTimeBiggestBlowouts}
@@ -196,4 +219,5 @@
     allTime={true}
     regular={selection == 'regular'}
     bind:selection={selection}
+    bind:masterSelection={masterSelection} 
 />

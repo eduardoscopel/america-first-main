@@ -6,28 +6,15 @@
 
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table'; 
 
-    export let selection = 'regular', waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerWeekTOPS, currentManagers, allTime=false, last=false;
+    export let selection = 'regular', masterSelection, waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerWeekTOPS, currentManagers, allTime=false;
 
     let leagueManagers = {};
     const numManagers = managers.length;
 
+    let masterPrefix;
+    // let selectedYear = currentYear;
+
     const changeSelection = (s) => {
-        let showRegular = new Boolean (true);
-        let showPlayoffs = new Boolean (false);
-        let showCombined = new Boolean (false);
-        if(selection == 'regular') {
-            showRegular = true;
-            showPlayoffs = false;
-            showCombined = false;
-        } else if(selection == 'playoffs') {
-            showRegular = false;
-            showPlayoffs = true;
-            showCombined = false;
-        } else if(selection == 'combined') {
-            showRegular = false;
-            showPlayoffs = false;
-            showCombined = true;
-        }
         selection = s;
         setHeading(selection);
     }
@@ -608,8 +595,6 @@
 
     /* END ranking table resizing */
 </style>
-
-<h4>{prefix} Records</h4>
 
 <div class="buttonHolder">
     <Group variant="outlined">
@@ -1649,7 +1634,3 @@
         {/each}
     </Group>
 </div>
-
-{#if !last}
-    <hr />
-{/if}

@@ -235,10 +235,6 @@
         text-align: center;
     }
 
-    .left {
-        text-align: left;
-    }
-
     .yearContainer {
         display: flex;
         width: 95%;

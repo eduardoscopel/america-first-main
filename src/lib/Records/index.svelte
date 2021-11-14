@@ -1,10 +1,23 @@
 <script>
     import { getLeagueRecords, getLeagueTransactions } from '$lib/utils/helper'; 
-
+    import Button, { Group, Label } from '@smui/button';
     import AllTimeRecords from './AllTimeRecords.svelte';
     import PerSeasonRecords from './PerSeasonRecords.svelte';
 
     export let leagueRecords, totals, stale;
+
+    let masterSelection = 'alltime';
+    let displayType;
+    const changeMasterSelection = (masterSelection) => {
+        if(masterSelection == 'alltime') {
+            displayType = 'alltime';
+        } else if(masterSelection == 'yearly') {
+            displayType = 'yearly';
+        }
+        masterSelection = displayType;
+        return displayType;
+    }
+    $: displayType = changeMasterSelection(masterSelection);
 
     const refreshTransactions = async () => {
         const newTransactions = await getLeagueTransactions(false, true);
@@ -48,13 +61,33 @@
         margin: 10em 0 4em;
         text-align: center;
     }
+
+    .buttonHolder {
+        text-align: center;
+        margin: 2em 0;
+    }
 </style>
 
 <div class="rankingsWrapper">
-    {#if leagueWeekRecords.length}
-        <AllTimeRecords transactionTotals={totals} {leagueWeekRecords} {leagueRosterRecords} {currentManagers} {leagueRecordArrays} />
-    {:else}
-        <p class="empty">No records <i>yet</i>...</p>
+
+    <div class="buttonHolder">
+        <Group variant="outlined">
+            <Button class="selectionButtons" on:click={() => changeMasterSelection('alltime')} variant="{displayType == 'alltime' ? "raised" : "outlined"}">
+                <Label>All-Time</Label>
+            </Button>
+            <Button class="selectionButtons" on:click={() => changeMasterSelection('yearly')} variant="{displayType == 'yearly' ? "raised" : "outlined"}">
+                <Label>Yearly</Label>
+            </Button>
+        </Group>
+    </div>
+
+    {#if displayType == 'alltime'}
+        {#if leagueWeekRecords.length}
+            <AllTimeRecords transactionTotals={totals} {leagueWeekRecords} {leagueRosterRecords} {currentManagers} {leagueRecordArrays} bind:masterSelection={masterSelection} />
+        {:else}
+            <p class="empty">No records <i>yet</i>...</p>
+        {/if}
+    {:else if displayType == 'yearly'}
+        <PerSeasonRecords transactionTotals={totals} {leagueRosterRecords} {seasonWeekRecords} {currentManagers} {currentYear} {lastYear} bind:masterSelection={masterSelection} />
     {/if}
-    <PerSeasonRecords transactionTotals={totals} {leagueRosterRecords} {seasonWeekRecords} {currentManagers} {currentYear} {lastYear} />
 </div>
