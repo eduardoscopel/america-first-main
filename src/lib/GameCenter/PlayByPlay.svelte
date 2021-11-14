@@ -1,7 +1,7 @@
 <script>
     import { getPlayByPlay, waitForAll, round } from '$lib/utils/helper'; 
 
-    export let nflTeams, nflMatchups, leagueData, fantasyStarters, managerInfo, weekMatchups, playersInfo, gameSelection = nflMatchups[0][0].gameID, matchSelection, fantasyProducts, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo;
+    export let nflTeams, nflMatchups, leagueData, fantasyStarters, managerInfo, weekMatchups, playersInfo, gameSelection = nflMatchups[0][0].gameID, matchSelection, managerSelection, fantasyProducts, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo;
 
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/situation?lang=en&region=us CURRENT DOWN
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/plays?lang=en&region=us PLAY BY PLAY
@@ -11,7 +11,7 @@
     // 4035687
     let startersArray = [];
 
-    const loadPlayByPlay = async (gameSelection, matchSelection, startersArray, showGameBox, showMatchBox) => {
+    const loadPlayByPlay = async (gameSelection, matchSelection, managerSelection, viewPlayerID, startersArray, showGameBox, showMatchBox) => {
 
         let fantasyProducts = [];
         const score = leagueData.scoring_settings;
@@ -325,7 +325,7 @@
             return {DEFscore, DEFthreshold, DEFdescription};
         }
         // processes plays and calculates FPTS
-        const processPlays = (playArray, defYardsArray, homeDefStarted, awayDefStarted, homeTeam, awayTeam, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed) => {
+        const processPlays = (playArray, defYardsArray, homeDefStarted, awayDefStarted, homeTeam, awayTeam, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed, gameState) => {
             let processedPlays = [];
             let fantasyPlay = {};
             for(const playKey in playArray) {
@@ -1636,8 +1636,8 @@
                     }
                 }
             }
-            // if DEF started, push entry for their starting points (pts/yds separated for later tallying)
-            if(homeDefStarted == true || awayDefStarted == true) {
+            // if game has started and a DEF is playing, push entry for their starting points 
+            if((gameState == 'in' || gameState == 'post') && (homeDefStarted == true || awayDefStarted == true)) {
                 if(homeDefStarted == true) {
                     const fptsPTS = (score?.pts_allow_0 || 0);
                     const fptsYDS = (score?.yds_allow_0_100 || 0);
@@ -1741,16 +1741,27 @@
             runningTotals = {};
             let fantasyProducts_match = [];
 
+            // filtering to one manager if selected
+            if(managerSelection != 0) {
+                match = match.filter(m => m.recordManID == managerSelection);
+            }
+
             for(const opponent in match) {
                 // get managers in matchup
                 relevancyKey.recordManIDs.push(match[opponent].recordManID);
+                relevancyKey.starters[match[opponent].recordManID] = [];
                 // get starters in matchup
-                for(const starter of match[opponent].starters) {
+                let starters =  match[opponent].starters;
+                    //filtering to one player if selected
+                if(viewPlayerID != null) {
+                    starters = starters.filter(s => s == viewPlayerID);
+                }
+                for(const starter of starters) {
                     if(starter != '0') {
                         const starterInfo = playersInfo.players[starter];
                         const starterEntry = {
                             playerID: starter,
-                            fpts: match[opponent].points[match[opponent].starters.indexOf(starter)],
+                            fpts: match[opponent].points[starters.indexOf(starter)],
                             owner: managerInfo[match[opponent].recordManID],
                             recordManID: match[opponent].recordManID,
                             fn: starterInfo.fn,
@@ -1765,9 +1776,7 @@
                         if(nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
                             starterEntry.teamAltColor = `background-color: #ffffff52`;
                         }
-                        if(!relevancyKey.starters[match[opponent].recordManID]) {
-                            relevancyKey.starters[match[opponent].recordManID] = [];
-                        }
+
                         relevancyKey.starters[match[opponent].recordManID].push(starterEntry);
 
                         // get starters' game IDs
@@ -1787,6 +1796,7 @@
 
                 // identify NFL teams in the current game
                 let game = nflMatchups.filter(m => m[0].gameID == relevancyKey.games[gameSelect])[0];
+                let gameState = game[0].status.type.state;
 
                 let home = game[0].sleeperID;
                 let homeEspn = game[0].team.espnAbbreviation;
@@ -2038,7 +2048,7 @@
                     }
                 }
                 let fantasyRelevantPlays = fantasyRelevantPlaysForward.slice().reverse();
-                let fantasyProducts_matchGame = processPlays(fantasyRelevantPlays, defYdsThreshBreakers, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed);
+                let fantasyProducts_matchGame = processPlays(fantasyRelevantPlays, defYdsThreshBreakers, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed, gameState);
 
                 for(const product of fantasyProducts_matchGame) {
                     fantasyProducts_match.push(product);
@@ -2060,27 +2070,51 @@
             let defYdsThreshBreakers = [];
             // startersArray will help us match our sleeper playerInfo to espn player APIs, and also check if someone is starting one of the DEFs
             startersArray = [];
-            for(const recordManID in fantasyStarters) {
-                const starters = fantasyStarters[recordManID].starters;
 
-                for(const starter of starters) {
-                    if(starter != '0') {
-                        const starterInfo = playersInfo.players[starter];
-                        const starterEntry = {
-                            playerID: starter,
-                            owner: managerInfo[recordManID],
-                            fn: starterInfo.fn,
-                            ln: starterInfo.ln,
-                            pos: starterInfo.pos,
-                            t: starterInfo.t,
-                            avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+            //filtering to one player if selected
+            if(viewPlayerID != null) {
+                let viewPlayerManager;
+                for(const recordManID in fantasyStarters) {
+                    if(fantasyStarters[recordManID].starters.includes(viewPlayerID)) {
+                        viewPlayerManager = recordManID;
+                        break;
+                    }
+                }
+                const starterInfo = playersInfo.players[viewPlayerID];
+                const starterEntry = {
+                    playerID: viewPlayerID,
+                    owner: managerInfo[viewPlayerManager],
+                    fn: starterInfo.fn,
+                    ln: starterInfo.ln,
+                    pos: starterInfo.pos,
+                    t: starterInfo.t,
+                    avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${viewPlayerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${viewPlayerID}.jpg`,
+                }
+                startersArray.push(starterEntry);
+            } else {
+                for(const recordManID in fantasyStarters) {
+                    const starters = fantasyStarters[recordManID].starters;
+
+                    for(const starter of starters) {
+                        if(starter != '0') {
+                            const starterInfo = playersInfo.players[starter];
+                            const starterEntry = {
+                                playerID: starter,
+                                owner: managerInfo[recordManID],
+                                fn: starterInfo.fn,
+                                ln: starterInfo.ln,
+                                pos: starterInfo.pos,
+                                t: starterInfo.t,
+                                avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                            }
+                            startersArray.push(starterEntry);
                         }
-                        startersArray.push(starterEntry);
                     }
                 }
             }
             // identify NFL teams in the current game
             let game = nflMatchups.filter(m => m[0].gameID == gameSelection)[0];
+            let gameState = game[0].status.type.state;
 
             let home = game[0].sleeperID;
             let homeEspn = game[0].team.espnAbbreviation;
@@ -2351,7 +2385,7 @@
             // }
 
             let fantasyRelevantPlays = fantasyRelevantPlaysForward.slice().reverse();
-            let fantasyProducts_game = processPlays(fantasyRelevantPlays, defYdsThreshBreakers, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed);
+            let fantasyProducts_game = processPlays(fantasyRelevantPlays, defYdsThreshBreakers, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed, gameState);
             fantasyProducts = fantasyProducts_game;
             fantasyProducts = fantasyProducts.filter(p => p.length > 0);
             fantasyProducts = fantasyProducts.sort((a, b) => b[0]?.order - a[0]?.order);
@@ -2360,8 +2394,8 @@
         return fantasyProducts; 
     }
 
-    const displayByPlay = async (gameSelection, matchSelection, startersArray, showGameBox, showMatchBox, leaderBoardInfo) => {
-        fantasyProducts = await loadPlayByPlay(gameSelection, matchSelection, startersArray, showGameBox, showMatchBox);   
+    const displayByPlay = async (gameSelection, matchSelection, managerSelection, viewPlayerID, startersArray, showGameBox, showMatchBox, leaderBoardInfo) => {
+        fantasyProducts = await loadPlayByPlay(gameSelection, matchSelection, managerSelection, viewPlayerID, startersArray, showGameBox, showMatchBox);   
         if(leaderBoardInfo && leaderBoardInfo.type == 'position') {
             let runTotal = fantasyProducts.pop();
             let filteredProducts = [];
@@ -2387,7 +2421,7 @@
         }
         return fantasyProducts;
     }
-    $: fantasyProducts = displayByPlay(gameSelection, matchSelection, startersArray, showGameBox, showMatchBox, leaderBoardInfo);   
+    $: fantasyProducts = displayByPlay(gameSelection, matchSelection, managerSelection, viewPlayerID, startersArray, showGameBox, showMatchBox, leaderBoardInfo);   
 </script>
 
 <style>

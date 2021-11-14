@@ -1,7 +1,7 @@
 <script>
     import {round} from '$lib/utils/helper'; 
 
-    export let nflTeams, nflMatchups, week, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, standingsData, matchSelection = 1, fantasyProducts, gameSelection = nflMatchups[0][0].gameID, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo;
+    export let nflTeams, nflMatchups, week, leagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, standingsData, matchSelection, managerSelection, fantasyProducts, gameSelection = nflMatchups[0][0].gameID, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo;
     
     const score = leagueData.scoring_settings;
     const positions = leagueData.roster_positions.filter(p => p != 'BN');
@@ -12,6 +12,7 @@
         }
     }
     let freshGame = new Boolean (false);
+    let freshManager = new Boolean (false);
     let positionLB;
     let positionPlayFilter = [];
 
@@ -111,90 +112,92 @@
         positionRankArrays['IDP_FLEX'] = positionRankArrays['IDP_FLEX'].sort((a, b) => b.fpts - a.fpts);
     }
     // assign managers for selected matchID
-    const displayMatch = (matchSelection) => {
-        let match = weekMatchups[matchSelection];
-        const projections = {};
-        const matchStarters = {};
-        for(const opponent in match) {
-            projections[match[opponent].recordManID] = 0;
-            for(const starter of match[opponent].starters) {
-                if(starter != '0') {
-                    const starterInfo = playersInfo.players[starter];
-                    const starterEntry = {
-                        playerID: starter,
-                        fpts: match[opponent].points[match[opponent].starters.indexOf(starter)],
-                        rosterSpot: positions[match[opponent].starters.indexOf(starter)],
-                        owner: managerInfo[match[opponent].recordManID],
-                        recordManID: match[opponent].recordManID,
-                        fn: starterInfo.fn,
-                        ln: starterInfo.ln,
-                        pos: starterInfo.pos,
-                        t: starterInfo.t,
-                        projection: Number.parseFloat(starterInfo.wi[week].p),
-                        avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                        teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t.toLowerCase()}.png`,
-                        teamColor: `background-color: #${nflTeams[starterInfo.t].color}6b`,
-                        teamAltColor: `background-color: #${nflTeams[starterInfo.t].alternateColor}52`,
+    const displayMatch = (matchSelection, showMatchBox) => {
+        if(showMatchBox == true && matchSelection != null && matchSelection > 0) {
+            let match = weekMatchups[matchSelection];
+            const projections = {};
+            const matchStarters = {};
+            for(const opponent in match) {
+                projections[match[opponent].recordManID] = 0;
+                for(const starter of match[opponent].starters) {
+                    if(starter != '0') {
+                        const starterInfo = playersInfo.players[starter];
+                        const starterEntry = {
+                            playerID: starter,
+                            fpts: match[opponent].points[match[opponent].starters.indexOf(starter)],
+                            rosterSpot: positions[match[opponent].starters.indexOf(starter)],
+                            owner: managerInfo[match[opponent].recordManID],
+                            recordManID: match[opponent].recordManID,
+                            fn: starterInfo.fn,
+                            ln: starterInfo.ln,
+                            pos: starterInfo.pos,
+                            t: starterInfo.t,
+                            projection: Number.parseFloat(starterInfo.wi[week].p),
+                            avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                            teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t.toLowerCase()}.png`,
+                            teamColor: `background-color: #${nflTeams[starterInfo.t].color}6b`,
+                            teamAltColor: `background-color: #${nflTeams[starterInfo.t].alternateColor}52`,
+                        }
+                        if(nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
+                            starterEntry.teamAltColor = `background-color: #ffffff52`;
+                        }
+                        projections[match[opponent].recordManID] += starterEntry.projection;
+                        if(!matchStarters[match[opponent].recordManID]) {
+                            matchStarters[match[opponent].recordManID] = [];
+                        }
+                        matchStarters[match[opponent].recordManID].push(starterEntry);
                     }
-                    if(nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
-                        starterEntry.teamAltColor = `background-color: #ffffff52`;
-                    }
-                    projections[match[opponent].recordManID] += starterEntry.projection;
-                    if(!matchStarters[match[opponent].recordManID]) {
-                        matchStarters[match[opponent].recordManID] = [];
-                    }
-                    matchStarters[match[opponent].recordManID].push(starterEntry);
                 }
             }
-        }
-        let records = {
-            0: null,
-            1: null,
-        }
-        for(let i = 0; i < match.length; i++) {
-            for(const key in standingsData.standingsInfo) {
-                if(standingsData.standingsInfo[key].recordManID == match[i].recordManID) {
-                    records[i] = {
-                        wins: standingsData.standingsInfo[key].wins,
-                        ties: standingsData.standingsInfo[key].ties,
-                        losses: standingsData.standingsInfo[key].losses,
-                        showTies: new Boolean (false),
+            let records = {
+                0: null,
+                1: null,
+            }
+            for(let i = 0; i < match.length; i++) {
+                for(const key in standingsData.standingsInfo) {
+                    if(standingsData.standingsInfo[key].recordManID == match[i].recordManID) {
+                        records[i] = {
+                            wins: standingsData.standingsInfo[key].wins,
+                            ties: standingsData.standingsInfo[key].ties,
+                            losses: standingsData.standingsInfo[key].losses,
+                            showTies: new Boolean (false),
+                        }
+                        if(records[i].ties != 0) {
+                            records[i].showTies = true;
+                        }
+                        break;
                     }
-                    if(records[i].ties != 0) {
-                        records[i].showTies = true;
-                    }
-                    break;
                 }
             }
-        }
-        let home = {
-            matchInfo: match[0],
-            manager: managerInfo[match[0].recordManID],
-            fpts: match[0].totalFpts,
-            projection: projections[match[0].recordManID],
-            starters: matchStarters[match[0].recordManID],
-            record: records[0],
-        }
-        let away = {
-            matchInfo: match[1],
-            manager: managerInfo[match[1].recordManID],
-            fpts: match[1].totalFpts,
-            projection: projections[match[1].recordManID],
-            starters: matchStarters[match[1].recordManID],
-            record: records[1],
-        }
-        freshGame = true;
-        positionLB = matchStarters;
-        leaderboardHeading = `${managerInfo[home.matchInfo.recordManID].abbreviation} v ${managerInfo[away.matchInfo.recordManID].abbreviation}`;
-        if(document.querySelector(".leaderboardContainer")) {
-            document.querySelector(".leaderboardContainer").scrollTo({
-                behavior: 'smooth',
-                top: 0,
-            })
-        }
-        return {home, away, matchStarters};
+            let home = {
+                matchInfo: match[0],
+                manager: managerInfo[match[0].recordManID],
+                fpts: match[0].totalFpts,
+                projection: projections[match[0].recordManID],
+                starters: matchStarters[match[0].recordManID],
+                record: records[0],
+            }
+            let away = {
+                matchInfo: match[1],
+                manager: managerInfo[match[1].recordManID],
+                fpts: match[1].totalFpts,
+                projection: projections[match[1].recordManID],
+                starters: matchStarters[match[1].recordManID],
+                record: records[1],
+            }
+            freshGame = true;
+            positionLB = matchStarters;
+            leaderboardHeading = `${managerInfo[home.matchInfo.recordManID].abbreviation} v ${managerInfo[away.matchInfo.recordManID].abbreviation}`;
+            if(document.querySelector(".leaderboardContainer")) {
+                document.querySelector(".leaderboardContainer").scrollTo({
+                    behavior: 'smooth',
+                    top: 0,
+                })
+            }
+            return {home, away, matchStarters};
+        } 
     }
-    $: match = displayMatch(matchSelection);
+    $: match = displayMatch(matchSelection, showMatchBox);
 
     // assign teams for selected gameID
     const selectGame = (gameSelection) => {
@@ -202,12 +205,6 @@
         let home = game[0].team;
         let away = game[1].team;
         freshGame = true;
-        if(document.querySelector(".leaderboardContainer")) {
-            document.querySelector(".leaderboardContainer").scrollTo({
-                behavior: 'smooth',
-                top: 0,
-            })
-        }
 
         return {home, away};
     }
@@ -220,90 +217,86 @@
     for(const nflPosition of nflPositions){
         positionGameStarters.positions[nflPosition] = [];
     }
-    const findStarters = (game) => {
-        const gameStarters = {};
-        if(!positionGameStarters[game.home.sleeperID]) {
-            positionGameStarters[game.home.sleeperID] = {
-                starters: [],
-            };
-        }
-        if(!positionGameStarters[game.away.sleeperID]) {
-            positionGameStarters[game.away.sleeperID] = {
-                starters: [],
-            };
-        }
-        if(!positionGameStarters.rowHeights[gameSelection]) {
-            positionGameStarters.rowHeights[gameSelection] = [];
-        }
-        for(const recordManID in fantasyStarters) {
-            const starters = fantasyStarters[recordManID].starters;
-            for(const starter of starters) {
-                const starterInfo = playersInfo.players[starter];
-                if(starter != '0' && (starterInfo.t == game.home.sleeperID || starterInfo.t == game.away.sleeperID)) {
-                    const starterEntry = {
-                        playerID: starter,
-                        fpts: fantasyStarters[recordManID].startersPoints[starters.indexOf(starter)],
-                        owner: managerInfo[recordManID],
-                        recordManID,
-                        fn: starterInfo.fn,
-                        ln: starterInfo.ln,
-                        pos: starterInfo.pos,
-                        t: starterInfo.t,
-                        projection: starterInfo.wi[week].p,
-                        avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                        teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t.toLowerCase()}.png`,
-                        teamColor: `background-color: #${nflTeams[starterInfo.t].color}6b`,
-                        teamAltColor: `background-color: #${nflTeams[starterInfo.t].alternateColor}52`,
-                    }
-                    if(nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
-                        starterEntry.teamAltColor = `background-color: #ffffff52`;
-                    }
-                    if(!gameStarters[recordManID]) {
-                        gameStarters[recordManID] = [];
-                    }
-                    gameStarters[recordManID].push(starterEntry);
-                    if(!positionGameStarters.positions[starterInfo.pos].includes(starterEntry)) {
-                        positionGameStarters.positions[starterInfo.pos].push(starterEntry);
+    const findStarters = (game, showGameBox) => {
+        if(showGameBox == true) {
+            const gameStarters = {};
+            if(!positionGameStarters[game.home.sleeperID]) {
+                positionGameStarters[game.home.sleeperID] = {
+                    starters: [],
+                };
+            }
+            if(!positionGameStarters[game.away.sleeperID]) {
+                positionGameStarters[game.away.sleeperID] = {
+                    starters: [],
+                };
+            }
+            if(!positionGameStarters.rowHeights[gameSelection]) {
+                positionGameStarters.rowHeights[gameSelection] = [];
+            }
+            for(const recordManID in fantasyStarters) {
+                const starters = fantasyStarters[recordManID].starters;
+                for(const starter of starters) {
+                    const starterInfo = playersInfo.players[starter];
+                    if(starter != '0' && (starterInfo.t == game.home.sleeperID || starterInfo.t == game.away.sleeperID)) {
+                        const starterEntry = {
+                            playerID: starter,
+                            fpts: fantasyStarters[recordManID].startersPoints[starters.indexOf(starter)],
+                            owner: managerInfo[recordManID],
+                            recordManID,
+                            fn: starterInfo.fn,
+                            ln: starterInfo.ln,
+                            pos: starterInfo.pos,
+                            t: starterInfo.t,
+                            projection: starterInfo.wi[week].p,
+                            avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                            teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t.toLowerCase()}.png`,
+                            teamColor: `background-color: #${nflTeams[starterInfo.t].color}6b`,
+                            teamAltColor: `background-color: #${nflTeams[starterInfo.t].alternateColor}52`,
+                        }
+                        if(nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
+                            starterEntry.teamAltColor = `background-color: #ffffff52`;
+                        }
+                        if(!gameStarters[recordManID]) {
+                            gameStarters[recordManID] = [];
+                        }
+                        gameStarters[recordManID].push(starterEntry);
+                        if(!positionGameStarters.positions[starterInfo.pos].includes(starterEntry)) {
+                            positionGameStarters.positions[starterInfo.pos].push(starterEntry);
+                        }
                     }
                 }
             }
-        }
 
-        if(positionGameStarters[game.home.sleeperID].starters.length == 0) {
-            for(const pos in positionGameStarters.positions) {
-                positionGameStarters[game.home.sleeperID].starters.push(positionGameStarters.positions[pos].filter(s => s.t == game.home.sleeperID));
-                positionGameStarters[game.away.sleeperID].starters.push(positionGameStarters.positions[pos].filter(s => s.t == game.away.sleeperID));
-                if(positionGameStarters.positions[pos].filter(s => s.t == game.home.sleeperID).length >= positionGameStarters.positions[pos].filter(s => s.t == game.away.sleeperID).length) {
-                    positionGameStarters.rowHeights[gameSelection].push(positionGameStarters.positions[pos].filter(s => s.t == game.home.sleeperID).length);
-                } else {
-                    positionGameStarters.rowHeights[gameSelection].push(positionGameStarters.positions[pos].filter(s => s.t == game.away.sleeperID).length);
+            if(positionGameStarters[game.home.sleeperID].starters.length == 0) {
+                for(const pos in positionGameStarters.positions) {
+                    positionGameStarters[game.home.sleeperID].starters.push(positionGameStarters.positions[pos].filter(s => s.t == game.home.sleeperID));
+                    positionGameStarters[game.away.sleeperID].starters.push(positionGameStarters.positions[pos].filter(s => s.t == game.away.sleeperID));
+                    if(positionGameStarters.positions[pos].filter(s => s.t == game.home.sleeperID).length >= positionGameStarters.positions[pos].filter(s => s.t == game.away.sleeperID).length) {
+                        positionGameStarters.rowHeights[gameSelection].push(positionGameStarters.positions[pos].filter(s => s.t == game.home.sleeperID).length);
+                    } else {
+                        positionGameStarters.rowHeights[gameSelection].push(positionGameStarters.positions[pos].filter(s => s.t == game.away.sleeperID).length);
+                    }
                 }
             }
+            freshGame = true;
+            positionLB = gameStarters;
+            leaderboardHeading = `${game.home.sleeperID} v ${game.away.sleeperID}`;
+            if(document.querySelector(".leaderboardContainer")) {
+                document.querySelector(".leaderboardContainer").scrollTo({
+                    behavior: 'smooth',
+                    top: 0,
+                })
+            }
+            return gameStarters;
         }
-        positionLB = gameStarters;
-        leaderboardHeading = `${game.home.sleeperID} v ${game.away.sleeperID}`;
-        return gameStarters;
+        if(document.querySelector(".leaderboardContainer")) {
+            document.querySelector(".leaderboardContainer").scrollTo({
+                behavior: 'smooth',
+                top: 0,
+            })
+        }
     }
-    $: gameStarters = findStarters(game);
-
-    const displayManagers = (gameStarters) => {
-        let gameManagers = [];
-        const gameManager = {};
-
-        for(const recordManID in gameStarters) {
-            if(gameStarters[recordManID].length > 0) {
-                if(!gameManager[recordManID]){
-                    gameManager[recordManID] = {
-                        info: managerInfo[recordManID],
-                        starters: gameStarters[recordManID],
-                    }
-                }
-                gameManagers.push(gameManager[recordManID]);
-            }
-        }
-        return gameManagers;
-    }
-    $: gameManagers = displayManagers(gameStarters);
+    $: gameStarters = findStarters(game, showGameBox);
 
     export const changePlayer = (viewPlayerID) => {
         let newViewPlayer;
@@ -387,7 +380,7 @@
         let newFantasyProducts = await fantasyProducts;
         const viewPlayerStats = {};
         let displayStats = [];
-        if(newFantasyProducts.length > 0 && viewPlayer != null  && newFantasyProducts[newFantasyProducts.length - 1][viewPlayer.player.playerID]) {
+        if(newFantasyProducts.length > 0 && viewPlayer.player != null  && newFantasyProducts[newFantasyProducts.length - 1][viewPlayer.player.playerID]) {
             let runningTotals = newFantasyProducts[newFantasyProducts.length - 1];
             viewPlayerStats[viewPlayer.player.playerID] = {
                 stats: [],
@@ -405,11 +398,16 @@
     }
     $: displayStats = getDisplayStats(viewPlayer);
 
-    const getPositionLeaders = (positionLB) => {
+    const getPositionLeaders = (positionLB, gameStarters, match) => {
         let positionLeaderboard = [];
-        if(freshGame == false) {
+        if(freshGame == false && freshManager == false) {
             positionLeaderboard = positionRankArrays[positionLB];
-        } else if(freshGame == true) {
+        } else if(freshGame == true && freshManager == false) {
+            if(showGameBox == true) {
+                positionLB = gameStarters;
+            } else if(showMatchBox == true) {
+                positionLB = match.matchStarters;
+            }
             for(const recordManID in positionLB) {
                 for(const starter of positionLB[recordManID]) {
                     positionLeaderboard.push(starter);
@@ -417,24 +415,48 @@
             }
             positionLeaderboard = positionLeaderboard.sort((a, b) => b.fpts - a.fpts);
             freshGame = false;
+        } else if(freshManager == true) {
+            for(const starter of positionLB) {
+                positionLeaderboard.push(starter);
+            }
+            positionLeaderboard = positionLeaderboard.sort((a, b) => b.fpts - a.fpts);
+            freshManager = false;
+            freshGame = false;
+        }
+        if(document.querySelector(".leaderboardContainer")) {
+            document.querySelector(".leaderboardContainer").scrollTo({
+                behavior: 'smooth',
+                top: 0,
+            })
         }
         return positionLeaderboard;
     }
-    $: positionLeaderboard = getPositionLeaders(positionLB);
+    $: positionLeaderboard = getPositionLeaders(positionLB, gameStarters, match);
 
-    const multiFunction = (playerID, teamID, leaderBoardType, leaderBoardSpec) => {
+    const multiFunction = (playerID, teamID, leaderBoardType, leaderBoardSpec, recordManID) => {
         if(playerID != null && teamID != null) {
             viewPlayerID = playerID;
         }
-        if(leaderBoardType != null && leaderBoardSpec != null) {
+        if(leaderBoardType != null && leaderBoardSpec != null && recordManID == 0) {
+            if(leaderBoardType == 'matchup') {
+                matchSelection = leaderBoardSpec;
+            } else if(leaderBoardType == 'nflGame') {
+                game = leaderBoardSpec;
+            }
+            managerSelection = recordManID;
+            viewPlayerID = null;
+            changeLeaderBoard(leaderBoardType, leaderBoardSpec, recordManID);
+        } else if(recordManID != 0 && recordManID != null) {
             if(leaderBoardType == 'matchup') {
                 matchSelection = leaderBoardSpec;
             } 
-            changeLeaderBoard(leaderBoardType, leaderBoardSpec);
+            managerSelection = recordManID;
+            viewPlayerID = null;
+            changeLeaderBoard(leaderBoardType, leaderBoardSpec, recordManID);
         }
     }
 
-    const changeLeaderBoard = (leaderBoardType, leaderBoardSpec) => {
+    const changeLeaderBoard = (leaderBoardType, leaderBoardSpec, managerSelection) => {
         if(leaderBoardType == 'position') {
             let newPlayFilter;
             if(positionPlayFilter.length > 0 && positionPlayFilter.includes(leaderBoardSpec)) {
@@ -481,25 +503,42 @@
                 leaderBoardSpec = nflPositions;
             }
         } else if(leaderBoardType == 'matchup') {
-            let newMatch = displayMatch(leaderBoardSpec);
-            positionLB = newMatch.matchStarters;
-            leaderboardHeading = `${managerInfo[newMatch.home.matchInfo.recordManID].abbreviation} v ${managerInfo[newMatch.away.matchInfo.recordManID].abbreviation}`;
-            positionPlayFilter = [];
+            if(managerSelection == 0) {
+                let newMatch = displayMatch(leaderBoardSpec, showMatchBox);
+                positionLB = newMatch.matchStarters;
+                leaderboardHeading = `${managerInfo[newMatch.home.matchInfo.recordManID].abbreviation} v ${managerInfo[newMatch.away.matchInfo.recordManID].abbreviation}`;
+                positionPlayFilter = [];
+                managerSelection = 0;
+            } else {
+                let newMatch = displayMatch(leaderBoardSpec, showMatchBox);
+                freshManager = true;
+                positionLB = newMatch.matchStarters[managerSelection];
+                leaderboardHeading = managerInfo[managerSelection].name;
+                positionPlayFilter = [];
+            }
         } else if(leaderBoardType == 'nflGame') {
-            let newGameStarters = findStarters(leaderBoardSpec);
+            let newGameStarters = findStarters(leaderBoardSpec, showGameBox);
             freshGame = true;
             positionLB = newGameStarters;
             leaderboardHeading = `${leaderBoardSpec.home.sleeperID} v ${leaderBoardSpec.away.sleeperID}`;
             positionPlayFilter = [];
+            managerSelection = 0;
+            matchSelection = null;
         }
         leaderBoardInfo = {
             type: leaderBoardType,
             spec: leaderBoardSpec,
         }
+        if(document.querySelector(".leaderboardContainer")) {
+            document.querySelector(".leaderboardContainer").scrollTo({
+                behavior: 'smooth',
+                top: 0,
+            })
+        }
         return leaderBoardInfo;
     }
 
-    $: leaderBoardInfo = changeLeaderBoard(leaderBoardType, leaderBoardSpec);
+    $: leaderBoardInfo = changeLeaderBoard(leaderBoardType, leaderBoardSpec, managerSelection);
 
 </script>
 
@@ -1032,6 +1071,23 @@
         width: auto;
     }
 
+    .matchAvatar {
+        z-index: 1;
+        display: inline-flex;
+        flex-direction: row;
+        position: relative;
+        border: 0.25px solid #777; 
+        border-radius: 50%; 
+        height: 90%; 
+        width: auto;
+    }
+
+    .matchAvatar:hover {
+        border: 0.5px solid #ededed; 
+        background-color: #181818;
+        cursor: pointer;
+    }
+
     .matchContainer {
         position: relative;
         display: inline-flex;
@@ -1040,7 +1096,7 @@
         align-items: flex-start;
         height: 86%;
         padding: 2%;
-        top: -2%;
+        top: -3%;
     }
 
     .gameContainer {
@@ -1305,7 +1361,7 @@
             <!-- shows specific NFL games -->
             {#if showGameBox == true}
                 <div class="gameHeader">
-                    <div class="gameHeaderBox" style="{showGameBox == true ? "border: 0.5px solid #ededed; border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'nflGame', game)} />
+                    <div class="gameHeaderBox" style="{showGameBox == true && positionPlayFilter.length == 0 && managerSelection == 0 ? "border: 0.5px solid #ededed; border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'nflGame', game, 0)} />
                     <div class="gameOpponent">
                         <img class="gameAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{game.home.sleeperID.toLowerCase()}.png" alt="{game.home.sleeperID}">
                         <div class="gameTeamWrapper" style="align-items: flex-start;">
@@ -1330,7 +1386,7 @@
                                     {#each positionGameStarters[game.home.sleeperID].starters[ix] as starter}
                                         <div class="rosterRow" style="justify-content: flex-start; height: {100 / row}%">
                                             <div class="avatarHolder">
-                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
                                             </div>
                                             <div class="rosterPlayerInfo">
                                                 <div class="rosterPlayer" style="justify-content: flex-start; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
@@ -1347,7 +1403,7 @@
                                     <div class="rosterPosition {nflPositions[ix]}" style="height: {100 / row}%;">
                                         <div class="rosterRowBox" style="top: -2%; height: {100 * row}%; {positionPlayFilter.length > 0 && positionPlayFilter.includes(nflPositions[ix]) ? "border: 0.5px solid #ededed; border-radius: 1em;" : null}"></div>
                                         {nflPositions[ix]}
-                                        <div class="selectedPosition" id="selectedPosition" on:click={() => multiFunction(null, null, 'position', nflPositions[ix])} style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(nflPositions[ix]) ? "border: 0.5px solid #ededed; border-radius: 1em; z-index: 1;" : null}"></div>
+                                        <div class="selectedPosition" id="selectedPosition" on:click={() => multiFunction(null, null, 'position', nflPositions[ix], 0)} style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(nflPositions[ix]) ? "border: 0.5px solid #ededed; border-radius: 1em; z-index: 1;" : null}"></div>
                                     </div>
                                 </div>
                                 <div class="positionGroup">
@@ -1362,7 +1418,7 @@
                                                 </div>
                                             </div>                                
                                             <div class="avatarHolder">
-                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
                                             </div>
                                         </div>
                                     {/each}
@@ -1374,10 +1430,10 @@
                 <!-- shows league matchups -->
             {:else if showMatchBox == true}        
                 <div class="gameHeader">
-                    <div class="gameHeaderBox" style="height: 120%; {showMatchBox == true ? "border: 0.5px solid #ededed; border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'matchup', match.home.matchInfo.matchID)} />
+                    <div class="gameHeaderBox" style="height: 120%; {showMatchBox == true && positionPlayFilter.length == 0 && managerSelection == 0 ? "border: 0.5px solid #ededed; border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'matchup', match.home.matchInfo.matchID, 0)} />
                     <div class="matchOpponent">
                         <div class="matchTop" style="justify-content: flex-start; left: 2%; top: 8%;">
-                            <img class="gameAvatar" src="{match.home.manager.avatar}" alt="" style="border: 1px solid #777; border-radius: 50%; height: 90%; width: auto;">
+                            <img class="matchAvatar" src="{match.home.manager.avatar}" alt="" on:click={() => multiFunction(null, null, 'matchup',  match.home.matchInfo.matchID, match.home.manager.recordManID)} style="{match.home.manager.recordManID == managerSelection ? "background-color: #181818; border: 0.5px solid #ededed;" : null}" >
                             <div class="gameTeamWrapper">
                                 <div class="gameTeam" style="margin: 0 0 5% 0; left: -2%;">{match.home.manager.realname}</div>
                             </div>
@@ -1391,7 +1447,7 @@
                             <div class="gameTeamWrapper">
                                 <div class="gameTeam" style="margin: 0 0 5% 0; right: -2%;">{match.away.manager.realname}</div>
                             </div>
-                            <img class="gameAvatar" src="{match.away.manager.avatar}" alt="" style="border: 1px solid #777; border-radius: 50%; height: 90%; width: auto;">
+                            <img class="matchAvatar" src="{match.away.manager.avatar}" alt="" on:click={() => multiFunction(null, null, 'matchup',  match.away.matchInfo.matchID, match.away.manager.recordManID)} style="{match.away.manager.recordManID == managerSelection ? "background-color: #181818; border: 0.5px solid #ededed;" : null}" >
                         </div>
                         <div class="gameTeam" style="align-items: center; justify-content: flex-end; font-size: 0.75em; font-style: italic; color: #999; top: -40%; width: 69%; line-height: 1em;">{match.away.manager.name}</div>
                         <div class="gameTeam" style="align-items: center; justify-content: flex-end; font-size: 0.75em; font-style: italic; color: #999; top: -40%; width: 69%; line-height: 1em;">{match.away.record.showTies == true ? '(' + match.away.record.wins + ' - ' + match.away.record.ties + ' - ' + match.away.record.losses + ')' : '(' + match.away.record.wins + ' - ' + match.away.record.losses + ')'}</div>
@@ -1412,13 +1468,13 @@
                         {#each match.home.starters as starter}
                             <div class="rosterRow" style="justify-content: flex-start;">
                                 <div class="avatarHolder">
-                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
                                 </div>
                                 <div class="rosterPlayerInfo">
                                     <div class="rosterPlayer" style="justify-content: flex-start; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                     <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">
-                                        <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
                                         <div style="display: inline-flex; color: #999; justify-content: flex-end; margin: 0 5% 0 0;">({round(starter.projection)})</div>
+                                        <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
                                     </div>
                                 </div>
                             </div>
@@ -1429,7 +1485,7 @@
                             <div class="rosterPosition {position}">
                                 <div class="rosterRowBox" style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(position)  ? "border: 0.5px solid #ededed; border-radius: 1em;" : null}" />
                                 {position}
-                                <div class="selectedPosition" on:click={() => multiFunction(null, null, 'position', position)} style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(position) ? "border: 0.5px solid #ededed; border-radius: 1em; z-index: 1;" : null}"></div>
+                                <div class="selectedPosition" on:click={() => multiFunction(null, null, 'position', position, 0)} style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(position) ? "border: 0.5px solid #ededed; border-radius: 1em; z-index: 1;" : null}"></div>
                             </div>
                         {/each}
                     </div>
@@ -1439,12 +1495,12 @@
                                 <div class="rosterPlayerInfo">
                                     <div class="rosterPlayer" style="justify-content: flex-end; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                     <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%;"}">
-                                        <div style="display: inline-flex; color: #999; justify-content: flex-start; margin: 0 0 0 5%;">({round(starter.projection)})</div>  
-                                        <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
+                                        <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>  
+                                        <div style="display: inline-flex; color: #999; justify-content: flex-start; margin: 0 0 0 5%;">({round(starter.projection)})</div>
                                     </div>
                                 </div>                                
                                 <div class="avatarHolder">
-                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
                                 </div>
                             </div>
                         {/each}
