@@ -456,7 +456,8 @@
 
     .buttonHolder {
         text-align: center;
-        margin: 2em 0 4em;
+        margin: 2em 0;
+        width: 100%;
     }
 
     :global(.cellName) {
@@ -594,6 +595,41 @@
     }
 
     /* END ranking table resizing */
+
+
+    .majorCategories {
+        position: relative;
+        display: inline-flex;
+        height: 2em;
+        width: 100%;
+        margin: 1em 0;
+        align-items: center;
+        justify-content: space-around;
+    }
+
+    .majorCategory {
+        position: relative;
+        display: inline-flex;
+        color: #ededed;
+        font-weight: 420;
+        font-size: 2em;
+    }
+
+    .recordsWrap {
+        position: relative;
+        display: inline-flex;
+        flex-direction: row;
+        width: 100%;
+    }
+
+    .columnWrap {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        width: 48%;
+        padding: 1%;
+    }
+
 </style>
 
 <div class="buttonHolder">
@@ -608,6 +644,24 @@
             <Label>Combined</Label>
         </Button>
     </Group>
+</div>
+
+<div class="majorCategories">
+    {#if allTime}
+        <div class="majorCategory">Weeks</div>
+        <div class="majorCategory">Seasons</div>
+    {:else}
+        <div class="majorCategory" style="justify-content: center">Weeks</div>
+    {/if}
+</div>
+
+<div class="recordsWrap">
+    <div class="columnWrap">
+
+    </div>
+    <div class="columnWrap">
+        
+    </div>
 </div>
 
 <div class="fullFlex">

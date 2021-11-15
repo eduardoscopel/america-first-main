@@ -241,6 +241,7 @@
                         const starterEntry = {
                             playerID: starter,
                             fpts: fantasyStarters[recordManID].startersPoints[starters.indexOf(starter)],
+                            rosterSpot: positions[starters.indexOf(starter)],
                             owner: managerInfo[recordManID],
                             recordManID,
                             fn: starterInfo.fn,
@@ -380,8 +381,8 @@
         let newFantasyProducts = await fantasyProducts;
         const viewPlayerStats = {};
         let displayStats = [];
-        if(newFantasyProducts.length > 0 && viewPlayer.player != null  && newFantasyProducts[newFantasyProducts.length - 1][viewPlayer.player.playerID]) {
-            let runningTotals = newFantasyProducts[newFantasyProducts.length - 1];
+        if(newFantasyProducts.fantasyProducts && newFantasyProducts.fantasyProducts.length > 0 && viewPlayer.player != null  && newFantasyProducts.runningTotals[viewPlayer.player.playerID]) {
+            let runningTotals = newFantasyProducts.runningTotals;
             viewPlayerStats[viewPlayer.player.playerID] = {
                 stats: [],
                 totalFpts: runningTotals[viewPlayer.player.playerID]?.totalFpts || null,

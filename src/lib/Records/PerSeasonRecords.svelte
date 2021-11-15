@@ -257,9 +257,11 @@
         display: inline-flex;
         position: relative;
         width: 100%;
-        height: 5em;
+        height: 7em;
         align-items: center;
         justify-content: space-evenly;
+        background-color: #222;
+        box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 40%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 8px 0px rgb(0 0 0 / 24%);
     }
 
     .yearText {

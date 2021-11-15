@@ -10,7 +10,7 @@
 
     let viewPlayerID;
     let leaderBoardInfo;
-    let fantasyProducts = [];
+    let fantasyProducts = {};
     let completeGames = [];
 
     let gameSelection;

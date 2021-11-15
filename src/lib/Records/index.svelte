@@ -51,10 +51,30 @@
 </script>
 
 <style>
+
     .rankingsWrapper {
-        margin: 0 auto;
+        width: 100%;
+        margin: 5% auto;
+        height: 100%;
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        align-content: center;
+    }
+
+    .mainBase {
         width: 100%;
         max-width: 1200px;
+        margin: 0 auto;
+        height: 100%;
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        align-content: center;
+        background-color: var(--f3f3f3);
+        border-radius: 50px;
     }
 
     .empty {
@@ -65,29 +85,31 @@
     .buttonHolder {
         text-align: center;
         margin: 2em 0;
+        width: 100%;
     }
 </style>
 
 <div class="rankingsWrapper">
+    <div class="mainBase">
+        <div class="buttonHolder">
+            <Group variant="outlined">
+                <Button class="selectionButtons" on:click={() => changeMasterSelection('alltime')} variant="{displayType == 'alltime' ? "raised" : "outlined"}">
+                    <Label>All-Time</Label>
+                </Button>
+                <Button class="selectionButtons" on:click={() => changeMasterSelection('yearly')} variant="{displayType == 'yearly' ? "raised" : "outlined"}">
+                    <Label>Yearly</Label>
+                </Button>
+            </Group>
+        </div>
 
-    <div class="buttonHolder">
-        <Group variant="outlined">
-            <Button class="selectionButtons" on:click={() => changeMasterSelection('alltime')} variant="{displayType == 'alltime' ? "raised" : "outlined"}">
-                <Label>All-Time</Label>
-            </Button>
-            <Button class="selectionButtons" on:click={() => changeMasterSelection('yearly')} variant="{displayType == 'yearly' ? "raised" : "outlined"}">
-                <Label>Yearly</Label>
-            </Button>
-        </Group>
-    </div>
-
-    {#if displayType == 'alltime'}
-        {#if leagueWeekRecords.length}
-            <AllTimeRecords transactionTotals={totals} {leagueWeekRecords} {leagueRosterRecords} {currentManagers} {leagueRecordArrays} bind:masterSelection={masterSelection} />
-        {:else}
-            <p class="empty">No records <i>yet</i>...</p>
+        {#if displayType == 'alltime'}
+            {#if leagueWeekRecords.length}
+                <AllTimeRecords transactionTotals={totals} {leagueWeekRecords} {leagueRosterRecords} {currentManagers} {leagueRecordArrays} bind:masterSelection={masterSelection} />
+            {:else}
+                <p class="empty">No records <i>yet</i>...</p>
+            {/if}
+        {:else if displayType == 'yearly'}
+            <PerSeasonRecords transactionTotals={totals} {leagueRosterRecords} {seasonWeekRecords} {currentManagers} {currentYear} {lastYear} bind:masterSelection={masterSelection} />
         {/if}
-    {:else if displayType == 'yearly'}
-        <PerSeasonRecords transactionTotals={totals} {leagueRosterRecords} {seasonWeekRecords} {currentManagers} {currentYear} {lastYear} bind:masterSelection={masterSelection} />
-    {/if}
+    </div>
 </div>
