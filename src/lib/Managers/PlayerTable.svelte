@@ -17,7 +17,7 @@
     let masterPrefix;
     let selectedYear = currentYear;
 
-    let weekBests, weekWorsts, periodBests, periodWorsts, blowoutBests, blowoutWorsts, narrowBests, narrowWorsts;
+    let weekBests, weekWorsts, periodBests, periodWorsts, blowoutBests, blowoutWorsts, narrowBests, narrowWorsts, playerWeekBests, playerWeekMissedBests, playerPeriodBests;
 
     let managerRecords;
     const refreshRecords = async () => {
@@ -53,6 +53,9 @@
             blowoutWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].blowout_Worst;
             narrowBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].narrow_Best;
             narrowWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].narrow_Worst;
+            playerWeekBests = managerRecords.managerRecordArrays.alltime.regularSeason.players[recordManID].week_Best;
+            playerWeekMissedBests = managerRecords.managerRecordArrays.alltime.regularSeason.players[recordManID].week_MissedBest;
+            playerPeriodBests = managerRecords.managerRecordArrays.alltime.regularSeason.players[recordManID].period_Best;
         } else if(displayType == 'yearly') {
             masterPrefix = displayYear;
             masterSelection = 'yearly';
@@ -64,6 +67,9 @@
             blowoutWorsts = managerRecords.managerRecordArrays.years[displayYear].regularSeason[recordManID].blowout_Worst;
             narrowBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason[recordManID].narrow_Best;
             narrowWorsts = managerRecords.managerRecordArrays.years[displayYear].regularSeason[recordManID].narrow_Worst;
+            playerWeekBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason.players[recordManID].week_Best;
+            playerWeekMissedBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason.players[recordManID].week_MissedBest;
+            playerPeriodBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason.players[recordManID].period_Best;
         }
     }
 
@@ -83,6 +89,9 @@
             blowoutWorsts = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].blowout_Worst;
             narrowBests = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].narrow_Best;
             narrowWorsts = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].narrow_Worst;  
+            playerWeekBests = managerRecords.managerRecordArrays.alltime.playoffs.players[recordManID].week_Best;
+            playerWeekMissedBests = managerRecords.managerRecordArrays.alltime.playoffs.players[recordManID].week_MissedBest;
+            playerPeriodBests = managerRecords.managerRecordArrays.alltime.playoffs.players[recordManID].period_Best;
         } else if(displayType == 'yearly' && managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID]) {
             showEmpty = false;
             masterPrefix = displayYear;
@@ -95,7 +104,10 @@
             blowoutWorsts = managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID].blowout_Worst;
             narrowBests = managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID].narrow_Best;
             narrowWorsts = managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID].narrow_Worst;
-        } else if(displayType == 'alltime' && !managerRecords.managerRecordArrays.alltime.playoffs[recordManID]) {
+            playerWeekBests = managerRecords.managerRecordArrays.alltime.playoffs.players[recordManID].week_Best;
+            playerWeekMissedBests = managerRecords.managerRecordArrays.years[displayYear].playoffs.players[recordManID].week_MissedBest;
+            playerPeriodBests = managerRecords.managerRecordArrays.years[displayYear].playoffs.players[recordManID].period_Best;
+        } else if(displayType == 'alltime' && !managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID]) {
             showEmpty = true;
             emptyMessage = "No Playoff Records Yet...";
             masterSelection = 'alltime';
@@ -124,6 +136,9 @@
             blowoutWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].blowout_Worst;
             narrowBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].narrow_Best;
             narrowWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].narrow_Worst;
+            playerWeekBests = managerRecords.managerRecordArrays.alltime.combined.players[recordManID].week_Best;
+            playerWeekMissedBests = managerRecords.managerRecordArrays.alltime.combined.players[recordManID].week_MissedBest;
+            playerPeriodBests = managerRecords.managerRecordArrays.alltime.combined.players[recordManID].period_Best;
         } else if(displayType == 'yearly') {
             masterPrefix = displayYear;
             masterSelection = 'yearly';
@@ -135,6 +150,9 @@
             blowoutWorsts = managerRecords.managerRecordArrays.years[displayYear].combined[recordManID].blowout_Worst;
             narrowBests = managerRecords.managerRecordArrays.years[displayYear].combined[recordManID].narrow_Best;
             narrowWorsts = managerRecords.managerRecordArrays.years[displayYear].combined[recordManID].narrow_Worst;
+            playerWeekBests = managerRecords.managerRecordArrays.years[displayYear].combined.players[recordManID].week_Best;
+            playerWeekMissedBests = managerRecords.managerRecordArrays.years[displayYear].combined.players[recordManID].week_MissedBest;
+            playerPeriodBests = managerRecords.managerRecordArrays.years[displayYear].combined.players[recordManID].period_Best;
         }
     }
 
@@ -158,6 +176,58 @@
         refreshRecords(displayYear);
     }
     $: changeYear(selectedYear);
+
+    let displayWeekRecord = 'best';
+    const changeWeekRecord = (weekType) => {
+        if(weekType == 'best') {
+            displayWeekRecord = 'best';
+        } else if(weekType == 'worst') {
+            displayWeekRecord = 'worst';
+        }
+    }
+    $: changeWeekRecord(displayWeekRecord);
+
+    let displaySeasonRecord = 'best';
+    const changeSeasonRecord = (seasonType) => {
+        if(seasonType == 'best') {
+            displaySeasonRecord = 'best';
+        } else if(seasonType == 'worst') {
+            displaySeasonRecord = 'worst';
+        }
+    }
+    $: changeSeasonRecord(displaySeasonRecord);
+
+    let displayBlowoutRecord = 'won';
+    const changeBlowoutRecord = (blowoutType) => {
+        if(blowoutType == 'won') {
+            displayBlowoutRecord = 'won';
+        } else if(blowoutType == 'lost') {
+            displayBlowoutRecord = 'lost';
+        }
+    }
+    $: changeBlowoutRecord(displayBlowoutRecord);
+
+    let displayNailbiterRecord = 'won';
+    const changeNailbiterRecord = (nailbiterType) => {
+        if(nailbiterType == 'won') {
+            displayNailbiterRecord = 'won';
+        } else if(nailbiterType == 'lost') {
+            displayNailbiterRecord = 'lost';
+        }
+    }
+    $: changeNailbiterRecord(displayNailbiterRecord);
+
+    let displayPlayerRecord = 'week';
+    const changePlayerRecord = (playerType) => {
+        if(playerType == 'week') {
+            displayPlayerRecord = 'week';
+        } else if(playerType == 'season') {
+            displayPlayerRecord = 'season';
+        } else if(playerType == 'bench') {
+            displayPlayerRecord = 'bench';
+        }
+    }
+    $: changePlayerRecord(displayPlayerRecord);
 
 </script>
 
@@ -208,11 +278,8 @@
 
     .buttonHolder {
         text-align: center;
-        margin: 1.75em 0 0;
-    }
-    .buttonHolderMaster {
-        text-align: center;
-        margin: 0em 0 0em;
+        margin: 2em 0;
+        width: 100%;
     }
 
     :global(.cellName) {
@@ -327,50 +394,706 @@
 
     /* END record table resizing */
 
+    .headerRow {
+        position: relative;
+        display: inline-flex;
+        height: 2em;
+        width: 100%;
+        margin: 1em 0;
+        align-items: center;
+        justify-content: space-around;
+    }
+
+    .headerLabel {
+        position: relative;
+        display: inline-flex;
+        color: #ededed;
+        font-weight: 420;
+        font-size: 2em;
+        justify-content: center;
+    }
+
+    .recordsWrap {
+        position: relative;
+        display: inline-flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .columnWrap {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        width: 48%;
+        padding: 1%;
+        align-items: center;
+    }
+
+    .mainBase {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        height: 100%;
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        align-content: center;
+        background-color: var(--f3f3f3);
+        border-radius: 50px;
+    }
+
+    .rankingsWrapper {
+        width: 100%;
+        margin: 5% auto;
+        height: 100%;
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        align-content: center;
+    }
+
+    .headingContainer {
+        display: inline-flex;
+        position: relative;
+        width: 100%;
+        height: 7em;
+        background-color: #222;
+        align-items: center;
+        justify-content: center;
+        box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 40%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 8px 0px rgb(0 0 0 / 24%);
+    }
+
+    .headingText {
+        text-align: center;
+        font-size: 2.25em;
+        font-weight: 450;
+        color: #ededed;
+    }
+
 </style>
 
-<div class="buttonHolderMaster">
-    <Group variant="outlined">
-        <Button class="selectionButtons" on:click={() => changeMasterSelection('alltime')} variant="{masterSelection == 'alltime' ? "raised" : "outlined"}">
-            <Label>All-Time</Label>
-        </Button>
-        <Button class="selectionButtons" on:click={() => changeMasterSelection('yearly')} variant="{masterSelection == 'yearly' ? "raised" : "outlined"}">
-            <Label>Yearly</Label>
-        </Button>
-    </Group>
+<div class="rankingsWrapper">
+    <div class="mainBase">
+        <div class="buttonHolder">
+            <Group variant="outlined">
+                <Button class="selectionButtons" on:click={() => changeMasterSelection('alltime')} variant="{masterSelection == 'alltime' ? "raised" : "outlined"}">
+                    <Label>All-Time</Label>
+                </Button>
+                <Button class="selectionButtons" on:click={() => changeMasterSelection('yearly')} variant="{masterSelection == 'yearly' ? "raised" : "outlined"}">
+                    <Label>Yearly</Label>
+                </Button>
+            </Group>
+        </div>
+        <div class="headingContainer">
+            {#if masterSelection == 'yearly' && displayYear > firstYear}
+                <Icon class="material-icons changeYear" on:click={() => changeYear(displayYear - 1)}>chevron_left</Icon>
+            {:else}
+                <span class="spacer" />
+            {/if}  
+            <div class="headingText">{masterPrefix} Records</div>
+            {#if masterSelection == 'yearly' && displayYear < currentYear}
+                <Icon class="material-icons changeYear" on:click={() => changeYear(displayYear + 1)}>chevron_right</Icon>
+            {:else}
+                <span class="spacer" />
+            {/if}  
+        </div>
+        <div class="buttonHolder">
+            <Group variant="outlined">
+                <Button class="selectionButtons" on:click={() => changeSelection('regular')} variant="{selection == 'regular' ? "raised" : "outlined"}">
+                    <Label>Regular Season</Label>
+                </Button>
+                <Button class="selectionButtons" on:click={() => changeSelection('playoffs')} variant="{selection == 'playoffs' ? "raised" : "outlined"}">
+                    <Label>Playoffs</Label>
+                </Button>
+                <Button class="selectionButtons" on:click={() => changeSelection('combined')} variant="{selection == 'combined' ? "raised" : "outlined"}">
+                    <Label>Combined</Label>
+                </Button>
+            </Group>
+        </div>
+        <div class="headerRow">
+            {#if masterSelection == 'alltime'}
+                <div class="headerLabel">Weeks</div>
+                <div class="headerLabel">Seasons</div>
+            {:else}
+                <div class="headerLabel" style="justify-content: center">Weeks</div>
+            {/if}
+        </div>
+        <div class="recordsWrap">
+            <div class="columnWrap" style="{masterSelection == 'yearly' ? "width: 98%;" : null}">
+                <div class="buttonHolder">
+                    <Group variant="outlined">
+                        <Button class="selectionButtons" on:click={() => changeWeekRecord('best')} variant="{displayWeekRecord == 'best' ? "raised" : "outlined"}">
+                            <Label>Best</Label>
+                        </Button>
+                        <Button class="selectionButtons" on:click={() => changeWeekRecord('worst')} variant="{displayWeekRecord == 'worst' ? "raised" : "outlined"}">
+                            <Label>Worst</Label>
+                        </Button>
+                    </Group>
+                </div>
+                {#if showEmpty == false}
+                    {#if displayWeekRecord == 'best'}
+                        {#if weekBests && weekBests.length}
+                            <DataTable class="recordTable" style="width: 450px;">
+                                <Head>
+                                    <Row>
+                                        <Cell class="header" colspan=4>
+                                            <p>
+                                                Personal Best Week Scores<br>
+                                                {recordPrefix} 
+                                            </p>
+                                        </Cell>  
+                                    </Row>
+                                    <Row>
+                                        <Cell class="header"></Cell>
+                                        {#if masterSelection == 'alltime'}
+                                            <Cell class="header">Year</Cell>
+                                        {/if}
+                                        <Cell class="header">Week</Cell>
+                                        <Cell class="header">PF</Cell>
+                                    </Row>
+                                </Head>
+                                <Body>
+                                    {#each weekBests as weekBest, ix}
+                                        <Row>
+                                            <Cell>{ix + 1}</Cell>
+                                            {#if masterSelection == 'alltime'}				
+                                                <Cell class="center">{weekBest.year}</Cell>
+                                            {/if}
+                                            <Cell class="center">{weekBest.week}</Cell>
+                                            <Cell class="center">{round(weekBest.fpts)}</Cell>
+                                        </Row>
+                                    {/each}
+                                </Body>
+                            </DataTable>
+                        {/if}
+                    {:else if displayWeekRecord == 'worst'}
+                        {#if weekWorsts && weekWorsts.length}
+                            <DataTable class="recordTable" style="width: 450px;">
+                                <Head>
+                                    <Row>
+                                        <Cell class="header" colspan=4>
+                                            <p>
+                                                Personal Worst Week Scores<br>
+                                                {recordPrefix} 
+                                            </p>
+                                        </Cell>  
+                                    </Row>
+                                    <Row>
+                                        <Cell class="header"></Cell>
+                                        {#if masterSelection == 'alltime'}
+                                            <Cell class="header">Year</Cell>
+                                        {/if}
+                                        <Cell class="header">Week</Cell>
+                                        <Cell class="header">PF</Cell>
+                                    </Row>
+                                </Head>
+                                <Body>
+                                    {#each weekWorsts as weekWorst, ix}
+                                        <Row>
+                                            <Cell>{ix + 1}</Cell>
+                                            {#if masterSelection == 'alltime'}				
+                                                <Cell class="center">{weekWorst.year}</Cell>
+                                            {/if}
+                                            <Cell class="center">{weekWorst.week}</Cell>
+                                            <Cell class="center">{round(weekWorst.fpts)}</Cell>
+                                        </Row>
+                                    {/each}
+                                </Body>
+                            </DataTable>
+                        {/if}
+                    {/if}
+                {:else}
+                    <div class="showEmpty">{emptyMessage}</div>
+                {/if}  
+            </div>
+            {#if masterSelection == 'alltime'}
+                <div class="columnWrap">
+                    <div class="buttonHolder">
+                        <Group variant="outlined">
+                            <Button class="selectionButtons" on:click={() => changeSeasonRecord('best')} variant="{displaySeasonRecord == 'best' ? "raised" : "outlined"}">
+                                <Label>Best</Label>
+                            </Button>
+                            <Button class="selectionButtons" on:click={() => changeSeasonRecord('worst')} variant="{displaySeasonRecord == 'worst' ? "raised" : "outlined"}">
+                                <Label>Worst</Label>
+                            </Button>
+                        </Group>
+                    </div>
+                    {#if showEmpty == false}
+                        {#if displaySeasonRecord == 'best'}
+                            {#if periodBests && periodBests.length}
+                                <DataTable class="recordTable" style="width: 450px;">
+                                    <Head>
+                                        <Row>
+                                            <Cell class="header" colspan=4>
+                                                <p>
+                                                    Personal Best Season-Long Scores<br>
+                                                    {recordPrefix} 
+                                                </p>
+                                            </Cell>  
+                                        </Row>
+                                        <Row>
+                                            <Cell class="header"></Cell>
+                                            {#if masterSelection == 'alltime'}
+                                                <Cell class="header">Year</Cell>
+                                            {/if}
+                                            <Cell class="header">PF</Cell>
+                                            <Cell class="header">PPG</Cell>
+                                        </Row>
+                                    </Head>
+                                    <Body>
+                                        {#each periodBests as periodBest, ix}
+                                            <Row>
+                                                <Cell>{ix + 1}</Cell>
+                                                {#if masterSelection == 'alltime'}				
+                                                    <Cell class="center">{periodBest.year}</Cell>
+                                                {/if}
+                                                <Cell class="center">{round(periodBest.fpts)}</Cell>
+                                                <Cell class="center">{round(periodBest.fptspg)}</Cell>
+                                            </Row>
+                                        {/each}
+                                    </Body>
+                                </DataTable>
+                            {/if}
+                        {:else if displaySeasonRecord == 'worst'}
+                            {#if periodWorsts && periodWorsts.length}
+                                <DataTable class="recordTable" style="width: 450px;">
+                                    <Head>
+                                        <Row>
+                                            <Cell class="header" colspan=4>
+                                                <p>
+                                                    Personal Worst Season-Long Scores<br>
+                                                    {recordPrefix} 
+                                                </p>
+                                            </Cell>  
+                                        </Row>
+                                        <Row>
+                                            <Cell class="header"></Cell>
+                                            {#if masterSelection == 'alltime'}				
+                                                <Cell class="header">Year</Cell>
+                                            {/if}
+                                            <Cell class="header">PF</Cell>
+                                            <Cell class="header">PPG</Cell>
+                                        </Row>
+                                    </Head>
+                                    <Body>
+                                        {#each periodWorsts as periodWorst, ix}
+                                            <Row>
+                                                <Cell>{ix + 1}</Cell>
+                                                {#if masterSelection == 'alltime'}				
+                                                    <Cell class="center">{periodWorst.year}</Cell>
+                                                {/if}
+                                                <Cell class="center">{round(periodWorst.fpts)}</Cell>
+                                                <Cell class="center">{round(periodWorst.fptspg)}</Cell>
+                                            </Row>
+                                        {/each}
+                                    </Body>
+                                </DataTable>
+                            {/if}
+                        {/if}
+                    {:else}
+                        <div class="showEmpty">{emptyMessage}</div>
+                    {/if}                
+                </div>
+            {/if}
+        </div>
+        <div class="headerRow">
+            <div class="headerLabel">Blowouts</div>
+            <div class="headerLabel">Nailbiters</div>
+        </div>
+        <div class="recordsWrap">
+            <div class="columnWrap">
+                <div class="buttonHolder">
+                    <Group variant="outlined">
+                        <Button class="selectionButtons" on:click={() => changeBlowoutRecord('won')} variant="{displayBlowoutRecord == 'won' ? "raised" : "outlined"}">
+                            <Label>Won</Label>
+                        </Button>
+                        <Button class="selectionButtons" on:click={() => changeBlowoutRecord('lost')} variant="{displayBlowoutRecord == 'lost' ? "raised" : "outlined"}">
+                            <Label>Lost</Label>
+                        </Button>
+                    </Group>
+                </div>
+                {#if showEmpty == false}
+                    {#if displayBlowoutRecord == 'won'}
+                        {#if blowoutBests && blowoutBests.length}
+                            <DataTable class="recordTable" style="width: 550px;">
+                                <Head>
+                                    <Row>
+                                        <Cell class="header" colspan=7>
+                                            <p>
+                                                Top 10 Blowouts Won<br>
+                                                {recordPrefix} 
+                                            </p>
+                                        </Cell>                  
+                                    </Row>
+                                    <Row>
+                                        <Cell class="header rank"></Cell>
+                                        <Cell class="header">PF</Cell>
+                                        <Cell class="header">Loser</Cell>
+                                        <Cell class="header">PA</Cell>
+                                        {#if masterSelection == 'alltime'}
+                                            <Cell class="header">Year</Cell>
+                                        {/if}
+                                        <Cell class="header">Week</Cell>
+                                        <Cell class="header">Diff</Cell>
+                                    </Row>
+                                </Head>
+                                <Body>
+                                    {#each blowoutBests as blowoutBest, ix}
+                                        <Row>
+                                            <Cell class="rank">{ix + 1}</Cell>
+                                            <Cell class="center" style="background-color: #0182c326;">{round(blowoutBest.fpts)}</Cell>
+                                            <Cell class="cellName" style="background-color: #7a7a7a33;" on:click={() => gotoManager(blowoutBest.againstRecordManID)}>
+                                                {blowoutBest.againstManager.realname}
+                                                {#if masterSelection == 'yearly'}
+                                                    <div class="fantasyTeamName">({blowoutBest.againstManager.name})</div>
+                                                {/if}
+                                            </Cell>
+                                            <Cell class="center" style="background-color: #6a6a6a33;">{round(blowoutBest.fptsAgainst)}</Cell>
+                                            {#if masterSelection == 'alltime'}
+                                                <Cell class="center">{blowoutBest.year}</Cell>
+                                            {/if}
+                                            <Cell class="center">{blowoutBest.week}</Cell>
+                                            <Cell class="center">{round(blowoutBest.matchDifferential)}</Cell>
+                                        </Row>
+                                    {/each}
+                                </Body>
+                            </DataTable>
+                        {/if}
+                    {:else if displayBlowoutRecord == 'lost'}
+                        {#if blowoutWorsts && blowoutWorsts.length}
+                            <DataTable class="recordTable" style="width: 550px;">
+                                <Head>
+                                    <Row>
+                                        <Cell class="header" colspan=7>
+                                            <p>
+                                                Top 10 Blowouts Lost<br>
+                                                {recordPrefix} 
+                                            </p>
+                                        </Cell>                  
+                                    </Row>
+                                    <Row>
+                                        <Cell class="header rank"></Cell>
+                                        <Cell class="header">PF</Cell>
+                                        <Cell class="header">Winner</Cell>
+                                        <Cell class="header">PA</Cell>
+                                        {#if masterSelection == 'alltime'}
+                                            <Cell class="header">Year</Cell>
+                                        {/if}
+                                        <Cell class="header">Week</Cell>
+                                        <Cell class="header">Diff</Cell>
+                                    </Row>
+                                </Head>
+                                <Body>
+                                    {#each blowoutWorsts as blowoutWorst, ix}
+                                        <Row>
+                                            <Cell class="rank">{ix + 1}</Cell>
+                                            <Cell class="center" style="background-color: #6a6a6a33;">{round(blowoutWorst.fpts)}</Cell>
+                                            <Cell class="cellName" style="background-color: #229bd924;" on:click={() => gotoManager(blowoutWorst.againstRecordManID)}>
+                                                {blowoutWorst.againstManager.realname}
+                                                {#if masterSelection == 'yearly'}
+                                                    <div class="fantasyTeamName">({blowoutWorst.againstManager.name})</div>
+                                                {/if}
+                                            </Cell>
+                                            <Cell class="center" style="background-color: #0182c326;">{round(blowoutWorst.fptsAgainst)}</Cell>
+                                            {#if masterSelection == 'alltime'}
+                                                <Cell class="center">{blowoutWorst.year}</Cell>
+                                            {/if}
+                                            <Cell class="center">{blowoutWorst.week}</Cell>
+                                            <Cell class="center">{round(blowoutWorst.matchDifferential)}</Cell>
+                                        </Row>
+                                    {/each}
+                                </Body>
+                            </DataTable>
+                        {/if}
+                    {/if}
+                {:else}
+                    <div class="showEmpty">{emptyMessage}</div>
+                {/if}    
+            </div>
+            <div class="columnWrap">
+                <div class="buttonHolder">
+                    <Group variant="outlined">
+                        <Button class="selectionButtons" on:click={() => changeNailbiterRecord('won')} variant="{displayNailbiterRecord == 'won' ? "raised" : "outlined"}">
+                            <Label>Won</Label>
+                        </Button>
+                        <Button class="selectionButtons" on:click={() => changeNailbiterRecord('lost')} variant="{displayNailbiterRecord == 'lost' ? "raised" : "outlined"}">
+                            <Label>Lost</Label>
+                        </Button>
+                    </Group>
+                </div>
+                {#if showEmpty == false}
+                    {#if displayNailbiterRecord == 'won'}
+                        {#if narrowBests && narrowBests.length}
+                            <DataTable class="recordTable" style="width: 550px;">
+                                <Head>
+                                    <Row>
+                                        <Cell class="header" colspan=7>
+                                            <p>
+                                                Top 10 Nailbiters Won<br>
+                                                {recordPrefix} 
+                                            </p>
+                                        </Cell>                  
+                                    </Row>
+                                    <Row>
+                                        <Cell class="header rank"></Cell>
+                                        <Cell class="header">PF</Cell>
+                                        <Cell class="header">Loser</Cell>
+                                        <Cell class="header">PF</Cell>
+                                        {#if masterSelection == 'alltime'}
+                                            <Cell class="header">Year</Cell>
+                                        {/if}
+                                        <Cell class="header">Week</Cell>
+                                        <Cell class="header">Diff</Cell>
+                                    </Row>
+                                </Head>
+                                <Body>
+                                    {#each narrowBests as narrowBest, ix}
+                                        <Row>
+                                            <Cell class="rank">{ix + 1}</Cell>
+                                            <Cell class="center" style="background-color: #0182c326;">{round(narrowBest.fpts)}</Cell>
+                                            <Cell class="cellName" style="background-color: #7a7a7a33;" on:click={() => gotoManager(narrowBest.againstRecordManID)}>
+                                                {narrowBest.againstManager.realname}
+                                                {#if masterSelection == 'yearly'}
+                                                    <div class="fantasyTeamName">({narrowBest.againstManager.name})</div>
+                                                {/if}
+                                            </Cell>
+                                            <Cell class="center" style="background-color: #6a6a6a33;">{round(narrowBest.fptsAgainst)}</Cell>
+                                            {#if masterSelection == 'alltime'}
+                                                <Cell class="center">{narrowBest.year}</Cell>
+                                            {/if}
+                                            <Cell class="center">{narrowBest.week}</Cell>
+                                            <Cell class="center">{round(narrowBest.matchDifferential)}</Cell>
+                                        </Row>
+                                    {/each}
+                                </Body>
+                            </DataTable>
+                        {/if}
+                    {:else if displayNailbiterRecord == 'lost'}
+                        {#if narrowWorsts && narrowWorsts.length}
+                            <DataTable class="recordTable" style="width: 550px;">
+                                <Head>
+                                    <Row>
+                                        <Cell class="header" colspan=7>
+                                            <p>
+                                                Top 10 Nailbiters Lost<br>
+                                                {recordPrefix} 
+                                            </p>
+                                        </Cell>                  
+                                    </Row>
+                                    <Row>
+                                        <Cell class="header rank"></Cell>
+                                        <Cell class="header">PF</Cell>
+                                        <Cell class="header">Winner</Cell>
+                                        <Cell class="header">PA</Cell>
+                                        {#if masterSelection == 'alltime'}
+                                            <Cell class="header">Year</Cell>
+                                        {/if}
+                                        <Cell class="header">Week</Cell>
+                                        <Cell class="header">Diff</Cell>
+                                    </Row>
+                                </Head>
+                                <Body>
+                                    {#each narrowWorsts as narrowWorst, ix}
+                                        <Row>
+                                            <Cell class="rank">{ix + 1}</Cell>
+                                            <Cell class="center" style="background-color: #6a6a6a33;">{round(narrowWorst.fpts)}</Cell>
+                                            <Cell class="cellName" style="background-color: #229bd924;" on:click={() => gotoManager(narrowWorst.againstRecordManID)}>
+                                                {narrowWorst.againstManager.realname}
+                                                {#if masterSelection == 'yearly'}
+                                                    <div class="fantasyTeamName">({narrowWorst.againstManager.name})</div>
+                                                {/if}
+                                            </Cell>
+                                            <Cell class="center" style="background-color: #0182c326;">{round(narrowWorst.fptsAgainst)}</Cell>
+                                            {#if masterSelection == 'alltime'}
+                                                <Cell class="center">{narrowWorst.year}</Cell>
+                                            {/if}
+                                            <Cell class="center">{narrowWorst.week}</Cell>
+                                            <Cell class="center">{round(narrowWorst.matchDifferential)}</Cell>
+                                        </Row>
+                                    {/each}
+                                </Body>
+                            </DataTable>
+                        {/if}
+                    {/if}
+                {:else}
+                    <div class="showEmpty">{emptyMessage}</div>
+                {/if}    
+            </div>
+        </div>
+        <div class="headerRow">
+            <div class="headerLabel" style="justify-content: center">Players</div>
+        </div>
+        <div class="recordsWrap">
+            <div class="columnWrap" style="width: 98%;">
+                <div class="buttonHolder">
+                    <Group variant="outlined">
+                        <Button class="selectionButtons" on:click={() => changePlayerRecord('week')} variant="{displayPlayerRecord == 'week' ? "raised" : "outlined"}">
+                            <Label>Week</Label>
+                        </Button>
+                        <Button class="selectionButtons" on:click={() => changePlayerRecord('season')} variant="{displayPlayerRecord == 'season' ? "raised" : "outlined"}">
+                            <Label>Season</Label>
+                        </Button>
+                        <Button class="selectionButtons" on:click={() => changePlayerRecord('bench')} variant="{displayPlayerRecord == 'bench' ? "raised" : "outlined"}">
+                            <Label>Benchwarmers</Label>
+                        </Button>
+                    </Group>
+                </div>
+                {#if showEmpty == false}
+                    {#if displayPlayerRecord == 'week'}
+                        {#if playerWeekBests && playerWeekBests.length}
+                            <DataTable class="recordTable">
+                                <Head>
+                                    <Row>
+                                        <Cell class="header" colspan=7>
+                                            <p>
+                                                Top 10 Week Scores - Players<br>
+                                                {recordPrefix} 
+                                            </p>
+                                        </Cell>                  
+                                    </Row>
+                                    <Row>
+                                        <Cell class="header rank"></Cell>
+                                        <div class="playerAvatar playerInfo" />
+                                        <Cell class="header">Player</Cell>
+                                        <Cell class="header">POS</Cell>
+                                        <Cell class="header">NFL Team</Cell>
+                                        {#if masterSelection == 'alltime'}
+                                            <Cell class="header">Year</Cell>
+                                        {/if}
+                                        <Cell class="header">Week</Cell>
+                                        <Cell class="header">PF</Cell>
+                                    </Row>
+                                </Head>
+                                <Body>
+                                    {#each playerWeekBests as playerWeekBest, ix}
+                                        <Row>
+                                            <Cell class="rank">{ix + 1}</Cell>
+                                            <div class="playerAvatar playerInfo" style="{playerWeekBest.avatar}" />
+                                            <Cell class="left">{playerWeekBest.playerInfo.fn} {playerWeekBest.playerInfo.ln}</Cell>
+                                            <Cell class="center">{playerWeekBest.playerInfo.pos}</Cell>
+                                            <Cell class="center">{playerWeekBest.playerInfo.t}</Cell>
+                                            {#if masterSelection == 'alltime'}
+                                                <Cell class="center">{playerWeekBest.year}</Cell>
+                                            {/if}
+                                            <Cell class="center">{playerWeekBest.week}</Cell>
+                                            <Cell class="center">{round(playerWeekBest.playerPoints)}</Cell>
+                                        </Row>
+                                    {/each}
+                                </Body>
+                            </DataTable>
+                        {/if}
+                    {:else if displayPlayerRecord == 'season'}
+                        {#if playerPeriodBests && playerPeriodBests.length}
+                            <DataTable class="recordTable">
+                                <Head>
+                                    <Row>
+                                        <Cell class="header" colspan=10>
+                                            <p>
+                                                Top 10 Season-Long Scores – Players<br>
+                                                {recordPrefix} 
+                                            </p>
+                                        </Cell>                  
+                                    </Row>
+                                    <Row>
+                                        <Cell class="header rank"></Cell>
+                                        <div class="playerAvatar playerInfo" />
+                                        <Cell class="header">Player</Cell>
+                                        <Cell class="header">POS</Cell>
+                                        <Cell class="header">NFL Team</Cell>
+                                        {#if masterSelection == 'alltime'}
+                                            <Cell class="header">Year</Cell>
+                                        {/if}
+                                        <Cell class="header">Led Team</Cell>
+                                        <Cell class="header">Avg Rank</Cell>
+                                        <Cell class="header">Starts</Cell>
+                                        <Cell class="header">PF</Cell>
+                                        <Cell class="header">PPG</Cell>
+                                    </Row>
+                                </Head>
+                                <Body>
+                                    {#each playerPeriodBests as playerPeriodBest, ix}
+                                        <Row>
+                                            <Cell class="rank">{ix + 1}</Cell>
+                                            <div class="playerAvatar playerInfo" style="{playerPeriodBest.avatar}" />
+                                            <Cell class="left">{playerPeriodBest.playerInfo.fn} {playerPeriodBest.playerInfo.ln}</Cell>
+                                            <Cell class="center">{playerPeriodBest.playerInfo.pos}</Cell>
+                                            <Cell class="center">{playerPeriodBest.playerInfo.t}</Cell>
+                                            {#if masterSelection == 'alltime'}
+                                                <Cell class="center">{playerPeriodBest.year}</Cell>
+                                            {/if}
+                                            <Cell class="center">{playerPeriodBest.topStarters}</Cell>
+                                            <Cell class="center">{round(playerPeriodBest.starterRankAVG)}</Cell>
+                                            <Cell class="center">{playerPeriodBest.weeksStarted} / {playerPeriodBest.weeksOwned}</Cell>
+                                            <Cell class="center">{round(playerPeriodBest.playerPoints)}</Cell>
+                                            <Cell class="center">{round(playerPeriodBest.playerPPStart)}</Cell>
+                                        </Row>
+                                    {/each}
+                                </Body>
+                            </DataTable>
+                        {/if}
+                    {:else if displayPlayerRecord == 'bench'}
+                        {#if playerWeekMissedBests && playerWeekMissedBests.length}
+                            <DataTable class="recordTable">
+                                <Head>
+                                    <Row>
+                                        <Cell class="header" colspan=7>
+                                            <p>
+                                                Top 10 Benchwarmers – Players<br>
+                                                {recordPrefix} 
+                                            </p>
+                                        </Cell>                  
+                                    </Row>
+                                    <Row>
+                                        <Cell class="header rank"></Cell>
+                                        <div class="playerAvatar playerInfo" /> 
+                                        <Cell class="header">Player</Cell>
+                                        <Cell class="header">POS</Cell>
+                                        <Cell class="header">NFL Team</Cell>
+                                        {#if masterSelection == 'alltime'}
+                                            <Cell class="header">Year</Cell>
+                                        {/if}
+                                        <Cell class="header">Week</Cell>
+                                        <Cell class="header">PF</Cell>
+                                    </Row>
+                                </Head>
+                                <Body>
+                                    {#each playerWeekMissedBests as playerWeekMissedBest, ix}
+                                        <Row>
+                                            <Cell class="rank">{ix + 1}</Cell>
+                                            <div class="playerAvatar playerInfo" style="{playerWeekMissedBest.avatar}" />
+                                            <Cell class="left">{playerWeekMissedBest.playerInfo.fn} {playerWeekMissedBest.playerInfo.ln}</Cell>
+                                            <Cell class="center">{playerWeekMissedBest.playerInfo.pos}</Cell>
+                                            <Cell class="center">{playerWeekMissedBest.playerInfo.t}</Cell>
+                                            {#if masterSelection == 'alltime'}
+                                                <Cell class="center">{playerWeekMissedBest.year}</Cell>
+                                            {/if}
+                                            <Cell class="center">{playerWeekMissedBest.week}</Cell>
+                                            <Cell class="center">{round(playerWeekMissedBest.benchPoints)}</Cell>
+                                        </Row>
+                                    {/each}
+                                </Body>
+                            </DataTable>
+                        {/if}
+                    {/if}
+                {:else}
+                    <div class="showEmpty">{emptyMessage}</div>
+                {/if}    
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="buttonHolder">
-    <Group variant="outlined">
-        <Button class="selectionButtons" on:click={() => changeSelection('regular')} variant="{selection == 'regular' ? "raised" : "outlined"}">
-            <Label>Regular Season</Label>
-        </Button>
-        <Button class="selectionButtons" on:click={() => changeSelection('playoffs')} variant="{selection == 'playoffs' ? "raised" : "outlined"}">
-            <Label>Playoffs</Label>
-        </Button>
-        <Button class="selectionButtons" on:click={() => changeSelection('combined')} variant="{selection == 'combined' ? "raised" : "outlined"}">
-            <Label>Combined</Label>
-        </Button>
-    </Group>
-</div>
 
-<div class="yearContainer">
-    {#if masterSelection == 'yearly' && displayYear > firstYear}
-        <Icon class="material-icons changeYear" on:click={() => changeYear(displayYear - 1)}>chevron_left</Icon>
-    {:else}
-        <span class="spacer" />
-    {/if}  
 
-    <h2 class="yearText">{masterPrefix} Records</h2>
 
-    {#if masterSelection == 'yearly' && displayYear < currentYear}
-        <Icon class="material-icons changeYear" on:click={() => changeYear(displayYear + 1)}>chevron_right</Icon>
-    {:else}
-        <span class="spacer" />
-    {/if}  
-</div>
 
-<div class="fullFlex">
+
+
+
+<!-- <div class="fullFlex"> -->
         <!-- <DataTable class="recordTable">
             <Head>
                 <Row>
@@ -414,351 +1137,5 @@
                 {/each}
             </Body>
         </DataTable> -->
-    {#if showEmpty == false}
-        {#if weekBests && weekBests.length}
-            <DataTable class="rankingTable">
-                <Head>
-                    <Row>
-                        <Cell class="header" colspan=4>
-                            <p>
-                                Personal Best Week Scores<br>
-                                {recordPrefix} 
-                            </p>
-                        </Cell>  
-                    </Row>
-                    <Row>
-                        <Cell class="header"></Cell>
-                            <!-- {#if allTime} -->
-                                <Cell class="header">Year</Cell>
-                            <!-- {/if} -->
-                        <Cell class="header">Week</Cell>
-                        <Cell class="header">PF</Cell>
-                    </Row>
-                </Head>
-                <Body>
-                    {#each weekBests as weekBest, ix}
-                        <Row>
-                            <Cell>{ix + 1}</Cell>
-                                <!-- {#if allTime}				 -->
-                                    <Cell class="center">{weekBest.year}</Cell>
-                                <!-- {/if} -->
-                            <Cell class="center">{weekBest.week}</Cell>
-                            <Cell class="center">{round(weekBest.fpts)}</Cell>
-                        </Row>
-                    {/each}
-                </Body>
-            </DataTable>
-        {/if}
 
-        {#if weekWorsts && weekWorsts.length}
-            <DataTable class="rankingTable">
-                <Head>
-                    <Row>
-                        <Cell class="header" colspan=4>
-                            <p>
-                                Personal Worst Week Scores<br>
-                                {recordPrefix} 
-                            </p>
-                        </Cell>  
-                    </Row>
-                    <Row>
-                        <Cell class="header"></Cell>
-                            <!-- {#if allTime} -->
-                                <Cell class="header">Year</Cell>
-                            <!-- {/if} -->
-                        <Cell class="header">Week</Cell>
-                        <Cell class="header">PF</Cell>
-                    </Row>
-                </Head>
-                <Body>
-                    {#each weekWorsts as weekWorst, ix}
-                        <Row>
-                            <Cell>{ix + 1}</Cell>
-                                <!-- {#if allTime}				 -->
-                                    <Cell class="center">{weekWorst.year}</Cell>
-                                <!-- {/if} -->
-                            <Cell class="center">{weekWorst.week}</Cell>
-                            <Cell class="center">{round(weekWorst.fpts)}</Cell>
-                        </Row>
-                    {/each}
-                </Body>
-            </DataTable>
-        {/if}
-
-        {#if periodBests && periodBests.length}
-            <DataTable class="rankingTable">
-                <Head>
-                    <Row>
-                        <Cell class="header" colspan=4>
-                            <p>
-                                Personal Best Season-Long Scores<br>
-                                {recordPrefix} 
-                            </p>
-                        </Cell>  
-                    </Row>
-                    <Row>
-                        <Cell class="header"></Cell>
-                            <!-- {#if allTime} -->
-                                <Cell class="header">Year</Cell>
-                            <!-- {/if} -->
-                        <Cell class="header">PF</Cell>
-                        <Cell class="header">PPG</Cell>
-                    </Row>
-                </Head>
-                <Body>
-                    {#each periodBests as periodBest, ix}
-                        <Row>
-                            <Cell>{ix + 1}</Cell>
-                                <!-- {#if allTime}				 -->
-                                    <Cell class="center">{periodBest.year}</Cell>
-                                <!-- {/if} -->
-                            <Cell class="center">{round(periodBest.fpts)}</Cell>
-                            <Cell class="center">{round(periodBest.fptspg)}</Cell>
-                        </Row>
-                    {/each}
-                </Body>
-            </DataTable>
-        {/if}
-
-        {#if periodWorsts && periodWorsts.length}
-            <DataTable class="rankingTable">
-                <Head>
-                    <Row>
-                        <Cell class="header" colspan=4>
-                            <p>
-                                Personal Worst Season-Long Scores<br>
-                                {recordPrefix} 
-                            </p>
-                        </Cell>  
-                    </Row>
-                    <Row>
-                        <Cell class="header"></Cell>
-                            <!-- {#if allTime} -->
-                                <Cell class="header">Year</Cell>
-                            <!-- {/if} -->
-                        <Cell class="header">PF</Cell>
-                        <Cell class="header">PPG</Cell>
-                    </Row>
-                </Head>
-                <Body>
-                    {#each periodWorsts as periodWorst, ix}
-                        <Row>
-                            <Cell>{ix + 1}</Cell>
-                                <!-- {#if allTime}				 -->
-                                    <Cell class="center">{periodWorst.year}</Cell>
-                                <!-- {/if} -->
-                            <Cell class="center">{round(periodWorst.fpts)}</Cell>
-                            <Cell class="center">{round(periodWorst.fptspg)}</Cell>
-                        </Row>
-                    {/each}
-                </Body>
-            </DataTable>
-        {/if}
-
-        {#if blowoutBests && blowoutBests.length}
-            <DataTable class="recordTable">
-                <Head>
-                    <Row>
-                        <Cell class="header" colspan=5>
-                            <p>
-                                Top 10 Blowouts Won<br>
-                                {recordPrefix} 
-                            </p>
-                        </Cell>                  
-                    </Row>
-                    <Row>
-                        <Cell class="header rank"></Cell>
-                        <Cell class="header">Matchup</Cell>
-                            <!-- {#if allTime} -->
-                                <Cell class="header">Year</Cell>
-                            <!-- {/if} -->
-                        <Cell class="header">Week</Cell>
-                        <Cell class="header">Diff</Cell>
-                    </Row>
-                </Head>
-                <Body>
-                    {#each blowoutBests as blowoutBest, ix}
-                        <Row>
-                            <Cell class="rank">{ix + 1}</Cell>
-                            <Cell class="cellName center differentialName">
-                                <div class="center" on:click={() => gotoManager(blowoutBest.recordManID)}>
-                                    {blowoutBest.manager.realname} ({round(blowoutBest.fpts)})
-                                    <!-- {#if !allTime} -->
-                                        <div class="fantasyTeamName">({blowoutBest.manager.name})</div>
-                                    <!-- {/if} -->
-                                </div>
-                                vs
-                                <div class="center" on:click={() => gotoManager(blowoutBest.againstRecordManID)}>
-                                    {blowoutBest.againstManager.realname} ({round(blowoutBest.fptsAgainst)})
-                                    <!-- {#if !allTime} -->
-                                        <div class="fantasyTeamName">({blowoutBest.againstManager.name})</div>
-                                    <!-- {/if} -->
-                                </div>
-                            </Cell>
-                                <!-- {#if allTime} -->
-                                    <Cell class="center">{blowoutBest.year}</Cell>
-                                <!-- {/if} -->
-                            <Cell class="center">{blowoutBest.week}</Cell>
-                            <Cell class="center">{round(blowoutBest.matchDifferential)}</Cell>
-                        </Row>
-                    {/each}
-                </Body>
-            </DataTable>
-        {/if}
-
-        {#if blowoutWorsts && blowoutWorsts.length}
-            <DataTable class="recordTable">
-                <Head>
-                    <Row>
-                        <Cell class="header" colspan=5>
-                            <p>
-                                Top 10 Blowouts Lost<br>
-                                {recordPrefix} 
-                            </p>
-                        </Cell>                  
-                    </Row>
-                    <Row>
-                        <Cell class="header rank"></Cell>
-                        <Cell class="header">Matchup</Cell>
-                            <!-- {#if allTime} -->
-                                <Cell class="header">Year</Cell>
-                            <!-- {/if} -->
-                        <Cell class="header">Week</Cell>
-                        <Cell class="header">Diff</Cell>
-                    </Row>
-                </Head>
-                <Body>
-                    {#each blowoutWorsts as blowoutWorst, ix}
-                        <Row>
-                            <Cell class="rank">{ix + 1}</Cell>
-                            <Cell class="cellName center differentialName">
-                                <div class="center" on:click={() => gotoManager(blowoutWorst.recordManID)}>
-                                    {blowoutWorst.manager.realname} ({round(blowoutWorst.fpts)})
-                                    <!-- {#if !allTime} -->
-                                        <div class="fantasyTeamName">({blowoutWorst.manager.name})</div>
-                                    <!-- {/if} -->
-                                </div>
-                                vs
-                                <div class="center" on:click={() => gotoManager(blowoutWorst.againstRecordManID)}>
-                                    {blowoutWorst.againstManager.realname} ({round(blowoutWorst.fptsAgainst)})
-                                    <!-- {#if !allTime} -->
-                                        <div class="fantasyTeamName">({blowoutWorst.againstManager.name})</div>
-                                    <!-- {/if} -->
-                                </div>
-                            </Cell>
-                                <!-- {#if allTime} -->
-                                    <Cell class="center">{blowoutWorst.year}</Cell>
-                                <!-- {/if} -->
-                            <Cell class="center">{blowoutWorst.week}</Cell>
-                            <Cell class="center">{round(blowoutWorst.matchDifferential)}</Cell>
-                        </Row>
-                    {/each}
-                </Body>
-            </DataTable>
-        {/if}
-
-        {#if narrowBests && narrowBests.length}
-            <DataTable class="recordTable">
-                <Head>
-                    <Row>
-                        <Cell class="header" colspan=5>
-                            <p>
-                                Top 10 Narrowest Victories<br>
-                                {recordPrefix} 
-                            </p>
-                        </Cell>                  
-                    </Row>
-                    <Row>
-                        <Cell class="header rank"></Cell>
-                        <Cell class="header">Matchup</Cell>
-                            <!-- {#if allTime} -->
-                                <Cell class="header">Year</Cell>
-                            <!-- {/if} -->
-                        <Cell class="header">Week</Cell>
-                        <Cell class="header">Diff</Cell>
-                    </Row>
-                </Head>
-                <Body>
-                    {#each narrowBests as narrowBest, ix}
-                        <Row>
-                            <Cell class="rank">{ix + 1}</Cell>
-                            <Cell class="cellName center differentialName">
-                                <div class="center" on:click={() => gotoManager(narrowBest.recordManID)}>
-                                    {narrowBest.manager.realname} ({round(narrowBest.fpts)})
-                                    <!-- {#if !allTime} -->
-                                        <div class="fantasyTeamName">({narrowBest.manager.name})</div>
-                                    <!-- {/if} -->
-                                </div>
-                                vs
-                                <div class="center" on:click={() => gotoManager(narrowBest.againstRecordManID)}>
-                                    {narrowBest.againstManager.realname} ({round(narrowBest.fptsAgainst)})
-                                    <!-- {#if !allTime} -->
-                                        <div class="fantasyTeamName">({narrowBest.againstManager.name})</div>
-                                    <!-- {/if} -->
-                                </div>
-                            </Cell>
-                                <!-- {#if allTime} -->
-                                    <Cell class="center">{narrowBest.year}</Cell>
-                                <!-- {/if} -->
-                            <Cell class="center">{narrowBest.week}</Cell>
-                            <Cell class="center">{round(narrowBest.matchDifferential)}</Cell>
-                        </Row>
-                    {/each}
-                </Body>
-            </DataTable>
-        {/if}
-
-        {#if narrowWorsts && narrowWorsts.length}
-            <DataTable class="recordTable">
-                <Head>
-                    <Row>
-                        <Cell class="header" colspan=5>
-                            <p>
-                                Top 10 Narrowest Defeats<br>
-                                {recordPrefix} 
-                            </p>
-                        </Cell>                  
-                    </Row>
-                    <Row>
-                        <Cell class="header rank"></Cell>
-                        <Cell class="header">Matchup</Cell>
-                            <!-- {#if allTime} -->
-                                <Cell class="header">Year</Cell>
-                            <!-- {/if} -->
-                        <Cell class="header">Week</Cell>
-                        <Cell class="header">Diff</Cell>
-                    </Row>
-                </Head>
-                <Body>
-                    {#each narrowWorsts as narrowWorst, ix}
-                        <Row>
-                            <Cell class="rank">{ix + 1}</Cell>
-                            <Cell class="cellName center differentialName">
-                                <div class="center" on:click={() => gotoManager(narrowWorst.recordManID)}>
-                                    {narrowWorst.manager.realname} ({round(narrowWorst.fpts)})
-                                    <!-- {#if !allTime} -->
-                                        <div class="fantasyTeamName">({narrowWorst.manager.name})</div>
-                                    <!-- {/if} -->
-                                </div>
-                                vs
-                                <div class="center" on:click={() => gotoManager(narrowWorst.againstRecordManID)}>
-                                    {narrowWorst.againstManager.realname} ({round(narrowWorst.fptsAgainst)})
-                                    <!-- {#if !allTime} -->
-                                        <div class="fantasyTeamName">({narrowWorst.againstManager.name})</div>
-                                    <!-- {/if} -->
-                                </div>
-                            </Cell>
-                                <!-- {#if allTime} -->
-                                    <Cell class="center">{narrowWorst.year}</Cell>
-                                <!-- {/if} -->
-                            <Cell class="center">{narrowWorst.week}</Cell>
-                            <Cell class="center">{round(narrowWorst.matchDifferential)}</Cell>
-                        </Row>
-                    {/each}
-                </Body>
-            </DataTable>
-        {/if}
-    {:else}
-        <div class="showEmpty">{emptyMessage}</div>
-    {/if}
-</div>
+<!-- </div> -->

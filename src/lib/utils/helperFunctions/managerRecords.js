@@ -196,9 +196,15 @@ export const getManagerRecords = async (refresh = false) => {
 		managers: {
 			years: {},
 			alltime: {
-				regularSeason: {},
-				playoffs: {},
-				combined: {},
+				regularSeason: {
+					players: {},
+				},
+				playoffs: {
+					players: {},
+				},
+				combined: {
+					players: {},
+				},
 			},
 		},
 	};
@@ -2200,6 +2206,13 @@ export const getManagerRecords = async (refresh = false) => {
 						narrow_Worst: masterRecordBook.managers[recordPeriod].years[year][recordManID].slice().filter(v => v.matchDifferential <= 0).sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 10),
 					};
 				}
+				if(!recordArrays.managers.years[year][recordPeriod].players[recordManID]) {		
+					recordArrays.managers.years[year][recordPeriod].players[recordManID] = {
+						week_Best: masterRecordBook.players.managers[recordPeriod].years[year][recordManID].slice().filter(p => p.benched == false).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
+						week_MissedBest: masterRecordBook.players.managers[recordPeriod].years[year][recordManID].slice().filter(p => p.benched == true).sort((a, b) => b.benchPoints - a.benchPoints).slice(0, 10),
+						period_Best: masterRecordBook.players.managers.totals.years[year][recordManID][recordPeriod].slice().sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
+					};
+				}
 			}
 			recordArrays.league.years[year][recordPeriod].players.week_Best = recordArrays.league.years[year][recordPeriod].players.week_Best.sort((a, b) => b.playerPoints - a.playerPoints);
 			recordArrays.league.years[year][recordPeriod].players.week_MissedBest = recordArrays.league.years[year][recordPeriod].players.week_MissedBest.sort((a, b) => b.benchPoints - a.benchPoints);
@@ -2396,6 +2409,13 @@ export const getManagerRecords = async (refresh = false) => {
 					blowout_Worst: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().filter(v => v.matchDifferential <= 0).sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 10),
 					narrow_Best: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().filter(v => v.matchDifferential >= 0).sort((a, b) => a.matchDifferential - b.matchDifferential).slice(0, 10),
 					narrow_Worst: masterRecordBook.managers[recordPeriod].alltime[recordManID].slice().filter(v => v.matchDifferential <= 0).sort((a, b) => b.matchDifferential - a.matchDifferential).slice(0, 10),
+				};
+			}
+			if(!recordArrays.managers.alltime[recordPeriod].players[recordManID]) {		
+				recordArrays.managers.alltime[recordPeriod].players[recordManID] = {
+					week_Best: masterRecordBook.players.managers[recordPeriod].alltime[recordManID].slice().filter(p => p.benched == false).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
+					week_MissedBest: masterRecordBook.players.managers[recordPeriod].alltime[recordManID].slice().filter(p => p.benched == true).sort((a, b) => b.benchPoints - a.benchPoints).slice(0, 10),
+					period_Best: masterRecordBook.players.managers.totals.alltime[recordManID][recordPeriod].slice().sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
 				};
 			}
 		}

@@ -691,16 +691,6 @@
         justify-content: center;
     }
 
-    .subHeaderLabel {
-        position: relative;
-        display: inline-flex;
-        color: #ededed;
-        font-weight: 420;
-        font-size: 0.78em;
-        justify-content: center;
-        width: 10%;
-    }
-
     .recordsWrap {
         position: relative;
         display: inline-flex;
@@ -717,11 +707,6 @@
         padding: 1%;
         align-items: center;
     }
-
-    /* .headerRow {
-        position: relative;
-        display: inline-flex;
-    } */
 
 </style>
 
@@ -970,9 +955,9 @@
                             <Cell class="header rank"></Cell>
                             <Cell class="header">Loser</Cell>
                             <Cell class="header">PF</Cell>
-                                {#if allTime}
-                                    <Cell class="header">Year</Cell>
-                                {/if}
+                            {#if allTime}
+                                <Cell class="header">Year</Cell>
+                            {/if}
                             <Cell class="header">Week</Cell>
                             <Cell class="header">Diff</Cell>
                         </Row>
@@ -996,9 +981,9 @@
                                     {/if}
                                 </Cell>
                                 <Cell class="center" style="background-color: #6a6a6a33;">{round(blowout.fptsAgainst)}</Cell>
-                                    {#if allTime}
-                                        <Cell class="center">{blowout.year}</Cell>
-                                    {/if}
+                                {#if allTime}
+                                    <Cell class="center">{blowout.year}</Cell>
+                                {/if}
                                 <Cell class="center">{blowout.week}</Cell>
                                 <Cell class="center">{round(blowout.matchDifferential)}</Cell>
                             </Row>

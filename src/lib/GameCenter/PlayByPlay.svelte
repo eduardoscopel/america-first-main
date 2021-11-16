@@ -17,6 +17,70 @@
         const score = leagueData.scoring_settings;
         const positions = leagueData.roster_positions.filter(p => p != 'BN');
 
+        // extracts Espn Team ID from API link
+        const parseEspnTeamID = (teamLink, linkType) => {
+            let espnTeamID;
+            if(linkType == 'play') {
+                if(teamLink.slice(82, 84)[1] != '?') {
+                    espnTeamID = teamLink.slice(82, 84);
+                } else {
+                    espnTeamID = teamLink.slice(82, 83);
+                }
+            } else if(linkType == 'participants') {
+                if(teamLink.slice(115, 117)[1] != '/') {           
+                    espnTeamID = teamLink.slice(115, 117);
+                } else {
+                    espnTeamID = teamLink.slice(115, 116);
+                }
+            }
+            return espnTeamID;
+        }
+
+        // determines whether play counts w.r.t. yards, penalties, etc.
+        const checkNoPlay = (playType, playDescription) => {
+            let noPlay = new Boolean (false);
+            if(playType == 8 || playDescription.includes('No Play.') || playType == 2 || playType == 21 || playType == 66 || playType == 70 || playType == 75) {
+                noPlay = true;
+            } else {
+                noPlay = false;
+            }
+            return noPlay;
+        }
+
+        // checks whether play is relevant to Team DEF/ST scoring
+        const isDefRelevant = (play, playTeam, homeDefStarted, awayDefStarted, home, away, homeDefense, awayDefense, playerKey) => {
+            let relevantEntry;
+            if(play.type.id == 7 || play.type.id == 9 || play.type.id == 26 ||     
+                play.type.id == 36 || play.type.id == 52 || play.type.id == 12 ||   
+                play.type.id == 32 || play.type.id == 17 || play.type.id == 29 ||
+                play.type.id == 37 || play.type.id == 39 || (play.type.id == 60 && play.alternativeText.includes('BLOCKED'))) {                                                      
+                if(awayDefStarted == true && playTeam == home) {
+                    const defense = awayDefense;
+                    relevantEntry = {
+                        playerInfo: defense,
+                        manager: defense.owner,
+                        statType: play.participants[playerKey].type,
+                        yards: play.statYardage, 
+                        playType: play.type.id,
+                        oppDef: away,
+                    }
+                } else if(homeDefStarted == true && playTeam == away) {
+                    const defense = homeDefense;
+                    relevantEntry = {
+                        playerInfo: defense,
+                        manager: defense.owner,
+                        statType: play.participants[playerKey].type,
+                        yards: play.statYardage, 
+                        playType: play.type.id,
+                        oppDef: home,
+                    }
+                }
+            } else {
+                relevantEntry = null;
+            }
+            return relevantEntry;
+        }
+
         // extracts enforced penalty yardage from play description 
         const getTruePenalty = (playTeam, oppTeam, description) => {
             let truePenaltyInfo = {
@@ -2007,18 +2071,13 @@
                         let play = playsData[k];
                         // find which team made the play (checking team of first play participant is most reliably correct way)
                         let espnTeamID;
+                        let linkType;
                         if(play.participants && play.participants[0].statistics) {
-                            if(play.participants[0].statistics.$ref.slice(115, 117)[1] != '/') {            
-                                espnTeamID = play.participants[0].statistics.$ref.slice(115, 117);
-                            } else {
-                                espnTeamID = play.participants[0].statistics.$ref.slice(115, 116);
-                            }
+                            linkType = 'participants';
+                            espnTeamID = parseEspnTeamID(play.participants[0].statistics.$ref, linkType);
                         } else {
-                            if(play.team.$ref.slice(82, 84)[1] != '?') {
-                                espnTeamID = play.team.$ref.slice(82, 84);
-                            } else {
-                                espnTeamID = play.team.$ref.slice(82, 83);
-                            }
+                            linkType = 'play';
+                            espnTeamID = parseEspnTeamID(play.team.$ref, linkType);
                         }
                         let playTeam;
                         let oppTeam;
@@ -2034,12 +2093,7 @@
                             oppTeam = homeEspn;
                         }
                         // flagging penalty-negated plays
-                        let noPlay = new Boolean (false);
-                        if(play.type.id == 8 || play.alternativeText.includes('No Play.') || play.type.id == 2 || play.type.id == 21 || play.type.id == 66 || play.type.id == 70 || play.type.id == 75) {
-                            noPlay = true;
-                        } else {
-                            noPlay = false;
-                        }
+                        let noPlay = checkNoPlay(play.type.id, play.alternativeText);
                         // flagging scoring plays & tracking DEF points allowed
                         let scoringPlay = new Boolean (false);
                         let scoreAgainstDEF = new Boolean (false);
@@ -2154,12 +2208,8 @@
                                 }
                                 const espnPlayerData = await waitForAll(...playerJsonPromises).catch((err) => { console.error(err); });
                                 // which team is player on
-                                let espnPlayerTeamID
-                                if(espnPlayerData[0].team.$ref.slice(82, 84)[1] != '?') {
-                                    espnPlayerTeamID = espnPlayerData[0].team.$ref.slice(82, 84);
-                                } else {
-                                    espnPlayerTeamID = espnPlayerData[0].team.$ref.slice(82, 83);
-                                }
+                                const linkType = 'play';
+                                let espnPlayerTeamID = parseEspnTeamID(espnPlayerData[0].team.$ref, linkType);
                                 let playerTeam;
                                 for(const key in nflTeams) {
                                     if(nflTeams[key].espnID == espnPlayerTeamID) {
@@ -2176,6 +2226,8 @@
                                 // Catching exceptions with different names
                                 if(espnMatch.fn == 'Michael' && espnMatch.ln == 'Pittman Jr.' && espnMatch.pos == 'WR') {
                                     espnMatch.ln = 'Pittman';
+                                } else if(espnMatch.fn == 'Darrell' && espnMatch.ln == 'Henderson Jr.' && espnMatch.pos == 'RB') {
+                                    espnMatch.ln = 'Henderson';
                                 }
                                 if(espnMatch.pos == 'PK') {
                                     espnMatch.pos = 'K';
@@ -2207,34 +2259,10 @@
                                     playEntry.relevantPlayers.push(relevantEntry);
                                 } 
                                 // flagging DEF-relevant plays
-                                if((homeDefStarted == true || awayDefStarted == true)                                       // someone started a DEF
-                                    && (play.type.id == 7 || play.type.id == 9 || play.type.id == 26 ||     // play was of a defensive type
-                                        play.type.id == 36 || play.type.id == 52 || play.type.id == 12 ||   // TO-DO need to be able to catch yardage threshold breaks
-                                        play.type.id == 32 || play.type.id == 17 || play.type.id == 29 || 
-                                        play.type.id == 37 || play.type.id == 39 || (play.type.id == 60 && play.alternativeText.includes('BLOCKED')))
-                                    && noPlay == false) {                                                       // no play-negating penalty
-                                    if(awayDefStarted == true && playTeam == home) {
-                                        const defense = awayDefense
-                                        const relevantEntry = {
-                                            playerInfo: defense,
-                                            manager: defense.owner,
-                                            statType: play.participants[playerKey].type,
-                                            yards: play.statYardage, 
-                                            playType: play.type.id,
-                                            oppDef: away,
-                                        }
-                                        playEntry.relevantDEF.push(relevantEntry);
-                                    } else if(homeDefStarted == true && playTeam == away) {
-                                        const defense = homeDefense;
-                                        const relevantEntry = {
-                                            playerInfo: defense,
-                                            manager: defense.owner,
-                                            statType: play.participants[playerKey].type,
-                                            yards: play.statYardage, 
-                                            playType: play.type.id,
-                                            oppDef: home,
-                                        }
-                                        playEntry.relevantDEF.push(relevantEntry);
+                                if(noPlay == false && (homeDefStarted == true || awayDefStarted == true)) {
+                                    let relevantDefEntry = isDefRelevant(play, playTeam, homeDefStarted, awayDefStarted, home, away, homeDefense, awayDefense, playerKey);
+                                    if(relevantDefEntry != null) {
+                                        playEntry.relevantDEF.push(relevantDefEntry);
                                     }
                                 }
                             }
@@ -2325,19 +2353,14 @@
                 for(let k = 0; k < playsData.length; k++) {
                     let play = playsData[k];
                     // which team made the play
-                    let espnTeamID
+                    let espnTeamID;
+                    let linkType;
                     if(play.participants && play.participants[0].statistics) {
-                        if(play.participants[0].statistics.$ref.slice(115, 117)[1] != '/') {            // checking team of first play participant is most reliably correct way
-                            espnTeamID = play.participants[0].statistics.$ref.slice(115, 117);
-                        } else {
-                            espnTeamID = play.participants[0].statistics.$ref.slice(115, 116);
-                        }
+                        linkType = 'participants';
+                        espnTeamID = parseEspnTeamID(play.participants[0].statistics.$ref, linkType);
                     } else {
-                        if(play.team.$ref.slice(82, 84)[1] != '?') {
-                            espnTeamID = play.team.$ref.slice(82, 84);
-                        } else {
-                            espnTeamID = play.team.$ref.slice(82, 83);
-                        }
+                        linkType = 'play';
+                        espnTeamID = parseEspnTeamID(play.team.$ref, linkType);
                     }
                     let playTeam;
                     let oppTeam;
@@ -2353,12 +2376,7 @@
                         oppTeam = homeEspn;
                     }
                     // flagging penalty-negated plays
-                    let noPlay = new Boolean (false);
-                    if(play.type.id == 8 || play.alternativeText.includes('No Play.') || play.type.id == 2 || play.type.id == 21 || play.type.id == 66 || play.type.id == 70 || play.type.id == 75) {
-                        noPlay = true;
-                    } else {
-                        noPlay = false;
-                    }
+                    let noPlay = checkNoPlay(play.type.id, play.alternativeText);
                     // flagging scoring plays & tracking DEF points allowed
                     let scoringPlay = new Boolean (false);
                     let scoreAgainstDEF = new Boolean (false);
@@ -2472,12 +2490,8 @@
                             }
                             const espnPlayerData = await waitForAll(...playerJsonPromises).catch((err) => { console.error(err); });
                             // which team is player on
-                            let espnPlayerTeamID
-                            if(espnPlayerData[0].team.$ref.slice(82, 84)[1] != '?') {
-                                espnPlayerTeamID = espnPlayerData[0].team.$ref.slice(82, 84);
-                            } else {
-                                espnPlayerTeamID = espnPlayerData[0].team.$ref.slice(82, 83);
-                            }
+                            const linkType = 'play';
+                            let espnPlayerTeamID = parseEspnTeamID(espnPlayerData[0].team.$ref, linkType);
                             let playerTeam;
                             for(const key in nflTeams) {
                                 if(nflTeams[key].espnID == espnPlayerTeamID) {
@@ -2494,6 +2508,8 @@
                             // Catching exceptions with different names
                             if(espnMatch.fn == 'Michael' && espnMatch.ln == 'Pittman Jr.' && espnMatch.pos == 'WR') {
                                 espnMatch.ln = 'Pittman';
+                            } else if(espnMatch.fn == 'Darrell' && espnMatch.ln == 'Henderson Jr.' && espnMatch.pos == 'RB') {
+                                espnMatch.ln = 'Henderson';
                             }
                             if(espnMatch.pos == 'PK') {
                                 espnMatch.pos = 'K';
@@ -2519,35 +2535,11 @@
                                 playEntry.relevantPlayers.push(relevantEntry);
                             } 
                             // flagging DEF-relevant plays
-                            if((homeDefStarted == true || awayDefStarted == true)                                       // someone started a DEF
-                                && (play.type.id == 7 || play.type.id == 9 || play.type.id == 26 ||     // play was of a defensive type
-                                    play.type.id == 36 || play.type.id == 52 || play.type.id == 12 ||   // TO-DO need to be able to catch yardage threshold breaks
-                                    play.type.id == 32 || play.type.id == 17 || play.type.id == 29 ||
-                                    play.type.id == 37 || play.type.id == 39 || (play.type.id == 60 && play.alternativeText.includes('BLOCKED')))
-                                && noPlay == false) {                                                       // no penalty
-                                if(awayDefStarted == true && playTeam == home) {
-                                    const defense = startersArray.filter(s => s.playerID == away)[0];
-                                    const relevantEntry = {
-                                        playerInfo: defense,
-                                        manager: defense.owner,
-                                        statType: play.participants[playerKey].type,
-                                        yards: play.statYardage, 
-                                        playType: play.type.id,
-                                        oppDef: away,
-                                    }
-                                    playEntry.relevantDEF.push(relevantEntry);
-                                } else if(homeDefStarted == true && playTeam == away) {
-                                    const defense = startersArray.filter(s => s.playerID == home)[0];
-                                    const relevantEntry = {
-                                        playerInfo: defense,
-                                        manager: defense.owner,
-                                        statType: play.participants[playerKey].type,
-                                        yards: play.statYardage, 
-                                        playType: play.type.id,
-                                        oppDef: home,
-                                    }
-                                    playEntry.relevantDEF.push(relevantEntry);
-                                }
+                            if(noPlay == false && (homeDefStarted == true || awayDefStarted == true)) {
+                                let relevantDefEntry = isDefRelevant(play, playTeam, homeDefStarted, awayDefStarted, home, away, homeDefense, awayDefense, playerKey);
+                                if(relevantDefEntry != null) {
+                                    playEntry.relevantDEF.push(relevantDefEntry);
+                                }            
                             }
                         }
                         // only push on plays involving starters, and not called back for penalty (deal with those separately)
@@ -2612,7 +2604,7 @@
                 filteredProducts = filteredProducts.filter(p => p.some(p => p.playerInfo.owner.recordManID == managerSelection));
             } 
 
-            if(viewPlayerID != null) {
+            if(viewPlayerID != null && viewPlayerID != 'flush') {
                 filteredProducts = filteredProducts.filter(p => p.some(p => p.playerInfo.playerID == viewPlayerID));
             }
         }

@@ -186,6 +186,7 @@
                 record: records[1],
             }
             freshGame = true;
+            viewPlayerID = 'flush';
             positionLB = matchStarters;
             leaderboardHeading = `${managerInfo[home.matchInfo.recordManID].abbreviation} v ${managerInfo[away.matchInfo.recordManID].abbreviation}`;
             if(document.querySelector(".leaderboardContainer")) {
@@ -205,6 +206,7 @@
         let home = game[0].team;
         let away = game[1].team;
         freshGame = true;
+        viewPlayerID = 'flush';
 
         return {home, away};
     }
@@ -436,7 +438,11 @@
 
     const multiFunction = (playerID, teamID, leaderBoardType, leaderBoardSpec, recordManID) => {
         if(playerID != null && teamID != null) {
-            viewPlayerID = playerID;
+            if(playerID == viewPlayerID) {
+                viewPlayerID = 'flush';
+            } else {
+                viewPlayerID = playerID;
+            }
         }
         if(leaderBoardType != null && leaderBoardSpec != null && recordManID == 0) {
             if(leaderBoardType == 'matchup') {
