@@ -287,7 +287,7 @@
     <div class="buttonHolderG">
         <Group variant="outlined">
             {#each graphs as graph, ix}
-                {#if ix < 4}
+                {#if ix < 6}
                     <Button class="selectionButtons" on:click={() => curGraph = ix} variant="{curGraph == ix ? "raised" : "outlined"}">
                         <Label>{graph.short}</Label>
                     </Button>
@@ -300,7 +300,7 @@
                 {#if graph.short == "Season Records" && !allTime}
                     <div></div>
                 {:else}
-                    {#if ix > 3}
+                    {#if ix > 5}
                         <Button class="selectionButtons" on:click={() => curGraph = ix} variant="{curGraph == ix ? "raised" : "outlined"}">
                             <Label>{graph.short}</Label>
                         </Button>

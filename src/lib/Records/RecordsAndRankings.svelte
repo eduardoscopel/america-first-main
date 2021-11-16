@@ -531,6 +531,8 @@
         position: relative;
         align-items: center;
         justify-content: center;
+        line-height: 1.15em;
+        flex-wrap: wrap;
     }
 
     :global(.cellName) {
@@ -1847,9 +1849,25 @@
                     {#if (table == "Season Highs" || table == "Season Lows") && !allTime}
                         <div></div>
                     {:else}
-                        <Button class="selectionButtons" on:click={() => curTable = ix} variant="{curTable == ix ? "raised" : "outlined"}">
-                            <Label>{table}</Label>
-                        </Button>
+                        {#if ix < 6}
+                            <Button class="selectionButtons" on:click={() => curTable = ix} variant="{curTable == ix ? "raised" : "outlined"}">
+                                <Label>{table}</Label>
+                            </Button>
+                        {/if}
+                    {/if}
+                {/each}
+            </Group>
+            <br />
+            <Group variant="outlined">
+                {#each tables as table, ix}
+                    {#if (table == "Season Highs" || table == "Season Lows") && !allTime}
+                        <div></div>
+                    {:else}
+                        {#if ix > 5}
+                            <Button class="selectionButtons" on:click={() => curTable = ix} variant="{curTable == ix ? "raised" : "outlined"}">
+                                <Label>{table}</Label>
+                            </Button>
+                        {/if}
                     {/if}
                 {/each}
             </Group>
