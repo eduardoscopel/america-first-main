@@ -1,8 +1,9 @@
 <script>
     import Button, { Group, Label } from '@smui/button';
-    import {xIntervalFont, xIntervalHeight, barLabelFont, labelFont} from './barChartResize'
+    import {xIntervalFont, xIntervalHeight, barLabelFont, labelFont} from './barChartResize';
+    import {round, min, max} from '$lib/utils/helper';
 
-    export let graphs, curGraph = 0, maxWidth = 1000, allTime, selection;
+    export let graphs, curGraph = 0, maxWidth = 1000, allTime, selection, displayObject, displayYear, leagueManagers, allManagers;
 
     const colors = [
         "#52DEE5",
@@ -27,6 +28,45 @@
     $: recordManIDs = graphs[curGraph].recordManIDs;
     $: labels = graphs[curGraph].labels;
     $: header = graphs[curGraph].header;
+
+    const refreshStats = (selection, displayYear) => {
+        if((selection && selection != null) || (displayYear && displayYear != null)) {
+            for(const graph in graphs) {
+                let newStats = displayObject[selection][graphs[graph].statCat];
+                // if yearly stats, refresh the recordManIDs
+                if(allTime == false) {
+                    graphs[graph].recordManIDs = [];
+                    graphs[graph].managers = [];
+                    for(const recordManID in leagueManagers) {
+                        if(leagueManagers[recordManID].yearsactive.includes(displayYear)) {
+                            graphs[graph].recordManIDs.push(leagueManagers[recordManID].managerID);
+                            graphs[graph].managers.push(allManagers[recordManID]);
+                        }
+                    }
+                }
+                for(let i = 0; i < graphs[graph].stats.length; i++) {
+                    if(newStats.find(m => m.recordManID == graphs[graph].recordManIDs[i])) {
+                        graphs[graph].stats[i] = Math.round(newStats.find(m => m.recordManID == graphs[graph].recordManIDs[i])[graphs[graph].field]);
+                        if(graphs[graph].secondField != null) {
+                            graphs[graph].secondStats[i] = Math.round(newStats.find(m => m.recordManID == graphs[graph].recordManIDs[i])[graphs[graph].secondField]);
+                        }
+                    } else {
+                        graphs[graph].stats[i] = 0;
+                    }
+                }
+                graphs[graph].yMin = min(graphs[graph].stats, 10);
+                graphs[graph].yMax = max(graphs[graph].stats, 10);
+            }
+            stats = graphs[curGraph].stats;
+            secondStats = graphs[curGraph].secondStats
+            yMin = graphs[curGraph].secondStats.length > 0 ? graphs[curGraph].yMin/2 : graphs[curGraph].yMin;
+            yMax = graphs[curGraph].yMax;
+            recordManIDs = graphs[curGraph].recordManIDs;
+            managers = graphs[curGraph].managers;
+        }
+    }
+    $: refreshStats(selection, displayYear);
+
 
     $: interval = (yMax - yMin) / 4;
 

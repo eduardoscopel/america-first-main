@@ -6,7 +6,7 @@
 
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table'; 
 
-    export let selection = 'regular', masterSelection, waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerWeekTOPS, currentManagers, displayObject, allTime=false;
+    export let selection = 'regular', masterSelection, displayYear, waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerWeekTOPS, allManagers, displayObject, allTime=false;
 
     let leagueManagers = {};
     const numManagers = managers.length;
@@ -33,145 +33,164 @@
 
 	for(const managerID in managers) {
 		const manager = managers[managerID];
-
-		const entryMan = {
+		leagueManagers[manager.managerID] = {
 			managerID: manager.managerID,
 			rosterID: manager.roster,
 			name: manager.name,
 			status: manager.status,
 			yearsactive: manager.yearsactive,
 		}
-
-		if(!leagueManagers[manager.roster]) {
-			leagueManagers[manager.roster] = [];
-		}
-		leagueManagers[manager.roster].push(entryMan);
 	}
 
     let lineupIQGraph = {
-        stats: lineupIQs,
+        stats: displayObject[selection].lineupIQs,
         x: "Manager",
         y: "Lineup IQ",
         stat: "%",
+        statCat: 'lineupIQs',
         header: "Manager Lineup IQ",
         field: "iq",
         short: "Lineup IQ"
     }
+    $: lineupIQGraph.stats = displayObject[selection].lineupIQs;
 
     let potentialPointsGraph = {
-        stats: lineupIQs,
+        stats: displayObject[selection].lineupIQs,
         x: "Manager",
         y: "Points",
         stat: "",
+        statCat: 'lineupIQs',
         header: "Potential Points vs Points",
         field: "potentialPoints",
         secondField: "fpts",
         short: "Potential Points"
     }
+    $: potentialPointsGraph.stats = displayObject[selection].lineupIQs;
 
     let winsGraph = {
         stats: displayObject[selection].winPercentages,
         x: "Manager",
         y: "Wins",
         stat: "",
+        statCat: 'winPercentages',
         header: "Team Wins",
         field: "wins",
         short: "Wins"
     }
+    $: winPercentagesGraph.stats = displayObject[selection].winPercentages;
 
     let winPercentagesGraph = {
         stats: displayObject[selection].winPercentages,
         x: "Manager",
         y: "Win Percentage",
         stat: "%",
+        statCat: 'winPercentages',
         header: "Team Win Percentages",
         field: "winPerc",
         short: "Win Percentage"
     }
+    $: winPercentagesGraph.stats = displayObject[selection].winPercentages;
 
     let fptsHistoriesGraph = {
-        stats: fptsHistories,
+        stats: displayObject[selection].fptsHistories,
         x: "Manager",
         y: "Fantasy Points",
         stat: "",
+        statCat: 'fptsHistories',
         header: "Team Fantasy Points",
         field: "fptspg",
         short: "Fantasy Points"
     }
+    $: fptsHistoriesGraph.stats = displayObject[selection].fptsHistories
+    ;
 
     let medianRecordsGraph = {
-        stats: medianRecords,
+        stats: displayObject[selection].medianRecords,
         x: "Manager",
         y: "Win Percentage",
         stat: "%",
+        statCat: 'medianRecords',
         header: "Managers Against the Median",
         field: "medianPerc",
         short: "Par Records"
     }
+    $: medianRecordsGraph.stats = displayObject[selection].medianRecords;
 
     let fptsSeasonBestGraph = {
-        stats: seasonBests, //fptsSeasonBest
+        stats: displayObject[selection].seasonBests, //fptsSeasonBest
         x: "Manager",
         y: "Fantasy Points",
         stat: "",
+        statCat: 'seasonBests',
         header: "Team Highest / Lowest Scoring Seasons",
         field: "fptspg",
 	    // secondField: "fptsFor",
         short: "Season Records"
     }
+    $: fptsSeasonBestGraph.stats = displayObject[selection].seasonBests;
 
     let fptsWeekBestGraph = {
-        stats: weekBests,
+        stats: displayObject[selection].weekBests,
         // secondStats: weekWorsts, 
         x: "Manager",
         y: "Fantasy Points",
         stat: "",
+        statCat: 'weekBests',
         header: "Team Highest / Lowest Scoring Weeks",
         field: "fpts",
         // secondField: "fpts",
         // yMinOverride: 0,
         short: "Weekly Records"
     }
+    $: fptsWeekBestGraph.stats = displayObject[selection].weekBests;
 
     let epeWinPercGraph = {
-        stats: seasonEPERecords,
+        stats: displayObject[selection].seasonEPERecords,
         x: "Manager",
         y: "EPE Win Percentage",
         stat: "%",
+        statCat: 'seasonEPERecords',
         header: "Everyone Plays Everyone Win Percentage",
         field: "epePerc",
         short: "EPE Records"
     }
+    $: epeWinPercGraph.stats = displayObject[selection].seasonEPERecords;
 
     let playerSeasonBestGraph = {
-        stats: playerSeasonBests,
+        stats: displayObject[selection].playerSeasonBests,
         x: "Manager",
         y: "Fantasy Points Earned",
         stat: "",
+        statCat: 'playerSeasonBests',
         header: "Top Single-Season Points Earners",
         field: "playerPPStart",
         short: "Season Leaders"
     }
+    $: playerSeasonBestGraph.stats = displayObject[selection].playerSeasonBests;
 
     let playerWeekBestGraph = {
-        stats: playerWeekBests,
+        stats: displayObject[selection].playerWeekBests,
         x: "Manager",
         y: "Fantasy Points Earned",
         stat: "",
+        statCat: 'playerWeekBests',
         header: "Top Single-Week Points Earners",
         field: "playerPoints",
         short: "Week Leaders"
     }
+    $: playerWeekBestGraph.stats = displayObject[selection].playerWeekBests;
 
     let playerWeekMissedBestGraph = {
-        stats: playerWeekMissedBests,
+        stats: displayObject[selection].playerWeekMissedBests,
         x: "Manager",
         y: "Fantasy Points Earned",
         stat: "",
+        statCat: 'playerWeekMissedBests',
         header: "Top Benchwarmers",
         field: "benchPoints",
         short: "Benchwarmers"
     }
+    $: playerWeekMissedBestGraph.stats = displayObject[selection].playerWeekMissedBests;
 
     for(let i = 1; i <= numManagers; i++) {
         if(waiversData.find(w => w.recordManID == i)) {
@@ -187,24 +206,28 @@
     }
 
     let tradesGraph = {
-        stats: tradesData,
+        stats: displayObject[selection].tradesData,
         x: "Manager",
         y: "# of trades",
         stat: "",
+        statCat: 'tradesData',
         header: "Trades Managers Have Made",
         field: "trades",
         short: "Trades"
     }
+    $: tradesGraph.stats = displayObject[selection].tradesData;
 
     let waiversGraph = {
-        stats: waiversData,
+        stats: displayObject[selection].waiversData,
         x: "Manager",
         y: "# of Waiver Moves",
         stat: "",
+        statCat: 'waiversData',
         header: "Waivers Managers Have Made",
         field: "waivers",
         short: "Waivers"
     }
+    $: waiversGraph.stats = displayObject[selection].waiversData;
 
     const graphs = [];
 
@@ -1224,7 +1247,7 @@
 </div>
 
 
-<BarChart maxWidth={innerWidth} {graphs} bind:selection={selection} bind:allTime={allTime} bind:curGraph={curGraph} />
+<BarChart maxWidth={innerWidth} {graphs} {displayObject} {leagueManagers} {allManagers} bind:displayYear={displayYear} bind:selection={selection} bind:allTime={allTime} bind:curGraph={curGraph} />
 
 <div class="rankingHolder">
     <div class="rankingInner" style="margin-left: -{100 * curTable}%;">

@@ -49,7 +49,7 @@ export const getLeagueRecords = async (refresh = false) => {
 
 	let curSeason = leagueID;
 
-	let currentManagers;
+	let allManagers = {};
 	
 	let currentYear;
 	let lastYear;
@@ -367,6 +367,10 @@ export const getLeagueRecords = async (refresh = false) => {
 				};
 			}
 
+			if(!allManagers[recordManID]) {
+				allManagers[recordManID] = originalManagers[recordManID];
+			}
+
 			if(roster.settings.wins == 0 && roster.settings.ties == 0 && roster.settings.losses == 0) continue;
 
 			if(!leagueRosterRecords[recordManID]) {
@@ -484,10 +488,6 @@ export const getLeagueRecords = async (refresh = false) => {
 				recordManID,
 			}
 				
-		}
-		
-		if(!currentManagers) {
-			currentManagers = originalManagers;
 		}
 
 		// loop through each week of the season
@@ -2427,7 +2427,7 @@ export const getLeagueRecords = async (refresh = false) => {
 		leagueRosterRecords,
 		leagueWeekRecords: recordArrays.league.alltime.regularSeason.week_Top,
 		leagueRecordArrays: recordArrays.league.alltime,
-		currentManagers,
+		allManagers,
 		currentYear,
 		lastYear
 	};

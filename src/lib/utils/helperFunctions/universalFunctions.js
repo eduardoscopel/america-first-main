@@ -10,12 +10,12 @@ export const round = (num) => {
     return (Math.round((num + Number.EPSILON) * 100) / 100).toFixed(2);
 }
 
-const min = (stats, roundOverride) => {
+export const min = (stats, roundOverride) => {
     const num = Math.min(...stats)
     return Math.floor(num / roundOverride) * roundOverride;
 }
 
-const max = (stats, roundOverride) => {
+export const max = (stats, roundOverride) => {
     const num = Math.max(...stats)
     return Math.ceil(num / roundOverride) * roundOverride;
 }
@@ -71,7 +71,7 @@ export const parseDate = (rawDate) => {
     return stringDate(d);
 }
 
-export const generateGraph = ({stats, x, y, stat, header, field, short, secondField = null}, roundOverride = 10, yMinOverride = null) => {
+export const generateGraph = ({stats, x, y, stat, statCat, header, field, short, secondField = null}, roundOverride = 10, yMinOverride = null) => {
     if(!stats) {
         return null;
     }
@@ -81,6 +81,9 @@ export const generateGraph = ({stats, x, y, stat, header, field, short, secondFi
         managers: [],
         recordManIDs: [],
         labels: {x, y, stat},
+        statCat,
+        field,
+        secondField,
         header,
         yMin: 0,
         yMax: 0,

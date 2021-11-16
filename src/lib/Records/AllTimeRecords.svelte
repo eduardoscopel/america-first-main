@@ -1,8 +1,8 @@
 <script>
-    import {round} from '$lib/utils/helper'
+    import {round} from '$lib/utils/helper';
   	import RecordsAndRankings from './RecordsAndRankings.svelte'; 
 
-    export let masterSelection, leagueRosterRecords, currentManagers, transactionTotals, leagueWeekRecords, leagueRecordArrays;
+    export let masterSelection, leagueRosterRecords, allManagers, transactionTotals, leagueWeekRecords, leagueRecordArrays;
 
     let lineupIQs = [];
     const tradesData = [];
@@ -80,7 +80,7 @@
 
     $: changeSelection(selection);
 
-    const setSelected = (s) => {        
+    const setSelected = (displayStats) => {        
         if(displayStats == 'regular') {
             leagueWeekRecords = leagueRecordArrays.regularSeason.week_Top;
             leagueWeekLows = leagueRecordArrays.regularSeason.week_Low;
@@ -146,23 +146,24 @@
             medianRecords = leagueRecordArrays.combined.managerBests.medianRecords;
         }
         displayObject[displayStats] = {
-            leagueWeekRecords,
-            leagueWeekLows,
-            mostSeasonLongPoints,
+            lineupIQs,
+            weekRecords: leagueWeekRecords,
+            weekLows: leagueWeekLows,
+            seasonLongRecords: mostSeasonLongPoints,
             leastSeasonLongPoints,
-            allTimeEPERecords,
-            allTimeSeasonWorsts,
-            allTimeSeasonBests,
-            allTimeWeekBests,
-            allTimeWeekWorsts,
-            playerATSeasonTOPS,
-            playerATSeasonBests,
-            playerATWeekBests,
-            playerATWeekMissedBests,
-            playerATWeekTOPS,
-            playerATWeekMissedTOPS,
-            allTimeBiggestBlowouts,
-            allTimeClosestMatchups,
+            seasonEPERecords: allTimeEPERecords,
+            seasonWorsts: allTimeSeasonWorsts,
+            seasonBests: allTimeSeasonBests,
+            weekBests: allTimeWeekBests,
+            weekWorsts: allTimeWeekWorsts,
+            playerSeasonTOPS: playerATSeasonTOPS,
+            playerSeasonBests: playerATSeasonBests,
+            playerWeekBests: playerATWeekBests,
+            playerWeekMissedBests: playerATWeekMissedBests,
+            playerWeekTOPS: playerATWeekTOPS,
+            playerWeekMissedTOPS: playerATWeekMissedTOPS,
+            blowouts: allTimeBiggestBlowouts,
+            closestMatchups: allTimeClosestMatchups,
             winPercentages,
             fptsHistories,
             medianRecords,
@@ -202,7 +203,7 @@
 
 <RecordsAndRankings
     {displayObject}
-    {currentManagers}   
+    {allManagers}   
     blowouts={allTimeBiggestBlowouts}
     closestMatchups={allTimeClosestMatchups}
     weekBests={allTimeWeekBests}
