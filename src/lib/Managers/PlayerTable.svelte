@@ -18,12 +18,28 @@
     let selectedYear = currentYear;
 
     let weekBests, weekWorsts, periodBests, periodWorsts, blowoutBests, blowoutWorsts, narrowBests, narrowWorsts, playerWeekBests, playerWeekMissedBests, playerPeriodBests;
+    const positionRecords = {
+        week_Top: {},
+        period_Top: {},
+    };
 
     let managerRecords;
+    const positionsArray = [];
+
     const refreshRecords = async () => {
         const newRecords = await getManagerRecords(managerrecords);
         managerrecords.update(() => newRecords);
         managerRecords = newRecords;
+
+        for(const position in managerRecords.playerPositionRecords.alltime.regularSeason[recordManID]) {
+            if(!positionsArray.includes(position) && managerRecords.playerPositionRecords.alltime.regularSeason[recordManID][position].week_Top.length > 0) {
+                positionsArray.push(position);
+                positionRecords.week_Top[position] = [];
+            }
+            if(managerRecords.playerPositionRecords.alltime.regularSeason[recordManID][position].period_Top.length > 0) {
+                positionRecords.period_Top[position] = [];
+            }
+        }
 
         if(displayStats == 'regular') {
             setRegularTable(managerRecords, displayType, displayYear);
@@ -35,7 +51,6 @@
     }
   
     refreshRecords(managerrecords);
-    
 
     const setRegularTable = (managerRecords, displayType, displayYear) => {
         recordPrefix = "Regular Season";
@@ -56,6 +71,12 @@
             playerWeekBests = managerRecords.managerRecordArrays.alltime.regularSeason.players[recordManID].week_Best;
             playerWeekMissedBests = managerRecords.managerRecordArrays.alltime.regularSeason.players[recordManID].week_MissedBest;
             playerPeriodBests = managerRecords.managerRecordArrays.alltime.regularSeason.players[recordManID].period_Best;
+
+            for(const position in managerRecords.playerPositionRecords.alltime.regularSeason[recordManID]) {
+                positionRecords.week_Top[position] = managerRecords.playerPositionRecords.alltime.regularSeason[recordManID][position].week_Top;
+                positionRecords.period_Top[position] = managerRecords.playerPositionRecords.alltime.regularSeason[recordManID][position].period_Top;
+            }
+
         } else if(displayType == 'yearly') {
             masterPrefix = displayYear;
             masterSelection = 'yearly';
@@ -70,6 +91,11 @@
             playerWeekBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason.players[recordManID].week_Best;
             playerWeekMissedBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason.players[recordManID].week_MissedBest;
             playerPeriodBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason.players[recordManID].period_Best;
+
+            for(const position in managerRecords.playerPositionRecords.alltime.regularSeason[recordManID]) {
+                positionRecords.week_Top[position] = managerRecords.playerPositionRecords.years[displayYear].regularSeason[recordManID][position].week_Top;
+                positionRecords.period_Top[position] = managerRecords.playerPositionRecords.years[displayYear].regularSeason[recordManID][position].period_Top;
+            }
         }
     }
 
@@ -92,6 +118,11 @@
             playerWeekBests = managerRecords.managerRecordArrays.alltime.playoffs.players[recordManID].week_Best;
             playerWeekMissedBests = managerRecords.managerRecordArrays.alltime.playoffs.players[recordManID].week_MissedBest;
             playerPeriodBests = managerRecords.managerRecordArrays.alltime.playoffs.players[recordManID].period_Best;
+
+            for(const position in managerRecords.playerPositionRecords.alltime.playoffs[recordManID]) {
+                positionRecords.week_Top[position] = managerRecords.playerPositionRecords.alltime.playoffs[recordManID][position].week_Top;
+                positionRecords.period_Top[position] = managerRecords.playerPositionRecords.alltime.playoffs[recordManID][position].period_Top;
+            }
         } else if(displayType == 'yearly' && managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID]) {
             showEmpty = false;
             masterPrefix = displayYear;
@@ -107,6 +138,11 @@
             playerWeekBests = managerRecords.managerRecordArrays.alltime.playoffs.players[recordManID].week_Best;
             playerWeekMissedBests = managerRecords.managerRecordArrays.years[displayYear].playoffs.players[recordManID].week_MissedBest;
             playerPeriodBests = managerRecords.managerRecordArrays.years[displayYear].playoffs.players[recordManID].period_Best;
+
+            for(const position in managerRecords.playerPositionRecords.alltime.playoffs[recordManID]) {
+                positionRecords.week_Top[position] = managerRecords.playerPositionRecords.years[displayYear].playoffs[recordManID][position].week_Top;
+                positionRecords.period_Top[position] = managerRecords.playerPositionRecords.years[displayYear].playoffs[recordManID][position].period_Top;
+            }
         } else if(displayType == 'alltime' && !managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID]) {
             showEmpty = true;
             emptyMessage = "No Playoff Records Yet...";
@@ -139,6 +175,11 @@
             playerWeekBests = managerRecords.managerRecordArrays.alltime.combined.players[recordManID].week_Best;
             playerWeekMissedBests = managerRecords.managerRecordArrays.alltime.combined.players[recordManID].week_MissedBest;
             playerPeriodBests = managerRecords.managerRecordArrays.alltime.combined.players[recordManID].period_Best;
+
+            for(const position in managerRecords.playerPositionRecords.alltime.combined[recordManID]) {
+                positionRecords.week_Top[position] = managerRecords.playerPositionRecords.alltime.combined[recordManID][position].week_Top;
+                positionRecords.period_Top[position] = managerRecords.playerPositionRecords.alltime.combined[recordManID][position].period_Top;
+            }
         } else if(displayType == 'yearly') {
             masterPrefix = displayYear;
             masterSelection = 'yearly';
@@ -153,6 +194,11 @@
             playerWeekBests = managerRecords.managerRecordArrays.years[displayYear].combined.players[recordManID].week_Best;
             playerWeekMissedBests = managerRecords.managerRecordArrays.years[displayYear].combined.players[recordManID].week_MissedBest;
             playerPeriodBests = managerRecords.managerRecordArrays.years[displayYear].combined.players[recordManID].period_Best;
+
+            for(const position in managerRecords.playerPositionRecords.alltime.combined[recordManID]) {
+                positionRecords.week_Top[position] = managerRecords.playerPositionRecords.years[displayYear].combined[recordManID][position].week_Top;
+                positionRecords.period_Top[position] = managerRecords.playerPositionRecords.years[displayYear].combined[recordManID][position].period_Top;
+            }
         }
     }
 
@@ -225,9 +271,17 @@
             displayPlayerRecord = 'season';
         } else if(playerType == 'bench') {
             displayPlayerRecord = 'bench';
+        } else if(playerType == 'position') {
+            displayPlayerRecord = 'position';
         }
     }
     $: changePlayerRecord(displayPlayerRecord);
+
+    let displayPositionRecord = 'RB';
+    const changePositionRecord = (positionType) => {
+        displayPositionRecord = positionType;
+    }
+    $: changePositionRecord(displayPositionRecord);
 
 </script>
 
@@ -939,6 +993,9 @@
                         <Button class="selectionButtons" on:click={() => changePlayerRecord('bench')} variant="{displayPlayerRecord == 'bench' ? "raised" : "outlined"}">
                             <Label>Benchwarmers</Label>
                         </Button>
+                        <Button class="selectionButtons" on:click={() => changePlayerRecord('position')} variant="{displayPlayerRecord == 'position' ? "raised" : "outlined"}">
+                            <Label>Positions</Label>
+                        </Button>
                     </Group>
                 </div>
                 {#if showEmpty == false}
@@ -1077,6 +1134,104 @@
                                 </Body>
                             </DataTable>
                         {/if}
+                    {:else if displayPlayerRecord == 'position'}
+                        <div class="buttonHolder">
+                            <Group variant="outlined">
+                                {#each positionsArray as position}
+                                    <Button class="selectionButtons" on:click={() => changePositionRecord(position)} variant="{displayPositionRecord == position ? "raised" : "outlined"}">
+                                        <Label>{position}</Label>
+                                    </Button>
+                                {/each}
+                            </Group>
+                        </div>
+                        {#if showEmpty == false}
+                            {#if positionRecords.week_Top[displayPositionRecord] && positionRecords.week_Top[displayPositionRecord].length}
+                                <DataTable class="recordTable">
+                                    <Head>
+                                        <Row>
+                                            <Cell class="header" colspan=6>
+                                                <p>
+                                                    Top 10 Week Scores - {displayPositionRecord}<br>
+                                                    {recordPrefix} 
+                                                </p>
+                                            </Cell>                  
+                                        </Row>
+                                        <Row>
+                                            <Cell class="header rank"></Cell>
+                                            <div class="playerAvatar playerInfo" />
+                                            <Cell class="header">Player</Cell>
+                                            <Cell class="header">NFL Team</Cell>
+                                            {#if masterSelection == 'alltime'}
+                                                <Cell class="header">Year</Cell>
+                                            {/if}
+                                            <Cell class="header">Week</Cell>
+                                            <Cell class="header">PF</Cell>
+                                        </Row>
+                                    </Head>
+                                    <Body>
+                                        {#each positionRecords.week_Top[displayPositionRecord] as positionPlayer, ix}
+                                            <Row>
+                                                <Cell class="rank">{ix + 1}</Cell>
+                                                <div class="playerAvatar playerInfo" style="{positionPlayer.avatar}" />
+                                                <Cell class="left">{positionPlayer.playerInfo.fn} {positionPlayer.playerInfo.ln}</Cell>
+                                                <Cell class="center">{positionPlayer.playerInfo.t}</Cell>
+                                                {#if masterSelection == 'alltime'}
+                                                    <Cell class="center">{positionPlayer.year}</Cell>
+                                                {/if}
+                                                <Cell class="center">{positionPlayer.week}</Cell>
+                                                <Cell class="center">{round(positionPlayer.playerPoints)}</Cell>
+                                            </Row>
+                                        {/each}
+                                    </Body>
+                                </DataTable>
+                            {/if}
+                            {#if positionRecords.period_Top[displayPositionRecord] && positionRecords.period_Top[displayPositionRecord].length}
+                                <DataTable class="recordTable">
+                                    <Head>
+                                        <Row>
+                                            <Cell class="header" colspan=9>
+                                                <p>
+                                                    Top 10 Season-Long Scores – {displayPositionRecord}<br>
+                                                    {recordPrefix} 
+                                                </p>
+                                            </Cell>                  
+                                        </Row>
+                                        <Row>
+                                            <Cell class="header rank"></Cell>
+                                            <div class="playerAvatar playerInfo" />
+                                            <Cell class="header">Player</Cell>
+                                            <Cell class="header">NFL Team</Cell>
+                                            {#if masterSelection == 'alltime'}
+                                                <Cell class="header">Year</Cell>
+                                            {/if}
+                                            <Cell class="header">Led Team</Cell>
+                                            <Cell class="header">Avg Rank</Cell>
+                                            <Cell class="header">Starts</Cell>
+                                            <Cell class="header">PF</Cell>
+                                            <Cell class="header">PPG</Cell>
+                                        </Row>
+                                    </Head>
+                                    <Body>
+                                        {#each positionRecords.period_Top[displayPositionRecord] as positionPlayer, ix}
+                                            <Row>
+                                                <Cell class="rank">{ix + 1}</Cell>
+                                                <div class="playerAvatar playerInfo" style="{positionPlayer.avatar}" />
+                                                <Cell class="left">{positionPlayer.playerInfo.fn} {positionPlayer.playerInfo.ln}</Cell>
+                                                <Cell class="center">{positionPlayer.playerInfo.t}</Cell>
+                                                {#if masterSelection == 'alltime'}
+                                                    <Cell class="center">{positionPlayer.year}</Cell>
+                                                {/if}
+                                                <Cell class="center">{positionPlayer.topStarters}</Cell>
+                                                <Cell class="center">{round(positionPlayer.starterRankAVG)}</Cell>
+                                                <Cell class="center">{positionPlayer.weeksStarted} / {positionPlayer.weeksOwned}</Cell>
+                                                <Cell class="center">{round(positionPlayer.playerPoints)}</Cell>
+                                                <Cell class="center">{round(positionPlayer.playerPPStart)}</Cell>
+                                            </Row>
+                                        {/each}
+                                    </Body>
+                                </DataTable>
+                            {/if}
+                        {/if}
                     {/if}
                 {:else}
                     <div class="showEmpty">{emptyMessage}</div>
@@ -1085,57 +1240,3 @@
         </div>
     </div>
 </div>
-
-
-
-
-
-
-
-
-<!-- <div class="fullFlex"> -->
-        <!-- <DataTable class="recordTable">
-            <Head>
-                <Row>
-                    <Cell class="header" colspan=9>
-                        <p>
-                            Top 10 Week Scores – Players<br>
-                            {prefix} – {recordPrefix} 
-                        </p>
-                    </Cell>                  
-                </Row>
-                <Row>
-                    <Cell class="header rank"></Cell>
-                    <div class="playerAvatar playerInfo" />
-                    <Cell class="header">Player</Cell>
-                    <Cell class="header">POS</Cell>
-                    <Cell class="header">NFL Team</Cell>
-                    <Cell class="header">Manager</Cell>
-                    <Cell class="header">Year</Cell>
-                    <Cell class="header">Week</Cell>
-                    <Cell class="header">Rank</Cell>
-                    <Cell class="header">PF</Cell>
-                </Row>
-            </Head>
-            <Body>
-                {#each playerWeekBests as playerWeekBest, ix}
-                    <Row>
-                        <Cell class="rank">{ix + 1}</Cell>
-                        <div class="playerAvatar playerInfo" style="{playerWeekBest.avatar}" />
-                        <Cell class="left">{playerWeekBest.playerInfo.fn} {playerWeekBest.playerInfo.ln}</Cell>
-                        <Cell class="center">{playerWeekBest.playerInfo.pos}</Cell>
-                        <Cell class="center">{playerWeekBest.playerInfo.t}</Cell>
-                        <Cell class="cellName" on:click={() => gotoManager(playerWeekBest.recordManID)}>
-                            {playerWeekBest.manager.realname}
-                                <div class="fantasyTeamName">({playerWeekBest.manager.name})</div>
-                        </Cell>
-                        <Cell class="center">{playerWeekBest.year}</Cell>
-                        <Cell class="center">{playerWeekBest.week}</Cell>
-                        <Cell class="center">{playerWeekBest.starterRank}</Cell>
-                        <Cell class="center">{round(playerWeekBest.playerPoints)}</Cell>
-                    </Row>
-                {/each}
-            </Body>
-        </DataTable> -->
-
-<!-- </div> -->
