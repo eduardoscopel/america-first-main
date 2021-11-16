@@ -137,13 +137,15 @@
     }
     $: changeYear(selectedYear);
 
+    let displayObject = {};
+    let selection = 'regular';
     const changeSelection = (selection, displayYear) => {
         displayStats = selection;
+        displayObject[selection] = {};
         let yearArrays = setSelected(displayStats, displayYear);
         return yearArrays;
     }
     $: yearArrays = changeSelection(selection, displayYear);
-
 
     const setSelected = (displayStats, displayYear) => {
         let waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, seasonLongLows, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekTOPS, playerWeekBests, playerWeekMissedBests, playerWeekMissedTOPS;
@@ -245,10 +247,34 @@
             playerWeekTOPS = arraysObj[key].combined.players.week_Top;
             playerWeekMissedTOPS = arraysObj[key].combined.players.week_MissedTop;
         }
+
+        displayObject[displayStats] = {
+            weekRecords,
+            weekLows,
+            seasonLongRecords,
+            seasonLongLows,
+            seasonEPERecords,
+            seasonWorsts,
+            seasonBests,
+            weekBests,
+            weekWorsts,
+            playerSeasonTOPS,
+            playerSeasonBests,
+            playerWeekBests,
+            playerWeekMissedBests,
+            playerWeekTOPS,
+            playerWeekMissedTOPS,
+            blowouts,
+            closestMatchups,
+            winPercentages,
+            fptsHistories,
+            medianRecords,
+            tradesData,
+            waiversData,
+        }
+
         return {waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, seasonLongLows, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekTOPS, playerWeekBests, playerWeekMissedBests, playerWeekMissedTOPS};
     }
-    let selection = 'regular';
-
 
 </script>
 
@@ -304,8 +330,8 @@
     {/if}  
 </div>
 
-<!-- {#each years as {waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, seasonLongLows, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, year, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekTOPS, playerWeekBests, playerWeekMissedBests, playerWeekMissedTOPS}, ix} -->
     <RecordsAndRankings
+        {displayObject}
         waiversData = {yearArrays.waiversData}
         tradesData = {yearArrays.tradesData}
         weekRecords = {yearArrays.weekRecords}
@@ -336,4 +362,3 @@
         bind:selection={selection}
         bind:masterSelection={masterSelection} 
     />
-<!-- {/each} -->

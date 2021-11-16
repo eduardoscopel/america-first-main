@@ -6,13 +6,12 @@
 
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table'; 
 
-    export let selection = 'regular', masterSelection, waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerWeekTOPS, currentManagers, allTime=false;
+    export let selection = 'regular', masterSelection, waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerWeekTOPS, currentManagers, displayObject, allTime=false;
 
     let leagueManagers = {};
     const numManagers = managers.length;
 
     let masterPrefix;
-    // let selectedYear = currentYear;
 
     const changeSelection = (s) => {
         selection = s;
@@ -49,7 +48,7 @@
 		leagueManagers[manager.roster].push(entryMan);
 	}
 
-    const lineupIQGraph = {
+    let lineupIQGraph = {
         stats: lineupIQs,
         x: "Manager",
         y: "Lineup IQ",
@@ -59,7 +58,7 @@
         short: "Lineup IQ"
     }
 
-    const potentialPointsGraph = {
+    let potentialPointsGraph = {
         stats: lineupIQs,
         x: "Manager",
         y: "Points",
@@ -70,8 +69,8 @@
         short: "Potential Points"
     }
 
-    const winsGraph = {
-        stats: winPercentages,
+    let winsGraph = {
+        stats: displayObject[selection].winPercentages,
         x: "Manager",
         y: "Wins",
         stat: "",
@@ -80,8 +79,8 @@
         short: "Wins"
     }
 
-    const winPercentagesGraph = {
-        stats: winPercentages,
+    let winPercentagesGraph = {
+        stats: displayObject[selection].winPercentages,
         x: "Manager",
         y: "Win Percentage",
         stat: "%",
@@ -90,7 +89,7 @@
         short: "Win Percentage"
     }
 
-    const fptsHistoriesGraph = {
+    let fptsHistoriesGraph = {
         stats: fptsHistories,
         x: "Manager",
         y: "Fantasy Points",
@@ -100,7 +99,7 @@
         short: "Fantasy Points"
     }
 
-    const medianRecordsGraph = {
+    let medianRecordsGraph = {
         stats: medianRecords,
         x: "Manager",
         y: "Win Percentage",
@@ -109,8 +108,8 @@
         field: "medianPerc",
         short: "Par Records"
     }
-    
-    const fptsSeasonBestGraph = {
+
+    let fptsSeasonBestGraph = {
         stats: seasonBests, //fptsSeasonBest
         x: "Manager",
         y: "Fantasy Points",
@@ -120,8 +119,8 @@
 	    // secondField: "fptsFor",
         short: "Season Records"
     }
-	
-    const fptsWeekBestGraph = {
+
+    let fptsWeekBestGraph = {
         stats: weekBests,
         // secondStats: weekWorsts, 
         x: "Manager",
@@ -133,8 +132,8 @@
         // yMinOverride: 0,
         short: "Weekly Records"
     }
-		
-    const epeWinPercGraph = {
+
+    let epeWinPercGraph = {
         stats: seasonEPERecords,
         x: "Manager",
         y: "EPE Win Percentage",
@@ -144,7 +143,7 @@
         short: "EPE Records"
     }
 
-    const playerSeasonBestGraph = {
+    let playerSeasonBestGraph = {
         stats: playerSeasonBests,
         x: "Manager",
         y: "Fantasy Points Earned",
@@ -154,7 +153,7 @@
         short: "Season Leaders"
     }
 
-    const playerWeekBestGraph = {
+    let playerWeekBestGraph = {
         stats: playerWeekBests,
         x: "Manager",
         y: "Fantasy Points Earned",
@@ -164,7 +163,7 @@
         short: "Week Leaders"
     }
 
-    const playerWeekMissedBestGraph = {
+    let playerWeekMissedBestGraph = {
         stats: playerWeekMissedBests,
         x: "Manager",
         y: "Fantasy Points Earned",
@@ -187,7 +186,7 @@
         }
     }
 
-    const tradesGraph = {
+    let tradesGraph = {
         stats: tradesData,
         x: "Manager",
         y: "# of trades",
@@ -197,7 +196,7 @@
         short: "Trades"
     }
 
-    const waiversGraph = {
+    let waiversGraph = {
         stats: waiversData,
         x: "Manager",
         y: "# of Waiver Moves",
@@ -206,7 +205,7 @@
         field: "waivers",
         short: "Waivers"
     }
-    
+
     const graphs = [];
 
     if(lineupIQs[0]?.potentialPoints) {
@@ -263,6 +262,7 @@
         "Week Leaders",
         "Benchwarmers",
     ]
+
     if(!lineupIQs[0]?.potentialPoints) {
         iqOffset = 1;
     } else {
@@ -504,6 +504,10 @@
         text-align: center;
         margin: 2em 0;
         width: 100%;
+        display: inline-flex;
+        position: relative;
+        align-items: center;
+        justify-content: center;
     }
 
     :global(.cellName) {
@@ -677,6 +681,7 @@
         display: inline-flex;
         flex-direction: row;
         width: 100%;
+        justify-content: center;
     }
 
     .columnWrap {
@@ -719,7 +724,7 @@
 </div>
 
 <div class="recordsWrap">
-    <div class="columnWrap" style="{!allTime ? "width: 100%;" : null}">
+    <div class="columnWrap" style="{!allTime ? "width: 98%;" : null}">
         <div class="buttonHolder">
             <Group variant="outlined">
                 <Button class="selectionButtons" on:click={() => changeWeekRecord('high')} variant="{displayWeekRecord == 'high' ? "raised" : "outlined"}">
@@ -910,7 +915,7 @@
 </div>
 
 <div class="recordsWrap">
-    <div class="columnWrap" style="width: 100%;">
+    <div class="columnWrap" style="width: 98%;">
         <div class="buttonHolder">
             <Group variant="outlined">
                 <Button class="selectionButtons" on:click={() => changeMarginRecord('blowout')} variant="{displayMarginRecord == 'blowout' ? "raised" : "outlined"}">
@@ -1040,7 +1045,7 @@
 </div>
 
 <div class="recordsWrap">
-    <div class="columnWrap" style="width: 100%;">
+    <div class="columnWrap" style="width: 98%;">
         <div class="buttonHolder">
             <Group variant="outlined">
                 <Button class="selectionButtons" on:click={() => changePlayerRecord('week')} variant="{displayPlayerRecord == 'week' ? "raised" : "outlined"}">
@@ -1214,9 +1219,12 @@
     </div>
 </div>
 
-<h4>{prefix} Rankings</h4>
+<div class="headerRow">
+    <div class="headerLabel" style="justify-content: center">{prefix} Rankings</div>
+</div>
 
-<BarChart maxWidth={innerWidth} {graphs} bind:curGraph={curGraph} />
+
+<BarChart maxWidth={innerWidth} {graphs} bind:selection={selection} bind:allTime={allTime} bind:curGraph={curGraph} />
 
 <div class="rankingHolder">
     <div class="rankingInner" style="margin-left: -{100 * curTable}%;">
@@ -1808,13 +1816,20 @@
         </div>
     </div>
 </div>
-
-<div class="buttonHolder">
-    <Group variant="outlined">
-        {#each tables as table, ix}
-            <Button class="selectionButtons" on:click={() => curTable = ix} variant="{curTable == ix ? "raised" : "outlined"}">
-                <Label>{table}</Label>
-            </Button>
-        {/each}
-    </Group>
+<div class="recordsWrap">
+    <div class="columnWrap" style="width: 98%; flex-wrap: wrap;">
+        <div class="buttonHolder">
+            <Group variant="outlined">
+                {#each tables as table, ix}
+                    {#if (table == "Season Highs" || table == "Season Lows") && !allTime}
+                        <div></div>
+                    {:else}
+                        <Button class="selectionButtons" on:click={() => curTable = ix} variant="{curTable == ix ? "raised" : "outlined"}">
+                            <Label>{table}</Label>
+                        </Button>
+                    {/if}
+                {/each}
+            </Group>
+        </div>
+    </div>
 </div>

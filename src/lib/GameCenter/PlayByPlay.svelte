@@ -341,60 +341,118 @@
                 }
                 // TO-DO: other non-defensive-score-hurting touchdowns                                      TEAM DEF POINTS ALLOWED
                 if((play.scoreAgainstOppDEF == true || play.scoreAgainstDEF == true) && (homeDefStarted == true || awayDefStarted == true)) {
-                    if(play.team == homeTeam && ((play.scoreAgainstDEF == true && awayDefStarted == true) || (play.scoreAgainstOppDEF == true && homeDefStarted == true))) {
-                        let oldAwayDefPtsAllowed = awayDefPtsAllowed - play.scoreValue;
-                        let curDEFscore = calculateDefPointsAllowed(awayDefPtsAllowed);
-                        let oldDEFscore = calculateDefPointsAllowed(oldAwayDefPtsAllowed);
-                        const defense = awayDefense;
-                        const fpts = curDEFscore.DEFscore - oldDEFscore.DEFscore;
-                        const statPTS = 'PTS ALW:';
-                        const entryDEF = {
-                            order: play.order,
-                            side: 'defense',
-                            manager: defense.owner,
-                            playerInfo: defense,
-                            stat: [curDEFscore.DEFthreshold],
-                            runningTotals: [],
-                            fpts,
-                            description: play.description,
-                            shortDesc: curDEFscore.DEFdescription,
-                        }   
-                        if(score.pts_allow) {
-                            entryDEF.stat.push('pts_allow');
-                        } 
-                        if(fpts != 0) {
-                            let runningTotal = pushRunningTotal(fpts, statPTS, curDEFscore.DEFthreshold, awayDefPtsAllowed, defense.playerID, defense.pos); 
-                            entryDEF.runningTotals.push(runningTotal);
-                            fantasyPlay[play.playID].push(entryDEF);
+                    if(play.team == homeTeam) {
+                        if(play.scoreAgainstDEF == true && awayDefStarted == true) {
+                            let oldAwayDefPtsAllowed = awayDefPtsAllowed - play.scoreValueAgainstDEF;
+                            let curDEFscore = calculateDefPointsAllowed(awayDefPtsAllowed);
+                            let oldDEFscore = calculateDefPointsAllowed(oldAwayDefPtsAllowed);
+                            const defense = awayDefense;
+                            const fpts = curDEFscore.DEFscore - oldDEFscore.DEFscore;
+                            const statPTS = 'PTS ALW:';
+                            const entryDEF = {
+                                order: play.order,
+                                side: 'defense',
+                                manager: defense.owner,
+                                playerInfo: defense,
+                                stat: [curDEFscore.DEFthreshold],
+                                runningTotals: [],
+                                fpts,
+                                description: play.description,
+                                shortDesc: curDEFscore.DEFdescription,
+                            }   
+                            if(score.pts_allow) {
+                                entryDEF.stat.push('pts_allow');
+                            } 
+                            if(fpts != 0) {
+                                let runningTotal = pushRunningTotal(fpts, statPTS, curDEFscore.DEFthreshold, awayDefPtsAllowed, defense.playerID, defense.pos); 
+                                entryDEF.runningTotals.push(runningTotal);
+                                fantasyPlay[play.playID].push(entryDEF);
+                            }
+                            awayDefPtsAllowed = oldAwayDefPtsAllowed;
+                        } else if(play.scoreAgainstOppDEF == true && homeDefStarted == true) {
+                            let oldHomeDefPtsAllowed = homeDefPtsAllowed - play.scoreValueAgainstOppDEF;
+                            let curDEFscore = calculateDefPointsAllowed(homeDefPtsAllowed);
+                            let oldDEFscore = calculateDefPointsAllowed(oldHomeDefPtsAllowed);
+                            const defense = homeDefense;
+                            const fpts = curDEFscore.DEFscore - oldDEFscore.DEFscore;
+                            const statPTS = 'PTS ALW:';
+                            const entryDEF = {
+                                order: play.order,
+                                side: 'defense',
+                                manager: defense.owner,
+                                playerInfo: defense,
+                                stat: [curDEFscore.DEFthreshold],
+                                runningTotals: [],
+                                fpts,
+                                description: play.description,
+                                shortDesc: curDEFscore.DEFdescription,
+                            }   
+                            if(score.pts_allow) {
+                                entryDEF.stat.push('pts_allow');
+                            } 
+                            if(fpts != 0) {
+                                let runningTotal = pushRunningTotal(fpts, statPTS, curDEFscore.DEFthreshold, homeDefPtsAllowed, defense.playerID, defense.pos); 
+                                entryDEF.runningTotals.push(runningTotal);
+                                fantasyPlay[play.playID].push(entryDEF);
+                            }
+                            homeDefPtsAllowed = oldHomeDefPtsAllowed;     
                         }
-                        awayDefPtsAllowed = oldAwayDefPtsAllowed;
-                    } else if(play.team == awayTeam && ((play.scoreAgainstDEF == true && homeDefStarted == true) || (play.scoreAgainstOppDEF == true && awayDefStarted == true))) {
-                        let oldHomeDefPtsAllowed = homeDefPtsAllowed - play.scoreValue;
-                        let curDEFscore = calculateDefPointsAllowed(homeDefPtsAllowed);
-                        let oldDEFscore = calculateDefPointsAllowed(oldHomeDefPtsAllowed);
-                        const defense = homeDefense;
-                        const fpts = curDEFscore.DEFscore - oldDEFscore.DEFscore;
-                        const statPTS = 'PTS ALW:';
-                        const entryDEF = {
-                            order: play.order,
-                            side: 'defense',
-                            manager: defense.owner,
-                            playerInfo: defense,
-                            stat: [curDEFscore.DEFthreshold],
-                            runningTotals: [],
-                            fpts,
-                            description: play.description,
-                            shortDesc: curDEFscore.DEFdescription,
-                        }   
-                        if(score.pts_allow) {
-                            entryDEF.stat.push('pts_allow');
-                        } 
-                        if(fpts != 0) {
-                            let runningTotal = pushRunningTotal(fpts, statPTS, curDEFscore.DEFthreshold, homeDefPtsAllowed, defense.playerID, defense.pos); 
-                            entryDEF.runningTotals.push(runningTotal);
-                            fantasyPlay[play.playID].push(entryDEF);
+                    } else if(play.team == awayTeam) {
+                        if(play.scoreAgainstDEF == true && homeDefStarted == true) {
+                            let oldHomeDefPtsAllowed = homeDefPtsAllowed - play.scoreValueAgainstDEF;
+                            let curDEFscore = calculateDefPointsAllowed(homeDefPtsAllowed);
+                            let oldDEFscore = calculateDefPointsAllowed(oldHomeDefPtsAllowed);
+                            const defense = homeDefense;
+                            const fpts = curDEFscore.DEFscore - oldDEFscore.DEFscore;
+                            const statPTS = 'PTS ALW:';
+                            const entryDEF = {
+                                order: play.order,
+                                side: 'defense',
+                                manager: defense.owner,
+                                playerInfo: defense,
+                                stat: [curDEFscore.DEFthreshold],
+                                runningTotals: [],
+                                fpts,
+                                description: play.description,
+                                shortDesc: curDEFscore.DEFdescription,
+                            }   
+                            if(score.pts_allow) {
+                                entryDEF.stat.push('pts_allow');
+                            } 
+                            if(fpts != 0) {
+                                let runningTotal = pushRunningTotal(fpts, statPTS, curDEFscore.DEFthreshold, homeDefPtsAllowed, defense.playerID, defense.pos); 
+                                entryDEF.runningTotals.push(runningTotal);
+                                fantasyPlay[play.playID].push(entryDEF);
+                            }
+                            homeDefPtsAllowed = oldHomeDefPtsAllowed;     
+                        } else if(play.scoreAgainstOppDEF == true && awayDefStarted == true) {
+                            let oldAwayDefPtsAllowed = awayDefPtsAllowed - play.scoreValueAgainstOppDEF;
+                            let curDEFscore = calculateDefPointsAllowed(awayDefPtsAllowed);
+                            let oldDEFscore = calculateDefPointsAllowed(oldAwayDefPtsAllowed);
+                            const defense = awayDefense;
+                            const fpts = curDEFscore.DEFscore - oldDEFscore.DEFscore;
+                            const statPTS = 'PTS ALW:';
+                            const entryDEF = {
+                                order: play.order,
+                                side: 'defense',
+                                manager: defense.owner,
+                                playerInfo: defense,
+                                stat: [curDEFscore.DEFthreshold],
+                                runningTotals: [],
+                                fpts,
+                                description: play.description,
+                                shortDesc: curDEFscore.DEFdescription,
+                            }   
+                            if(score.pts_allow) {
+                                entryDEF.stat.push('pts_allow');
+                            } 
+                            if(fpts != 0) {
+                                let runningTotal = pushRunningTotal(fpts, statPTS, curDEFscore.DEFthreshold, awayDefPtsAllowed, defense.playerID, defense.pos); 
+                                entryDEF.runningTotals.push(runningTotal);
+                                fantasyPlay[play.playID].push(entryDEF);
+                            }
+                            awayDefPtsAllowed = oldAwayDefPtsAllowed;
                         }
-                        homeDefPtsAllowed = oldHomeDefPtsAllowed;     
                     }
                 }
                 if(play.relevantDEF.length > 0) {                   // TEAM DEF/ST FPTS
@@ -1986,6 +2044,8 @@
                         let scoringPlay = new Boolean (false);
                         let scoreAgainstDEF = new Boolean (false);
                         let scoreAgainstOppDEF = new Boolean (false);
+                        let scoreValueAgainstDEF = 0;
+                        let scoreValueAgainstOppDEF = 0;
                         let scoringType = null;
                         let scoreValue = 0;
                         if(play.scoreValue > 0) {
@@ -2006,9 +2066,21 @@
                                 } else {
                                     awayDefPtsAllowed += scoreValue;
                                 }
+                                scoreValueAgainstOppDEF = scoreValue;
                             } else if(play.type.id == 36 || play.type.id == 39 || play.type.id == 29) {     // pick 6 / fumble 6
-                                scoreAgainstDEF = false;
-                                scoreAgainstOppDEF = false;
+                                if(scoreValue == 6) {
+                                    scoreAgainstDEF = false;
+                                    scoreAgainstOppDEF = false;
+                                } else if(scoreValue > 6) {
+                                    scoreAgainstDEF = true;
+                                    scoreAgainstOppDEF = false;
+                                    if(playTeam == homeEspn) {
+                                        awayDefPtsAllowed += scoreValue - 6;
+                                    } else {
+                                        homeDefPtsAllowed += scoreValue - 6;
+                                    }
+                                    scoreValueAgainstDEF = scoreValue - 6;
+                                } 
                             } else {
                                 scoreAgainstDEF = true;
                                 scoreAgainstOppDEF = false;
@@ -2017,6 +2089,7 @@
                                 } else {
                                     homeDefPtsAllowed += scoreValue;
                                 }
+                                scoreValueAgainstDEF = scoreValue;
                             }
                         }
                         // the play object with all necessary info
@@ -2030,6 +2103,8 @@
                             scoringPlay,
                             scoringType,
                             scoreValue,
+                            scoreValueAgainstDEF,
+                            scoreValueAgainstOppDEF,
                             yards: play.statYardage,
                             relevantPlayers: [],
                             relevantDEF: [],
@@ -2288,6 +2363,8 @@
                     let scoringPlay = new Boolean (false);
                     let scoreAgainstDEF = new Boolean (false);
                     let scoreAgainstOppDEF = new Boolean (false);
+                    let scoreValueAgainstDEF = 0;
+                    let scoreValueAgainstOppDEF = 0;
                     let scoringType = null;
                     let scoreValue = 0;
                     if(play.scoreValue > 0) {
@@ -2308,9 +2385,21 @@
                             } else {
                                 awayDefPtsAllowed += scoreValue;
                             }
+                            scoreValueAgainstOppDEF = scoreValue;
                         } else if(play.type.id == 36 || play.type.id == 39 || play.type.id == 29) {    // pick 6 / fumble 6
-                            scoreAgainstDEF = false;
-                            scoreAgainstOppDEF = false;
+                            if(scoreValue == 6) {
+                                scoreAgainstDEF = false;
+                                scoreAgainstOppDEF = false;
+                            } else if(scoreValue > 6) {
+                                scoreAgainstDEF = false;
+                                scoreAgainstOppDEF = true;
+                                if(playTeam == homeEspn) {
+                                    homeDefPtsAllowed += scoreValue - 6;
+                                } else {
+                                    awayDefPtsAllowed += scoreValue - 6;
+                                }
+                                scoreValueAgainstOppDEF = scoreValue - 6;
+                            } 
                         } else {
                             scoreAgainstDEF = true;
                             scoreAgainstOppDEF = false;
@@ -2319,6 +2408,7 @@
                             } else {
                                 homeDefPtsAllowed += scoreValue;
                             }
+                            scoreValueAgainstDEF = scoreValue;
                         }
                     }
                     // the play object with all necessary info
@@ -2332,6 +2422,8 @@
                         scoringPlay,
                         scoringType,
                         scoreValue,
+                        scoreValueAgainstDEF,
+                        scoreValueAgainstOppDEF,
                         yards: play.statYardage,
                         relevantPlayers: [],
                         relevantDEF: [],

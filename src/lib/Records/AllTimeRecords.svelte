@@ -2,7 +2,7 @@
     import {round} from '$lib/utils/helper'
   	import RecordsAndRankings from './RecordsAndRankings.svelte'; 
 
-    export let selection, masterSelection, leagueRosterRecords, currentManagers, transactionTotals, leagueWeekRecords, leagueRecordArrays;
+    export let masterSelection, leagueRosterRecords, currentManagers, transactionTotals, leagueWeekRecords, leagueRecordArrays;
 
     let lineupIQs = [];
     const tradesData = [];
@@ -69,33 +69,18 @@
     let allTimeWeekBests = leagueRecordArrays.regularSeason.managerBests.week_Best;
     let allTimeWeekWorsts = leagueRecordArrays.regularSeason.managerBests.week_Worst;
 
-    let showRegular = new Boolean (true);
-    let showPlayoffs = new Boolean (false);
-    let showCombined = new Boolean (false);
     let displayStats;
-
+    let selection = 'regular';
+    let displayObject = {};
     const changeSelection = (selection) => {
-        if(selection == 'regular') {
-            showRegular = true;
-            showPlayoffs = false;
-            showCombined = false;
-        } else if(selection == 'playoffs') {
-            showRegular = false;
-            showPlayoffs = true;
-            showCombined = false;
-
-        } else if(selection == 'combined') {
-            showRegular = false;
-            showPlayoffs = false;
-            showCombined = true;
-        }
         displayStats = selection;
+        displayObject[selection] = {};
         setSelected(displayStats);
     }
 
     $: changeSelection(selection);
 
-    const setSelected = (s) => {
+    const setSelected = (s) => {        
         if(displayStats == 'regular') {
             leagueWeekRecords = leagueRecordArrays.regularSeason.week_Top;
             leagueWeekLows = leagueRecordArrays.regularSeason.week_Low;
@@ -160,6 +145,30 @@
             fptsHistories = leagueRecordArrays.combined.managerBests.cumulativePoints;
             medianRecords = leagueRecordArrays.combined.managerBests.medianRecords;
         }
+        displayObject[displayStats] = {
+            leagueWeekRecords,
+            leagueWeekLows,
+            mostSeasonLongPoints,
+            leastSeasonLongPoints,
+            allTimeEPERecords,
+            allTimeSeasonWorsts,
+            allTimeSeasonBests,
+            allTimeWeekBests,
+            allTimeWeekWorsts,
+            playerATSeasonTOPS,
+            playerATSeasonBests,
+            playerATWeekBests,
+            playerATWeekMissedBests,
+            playerATWeekTOPS,
+            playerATWeekMissedTOPS,
+            allTimeBiggestBlowouts,
+            allTimeClosestMatchups,
+            winPercentages,
+            fptsHistories,
+            medianRecords,
+            tradesData,
+            waiversData,
+        }
     }
 
     $: setSelected(displayStats);
@@ -192,6 +201,7 @@
 
 
 <RecordsAndRankings
+    {displayObject}
     {currentManagers}   
     blowouts={allTimeBiggestBlowouts}
     closestMatchups={allTimeClosestMatchups}

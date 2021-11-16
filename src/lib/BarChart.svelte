@@ -2,7 +2,7 @@
     import Button, { Group, Label } from '@smui/button';
     import {xIntervalFont, xIntervalHeight, barLabelFont, labelFont} from './barChartResize'
 
-    export let graphs, curGraph = 0, maxWidth = 1000;
+    export let graphs, curGraph = 0, maxWidth = 1000, allTime, selection;
 
     const colors = [
         "#52DEE5",
@@ -257,10 +257,14 @@
         <br />
         <Group variant="outlined">
             {#each graphs as graph, ix}
-                {#if ix > 3}
-                    <Button class="selectionButtons" on:click={() => curGraph = ix} variant="{curGraph == ix ? "raised" : "outlined"}">
-                        <Label>{graph.short}</Label>
-                    </Button>
+                {#if graph.short == "Season Records" && !allTime}
+                    <div></div>
+                {:else}
+                    {#if ix > 3}
+                        <Button class="selectionButtons" on:click={() => curGraph = ix} variant="{curGraph == ix ? "raised" : "outlined"}">
+                            <Label>{graph.short}</Label>
+                        </Button>
+                    {/if}
                 {/if}
             {/each}
         </Group>
