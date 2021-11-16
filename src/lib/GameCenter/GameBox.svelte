@@ -394,6 +394,16 @@
                 viewPlayerStats[viewPlayer.player.playerID].stats.push(runningTotals[viewPlayer.player.playerID].stats[stat]);
             }
             displayStats.push(viewPlayerStats[viewPlayer.player.playerID]);
+        // if game has started, show Fpts as 0.00
+        } else if(viewPlayer.player != null && newFantasyProducts.fantasyProducts.length > 0 && !newFantasyProducts.runningTotals[viewPlayer.player.playerID] &&
+                (nflMatchups.find(m => m.some(m => m.sleeperID == viewPlayer.player.t))[0].status.type.state == 'in' 
+                || nflMatchups.find(m => m.some(m => m.sleeperID == viewPlayer.player.t))[0].status.type.state == 'post')) {
+                viewPlayerStats[viewPlayer.player.playerID] = {
+                    stats: [],
+                    totalFpts: 0.00,
+                    playerID: viewPlayer.player.playerID,
+                }
+                displayStats.push(viewPlayerStats[viewPlayer.player.playerID]);
         } else {
             displayStats = null;
         }
@@ -719,6 +729,9 @@
         width: auto;
         justify-content: center;
         height: 100%;
+        border: 0.25px solid #777;
+        border-radius: 1em;
+        margin: 0 0.7em 0 0;
     }
 
     .viewDefenseAvatar {
