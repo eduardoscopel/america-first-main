@@ -5,6 +5,10 @@ export const dues = 100; // (optional) used in template constitution page
 export const dynasty = false; // true for dynasty leagues, false for redraft and keeper
 export const enableBlog = false; // requires VITE_CONTENTFUL_ACCESS_TOKEN and VITE_CONTENTFUL_SPACE environment variables
 
+export const importHistory = true; // true only if importing non-Sleeper data from google sheets
+export const importType = 'complex' // 'complex' if imported data contains complete INDIVIDUAL WEEK data (ie. each team's points for every week), 
+                                    // 'simple' if imported data only contains SEASON TOTALS data (ie. each team's win-loss record and total points for/against)
+                                    // 'super' if imported data contains complete PLAYER DATA (ie. every starter's points for every team for every week)
 /*   STEP 2   */
 export const homepageText = `
   <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>

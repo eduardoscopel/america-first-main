@@ -3021,7 +3021,7 @@
         margin: 0.5em 0;
         width: 100%;
         height: 79em;
-		background-color: var(--f3f3f3);
+		background-color: var(--boxShadowThree);
         overflow-y: auto;
         align-items: center;
     }
@@ -3040,7 +3040,7 @@
 
     .playMainRow {
         display: inline-flex;
-        background-color: var(--f3f3f3);
+        background-color: var(--boxShadowThree);
         position: relative;
         padding: 0.5em;
         margin: 0.3% 1.5%;
@@ -3083,7 +3083,7 @@
         display: inline-flex;
         position: relative;
         width: 100%;
-        color: #ededed;
+        color: var(--g111);
         justify-content: flex-end;
         align-items: center;
     }
@@ -3096,7 +3096,7 @@
         margin: 0 0.5em;
         justify-content: center;
         height: fit-content;
-        background-color: var(--f3f3f3);
+        background-color: var(--boxShadowThree);
     }
 
     .defenseAvatar {
@@ -3107,7 +3107,7 @@
         margin: 0 1.1em;
         justify-content: center;
         height: fit-content;
-        background-color: var(--f3f3f3);
+        background-color: var(--boxShadowThree);
     }
 
     .playerName {
@@ -3115,7 +3115,7 @@
         position: relative;
         align-items: center;
         width: 38%;
-        color: #ededed;
+        color: var(--g111);
         justify-content: left;
         align-content: center;
     }
@@ -3125,7 +3125,7 @@
         position: relative;
         align-items: center;
         width: 35%;
-        color: #ededed;
+        color: var(--g111);
         justify-content: center;
         align-content: center;
         font-size: 0.9em;

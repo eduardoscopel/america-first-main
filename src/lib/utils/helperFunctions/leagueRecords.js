@@ -1,5 +1,5 @@
 import { getLeagueData } from './leagueData';
-import { leagueID, managers } from '$lib/utils/leagueInfo';
+import { leagueID, managers, importHistory, importType } from '$lib/utils/leagueInfo';
 import { getNflState } from './nflState';
 import { getLeagueRosters } from "./leagueRosters"
 import { getLeagueUsers } from "./leagueUsers"
@@ -8,6 +8,7 @@ import { get } from 'svelte/store';
 import {records} from '$lib/stores';
 import { loadPlayers, getPreviousDrafts } from '$lib/utils/helper';
 import { null_to_empty } from 'svelte/internal';
+import leagueHistory from '$lib/utils/leagueHistory.json';
 
 export const getLeagueRecords = async (refresh = false) => {
 	if(get(records).seasonWeekRecords) {
@@ -220,6 +221,7 @@ export const getLeagueRecords = async (refresh = false) => {
 					  "LAC", "LAR", "LV", "OAK", "MIA", "MIN", "NE", "NO", "NYG", "NYJ", "PHI", "PIT", "SEA", "SF", "TEN", "TB", "WAS"];
 
 	const numManagers = managers.length;
+	const leagueRecordManagers = {};
 	for(const managerID in managers) {
 		const manager = managers[managerID];
 
@@ -239,9 +241,12 @@ export const getLeagueRecords = async (refresh = false) => {
 		if(manager.status == "active") {
 			activeManagers.push(manager.managerID);
 		}
+
+		leagueRecordManagers[manager.managerID] = entryMan;
 	}
 	const numActiveManagers = activeManagers.length;
 
+	// SLEEPER RECORDS (MAIN)
 	while(curSeason && curSeason != 0) {
 		const [rosterRes, users, leagueData] = await waitForAll(
 			getLeagueRosters(curSeason),
@@ -2239,6 +2244,163 @@ export const getLeagueRecords = async (refresh = false) => {
 		};
 		
 	} // SEASON LOOPS HERE
+
+
+	// IMPORT HISTORY
+	if(importHistory == true) {
+		const historyData = leagueHistory;
+		const weekScores = {};
+		const importRecords = {};
+
+		for(const key in historyData.managers) {
+			const recordManID = historyData.managers[key].recordManID;
+			importRecords[recordManID] = {
+				years: {},
+				fpts: 0,
+				fptsAgainst: 0,
+				fptspg: 0,
+				wins: 0,
+				losses: 0,
+				ties: 0,
+				winPerc: null,
+				epeWins: 0,
+				epeLosses: 0,
+				epeTies: 0,
+				epePerc: null,
+				topScores: 0,
+				bottomScores: 0,
+				weekWins: 0,
+				weekLosses: 0,
+				weekTies: 0,
+				medianPerc: null,
+			};
+
+			if(!allManagers[recordManID]) {
+				allManagers[recordManID] = {
+					avatar: `https://sleepercdn.com/images/v2/icons/player_default.webp`,
+					name: 'Placeholder',
+					realname: leagueRecordManagers[recordManID].name,
+				};
+			}
+
+			for(const year in historyData.managers[key].years) {
+				const yearTotals = historyData.managers[key].years[year]
+
+				importRecords[recordManID].fpts += yearTotals.totalFpts;
+				importRecords[recordManID].fptsAgainst += yearTotals.totalFptsAgainst;
+				importRecords[recordManID].wins += yearTotals.wins;
+				importRecords[recordManID].losses += yearTotals.losses;
+				importRecords[recordManID].ties += yearTotals.ties;
+
+				const totalPPG = yearTotals.totalFpts / (yearTotals.wins + yearTotals.losses + yearTotals.ties); 
+				const winPerc = (yearTotals.wins + yearTotals.ties / 2) / (yearTotals.wins + yearTotals.losses + yearTotals.ties) * 100;
+				const simpleEntry = {
+					manager: allManagers[recordManID],
+					recordManID: recordManID,
+					rosterID: leagueRecordManagers[recordManID].rosterID,
+					fpts: yearTotals.totalFpts,
+					fptspg: totalPPG,
+					fptsAgainst: yearTotals.totalFptsAgainst,
+					epeWins: 0,
+					epeTies: 0,
+					epeLosses: 0,
+					epePerc: null,
+					weekWins: 0,
+					weekLosses: 0,
+					weekTies: 0,
+					medianPerc: null,
+					topScores: 0,
+					bottomScores: 0,
+					winPerc: winPerc,
+					wins: yearTotals.wins,
+					losses: yearTotals.losses,
+					ties: yearTotals.ties,
+					periodDifferential: null,
+					weeks: {},
+					year: yearTotals.year
+				}
+
+				if(importType == 'complex' || importType == 'super') {
+					if(!weekScores[yearTotals.year]) {
+						weekScores[yearTotals.year] = {};
+					}
+
+					for(const week in yearTotals.weeks) {
+						const weekTotals = yearTotals.weeks[week];
+	
+						if(!weekScores[yearTotals.year][weekTotals.week]) {
+							weekScores[yearTotals.year][weekTotals.week] = [];
+						}
+						weekScores[yearTotals.year][weekTotals.week].push(weekTotals.fpts)
+						simpleEntry.weeks[weekTotals.week] = weekTotals;
+					}
+				} 
+				if(importType == 'super') {
+					
+				}
+
+				importRecords[recordManID].years[yearTotals.year] = simpleEntry;
+			}
+			importRecords[recordManID].winPerc = (importRecords[recordManID].wins + importRecords[recordManID].ties / 2) / (importRecords[recordManID].wins + importRecords[recordManID].ties + importRecords[recordManID].losses) * 100;
+			importRecords[recordManID].fptspg = importRecords[recordManID].fpts / (importRecords[recordManID].wins + importRecords[recordManID].ties + importRecords[recordManID].losses);
+		}
+
+		if(importType == 'complex' || importType == 'super') {
+
+			for(const recordManID in importRecords) {
+
+				for(const year in importRecords[recordManID].years) {
+
+					for(const week in weekScores[year]) {
+
+						const compareScore = importRecords[recordManID].years[year].weeks[week].fpts;
+						const epeWins = weekScores[year][week].filter(s => s < compareScore).length;
+						const epeLosses = weekScores[year][week].filter(s => s > compareScore).length;
+						const epeTies = weekScores[year][week].filter(s => s == compareScore).length - 1;
+
+						importRecords[recordManID].years[year].epeWins += epeWins;
+						importRecords[recordManID].years[year].epeLosses += epeLosses;
+						importRecords[recordManID].years[year].epeTies += epeTies;
+						importRecords[recordManID].epeWins += epeWins;
+						importRecords[recordManID].epeLosses += epeLosses;
+						importRecords[recordManID].epeTies += epeTies;
+
+						if(epeWins == 0) {
+							importRecords[recordManID].years[year].bottomScores++;
+							importRecords[recordManID].bottomScores++;
+						} else if(epeLosses == 0) {
+							importRecords[recordManID].years[year].topScores++;
+							importRecords[recordManID].topScores++;
+						}
+
+						const middleScores = weekScores[year][week].sort((a, b) => b - a).slice(weekScores[year][week].length / 2 - 1, weekScores[year][week].length / 2 + 1);
+						const medianScore = (middleScores[0] + middleScores[1]) / 2;
+						if(compareScore > medianScore) {
+							importRecords[recordManID].years[year].weekWins++;
+							importRecords[recordManID].weekWins++;
+						} else if(compareScore < medianScore) {
+							importRecords[recordManID].years[year].weekLosses++;
+							importRecords[recordManID].weekLosses++;
+						} else if(compareScore == medianScore) {
+							importRecords[recordManID].years[year].weekTies++;
+							importRecords[recordManID].weekTies++;
+						}
+					}
+					importRecords[recordManID].years[year].epePerc = (importRecords[recordManID].years[year].epeWins + importRecords[recordManID].years[year].epeTies / 2) / (importRecords[recordManID].years[year].epeWins + importRecords[recordManID].years[year].epeTies + importRecords[recordManID].years[year].epeLosses) * 100;
+					importRecords[recordManID].years[year].medianPerc = (importRecords[recordManID].years[year].weekWins + importRecords[recordManID].years[year].weekTies / 2) / (importRecords[recordManID].years[year].weekWins + importRecords[recordManID].years[year].weekTies + importRecords[recordManID].years[year].weekLosses) * 100;
+				}
+				importRecords[recordManID].epePerc = (importRecords[recordManID].epeWins + importRecords[recordManID].epeTies / 2) / (importRecords[recordManID].epeWins + importRecords[recordManID].epeTies + importRecords[recordManID].epeLosses) * 100;
+				importRecords[recordManID].medianPerc = (importRecords[recordManID].weekWins + importRecords[recordManID].weekTies / 2) / (importRecords[recordManID].weekWins + importRecords[recordManID].weekTies + importRecords[recordManID].weekLosses) * 100;
+			}
+
+		} else if(importType == 'super') {
+
+		}
+
+
+	}
+
+
 	
 	// calculate all-time records involving multi-season cumulative stats
 	for(const recordManID in masterRecordBook.managers.totals.alltime) {

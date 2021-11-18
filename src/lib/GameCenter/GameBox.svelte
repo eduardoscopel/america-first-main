@@ -599,7 +599,7 @@
         align-items: center;
         font-size: 1.2em;
         font-weight: 600;
-        color: #ededed;
+        color: var(--g111);
     }
 
     .statsContainer {
@@ -609,7 +609,7 @@
         flex-direction: column;
         justify-content: space-around;
         align-content: flex-start;
-        color: #ededed;
+        color: var(--g111);
         font-size: 0.82em;
         font-weight: 420;
         height: 100%;
@@ -632,7 +632,7 @@
     .statCat {
         position: relative;
         display: inline-flex;
-        color: #ededed;
+        color: var(--g111);
         justify-content: flex-start;
         width: 50%;
     }
@@ -640,7 +640,7 @@
     .statMetric {
         position: relative;
         display: inline-flex;
-        color: #ededed;
+        color: var(--g111);
         width: 25%;
         justify-content: center;
     }
@@ -648,7 +648,7 @@
     .statFpts {
         position: relative;
         display: inline-flex;
-        color: #ededed;
+        color: var(--g111);
         width: 25%;
         justify-content: center;
     }
@@ -659,7 +659,7 @@
         width: 90%;
         height: 24%;
         border-radius: 1em;
-        background-color: var(--f3f3f3);
+        background-color: var(--boxShadowThree);
         padding: 2%;
         margin: 0 0 1% 0;
     }
@@ -719,7 +719,7 @@
         font-size: 1.2em;
         width: 9em;
         justify-content: flex-start;
-        color: #ededed;
+        color: var(--g111);
     }
 
     .viewPlayerAvatar {
@@ -746,7 +746,7 @@
     .posPlayerRank {
         position: relative;
         display: inline-flex;
-        color: #ededed;
+        color: var(--g111);
         align-items: center;
         font-weight: 420;
         width: 3%;
@@ -767,7 +767,7 @@
     .posPlayerManager {
         position: relative;
         display: inline-flex;
-        color: #ededed;
+        color: var(--g111);
         align-items: center;
         font-style: italic;
         font-size: 0.7em;
@@ -780,7 +780,7 @@
     .posPlayerFpts {
         position: relative;
         display: inline-flex;
-        color: #ededed;
+        color: var(--g111);
         align-items: center;
         width: 8%;
         font-size: 0.85em;
@@ -799,7 +799,8 @@
         justify-content: flex-start;
         flex-wrap: wrap;
         align-items: center;
-        color: #ededed;
+        color: var(--g111);
+        line-height: 1em;
     }
 
     .posPlayerAvatar {
@@ -839,7 +840,7 @@
         margin: 1% 0 0 1%;
         border-radius: 1em;
         padding: 2%;
-        background-color: var(--f3f3f3);
+        background-color: var(--boxShadowThree);
         align-content: center;
         justify-content: center;
         align-self: center
@@ -899,7 +900,7 @@
         margin: 0 1% 0 0;
         height: 100%;
         border-radius: 1em;
-        background-color: var(--f3f3f3);
+        background-color: var(--boxShadowThree);
         align-self: center;
     }
 
@@ -933,8 +934,8 @@
 
     :global(.managerAvatar:hover) {
         cursor: pointer;
-        background-color: #181818;
-        border: 0.5px solid #ededed;
+        background-color: var(--aaa);
+        border: 0.5px solid var(--g111);
     }
 
     .managerStarters {
@@ -961,8 +962,8 @@
 
     .playerAvatar:hover {
         cursor: pointer;
-        background-color: #181818;
-        border: 0.5px solid #ededed;
+        background-color: var(--aaa);
+        border: 0.5px solid var(--g111);
     }
 
     .defenseAvatar {
@@ -980,14 +981,14 @@
 
     .defenseAvatar:hover {
         cursor: pointer;
-        background-color: #181818;
-        border: 0.5px solid #ededed;
+        background-color: var(--aaa);
+        border: 0.5px solid var(--g111);
     }
 
     .heading {
         position: relative;
         display: inline-flex;
-        color: #ededed;
+        color: var(--g111);
         font-weight: 430;
         font-size: 1.4em;
         height: 6%;
@@ -1007,7 +1008,7 @@
 
     .gameHeaderBox:hover {
         cursor: pointer;
-        border: 0.5px solid #ededed;
+        border: 0.5px solid var(--g111);
         border-radius: 1em;
     }
 
@@ -1059,7 +1060,7 @@
         font-style: italic;
         font-weight: 420;
         font-size: 0.8em;
-        color: #999;
+        color: var(--g555);
         align-items: center;
     }
 
@@ -1077,7 +1078,7 @@
         flex-direction: row;
         position: relative;
         height: 100%;
-        color: #ededed;
+        color: var(--g111);
         font-weight: 700;
     }
 
@@ -1101,8 +1102,8 @@
     }
 
     .matchAvatar:hover {
-        border: 0.5px solid #ededed; 
-        background-color: #181818;
+        border: 0.5px solid var(--g111); 
+        background-color: var(--aaa);
         cursor: pointer;
     }
 
@@ -1221,7 +1222,7 @@
         width: 100%;
         font-size: 0.85em;
         font-weight: 500;
-        color: #ededed;
+        color: var(--g111);
     }
 
     .rosterPlayer {
@@ -1245,8 +1246,8 @@
 
     .rosterAvatar:hover {
         cursor: pointer;
-        background-color: #181818;
-        border: 0.5px solid #ededed;
+        background-color: var(--aaa);
+        border: 0.5px solid var(--g111);
         border-radius: 1em;
     }
 
@@ -1309,7 +1310,7 @@
 
     .selectedPosition:hover {
         cursor: pointer;
-        border: 0.5px solid #ededed;
+        border: 0.5px solid var(--g111);
         z-index: 1;
     }
 
@@ -1352,7 +1353,7 @@
         display: inline-flex;
         font-weight: 420;
         font-size: 0.85em;
-        color: #999;
+        color: var(--g555);
         top: 15%;
     }
 
@@ -1361,7 +1362,7 @@
         display: inline-flex;
         font-weight: 600;
         font-size: 1.2em;
-        color: #ededed;
+        color: var(--g111);
         top: 5%;
     }
 
@@ -1379,7 +1380,7 @@
             <!-- shows specific NFL games -->
             {#if showGameBox == true}
                 <div class="gameHeader">
-                    <div class="gameHeaderBox" style="{showGameBox == true && positionPlayFilter.length == 0 && managerSelection == 0 ? "border: 0.5px solid #ededed; border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'nflGame', game, 0)} />
+                    <div class="gameHeaderBox" style="{showGameBox == true && positionPlayFilter.length == 0 && managerSelection == 0 ? "border: 0.5px solid var(--g111); border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'nflGame', game, 0)} />
                     <div class="gameOpponent">
                         <img class="gameAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{game.home.sleeperID.toLowerCase()}.png" alt="{game.home.sleeperID}">
                         <div class="gameTeamWrapper" style="align-items: flex-start;">
@@ -1404,7 +1405,7 @@
                                     {#each positionGameStarters[game.home.sleeperID].starters[ix] as starter}
                                         <div class="rosterRow" style="justify-content: flex-start; height: {100 / row}%">
                                             <div class="avatarHolder" style="{starter.pos == 'DEF' ? "margin: 0 0 0 4%;" : null}">
-                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa); border: 0.5px solid var(--g111); border-radius: 1em;" : null}">
                                             </div>
                                             <div class="rosterPlayerInfo">
                                                 {#if starter.pos == 'DEF'}
@@ -1412,9 +1413,9 @@
                                                 {:else}
                                                     <div class="rosterPlayer" style="justify-content: flex-start; width: 92%; margin: 0 3% 0 5%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                                 {/if}
-                                                <div class="rosterPlayer" style="justify-content: flex-start; color: #999; font-size: 0.75em; {starter.pos == 'DEF' ? "width: 82%; margin: 0 7% 0 15%;" : "width: 92%; margin: 0 3% 0 5%; line-height: 1em;"}">{starter.owner.name}</div>
+                                                <div class="rosterPlayer" style="justify-content: flex-start; color: var(--g555); font-size: 0.75em; {starter.pos == 'DEF' ? "width: 82%; margin: 0 7% 0 15%;" : "width: 92%; margin: 0 3% 0 5%; line-height: 1em;"}">{starter.owner.name}</div>
                                                 <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 7% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">
-                                                    <div style="display: inline-flex; color: #999; justify-content: flex-end; margin: 0 5% 0 0;">({starter.projection})</div>
+                                                    <div style="display: inline-flex; color: var(--g555); justify-content: flex-end; margin: 0 5% 0 0;">({starter.projection})</div>
                                                     <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
                                                 </div>
                                             </div>
@@ -1423,9 +1424,9 @@
                                 </div>
                                 <div class="positionsWrap" style="justify-content: flex-start;">
                                     <div class="rosterPosition {nflPositions[ix]}" style="height: {100 / row}%;">
-                                        <div class="rosterRowBox" style="top: -2%; height: {100 * row}%; {positionPlayFilter.length > 0 && positionPlayFilter.includes(nflPositions[ix]) ? "border: 0.5px solid #ededed; border-radius: 1em;" : null}"></div>
+                                        <div class="rosterRowBox" style="top: -2%; height: {100 * row}%; {positionPlayFilter.length > 0 && positionPlayFilter.includes(nflPositions[ix]) ? "border: 0.5px solid var(--g111); border-radius: 1em;" : null}"></div>
                                         {nflPositions[ix]}
-                                        <div class="selectedPosition" id="selectedPosition" on:click={() => multiFunction(null, null, 'position', nflPositions[ix], 0)} style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(nflPositions[ix]) ? "border: 0.5px solid #ededed; border-radius: 1em; z-index: 1;" : null}"></div>
+                                        <div class="selectedPosition" id="selectedPosition" on:click={() => multiFunction(null, null, 'position', nflPositions[ix], 0)} style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(nflPositions[ix]) ? "border: 0.5px solid var(--g111); border-radius: 1em; z-index: 1;" : null}"></div>
                                     </div>
                                 </div>
                                 <div class="positionGroup">
@@ -1437,14 +1438,14 @@
                                                 {:else}
                                                     <div class="rosterPlayer" style="justify-content: flex-end; width: 92%; margin: 0 15% 0 3%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                                 {/if}
-                                                <div class="rosterPlayer" style="justify-content: flex-end; color: #999; font-size: 0.75em; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 7%;" : "width: 92%; margin: 0 15% 0 3%; line-height: 1em;"}">{starter.owner.name}</div>
+                                                <div class="rosterPlayer" style="justify-content: flex-end; color: var(--g555); font-size: 0.75em; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 7%;" : "width: 92%; margin: 0 15% 0 3%; line-height: 1em;"}">{starter.owner.name}</div>
                                                 <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 7%;" : "width: 92%; margin: 0 15% 0 3%;"}">
                                                     <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>  
-                                                    <div style="display: inline-flex; color: #999; justify-content: flex-start; margin: 0 0 0 5%;">({starter.projection})</div>
+                                                    <div style="display: inline-flex; color: var(--g555); justify-content: flex-start; margin: 0 0 0 5%;">({starter.projection})</div>
                                                 </div>
                                             </div>                                
                                             <div class="avatarHolder" style="{starter.pos == 'DEF' ? "margin: 0 4% 0 0;" : null}">
-                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa); border: 0.5px solid var(--g111); border-radius: 1em;" : null}">
                                             </div>
                                         </div>
                                     {/each}
@@ -1456,16 +1457,16 @@
                 <!-- shows league matchups -->
             {:else if showMatchBox == true}        
                 <div class="gameHeader">
-                    <div class="gameHeaderBox" style="height: 120%; {showMatchBox == true && positionPlayFilter.length == 0 && managerSelection == 0 ? "border: 0.5px solid #ededed; border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'matchup', match.home.matchInfo.matchID, 0)} />
+                    <div class="gameHeaderBox" style="height: 120%; {showMatchBox == true && positionPlayFilter.length == 0 && managerSelection == 0 ? "border: 0.5px solid var(--g111); border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'matchup', match.home.matchInfo.matchID, 0)} />
                     <div class="matchOpponent">
                         <div class="matchTop" style="justify-content: flex-start; left: 2%; top: 8%;">
-                            <img class="matchAvatar" src="{match.home.manager.avatar}" alt="" on:click={() => multiFunction(null, null, 'matchup',  match.home.matchInfo.matchID, match.home.manager.recordManID)} style="{match.home.manager.recordManID == managerSelection ? "background-color: #181818; border: 0.5px solid #ededed;" : null}" >
+                            <img class="matchAvatar" src="{match.home.manager.avatar}" alt="" on:click={() => multiFunction(null, null, 'matchup',  match.home.matchInfo.matchID, match.home.manager.recordManID)} style="{match.home.manager.recordManID == managerSelection ? "background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}" >
                             <div class="gameTeamWrapper">
                                 <div class="gameTeam" style="margin: 0 0 5% 0; left: -2%;">{match.home.manager.realname}</div>
                             </div>
                         </div>
-                        <div class="gameTeam" style="align-items: center; font-size: 0.75em; font-style: italic; color: #999; top: -40%; left: 30%; width: 69%; line-height: 1em;">{match.home.manager.name}</div>
-                        <div class="gameTeam" style="align-items: center; font-size: 0.75em; font-style: italic; color: #999; top: -40%; left: 30%; width: 69%; line-height: 1em;">{match.home.record.showTies == true ? '(' + match.home.record.wins + ' - ' + match.home.record.ties + ' - ' + match.home.record.losses + ')' : '(' + match.home.record.wins + ' - ' + match.home.record.losses + ')'}</div>
+                        <div class="gameTeam" style="align-items: center; font-size: 0.75em; font-style: italic; color: var(--g555); top: -40%; left: 30%; width: 69%; line-height: 1em;">{match.home.manager.name}</div>
+                        <div class="gameTeam" style="align-items: center; font-size: 0.75em; font-style: italic; color: var(--g555); top: -40%; left: 30%; width: 69%; line-height: 1em;">{match.home.record.showTies == true ? '(' + match.home.record.wins + ' - ' + match.home.record.ties + ' - ' + match.home.record.losses + ')' : '(' + match.home.record.wins + ' - ' + match.home.record.losses + ')'}</div>
                     </div>
                     <div class="versus">V</div>
                     <div class="matchOpponent">
@@ -1473,10 +1474,10 @@
                             <div class="gameTeamWrapper">
                                 <div class="gameTeam" style="margin: 0 0 5% 0; right: -2%;">{match.away.manager.realname}</div>
                             </div>
-                            <img class="matchAvatar" src="{match.away.manager.avatar}" alt="" on:click={() => multiFunction(null, null, 'matchup',  match.away.matchInfo.matchID, match.away.manager.recordManID)} style="{match.away.manager.recordManID == managerSelection ? "background-color: #181818; border: 0.5px solid #ededed;" : null}" >
+                            <img class="matchAvatar" src="{match.away.manager.avatar}" alt="" on:click={() => multiFunction(null, null, 'matchup',  match.away.matchInfo.matchID, match.away.manager.recordManID)} style="{match.away.manager.recordManID == managerSelection ? "background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}" >
                         </div>
-                        <div class="gameTeam" style="align-items: center; justify-content: flex-end; font-size: 0.75em; font-style: italic; color: #999; top: -40%; width: 69%; line-height: 1em;">{match.away.manager.name}</div>
-                        <div class="gameTeam" style="align-items: center; justify-content: flex-end; font-size: 0.75em; font-style: italic; color: #999; top: -40%; width: 69%; line-height: 1em;">{match.away.record.showTies == true ? '(' + match.away.record.wins + ' - ' + match.away.record.ties + ' - ' + match.away.record.losses + ')' : '(' + match.away.record.wins + ' - ' + match.away.record.losses + ')'}</div>
+                        <div class="gameTeam" style="align-items: center; justify-content: flex-end; font-size: 0.75em; font-style: italic; color: var(--g555); top: -40%; width: 69%; line-height: 1em;">{match.away.manager.name}</div>
+                        <div class="gameTeam" style="align-items: center; justify-content: flex-end; font-size: 0.75em; font-style: italic; color: var(--g555); top: -40%; width: 69%; line-height: 1em;">{match.away.record.showTies == true ? '(' + match.away.record.wins + ' - ' + match.away.record.ties + ' - ' + match.away.record.losses + ')' : '(' + match.away.record.wins + ' - ' + match.away.record.losses + ')'}</div>
                     </div>
                 </div>
                 <div class="totalPointsRow">
@@ -1494,7 +1495,7 @@
                         {#each match.home.starters as starter}
                             <div class="rosterRow" style="justify-content: flex-start;">
                                 <div class="avatarHolder" style="{starter.pos == 'DEF' ? "margin: 0 0 0 4%;" : null}">
-                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa); border: 0.5px solid var(--g111); border-radius: 1em;" : null}">
                                 </div>
                                 <div class="rosterPlayerInfo">
                                     {#if starter.pos == 'DEF'}
@@ -1503,7 +1504,7 @@
                                         <div class="rosterPlayer" style="justify-content: flex-start; width: 92%; margin: 0 3% 0 5%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                     {/if}
                                     <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 7% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">
-                                        <div style="display: inline-flex; color: #999; justify-content: flex-end; margin: 0 5% 0 0;">({round(starter.projection)})</div>
+                                        <div style="display: inline-flex; color: var(--g555); justify-content: flex-end; margin: 0 5% 0 0;">({round(starter.projection)})</div>
                                         <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
                                     </div>
                                 </div>
@@ -1513,9 +1514,9 @@
                     <div class="positionsWrap">
                         {#each positions as position}
                             <div class="rosterPosition {position}">
-                                <div class="rosterRowBox" style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(position)  ? "border: 0.5px solid #ededed; border-radius: 1em;" : null}" />
+                                <div class="rosterRowBox" style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(position)  ? "border: 0.5px solid var(--g111); border-radius: 1em;" : null}" />
                                 {position}
-                                <div class="selectedPosition" on:click={() => multiFunction(null, null, 'position', position, 0)} style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(position) ? "border: 0.5px solid #ededed; border-radius: 1em; z-index: 1;" : null}"></div>
+                                <div class="selectedPosition" on:click={() => multiFunction(null, null, 'position', position, 0)} style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(position) ? "border: 0.5px solid var(--g111); border-radius: 1em; z-index: 1;" : null}"></div>
                             </div>
                         {/each}
                     </div>
@@ -1530,11 +1531,11 @@
                                     {/if}
                                     <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 7%;" : "width: 92%; margin: 0 15% 0 3%;"}">
                                         <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>  
-                                        <div style="display: inline-flex; color: #999; justify-content: flex-start; margin: 0 0 0 5%;">({round(starter.projection)})</div>
+                                        <div style="display: inline-flex; color: var(--g555); justify-content: flex-start; margin: 0 0 0 5%;">({round(starter.projection)})</div>
                                     </div>
                                 </div>                                
                                 <div class="avatarHolder" style="{starter.pos == 'DEF' ? "margin: 0 4% 0 0;" : null}">
-                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
+                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa); border: 0.5px solid var(--g111); border-radius: 1em;" : null}">
                                 </div>
                             </div>
                         {/each}
@@ -1596,7 +1597,7 @@
             <div class="leaderboardContainer">
                 {#if positionLeaderboard && positionLeaderboard.length > 0}
                     {#each positionLeaderboard as positionLeader, ix}
-                        <div class="leaderboardRow" id="{positionLeader.playerID == viewPlayer?.player?.playerID ? "viewPlayer" : null}" style="{positionLeader.playerID == viewPlayer?.player?.playerID ? "background-color: #181818; border: 0.5px solid #ededed; font-weight: 700;" : null}">
+                        <div class="leaderboardRow" id="{positionLeader.playerID == viewPlayer?.player?.playerID ? "viewPlayer" : null}" style="{positionLeader.playerID == viewPlayer?.player?.playerID ? "background-color: var(--aaa); border: 0.5px solid var(--g111); font-weight: 700;" : null}">
                             <div class="posPlayerRank">{ix + 1}</div>
                             <div class="posPlayerProfile">
                                 {#if positionLeader.pos == 'DEF'}

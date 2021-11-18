@@ -296,7 +296,7 @@ import AllManagers from '$lib/Managers/AllManagers.svelte';
         text-align: center;
         font-size: 2.25em;
         font-weight: 450;
-        color: #ededed;
+        color: var(--g111);
     }
 
     :global(.changeYear) {

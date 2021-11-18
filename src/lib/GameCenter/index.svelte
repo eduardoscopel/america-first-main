@@ -148,10 +148,10 @@
 
     .mainConstrained {
         width: 100%;
-        height: 132em;
+        height: 142em;
         max-width: 1500px;
         margin: 0 auto 4em;
-        background-color: var(--f3f3f3);
+        background-color: var(--boxShadowThree);
         display: inline-flex;
         align-content: center;
         position: relative;
@@ -165,7 +165,7 @@
         align-items: center;
         height: 5%;
         width: 100%;
-        color: #ededed;
+        color: var(--g111);
         font-size: 1.5em;
         font-weight: 500;
     }

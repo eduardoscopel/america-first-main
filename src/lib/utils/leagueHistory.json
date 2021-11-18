@@ -1,0 +1,2141 @@
+{
+  "managers": [
+    {
+      "recordManID": 1,
+      "years": [
+        {
+          "year": 2018,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 13,
+          "losses": 0,
+          "ties": 0,
+          "totalFpts": 12707.84,
+          "totalFptsAgainst": 12892.880000000005
+        },
+        {
+          "year": 2017,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 13,
+          "losses": 0,
+          "ties": 0,
+          "totalFpts": 12707.84,
+          "totalFptsAgainst": 12892.880000000005
+        }
+      ]
+    },
+    {
+      "recordManID": 2,
+      "years": [
+        {
+          "year": 2018,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            }
+          ],
+          "wins": 12,
+          "losses": 1,
+          "ties": 1,
+          "totalFpts": 13458.479999999996,
+          "totalFptsAgainst": 13226.560000000001
+        },
+        {
+          "year": 2017,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 1
+            }
+          ],
+          "wins": 12,
+          "losses": 1,
+          "ties": 1,
+          "totalFpts": 13458.479999999996,
+          "totalFptsAgainst": 13226.560000000001
+        }
+      ]
+    },
+    {
+      "recordManID": 3,
+      "years": [
+        {
+          "year": 2018,
+          "weeks": [
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        },
+        {
+          "year": 2017,
+          "weeks": [
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        }
+      ]
+    },
+    {
+      "recordManID": 4,
+      "years": [
+        {
+          "year": 2018,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        },
+        {
+          "year": 2017,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        }
+      ]
+    },
+    {
+      "recordManID": 5,
+      "years": [
+        {
+          "year": 2018,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        },
+        {
+          "year": 2017,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        }
+      ]
+    },
+    {
+      "recordManID": 6,
+      "years": [
+        {
+          "year": 2018,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        },
+        {
+          "year": 2017,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        }
+      ]
+    },
+    {
+      "recordManID": 7,
+      "years": [
+        {
+          "year": 2018,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        },
+        {
+          "year": 2017,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        }
+      ]
+    },
+    {
+      "recordManID": 8,
+      "years": [
+        {
+          "year": 2018,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        },
+        {
+          "year": 2017,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        }
+      ]
+    },
+    {
+      "recordManID": 9,
+      "years": [
+        {
+          "year": 2018,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        },
+        {
+          "year": 2017,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        }
+      ]
+    },
+    {
+      "recordManID": 10,
+      "years": [
+        {
+          "year": 2018,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        },
+        {
+          "year": 2017,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        }
+      ]
+    },
+    {
+      "recordManID": 11,
+      "years": [
+        {
+          "year": 2018,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        },
+        {
+          "year": 2017,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        }
+      ]
+    },
+    {
+      "recordManID": 12,
+      "years": [
+        {
+          "year": 2018,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        },
+        {
+          "year": 2017,
+          "weeks": [
+            {
+              "week": 1,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 2,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 3,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 4,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 5,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 6,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 7,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 8,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 9,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 10,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 11,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 12,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            },
+            {
+              "week": 13,
+              "fpts": 120,
+              "fptsAgainst": 110,
+              "opponent": 2
+            }
+          ],
+          "wins": 10,
+          "losses": 2,
+          "ties": 2,
+          "totalFpts": 13115.72,
+          "totalFptsAgainst": 13258.120000000003
+        }
+      ]
+    }
+  ],
+  "playoff_start": 10
+}

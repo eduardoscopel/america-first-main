@@ -461,7 +461,7 @@
     .headerLabel {
         position: relative;
         display: inline-flex;
-        color: #ededed;
+        color: var(--g111);
         font-weight: 420;
         font-size: 2em;
         justify-content: center;
@@ -524,7 +524,7 @@
         text-align: center;
         font-size: 2.25em;
         font-weight: 450;
-        color: #ededed;
+        color: var(--g111);
     }
 
 </style>

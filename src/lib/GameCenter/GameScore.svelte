@@ -105,7 +105,7 @@
         position: relative;
         z-index: 1;
         width: 100%;
-		background-color: var(--f3f3f3);
+		background-color: var(--boxShadowThree);
         padding: 0 0.5em;
     }
 
@@ -114,12 +114,12 @@
         z-index: auto;
         margin: 0.5em 0;
         width: 100%;
-		background-color: var(--f3f3f3);
+		background-color: var(--boxShadowThree);
     }
 
     :global(.scoresBlock:hover) {
         cursor: pointer;
-        background-color: #181818;
+        background-color: var(--d7d7d7);
     }
 
     .teamsBlock {
@@ -140,7 +140,7 @@
         display: inline-flex;
         position: relative;
         z-index: auto;
-        color: #ededed;
+        color: var(--g111);
         font-weight: 600;
         font-size: 1.1em;
         padding: 0 0 0 0.2em;
@@ -157,7 +157,7 @@
     }
 
     .teamScore {
-        color: #999;
+        color: var(--g555);
         display: inline-flex;
         position: relative;
         z-index: auto;
@@ -173,7 +173,7 @@
         align-items: center;
         font-size: 1.05em;
         justify-content: center;
-        color: #ededed;
+        color: var(--g111);
         top: 1.25em;
     }
 
@@ -196,7 +196,7 @@
         font-size: 1.05em;
         align-content: center;
         justify-content: center;
-        color: #ededed;
+        color: var(--g111);
     }
 
     .gameStatusClock {
@@ -207,11 +207,11 @@
         align-content: center;
         justify-content: center;
         top: 1.25em;
-        color: #ededed;
+        color: var(--g111);
     }
 </style>
-<div class="showSelected" style="{showGameBox == true && gameSelection == gameID ? "background-color: #222222" : null}">
-    <div class="scoresBlock" on:click={() => changeGameSelection(gameID)} style="{showGameBox == true && gameSelection == gameID ? "background-color: #181818" : null}">
+<div class="showSelected" style="{showGameBox == true && gameSelection == gameID ? "background-color: var(--aaa)" : null}">
+    <div class="scoresBlock" on:click={() => changeGameSelection(gameID)} style="{showGameBox == true && gameSelection == gameID ? "background-color: var(--d7d7d7)" : null}">
         <div class="teamsBlock">
             <img class="teamLogo" src="https://sleepercdn.com/images/team_logos/nfl/{home.sleeperID.toLowerCase()}.png" alt="{home.sleeperID}"/>
             <div class="teamAbbrev">{home.sleeperID}</div>
