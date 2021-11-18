@@ -36,7 +36,7 @@
                     ln: starterInfo.ln,
                     pos: starterInfo.pos,
                     t: starterInfo.t,
-                    projection: starterInfo.wi[week].p,
+                    projection: starterInfo.wi[week]?.p || 0,
                     avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                     teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t.toLowerCase()}.png`,
                     teamColor: `background-color: #${nflTeams[starterInfo.t].color}6b`,
@@ -729,8 +729,6 @@
         width: auto;
         justify-content: center;
         height: 100%;
-        border: 0.25px solid #777;
-        border-radius: 1em;
         margin: 0 0.7em 0 0;
     }
 
@@ -1233,7 +1231,7 @@
         height: 50%;
         width: 100%;
         align-items: center;
-        line-height: 0.5em;
+        line-height: 1em;
     }
 
     .rosterAvatar {
@@ -1405,13 +1403,17 @@
                                 <div class="positionGroup">
                                     {#each positionGameStarters[game.home.sleeperID].starters[ix] as starter}
                                         <div class="rosterRow" style="justify-content: flex-start; height: {100 / row}%">
-                                            <div class="avatarHolder">
+                                            <div class="avatarHolder" style="{starter.pos == 'DEF' ? "margin: 0 0 0 4%;" : null}">
                                                 <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
                                             </div>
                                             <div class="rosterPlayerInfo">
-                                                <div class="rosterPlayer" style="justify-content: flex-start; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
-                                                <div class="rosterPlayer" style="justify-content: flex-start; color: #999; font-size: 0.75em; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%; line-height: 1em;"}">{starter.owner.name}</div>
-                                                <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">
+                                                {#if starter.pos == 'DEF'}
+                                                    <div class="rosterPlayer" style="justify-content: flex-start; width: 82%; margin: 0 7% 0 15%;">{starter.ln} D/ST</div>
+                                                {:else}
+                                                    <div class="rosterPlayer" style="justify-content: flex-start; width: 92%; margin: 0 3% 0 5%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
+                                                {/if}
+                                                <div class="rosterPlayer" style="justify-content: flex-start; color: #999; font-size: 0.75em; {starter.pos == 'DEF' ? "width: 82%; margin: 0 7% 0 15%;" : "width: 92%; margin: 0 3% 0 5%; line-height: 1em;"}">{starter.owner.name}</div>
+                                                <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 7% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">
                                                     <div style="display: inline-flex; color: #999; justify-content: flex-end; margin: 0 5% 0 0;">({starter.projection})</div>
                                                     <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
                                                 </div>
@@ -1430,14 +1432,18 @@
                                     {#each positionGameStarters[game.away.sleeperID].starters[ix] as starter}
                                         <div class="rosterRow" style="justify-content: flex-end; height: {100 / row}%;">
                                             <div class="rosterPlayerInfo">
-                                                <div class="rosterPlayer" style="justify-content: flex-end; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
-                                                <div class="rosterPlayer" style="justify-content: flex-end; color: #999; font-size: 0.75em; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%; line-height: 1em;"}">{starter.owner.name}</div>
-                                                <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%;"}">
+                                                {#if starter.pos == 'DEF'}
+                                                    <div class="rosterPlayer" style="justify-content: flex-end; width: 82%; margin: 0 15% 0 7%;">{starter.ln} D/ST</div>
+                                                {:else}
+                                                    <div class="rosterPlayer" style="justify-content: flex-end; width: 92%; margin: 0 15% 0 3%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
+                                                {/if}
+                                                <div class="rosterPlayer" style="justify-content: flex-end; color: #999; font-size: 0.75em; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 7%;" : "width: 92%; margin: 0 15% 0 3%; line-height: 1em;"}">{starter.owner.name}</div>
+                                                <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 7%;" : "width: 92%; margin: 0 15% 0 3%;"}">
                                                     <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>  
                                                     <div style="display: inline-flex; color: #999; justify-content: flex-start; margin: 0 0 0 5%;">({starter.projection})</div>
                                                 </div>
                                             </div>                                
-                                            <div class="avatarHolder">
+                                            <div class="avatarHolder" style="{starter.pos == 'DEF' ? "margin: 0 4% 0 0;" : null}">
                                                 <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
                                             </div>
                                         </div>
@@ -1487,12 +1493,16 @@
                     <div class="rosterWrap">
                         {#each match.home.starters as starter}
                             <div class="rosterRow" style="justify-content: flex-start;">
-                                <div class="avatarHolder">
+                                <div class="avatarHolder" style="{starter.pos == 'DEF' ? "margin: 0 0 0 4%;" : null}">
                                     <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
                                 </div>
                                 <div class="rosterPlayerInfo">
-                                    <div class="rosterPlayer" style="justify-content: flex-start; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
-                                    <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 3% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">
+                                    {#if starter.pos == 'DEF'}
+                                        <div class="rosterPlayer" style="justify-content: flex-start; width: 82%; margin: 0 7% 0 15%;">{starter.ln} D/ST</div>
+                                    {:else}
+                                        <div class="rosterPlayer" style="justify-content: flex-start; width: 92%; margin: 0 3% 0 5%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
+                                    {/if}
+                                    <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 7% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">
                                         <div style="display: inline-flex; color: #999; justify-content: flex-end; margin: 0 5% 0 0;">({round(starter.projection)})</div>
                                         <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>
                                     </div>
@@ -1513,13 +1523,17 @@
                         {#each match.away.starters as starter}
                             <div class="rosterRow" style="justify-content: flex-end;">
                                 <div class="rosterPlayerInfo">
-                                    <div class="rosterPlayer" style="justify-content: flex-end; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%;"}">{starter.fn.slice(0, 1)}. {starter.ln}</div>
-                                    <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 3%;" : "width: 92%; margin: 0 15% 0 3%;"}">
+                                    {#if starter.pos == 'DEF'}
+                                        <div class="rosterPlayer" style="justify-content: flex-end; width: 82%; margin: 0 15% 0 7%;">{starter.ln} D/ST</div>
+                                    {:else}
+                                        <div class="rosterPlayer" style="justify-content: flex-end; width: 92%; margin: 0 15% 0 3%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
+                                    {/if}
+                                    <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 7%;" : "width: 92%; margin: 0 15% 0 3%;"}">
                                         <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>  
                                         <div style="display: inline-flex; color: #999; justify-content: flex-start; margin: 0 0 0 5%;">({round(starter.projection)})</div>
                                     </div>
                                 </div>                                
-                                <div class="avatarHolder">
+                                <div class="avatarHolder" style="{starter.pos == 'DEF' ? "margin: 0 4% 0 0;" : null}">
                                     <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: #181818; border: 0.5px solid #ededed; border-radius: 1em;" : null}">
                                 </div>
                             </div>
@@ -1535,10 +1549,10 @@
                 <div class="viewPlayerTop">
                     <div class="viewPlayerProfile">
                         {#if viewPlayer?.player?.pos != 'DEF'}
-                            <img class="viewPlayerAvatar" src="{viewPlayer?.player?.avatar}" alt="">
+                            <img class="viewPlayerAvatar" src="{viewPlayer?.player?.avatar}" alt="" style="{viewPlayer?.player != null && viewPlayer?.player != 'flush' ? "border: 0.25px solid #777; border-radius: 1em;" : null}">
                             <div class="viewPlayerName">{viewPlayer?.player?.fn || ''} {viewPlayer?.player?.ln || ''}</div>
                         {:else}
-                            <img class="viewDefenseAvatar" src="{viewPlayer?.player?.avatar}" alt="">
+                            <img class="viewDefenseAvatar" src="{viewPlayer?.player?.avatar}" alt="" style="{viewPlayer?.player != null && viewPlayer?.player != 'flush' ? "border: 0.25px solid #777; border-radius: 1em;" : null}">
                             <div class="viewPlayerName">{viewPlayer?.player?.ln + ' Defense' || ''}</div>  
                         {/if}
                     </div>

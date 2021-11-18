@@ -47,6 +47,50 @@ export const getPlayByPlay = async (gameID) => {
     return fullPlayByPlay;
 }
 
+export const getGameDrives = async (gameID) => {
+
+    let fullDrives;
+
+    const drivesPromises = [];
+    drivesPromises.push(fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/${gameID}/competitions/${gameID}/drives?lang=en&region=us`, {compress: true}));
+
+    const drivesRes = await waitForAll(...drivesPromises).catch((err) => { console.error(err); });
+
+    const drivesJsonPromises = [];
+    for(const driveRes of drivesRes) {
+        const data = driveRes.json();
+        drivesJsonPromises.push(data)
+        if (!driveRes.ok) {
+            throw new Error(data);
+        }
+    }
+    const drivesData = await waitForAll(...drivesJsonPromises).catch((err) => { console.error(err); });
+
+    let pageCount = drivesData[0].pageCount;
+    if(pageCount > 1) {
+        const pagePromises = [];
+        for(let i = 1; i < pageCount + 1; i++) {
+            pagePromises.push(fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/${gameID}/competitions/${gameID}/drives?lang=en&region=us&page=${i}`, {compress: true}));
+        }
+
+        const pagesRes = await waitForAll(...pagePromises).catch((err) => { console.error(err); });
+
+        const pageJsonPromises = [];
+        for(const pageRes of pagesRes) {
+            const data = pageRes.json();
+            pageJsonPromises.push(data)
+            if (!pageRes.ok) {
+                throw new Error(data);
+            }
+        }
+        const pagesData = await waitForAll(...pageJsonPromises).catch((err) => { console.error(err); });
+        fullDrives = pagesData;
+    } else {
+        fullDrives = drivesData;
+    }
+    return fullDrives;
+}
+
 export const getNflScoreboard = async () => {
 	if(get(scoreboardStore).nflWeek) {
 		return get(scoreboardStore);
