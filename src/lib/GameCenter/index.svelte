@@ -199,6 +199,17 @@
         justify-content: center;
     }
 
+    .banner {
+        position: absolute;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 5%;
+        width: 100%;
+        background-color: var(--gcBox);
+        box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 40%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 3px 2px rgb(0 0 0 / 40%);
+    }
+
     .mainWrapper {
         width: 100%;
         height: 100%;
@@ -214,10 +225,12 @@
         min-height: 132em;
         max-width: 1500px;
         margin: 0 auto 4em;
-        background-color: var(--boxShadowThree);
+        background-color: var(--gcMain);
         display: inline-flex;
         align-content: center;
         position: relative;
+        border-radius: 3em;
+        padding: 3% 0;
     }
 
     .weekInfo {
@@ -228,9 +241,10 @@
         align-items: center;
         height: 5%;
         width: 100%;
-        color: var(--g111);
+        color: var(--gcBannerText);
         font-size: 1.5em;
         font-weight: 500;
+        margin: 0 0 2% 0;
     }
 
     .weekInfoSeason {
@@ -313,6 +327,8 @@
         position: relative;
         align-items: center;
         width: 102%;
+        min-height: 72em;
+        max-height: 92em;
     }
 
     :global(.changeWeekSelection) {
@@ -333,6 +349,7 @@
 
 <div class="mainWrapper">
     <div class="mainConstrained">
+        <div class="banner" />
         <div class="leftWrapper">
             <div class="weekInfo">
                 <div class="weekInfoSeason">
@@ -375,7 +392,7 @@
             </div>
         </div>
         <div class="rightWrapper">
-            <div class="weekInfo" style="margin: 15% 0;">
+            <div class="weekInfo" style="margin: 17% 0;">
                 <div class="weekInfoSeason">
                     <div class="default" style="height: 33.333%;" >{yearSelection}</div>
                 </div>

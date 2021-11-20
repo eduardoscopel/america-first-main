@@ -580,7 +580,7 @@
         margin: 0.2em 0.2em 0.8em 0.2em;
         width: 100%;
         height: 45em;
-		background-color: #222;
+		background-color: var(--gcBox);
         border-radius: 1em;
         padding: 1%;
         align-content: center;
@@ -588,6 +588,7 @@
         align-items: center;
         justify-content: center;
         justify-items: center;
+        box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 30%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 3px 2px rgb(0 0 0 / 30%);
     }
 
     .fptsContainer {
@@ -610,7 +611,7 @@
         align-items: center;
         font-size: 1.2em;
         font-weight: 600;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
     }
 
     .statsContainer {
@@ -620,7 +621,7 @@
         flex-direction: column;
         justify-content: space-around;
         align-content: flex-start;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
         font-size: 0.82em;
         font-weight: 420;
         height: 100%;
@@ -635,7 +636,9 @@
         flex-direction: row;
         line-height: 1.2em;
         align-items: center;
-        width: 100%;
+        width: 94%;
+        padding: 0 0 0 2%;
+        border-radius: 0.3em;
         margin: 0 4%;
         justify-content: center;
     }
@@ -643,7 +646,7 @@
     .statCat {
         position: relative;
         display: inline-flex;
-        color: var(--g111);
+        color: var(--gcStats);
         justify-content: flex-start;
         width: 50%;
     }
@@ -651,7 +654,7 @@
     .statMetric {
         position: relative;
         display: inline-flex;
-        color: var(--g111);
+        color: var(--gcStats);
         width: 25%;
         justify-content: center;
     }
@@ -659,7 +662,7 @@
     .statFpts {
         position: relative;
         display: inline-flex;
-        color: var(--g111);
+        color: var(--gcStats);
         width: 25%;
         justify-content: center;
     }
@@ -670,9 +673,10 @@
         width: 90%;
         height: 24%;
         border-radius: 1em;
-        background-color: var(--boxShadowThree);
+        background-color: var(--gcComponent);
         padding: 2%;
         margin: 0 0 1% 0;
+        box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 30%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 3px 2px var(--gcScoreShadow);
     }
 
     .viewPlayerBlock {
@@ -730,7 +734,7 @@
         font-size: 1.2em;
         width: 9em;
         justify-content: flex-start;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
     }
 
     .viewPlayerAvatar {
@@ -757,7 +761,7 @@
     .posPlayerRank {
         position: relative;
         display: inline-flex;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
         align-items: center;
         font-weight: 420;
         width: 3%;
@@ -778,20 +782,21 @@
     .posPlayerManager {
         position: relative;
         display: inline-flex;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
         align-items: center;
         font-style: italic;
         font-size: 0.7em;
         overflow: hidden;
         width: 33%;
         margin: 0 1%;
+        font-weight: 410;
         justify-content: center;
     }
 
     .posPlayerFpts {
         position: relative;
         display: inline-flex;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
         align-items: center;
         width: 8%;
         font-size: 0.85em;
@@ -810,7 +815,7 @@
         justify-content: flex-start;
         flex-wrap: wrap;
         align-items: center;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
         line-height: 1em;
     }
 
@@ -851,10 +856,11 @@
         margin: 1% 0 0 1%;
         border-radius: 1em;
         padding: 2%;
-        background-color: var(--boxShadowThree);
+        background-color: var(--gcComponent);
         align-content: center;
         justify-content: center;
-        align-self: center
+        align-self: center;
+        box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 30%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 4px 3px var(--gcScoreShadow);
     }
 
     .leaderboardContainer {
@@ -911,8 +917,9 @@
         margin: 0 1% 0 0;
         height: 100%;
         border-radius: 1em;
-        background-color: var(--boxShadowThree);
+        background-color: var(--gcComponent);
         align-self: center;
+        box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 30%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 4px 3px var(--gcScoreShadow);
     }
 
     .managerBlock {
@@ -945,7 +952,7 @@
 
     :global(.managerAvatar:hover) {
         cursor: pointer;
-        background-color: var(--aaa);
+        background-color: var(--gcSelect);
         border: 0.5px solid var(--g111);
     }
 
@@ -973,7 +980,7 @@
 
     .playerAvatar:hover {
         cursor: pointer;
-        background-color: var(--aaa);
+        background-color: var(--gcSelect);
         border: 0.5px solid var(--g111);
     }
 
@@ -992,14 +999,14 @@
 
     .defenseAvatar:hover {
         cursor: pointer;
-        background-color: var(--aaa);
+        background-color: var(--gcSelect);
         border: 0.5px solid var(--g111);
     }
 
     .heading {
         position: relative;
         display: inline-flex;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
         font-weight: 430;
         font-size: 1.4em;
         height: 6%;
@@ -1015,6 +1022,7 @@
         border: 0.25px solid #555;
         border-radius: 1em;
         top: 8%;
+        box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 30%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 3px 2px var(--gcScoreShadow);
     }
 
     .gameHeaderBox:hover {
@@ -1089,7 +1097,7 @@
         flex-direction: row;
         position: relative;
         height: 100%;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
         font-weight: 700;
     }
 
@@ -1114,7 +1122,7 @@
 
     .matchAvatar:hover {
         border: 0.5px solid var(--g111); 
-        background-color: var(--aaa);
+        background-color: var(--gcSelect);
         cursor: pointer;
     }
 
@@ -1230,10 +1238,10 @@
         display: inline-flex;
         flex-direction: column;
         height: 100%;
-        width: 100%;
+        width: 95%;
         font-size: 0.85em;
         font-weight: 500;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
     }
 
     .rosterPlayer {
@@ -1250,14 +1258,16 @@
         position: relative;
         display: inline-flex;
         flex-direction: row;
-        height: 100%;
+        height: 96%;
+        top: 3%;
         width: auto;
         align-items: center;
+        overflow: hidden;
     }
 
     .rosterAvatar:hover {
         cursor: pointer;
-        background-color: var(--aaa);
+        background-color: var(--gcSelect);
         border: 0.5px solid var(--g111);
         border-radius: 1em;
     }
@@ -1287,7 +1297,8 @@
         align-items: center;
         flex-direction: row;
         height: 100%;
-        width: 35%;
+        width: 60%;
+        overflow: hidden;
     }
 
     .positionsWrap {
@@ -1334,6 +1345,7 @@
         width: 835%;
         border: 0.25px solid #555;
         border-radius: 1em;
+        box-shadow: inset 0px 0px 0px -2px rgb(0 0 0 / 30%), inset 0px 1px 1px -1px rgb(0 0 0 / 28%), inset 0px 1px 4px 0px var(--gcScoreShadow);
     }
 
     .totalPointsRow {
@@ -1415,17 +1427,17 @@
                                 <div class="positionGroup">
                                     {#each positionGameStarters[gameSelection][game.home.sleeperID].starters[ix] as starter}
                                         <div class="rosterRow" style="justify-content: flex-start; height: {100 / row}%">
-                                            <div class="avatarHolder" style="{starter.pos == 'DEF' ? "margin: 0 0 0 4%;" : null}">
-                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa); border: 0.5px solid var(--g111); border-radius: 1em;" : null}">
+                                            <div class="avatarHolder" style="right: 2%;">
+                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--gcSelect); border: 0.5px solid var(--g111); border-radius: 1em;" : null}">
                                             </div>
                                             <div class="rosterPlayerInfo">
                                                 {#if starter.pos == 'DEF'}
-                                                    <div class="rosterPlayer" style="justify-content: flex-start; width: 82%; margin: 0 7% 0 15%;">{starter.ln} D/ST</div>
+                                                    <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 7% 0 0;">{starter.ln} D/ST</div>
                                                 {:else}
-                                                    <div class="rosterPlayer" style="justify-content: flex-start; width: 92%; margin: 0 3% 0 5%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
+                                                    <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 3% 0 0;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                                 {/if}
-                                                <div class="rosterPlayer" style="justify-content: flex-start; color: var(--g555); font-size: 0.75em; {starter.pos == 'DEF' ? "width: 82%; margin: 0 7% 0 15%;" : "width: 92%; margin: 0 3% 0 5%; line-height: 1em;"}">{starter.owner.name}</div>
-                                                <div class="rosterPlayer" style="{yearSelection != currentYear ? "justify-content: flex-end;" : "justify-content: space-between;"} {starter.pos == 'DEF' ? "width: 82%; margin: 0 7% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">
+                                                <div class="rosterPlayer" style="justify-content: flex-start; color: var(--g555); font-size: 0.75em; {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0; line-height: 1em;"}">{starter.owner.name}</div>
+                                                <div class="rosterPlayer" style="{yearSelection != currentYear ? "justify-content: flex-end;" : "justify-content: space-between;"} {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">
                                                     {#if yearSelection == currentYear}
                                                         <div style="display: inline-flex; color: var(--g555); justify-content: flex-end; margin: 0 5% 0 0;">({starter.projection})</div>
                                                     {/if}
@@ -1447,20 +1459,20 @@
                                         <div class="rosterRow" style="justify-content: flex-end; height: {100 / row}%;">
                                             <div class="rosterPlayerInfo">
                                                 {#if starter.pos == 'DEF'}
-                                                    <div class="rosterPlayer" style="justify-content: flex-end; width: 82%; margin: 0 15% 0 7%;">{starter.ln} D/ST</div>
+                                                    <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 7%;">{starter.ln} D/ST</div>
                                                 {:else}
-                                                    <div class="rosterPlayer" style="justify-content: flex-end; width: 92%; margin: 0 15% 0 3%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
+                                                    <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 3%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                                 {/if}
-                                                <div class="rosterPlayer" style="justify-content: flex-end; color: var(--g555); font-size: 0.75em; {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 7%;" : "width: 92%; margin: 0 15% 0 3%; line-height: 1em;"}">{starter.owner.name}</div>
-                                                <div class="rosterPlayer" style="{yearSelection != currentYear ? "justify-content: flex-start;" : "justify-content: space-between;"} {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 7%;" : "width: 92%; margin: 0 15% 0 3%;"}">
+                                                <div class="rosterPlayer" style="justify-content: flex-end; color: var(--g555); font-size: 0.75em; {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%; line-height: 1em;"}">{starter.owner.name}</div>
+                                                <div class="rosterPlayer" style="{yearSelection != currentYear ? "justify-content: flex-start;" : "justify-content: space-between;"} {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">
                                                     <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>  
                                                     {#if yearSelection == currentYear}
                                                         <div style="display: inline-flex; color: var(--g555); justify-content: flex-start; margin: 0 0 0 5%;">({starter.projection})</div>
                                                     {/if}
                                                 </div>
                                             </div>                                
-                                            <div class="avatarHolder" style="{starter.pos == 'DEF' ? "margin: 0 4% 0 0;" : null}">
-                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa); border: 0.5px solid var(--g111); border-radius: 1em;" : null}">
+                                            <div class="avatarHolder" style="left: 2%;">
+                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--gcSelect); border: 0.5px solid var(--g111); border-radius: 1em;" : null}">
                                             </div>
                                         </div>
                                     {/each}
@@ -1475,7 +1487,7 @@
                     <div class="gameHeaderBox" style="height: 120%; {showMatchBox == true && positionPlayFilter.length == 0 && managerSelection == 0 ? "border: 0.5px solid var(--g111); border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'matchup', match.home.matchInfo.matchID, 0)} />
                     <div class="matchOpponent">
                         <div class="matchTop" style="justify-content: flex-start; left: 2%; top: 8%;">
-                            <img class="matchAvatar" src="{match.home.manager.avatar}" alt="" on:click={() => multiFunction(null, null, 'matchup',  match.home.matchInfo.matchID, match.home.manager.recordManID)} style="{match.home.manager.recordManID == managerSelection ? "background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}" >
+                            <img class="matchAvatar" src="{match.home.manager.avatar}" alt="" on:click={() => multiFunction(null, null, 'matchup',  match.home.matchInfo.matchID, match.home.manager.recordManID)} style="{match.home.manager.recordManID == managerSelection ? "background-color: var(--gcSelect); border: 0.5px solid var(--g111);" : null}" >
                             <div class="gameTeamWrapper">
                                 <div class="gameTeam" style="margin: 0 0 5% 0; left: -2%;">{match.home.manager.realname}</div>
                             </div>
@@ -1489,7 +1501,7 @@
                             <div class="gameTeamWrapper">
                                 <div class="gameTeam" style="margin: 0 0 5% 0; right: -2%;">{match.away.manager.realname}</div>
                             </div>
-                            <img class="matchAvatar" src="{match.away.manager.avatar}" alt="" on:click={() => multiFunction(null, null, 'matchup',  match.away.matchInfo.matchID, match.away.manager.recordManID)} style="{match.away.manager.recordManID == managerSelection ? "background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}" >
+                            <img class="matchAvatar" src="{match.away.manager.avatar}" alt="" on:click={() => multiFunction(null, null, 'matchup',  match.away.matchInfo.matchID, match.away.manager.recordManID)} style="{match.away.manager.recordManID == managerSelection ? "background-color: var(--gcSelect); border: 0.5px solid var(--g111);" : null}" >
                         </div>
                         <div class="gameTeam" style="align-items: center; justify-content: flex-end; font-size: 0.75em; font-style: italic; color: var(--g555); top: -40%; width: 69%; line-height: 1em;">{match.away.manager.name}</div>
                         <div class="gameTeam" style="align-items: center; justify-content: flex-end; font-size: 0.75em; font-style: italic; color: var(--g555); top: -40%; width: 69%; line-height: 1em;">{match.away.record.showTies == true ? '(' + match.away.record.wins + ' - ' + match.away.record.ties + ' - ' + match.away.record.losses + ')' : '(' + match.away.record.wins + ' - ' + match.away.record.losses + ')'}</div>
@@ -1513,16 +1525,16 @@
                     <div class="rosterWrap">
                         {#each match.home.starters as starter}
                             <div class="rosterRow" style="justify-content: flex-start;">
-                                <div class="avatarHolder" style="{starter.pos == 'DEF' ? "margin: 0 0 0 4%;" : null}">
-                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa); border: 0.5px solid var(--g111); border-radius: 1em;" : null}">
+                                <div class="avatarHolder" style="right: 2%;"> 
+                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--gcSelect); border: 0.5px solid var(--g111); border-radius: 1em;" : null}">
                                 </div>
                                 <div class="rosterPlayerInfo">
                                     {#if starter.pos == 'DEF'}
-                                        <div class="rosterPlayer" style="justify-content: flex-start; width: 82%; margin: 0 7% 0 15%;">{starter.ln} D/ST</div>
+                                        <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 7% 0 0;">{starter.ln} D/ST</div>
                                     {:else}
-                                        <div class="rosterPlayer" style="justify-content: flex-start; width: 92%; margin: 0 3% 0 5%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
+                                        <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 3% 0 0;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                     {/if}
-                                    <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "width: 82%; margin: 0 7% 0 15%;" : "width: 92%; margin: 0 3% 0 5%;"}">
+                                    <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">
                                         {#if yearSelection == currentYear}
                                             <div style="display: inline-flex; color: var(--g555); {yearSelection != currentYear ? "justify-content: flex-end;" : "justify-content: space-between;"} margin: 0 5% 0 0;">({round(starter.projection)})</div>
                                         {/if}
@@ -1546,19 +1558,19 @@
                             <div class="rosterRow" style="justify-content: flex-end;">
                                 <div class="rosterPlayerInfo">
                                     {#if starter.pos == 'DEF'}
-                                        <div class="rosterPlayer" style="justify-content: flex-end; width: 82%; margin: 0 15% 0 7%;">{starter.ln} D/ST</div>
+                                        <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 7%;">{starter.ln} D/ST</div>
                                     {:else}
-                                        <div class="rosterPlayer" style="justify-content: flex-end; width: 92%; margin: 0 15% 0 3%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
+                                        <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 3%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                     {/if}
-                                    <div class="rosterPlayer" style="{yearSelection != currentYear ? "justify-content: flex-start;" : "justify-content: space-between;"} {starter.pos == 'DEF' ? "width: 82%; margin: 0 15% 0 7%;" : "width: 92%; margin: 0 15% 0 3%;"}">
+                                    <div class="rosterPlayer" style="{yearSelection != currentYear ? "justify-content: flex-start;" : "justify-content: space-between;"} {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">
                                         <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>  
                                         {#if yearSelection == currentYear}
                                             <div style="display: inline-flex; color: var(--g555); justify-content: flex-start; margin: 0 0 0 5%;">({round(starter.projection)})</div>
                                         {/if}
                                     </div>
                                 </div>                                
-                                <div class="avatarHolder" style="{starter.pos == 'DEF' ? "margin: 0 4% 0 0;" : null}">
-                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa); border: 0.5px solid var(--g111); border-radius: 1em;" : null}">
+                                <div class="avatarHolder" style="left: 2%;">
+                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--gcSelect); border: 0.5px solid var(--g111); border-radius: 1em;" : null}">
                                 </div>
                             </div>
                         {/each}

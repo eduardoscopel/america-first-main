@@ -17,8 +17,11 @@
         position: relative;
         z-index: 1;
         width: 100%;
-		background-color: var(--boxShadowThree);
+		background-color: var(--gcScore);
         padding: 0 0.5em;
+        border-radius: 1em;
+        margin: 1.5% 0;
+        box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 30%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 4px 3px var(--gcScoreShadow);
     }
 
     .scoresBlock {
@@ -26,12 +29,13 @@
         z-index: auto;
         margin: 0.5em 0;
         width: 100%;
-		background-color: var(--boxShadowThree);
+		background-color: var(--gcScore);
+        border-radius: 1em;
     }
 
     :global(.scoresBlock:hover) {
         cursor: pointer;
-        background-color: var(--d7d7d7);
+        background-color: var(--gcSelect);
     }
 
     .teamsBlock {
@@ -126,8 +130,8 @@
     }
 </style>
 
-<div class="showSelected" style="{showMatchBox == true && matchSelection == matchID ? "background-color: var(--aaa)" : null}">
-    <div class="scoresBlock" on:click={() => changeMatchSelection(matchID)} style="{showMatchBox == true && matchSelection == matchID ? "background-color: var(--d7d7d7)" : null}">
+<div class="showSelected" style="{showMatchBox == true && matchSelection == matchID ? "background-color: var(--gcHighlight)" : null}">
+    <div class="scoresBlock" on:click={() => changeMatchSelection(matchID)} style="{showMatchBox == true && matchSelection == matchID ? "background-color: var(--gcSelect)" : null}">
         <div class="teamsBlock">
             <img class="teamLogo" src="{home.matchInfo.manager.avatar}" alt="{home.matchInfo.manager.abbreviation}"/>
             <div class="teamAbbrev">{home.matchInfo.manager.abbreviation}</div>

@@ -83,12 +83,26 @@
             }
             return relevantEntry;
         }
-
+        // games with laterals: Lions-Steelers (2021-10), Bills-Jets (2021-10), Colts-Jets (2021-9), Dolphins-Texans (2021-9)
         // determines true stat yardage on plays involving laterals - TO-DO: much stupid work to process "circus plays" ; also other types of plays besides pass
         const processLateral = (play, player, relevantStartersArray) => {
             const lateralInfo = [];
 
             if(player.playType == 24 || play.secondDescription.includes('Pass for')) {
+                let lateralCount = 1;
+
+                let moreLaterals = true;
+                let countCheck = play.description.slice(play.description.indexOf('Lateral') + 7);
+                while(moreLaterals == true) {
+                    if(countCheck.includes('Lateral')) {
+                        lateralCount++;
+                        countCheck = countCheck.slice(play.description.indexOf('Lateral') + 7);
+                    } else {
+                        moreLaterals = false;
+                    }
+                }
+
+
                 let firstPlayerIndex = play.description.indexOf('.', play.description.indexOf('.') + 1);
                 let firstPlayer = play.description.slice(firstPlayerIndex - 2, play.description.indexOf('. '));
                 let firstPlayerInitial;
@@ -105,26 +119,89 @@
                     firstPlayerYards = firstPlayerYards.slice(1)
                 }
                 firstPlayerYards = parseInt(firstPlayerYards);
-                
-                let lateralPlayerYards = play.description.slice(play.description.indexOf('Lateral'));
-                lateralPlayerYards = lateralPlayerYards.slice(lateralPlayerYards.indexOf(' yards') - 2, lateralPlayerYards.indexOf(' yards'));
-                if(lateralPlayerYards[0] == ' ') {
-                    lateralPlayerYards = lateralPlayerYards.slice(1);
-                }
-                lateralPlayerYards = parseInt(lateralPlayerYards);
 
-                if(firstPlayerYards < 0 && player.yards > 0) {
-                    firstPlayerYards = 0;
-                    lateralPlayerYards = player.yards;
-                } else if((firstPlayerYards < 0 && player.yards < 0) || (firstPlayerYards > 0 && lateralPlayerYards == 0 && firstPlayerYards > player.yards)) {
-                    firstPlayerYards = player.yards;
-                    lateralPlayerYards = 0;
-                } else if(firstPlayerYards > 0 && firstPlayerYards > player.yards && lateralPlayerYards > 0) {
-                    firstPlayerYards = firstPlayerYards - lateralPlayerYards;
-                } else if(firstPlayerYards > 0 && firstPlayerYards > player.yards && lateralPlayerYards < 0) {
-                    firstPlayerYards = player.yards - lateralPlayerYards;
-                } else if(firstPlayerYards > 0 && firstPlayerYards < player.yards && (player.yards - lateralPlayerYards < 0)) {
-                    firstPlayerYards += player.yards - lateralPlayerYards;
+                let lateralPlayerArray = [];
+                let lateralPlayer = play.description.slice();
+                while(lateralCount > 0) {
+                    lateralPlayer = lateralPlayer.slice(lateralPlayer.indexOf('Lateral') + 11);
+
+                    let lateralPlayerInitial = lateralPlayer.slice(0, 1);
+                    let lateralPlayerSurname = lateralPlayer.slice(lateralPlayer.indexOf('.') + 1, lateralPlayer.indexOf(' '));
+
+                    let lateralPlayerYards = lateralPlayer.slice(lateralPlayer.indexOf(' yards') - 2, lateralPlayer.indexOf(' yards'));
+                    if(lateralPlayerYards[0] == ' ') {
+                        lateralPlayerYards = lateralPlayerYards.slice(1);
+                    }
+                    lateralPlayerYards = parseInt(lateralPlayerYards);
+
+                    lateralPlayerArray.push({
+                        initial: lateralPlayerInitial,
+                        surname: lateralPlayerSurname,
+                        yards: lateralPlayerYards,
+                    });
+
+                    lateralCount--;
+                }
+
+                let totalLateralYards = 0;
+                for(const player in lateralPlayerArray) {
+                    totalLateralYards += lateralPlayerArray[player].yards;
+                }
+                
+                let lastPlayerYards = lateralPlayerArray[0].yards;
+                if(lateralCount == 1) {
+                    if(firstPlayerYards < 0 && player.yards > 0) {
+                        firstPlayerYards = 0;
+                        lastPlayerYards = player.yards;
+                    } else if((firstPlayerYards < 0 && player.yards <= 0) || (firstPlayerYards > 0 && lastPlayerYards == 0 && firstPlayerYards > player.yards)) {
+                        firstPlayerYards = player.yards;
+                        lastPlayerYards = 0;
+                    } else if(firstPlayerYards > 0 && firstPlayerYards > player.yards && lateralPlayerYards > 0) {
+                        firstPlayerYards = firstPlayerYards - lastPlayerYards;
+                    } else if(firstPlayerYards > 0 && firstPlayerYards > player.yards && lastPlayerYards < 0) {
+                        firstPlayerYards = player.yards - lastPlayerYards;
+                    } else if(firstPlayerYards > 0 && firstPlayerYards < player.yards && (player.yards - lastPlayerYards < 0)) {
+                        firstPlayerYards += player.yards - lastPlayerYards;
+                    }
+                } else {
+                    // calculate firstPlayer's yards first
+                    if(firstPlayerYards < 0 && player.yards > 0) {
+                        firstPlayerYards = 0;
+                    } else if((firstPlayerYards < 0 && player.yards <= 0) || (firstPlayerYards > 0 && totalLateralYards == 0 && firstPlayerYards > player.yards)) {
+                        firstPlayerYards = player.yards;
+                    } else if(firstPlayerYards > 0 && firstPlayerYards > player.yards && totalLateralYards > 0) {
+                        firstPlayerYards = firstPlayerYards - totalLateralYards;
+                    } else if(firstPlayerYards > 0 && firstPlayerYards > player.yards && totalLateralYards < 0) {
+                        firstPlayerYards = player.yards - totalLateralYards;
+                    } else if(firstPlayerYards > 0 && firstPlayerYards < player.yards && (player.yards - totalLateralYards < 0)) {
+                        firstPlayerYards += player.yards - totalLateralYards;
+                    }
+
+                    // now each lateralee (super hacky & assumes ball gets past line of scrimmage after 3 laterals)
+                    // if(firstPlayerYards < 0 && lateralPlayerArray[0].yards + firstPlayerYards <= 0) {
+                    //     lateralPlayerArray[0].yards = 0;
+                    //     if(lateralPlayerArray[0].yards + firstPlayerYards + lateralPlayerArray[1].yards <= 0) {
+                    //         lateralPlayerArray[1].yards = 0
+                    //         if(lateralPlayerArray[2] && (lateralPlayerArray[0].yards + firstPlayerYards + lateralPlayerArray[1].yards + lateralPlayerArray[2].yards <= 0)) {
+                    //             lateralPlayerArray[2].yards = 0;
+                    //         } else if(lateralPlayerArray[2]) {
+                    //             lateralPlayerArray[2].yards += firstPlayerYards
+                    //             let priorYards = firstPlayerYards;
+                    //             let priorLaterals = lateralPlayerArray.slice();
+                    //             while(priorYards < 0) {
+                    //                 priorYards += priorLaterals[0].yards;
+                    //                 if(priorYards > 0) {
+                    //                     lateralPlayerArray[2].yards += priorLaterals[0].yards - priorYards;
+                    //                 }
+                    //                 priorLaterals = priorLaterals.shift()
+                    //             }
+
+                    //             if(firstPlayerYards + lateralPlayerArray[0].yards < 0) {
+                    //                 lateralPlayerArray[2].yards += firstPlayerYards + lateralPlayerArray[i].yards;
+                    //             }
+                    //         }
+                    //     }
+                    // } 
                 }
 
                 if(relevantStartersArray.find(s => s.ln == firstPlayerSurname && s.t == play.playTeam && s.fn.slice(1) == firstPlayerInitial)) {
@@ -135,10 +212,23 @@
                         stats: ['rec', 'rec_yd'],
                     });
                 }
+
+                if(lateralCount > 1) {
+                    for(let i = 0; i < lateralPlayerArray.length - 1; i++) {
+                        if(relevantStartersArray.find(s => s.ln == lateralPlayerArray[i].surname && s.t == play.playTeam && s.fn.slice(1) == lateralPlayerArray[i].initial)) {
+                            let lateralPlayer = relevantStartersArray.find(s => s.ln == lateralPlayerArray[i].surname && s.t == play.playTeam && s.fn.slice(1) == lateralPlayerArray[i].initial);
+                            lateralInfo.push({
+                                player: lateralPlayer,
+                                yards: lateralPlayerArray[i].yards,
+                                stats: ['rec_yd'],
+                            });
+                        }
+                    }
+                }
                 
                 lateralInfo.push({
                     player: player,
-                    yards: lateralPlayerYards,
+                    yards: lastPlayerYards,
                     stats: ['rec_yd'],
                 });
             }
@@ -1673,11 +1763,11 @@
                                     const statRec = 'REC:';
                                     const statYDS = 'REC YDS:';
                                     let adjustedYards = player.yards;
-                                    if(play.description.includes('Lateral')) {            // TO-DO for lateral play, see Colts-Jets week 9
+                                    if(play.description.includes('Lateral')) {            // TO-DO fix this 
                                         let lateralInfo = processLateral(play, player, relevantStartersArray); 
                                         adjustedYards = lateralInfo.find(p => p.player == player).yards;
                                         // scoring the original receiver
-                                        if(lateralInfo.find(p => p.player != player)) {
+                                        if(lateralInfo.find(p => p.player != player)) {                                          
                                             let firstPlayer = lateralInfo.find(p => p.player != player);
                                             let firstPlayerYards = firstPlayer.yards;
                                             const fpts = firstPlayerYards * (score?.rec_yd || 0) + (score?.rec || 0);
@@ -1696,15 +1786,15 @@
                                                 shortDesc: 'Reception',
                                             }
                                             if(fptsRec != 0) {
-                                                let runningTotal = pushRunningTotal(fptsREC, statRec, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                                let runningTotal = pushRunningTotal(fptsREC, statRec, entry.stat[1], 1, firstPlayer.player.playerInfo.playerID, firstPlayer.player.playerInfo.pos); 
                                                 entry.runningTotals.push(runningTotal);
                                             }
                                             if(fptsYDS != 0) {
-                                                let runningTotal = pushRunningTotal(fptsYDS, statYDS, entry.stat[0], firstPlayerYards, player.playerInfo.playerID, player.playerInfo.pos); 
+                                                let runningTotal = pushRunningTotal(fptsYDS, statYDS, entry.stat[0], firstPlayerYards, firstPlayer.player.playerInfo.playerID, firstPlayer.player.playerInfo.pos); 
                                                 entry.runningTotals.push(runningTotal);
                                             }
                                             if(firstPlayerYards > 0) {
-                                                let receptionBonusInfo = receptionBonus(firstPlayerYards, statYDS, statRec, player)
+                                                let receptionBonusInfo = receptionBonus(firstPlayerYards, statYDS, statRec, firstPlayer.player)
                                                 if(receptionBonusInfo.stat.length > 0) {
                                                     for(const stat in receptionBonusInfo.stat) {
                                                         entry.stat.push(receptionBonusInfo.stat[stat]);
@@ -1717,6 +1807,32 @@
                                                 }
                                             }
                                             fantasyPlay[play.playID].push(entry);
+
+                                            let lateralPlayers = lateralInfo.filter(p => p.player != player).shift();
+                                            if(lateralPlayers.length > 0) {
+                                                for(const lateralPlayer in lateralPlayers) {
+                                                    const lateralee = lateralPlayers[lateralPlayer];
+                                                    const lateraleeYards = lateralee.yards;
+                                                    const fpts = lateraleeYards * (score?.rec_yd || 0);
+                                                    const entry = {
+                                                        order: play.order,
+                                                        side: 'offense',
+                                                        manager: lateralee.player.manager,
+                                                        playerInfo: lateralee.player.playerInfo,
+                                                        stat: ['rec_yd'],
+                                                        runningTotals: [],
+                                                        fpts,
+                                                        yards: lateraleeYards,
+                                                        description: play.description,
+                                                        shortDesc: 'Pass Yards After Lateral',
+                                                    }
+                                                    if(fpts != 0) {
+                                                        let runningTotal = pushRunningTotal(fpts, statYDS, entry.stat[0], lateraleeYards, lateralee.player.playerInfo.playerID, lateralee.player.playerInfo.pos); 
+                                                        entry.runningTotals.push(runningTotal);
+                                                    }
+                                                }
+                                            }
+
                                         }
                                     }
                                     if(play.penalty == true) {
@@ -3519,8 +3635,7 @@
         z-index: auto;
         margin: 0.5em 0;
         width: 100%;
-        height: 79em;
-		background-color: var(--boxShadowThree);
+		background-color: var(--gcMain);
         overflow-y: auto;
         align-items: center;
     }
@@ -3532,14 +3647,16 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        background-color: #222;
+        background-color: var(--gcBox);
         margin: 0.3% 0;
+        padding: 0.5% 0 0 0;
         border-radius: 1em;
+        box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 30%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 3px 2px rgb(0 0 0 / 30%);
     }
 
     .playMainRow {
         display: inline-flex;
-        background-color: var(--boxShadowThree);
+        background-color: var(--gcComponent);
         position: relative;
         padding: 0.5em;
         margin: 0.3% 1.5%;
@@ -3549,6 +3666,7 @@
         width: 97%;
         align-items: center;
         justify-content: center;
+        box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 30%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 3px 2px var(--gcScoreShadow);
     }
 
     .pointsPositive {
@@ -3571,6 +3689,10 @@
         font-weight: 420;
     }
 
+    .noPlays {
+        color: var(--gcPlayRowText);
+    }
+
     .managerContainer {
         width: 45%;
         justify-content: flex-end;
@@ -3582,7 +3704,7 @@
         display: inline-flex;
         position: relative;
         width: 100%;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
         justify-content: flex-end;
         align-items: center;
     }
@@ -3595,7 +3717,7 @@
         margin: 0 0.5em;
         justify-content: center;
         height: fit-content;
-        background-color: var(--boxShadowThree);
+        background-color: var(--gcComponent);
     }
 
     .defenseAvatar {
@@ -3606,7 +3728,7 @@
         margin: 0 1.1em;
         justify-content: center;
         height: fit-content;
-        background-color: var(--boxShadowThree);
+        background-color: var(--gcComponent);
     }
 
     .playerName {
@@ -3614,7 +3736,7 @@
         position: relative;
         align-items: center;
         width: 38%;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
         justify-content: left;
         align-content: center;
     }
@@ -3624,7 +3746,7 @@
         position: relative;
         align-items: center;
         width: 35%;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
         justify-content: center;
         align-content: center;
         font-size: 0.9em;
@@ -3638,7 +3760,7 @@
         width: 96%;
         font-size: 0.85em;
         font-weight: 600;
-        color: #b7b7b7;
+        color: var(--gcPlayText);
         justify-content: center;
         align-content: center;
     }
@@ -3650,7 +3772,7 @@
             Loading fantasy play by play...
         {:then fantasyProducts}
             {#if !fantasyProducts.fantasyProducts.length > 0}
-                No plays yet...
+                <div class="noPlays">No plays yet...</div>
             {:else}
                 {#each filteredProducts as filteredProduct}
                     <div class="playContainer">
