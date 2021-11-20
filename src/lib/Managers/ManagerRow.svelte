@@ -5,6 +5,13 @@
 
     export let manager, rosters, users, key;
 
+
+    let profilePic = manager.photo;
+    // default profile picture
+    if(profilePic == '/managers/name.jpg') {
+        profilePic = '/managers/profile-empty-gray.png'
+    }
+
     const roster = rosters.rosters[manager.roster - 1];
     const user = users[roster.owner_id];
 </script>
@@ -189,7 +196,7 @@
 </style>
 
 <div class="manager" on:click={() => goto(`/managers?manager=${key}`)}>
-    <img class="photo" src="{manager.photo}" alt="{manager.name}" />
+    <img class="photo" src="{profilePic}" alt="{manager.name}" />
     <div class="name">{manager.name}</div>
     <div class="team">{user.metadata.team_name ? user.metadata.team_name : user.display_name}</div>
     <div class="spacer" />
