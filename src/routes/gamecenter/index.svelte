@@ -1,13 +1,10 @@
 <script context="module">
-	import { getNflScoreboard, getLeagueRosters, getLeagueUsers, getLeagueData, getLeagueMatchups, getLeagueStandings, loadPlayers, waitForAll } from '$lib/utils/helper';
+	import { getNflScoreboard, getYearMatchups, getLeagueStandings, loadPlayers, waitForAll } from '$lib/utils/helper';
 
     export async function load() {
         const scoreboardInfo = waitForAll(
-            getLeagueRosters(),    
-            getLeagueUsers(),
-            getLeagueData(),
             getNflScoreboard(),
-            getLeagueMatchups(),
+            getYearMatchups(),
 			getLeagueStandings(),
             loadPlayers(),
         );
@@ -46,9 +43,9 @@
 			<br />
 			<LinearProgress indeterminate />
 		</div>
-	{:then [rosterData, users, leagueData, nflWeek, matchupsInfo, standingsData, playersInfo]}
+	{:then [nflWeek, matchupsInfo, standingsData, playersInfo]}
 		<!-- promise was fulfilled -->
-		<GameCenter {rosterData} {users} {leagueData} {nflWeek} {matchupsInfo} {standingsData} {playersInfo} /> 
+		<GameCenter {nflWeek} {matchupsInfo} {standingsData} {playersInfo} /> 
 	{:catch error}
 		<!-- promise was rejected -->
 		<p>Something went wrong: {error.message}</p>

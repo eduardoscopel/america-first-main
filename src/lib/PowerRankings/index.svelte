@@ -1,14 +1,14 @@
 <script>
-    import {getNflState, getLeagueRosters, getLeagueUsers, waitForAll, getLeagueRecords, loadPlayers, getLeagueData} from '$lib/utils/helper';
+    import {getNflState, getLeagueRosters, getLeagueUsers, waitForAll, getLeagueRecords, loadPlayers, getLeagueData, leagueID} from '$lib/utils/helper';
     import PowerRankingsDisplay from './PowerRankingsDisplay.svelte';
     import LinearProgress from '@smui/linear-progress';
     
     const helperPromises = waitForAll(
         getNflState(),
-        getLeagueRosters(),
-        getLeagueUsers(),
+        getLeagueRosters(leagueID),
+        getLeagueUsers(leagueID),
         getLeagueRecords(),
-        getLeagueData(),
+        getLeagueData(leagueID),
         loadPlayers(),
     );
 

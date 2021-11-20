@@ -1,5 +1,5 @@
 import {getLeagueData} from './helperFunctions/leagueData';
-import {dues, leagueID, leagueName, dynasty, managers, homepageText, enableBlog, importHistory, importType} from './leagueInfo';
+import {dues, leagueID, leagueName, dynasty, managers, homepageText, enableBlog, importHistory, importType, creationYear} from './leagueInfo';
 import {getLeagueTransactions} from './helperFunctions/leagueTransactions';
 import {getNflState} from './helperFunctions/nflState';
 import {getLeagueRosters} from './helperFunctions/leagueRosters';
@@ -17,7 +17,7 @@ import { predictScores } from './helperFunctions/predictOptimalScore';
 import { getBrackets } from './helperFunctions/leagueBrackets';
 import { getBlogPosts } from './helperFunctions/getBlogPosts';
 import { getLeagueStandings } from './helperFunctions/leagueStandings';
-import { getNflScoreboard, getPlayByPlay, getGameDrives } from './helperFunctions/gameCenter';
+import { getNflScoreboard, getPlayByPlay, getGameDrives, getYearMatchups } from './helperFunctions/gameCenter';
 import { nflTeams } from './NFLinfo';
 
 export {
@@ -25,6 +25,7 @@ export {
     homepageText,
     importHistory,
     importType,
+    creationYear,
     gotoManager,
     managers,
     getLeagueData,
@@ -58,6 +59,7 @@ export {
     getNflScoreboard,
     getPlayByPlay,
     getGameDrives,
+    getYearMatchups,
     nflTeams,
     getAuthor,
     parseDate,

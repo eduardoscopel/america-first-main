@@ -1,49 +1,61 @@
 <script>
     import MatchScore from "./MatchScore.svelte";
 
-    export let weekMatchups, week, managerInfo, matchSelection, completeGames, playersInfo, showGameBox, showMatchBox;
+    export let weekMatchups, week, matchSelection, completeGames, playersInfo, showGameBox, showMatchBox, yearSelection, currentYear;
 
     let matchScores = [];
     const matchesObj = {};
 
-    for(const matchup in weekMatchups) {
-        const matchTeams = weekMatchups[matchup];
-        let matchID = matchTeams[0].matchID;
+    const getMatchScores = (weekMatchups) => {
+        matchScores = [];
+        for(const matchup in weekMatchups) {
+            const matchTeams = weekMatchups[matchup];
+            let matchID = matchTeams[0].matchID;
 
-        let toPlay = {
-            0: matchTeams[0].starters.length,
-            1: matchTeams[1].starters.length,
-        };
-        for(let i = 0; i < matchTeams.length; i++) {
-            for(const starter of matchTeams[i].starters) {
-                if(starter == '0' || !playersInfo.players[starter].wi[week] || playersInfo.players[starter].wi[week].o == null || completeGames.includes(starter) || completeGames.includes(playersInfo.players[starter].t)) {
-                    toPlay[i] --;
+            let toPlay = {
+                0: matchTeams[0].starters.length,
+                1: matchTeams[1].starters.length,
+            };
+            if(yearSelection == currentYear) {
+                for(let i = 0; i < matchTeams.length; i++) {
+                    for(const starter of matchTeams[i].starters) {
+                        if(starter == '0' || !playersInfo.players[starter].wi[week] || playersInfo.players[starter].wi[week].o == null || completeGames.includes(starter) || completeGames.includes(playersInfo.players[starter].t)) {
+                            toPlay[i] --;
+                        }
+                    }
                 }
+            } else {
+                toPlay[0] = 0;
+                toPlay[1] = 0;
             }
-        }
 
-        matchesObj[matchID] = {
-            matchID,
-            home: {
-                recordManID: matchTeams[0].recordManID,
-                fpts: matchTeams[0].totalFpts,
-                matchInfo: matchTeams[0],
-                rosterID: matchTeams[0].rosterID,
-                manager: managerInfo[matchTeams[0].recordManID],
-                toPlay: toPlay[0],
-            },
-            away: {
-                recordManID: matchTeams[1].recordManID,
-                fpts: matchTeams[1].totalFpts,
-                matchInfo: matchTeams[1],
-                rosterID: matchTeams[1].rosterID,
-                manager: managerInfo[matchTeams[1].recordManID],
-                toPlay: toPlay[1],
-            },
-        }
+            matchesObj[matchID] = {
+                matchID,
+                home: {
+                    recordManID: matchTeams[0].recordManID,
+                    fpts: matchTeams[0].totalFpts,
+                    matchInfo: matchTeams[0],
+                    rosterID: matchTeams[0].rosterID,
+                    toPlay: toPlay[0],
+                },
+                away: {
+                    recordManID: matchTeams[1].recordManID,
+                    fpts: matchTeams[1].totalFpts,
+                    matchInfo: matchTeams[1],
+                    rosterID: matchTeams[1].rosterID,
+                    toPlay: toPlay[1],
+                },
+                isComplete: new Boolean (false),
+            }
 
-        matchScores.push(matchesObj[matchID]);
+            if(toPlay[0] == 0 && toPlay[1] == 0) {
+                matchesObj[matchID].isComplete = true;
+            }
+            matchScores.push(matchesObj[matchID]);
+        }
     }
+    $: getMatchScores(weekMatchups);
+
 </script>
 
 <style>
@@ -63,7 +75,7 @@
 </style>
 
 <div class="scoresHolder">
-    {#each matchScores as {matchID, home, away}} 
-        <MatchScore  {matchID} {home} {away} bind:matchSelection={matchSelection} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
+    {#each matchScores as {matchID, home, away, isComplete}} 
+        <MatchScore  {matchID} {home} {away} {isComplete} bind:matchSelection={matchSelection} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
     {/each}
 </div>

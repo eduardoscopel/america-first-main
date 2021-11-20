@@ -14,9 +14,9 @@ export const getLeagueMatchups = async () => {
 
 	const [nflState, leagueData, rosterRes, users] = await waitForAll(
 		getNflState(),
-		getLeagueData(),
-		getLeagueRosters(),
-		getLeagueUsers()
+		getLeagueData(leagueID),
+		getLeagueRosters(leagueID),
+		getLeagueUsers(leagueID)
 	).catch((err) => { console.error(err); });
 
 	let week = 1;
@@ -41,6 +41,7 @@ export const getLeagueMatchups = async () => {
 			name: manager.name,
 			status: manager.status,
 			yearsactive: manager.yearsactive,
+			abbreviation: manager.abbreviation,
 		}
 
 		if(!yearManagers[manager.roster] && manager.yearsactive.includes(yearP)) {
@@ -108,6 +109,9 @@ const processMatchups = (inputMatchups, yearManagers, rosters, users, week) => {
 				name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
 				avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
 				realname: recordManager[0].name,
+				abbreviation: recordManager[0].abbreviation,
+				rosterID: match.roster_id,
+				recordManID,
 			},
 			recordManID,
 			starters: match.starters,

@@ -1,10 +1,5 @@
 <script>
-    export let matchID, home, away, matchSelection = matchID, showGameBox, showMatchBox;
-
-    let isComplete = new Boolean (false);
-    if(home.toPlay == 0 && away.toPlay == 0) {
-        isComplete = true;
-    }
+    export let matchID, home, away, isComplete, matchSelection = matchID, showGameBox, showMatchBox;
 
     let newMatchSelection
     const changeMatchSelection = (matchID) => {
@@ -134,16 +129,16 @@
 <div class="showSelected" style="{showMatchBox == true && matchSelection == matchID ? "background-color: var(--aaa)" : null}">
     <div class="scoresBlock" on:click={() => changeMatchSelection(matchID)} style="{showMatchBox == true && matchSelection == matchID ? "background-color: var(--d7d7d7)" : null}">
         <div class="teamsBlock">
-            <img class="teamLogo" src="{home.manager.avatar}" alt="{home.manager.abbreviation}"/>
-            <div class="teamAbbrev">{home.manager.abbreviation}</div>
+            <img class="teamLogo" src="{home.matchInfo.manager.avatar}" alt="{home.matchInfo.manager.abbreviation}"/>
+            <div class="teamAbbrev">{home.matchInfo.manager.abbreviation}</div>
             <div class="teamScoreContainer">
                 <div class="teamScore">{home.fpts}</div>
             </div>
         </div>
         <br>
         <div class="teamsBlock">
-            <img class="teamLogo" src="{away.manager.avatar}" alt="{away.manager.abbreviation}"/>
-            <div class="teamAbbrev">{away.manager.abbreviation}</div>
+            <img class="teamLogo" src="{away.matchInfo.manager.avatar}" alt="{away.matchInfo.manager.abbreviation}"/>
+            <div class="teamAbbrev">{away.matchInfo.manager.abbreviation}</div>
             <div class="teamScoreContainer">
                 <div class="teamScore">{away.fpts}</div>
             </div>

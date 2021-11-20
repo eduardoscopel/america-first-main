@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
 	import LinearProgress from '@smui/linear-progress';
     import Post from "./Post.svelte";
-    import { getBlogPosts, getLeagueRosters, getLeagueUsers } from "$lib/utils/helper";
+    import { getBlogPosts, getLeagueRosters, getLeagueUsers, leagueID } from "$lib/utils/helper";
 
     const lang = "en-US";
 
@@ -13,8 +13,8 @@
 
     onMount(async() => {
 		const {posts, fresh} = await getBlogPosts();
-		users = await getLeagueUsers();
-		const rostersData = await getLeagueRosters();
+		users = await getLeagueUsers(leagueID);
+		const rostersData = await getLeagueRosters(leagueID);
 		rosters = rostersData.rosters;
         for(const singlePost of posts) {
             if(singlePost.fields.featured[lang]) {

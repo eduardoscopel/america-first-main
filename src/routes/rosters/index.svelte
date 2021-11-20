@@ -1,11 +1,11 @@
 <script context="module">
-	import { getLeagueData, getLeagueRosters, getLeagueUsers, loadPlayers, waitForAll } from '$lib/utils/helper';
+	import { getLeagueData, getLeagueRosters, getLeagueUsers, loadPlayers, waitForAll, leagueID } from '$lib/utils/helper';
 
     export async function load() {
         const rostersInfo = waitForAll(
-			getLeagueData(),
-			getLeagueRosters(),
-			getLeagueUsers(),
+			getLeagueData(leagueID),
+			getLeagueRosters(leagueID),
+			getLeagueUsers(leagueID),
 			loadPlayers(),
 		)
 	

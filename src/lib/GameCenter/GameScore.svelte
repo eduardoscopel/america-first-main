@@ -1,45 +1,18 @@
 <script>
-    export let gameID, home, away, gameSelection = gameID, completeGames, showGameBox, showMatchBox;
+    export let gameID, home, away, isComplete, gameState, gameSelection = gameID, showGameBox, showMatchBox;
 
     let timezone = 'CST';
-    let isComplete = home.status.type.completed;
-    let gameState = home.status.type.state;
     let kickoffDay;
     let kickoffTime;
 
-    let quarterSuper;
-    if(home.status.period == 1) {
-        quarterSuper = 'st';
-    } else if(home.status.period == 2) {
-        quarterSuper = 'nd';
-    } else if(home.status.period == 3) {
-        quarterSuper = 'rd';
-    } else if(home.status.period == 4) {
-        quarterSuper = 'th';
-    } else {
-        quarterSuper = null;
-    }
-
-    let gameStatus = {
-        quarter: home.status.period,
-        quarterSuper,
-        clock: home.status.displayClock,
-    }
-
-    if(isComplete == true) {
-        gameStatus.quarter = "Final";
-        gameStatus.clock = "";
-        completeGames.push(home.sleeperID);
-        completeGames.push(away.sleeperID);
-    }
-    let newGameSelection
-    const changeGameSelection = (gameID) => {
-        newGameSelection = gameID;
+    const changeGameSelection = (newGameSelection) => {
         gameSelection = newGameSelection;
         showGameBox = true;
         showMatchBox = false;
+
         return gameSelection;
     }
+    $: changeGameSelection(gameSelection);
     
 
     const timezoneShift = (timezone, time) => {
@@ -87,7 +60,29 @@
         return shiftedTime;
     }
 
-    if(gameState == 'pre') {
+    let gameStatus = {
+        quarter: home.status.period,
+        quarterSuper: null,
+        clock: home.status.displayClock,
+    }
+
+    if(home.status.period == 1) {
+        gameStatus.quarterSuper = 'st';
+    } else if(home.status.period == 2) {
+        gameStatus.quarterSuper = 'nd';
+    } else if(home.status.period == 3) {
+        gameStatus.quarterSuper = 'rd';
+    } else if(home.status.period == 4) {
+        gameStatus.quarterSuper = 'th';
+    } else {
+        gameStatus.quarterSuper = null;
+    }
+
+    if(isComplete == true) {
+        gameStatus.quarter = "Final";
+        gameStatus.clock = "";
+    } else if(gameState == 'pre') {
+
         kickoffDay = home.status.type.detail.slice(0, 3);
         let timeUnshifted = home.status.type.shortDetail.slice(home.status.type.shortDetail.length - 12, home.status.type.shortDetail.length - 4);
         kickoffTime = timezoneShift(timezone, timeUnshifted);

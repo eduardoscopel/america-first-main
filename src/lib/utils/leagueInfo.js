@@ -1,6 +1,7 @@
 /*   STEP 1   */
 export const leagueID = "725417455366799360"; // your league ID   MY ID: 725417455366799360
 export const leagueName = "America First"; // your league name
+export const creationYear = 2019; // year (NFL season) when league created
 export const dues = 100; // (optional) used in template constitution page
 export const dynasty = false; // true for dynasty leagues, false for redraft and keeper
 export const enableBlog = false; // requires VITE_CONTENTFUL_ACCESS_TOKEN and VITE_CONTENTFUL_SPACE environment variables

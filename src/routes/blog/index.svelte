@@ -1,13 +1,13 @@
 <script context="module">
-	import { enableBlog, getBlogPosts, getLeagueRosters, getLeagueUsers } from '$lib/utils/helper';
+	import { enableBlog, getBlogPosts, getLeagueRosters, getLeagueUsers, leagueID } from '$lib/utils/helper';
 
     export function load({ page }) {
         if(!enableBlog) return false;
         const queryPage = page.query.get('page') || 1;
         const filterKey = page.query.get('filter') || '';
 		const postsData = getBlogPosts();
-		const usersData = getLeagueUsers();
-		const rostersData = getLeagueRosters();
+		const usersData = getLeagueUsers(leagueID);
+		const rostersData = getLeagueRosters(leagueID);
 	
 		return {
 			props: {

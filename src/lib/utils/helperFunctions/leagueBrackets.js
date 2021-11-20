@@ -13,9 +13,9 @@ export const getBrackets = async () => {
 
     // get roster, user, and league data
 	const [rosterRes, users, leagueData] = await waitForAll(
-		getLeagueRosters(),
-		getLeagueUsers(),
-		getLeagueData(),
+		getLeagueRosters(leagueID),
+		getLeagueUsers(leagueID),
+		getLeagueData(leagueID),
 	).catch((err) => { console.error(err); });
 
 	const rosters = rosterRes.rosters;

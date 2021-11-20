@@ -1,10 +1,10 @@
 <script context="module">
-	import { getLeagueStandings, getLeagueUsers } from '$lib/utils/helper';
+	import { getLeagueStandings, getLeagueUsers, leagueID } from '$lib/utils/helper';
 
     export async function load() {
 
 		const standingsData = getLeagueStandings();
-		const usersData = getLeagueUsers();
+		const usersData = getLeagueUsers(leagueID);
 	
 		return {
 			props: {

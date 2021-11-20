@@ -13,8 +13,8 @@ export const getLeagueStandings = async () => {
 
 	const [nflState, leagueData, rosters] = await waitForAll(
 		getNflState(),
-		getLeagueData(),
-		getLeagueRosters(),
+		getLeagueData(leagueID),
+		getLeagueRosters(leagueID),
 	).catch((err) => { console.error(err); });
 
 	const yearData = leagueData.season;

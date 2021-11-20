@@ -2,7 +2,8 @@ import { leagueID } from '$lib/utils/leagueInfo';
 import { get } from 'svelte/store';
 import {users} from '$lib/stores';
 
-export const getLeagueUsers = async (queryLeagueID = leagueID) => {
+let queryLeagueID = leagueID;
+export const getLeagueUsers = async (queryLeagueID) => {
 	if(get(users)[queryLeagueID]) {
 		return get(users)[queryLeagueID];
 	}

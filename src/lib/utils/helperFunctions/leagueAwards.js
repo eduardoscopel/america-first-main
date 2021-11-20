@@ -4,7 +4,7 @@ import { getLeagueUsers } from './leagueUsers';
 import {waitForAll} from './multiPromise';
 import { get } from 'svelte/store';
 import {awards} from '$lib/stores';
-import { managers } from '$lib/utils/leagueInfo';
+import { managers, leagueID } from '$lib/utils/leagueInfo';
 
 
 export const getAwards = async () => {
@@ -12,9 +12,9 @@ export const getAwards = async () => {
 		return get(awards);
 	}
 	const [rosterRes, users, leagueData] = await waitForAll(
-		getLeagueRosters(),
-		getLeagueUsers(),
-		getLeagueData()
+		getLeagueRosters(leagueID),
+		getLeagueUsers(leagueID),
+		getLeagueData(leagueID),
 	).catch((err) => { console.error(err); });
 
 	const rosters = rosterRes.rosters;

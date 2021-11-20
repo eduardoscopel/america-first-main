@@ -1,21 +1,32 @@
 <script>
     import GameScore from './GameScore.svelte';
 
-    export let nflMatchups, week, gameSelection, completeGames, showGameBox, showMatchBox;
+    export let nflMatchups, gameSelection, completeGames, showGameBox, showMatchBox;
     
     let gameScores = [];
     const gamesObj = {};
 
-    for(const matchup in nflMatchups) {
-        const matchTeams = nflMatchups[matchup];
-        let gameID = matchTeams[0].gameID
-        gamesObj[gameID] = {
-            gameID,
-            home: matchTeams[0],
-            away: matchTeams[1],
+    const getGameScores = (nflMatchups) => {
+        gameScores = [];
+        for(const matchup in nflMatchups) {
+            const matchTeams = nflMatchups[matchup];
+            let gameID = matchTeams[0].gameID
+            gamesObj[gameID] = {
+                gameID,
+                home: matchTeams[0],
+                away: matchTeams[1],
+                isComplete: matchTeams[0].status.type.completed,
+                gameState: matchTeams[0].status.type.state,
+            }
+            gameScores.push(gamesObj[gameID]);
+
+            if(matchTeams[0].status.type.completed) {
+                completeGames.push(matchTeams[0].sleeperID);
+                completeGames.push(matchTeams[1].sleeperID);
+            }
         }
-        gameScores.push(gamesObj[gameID]);
     }
+    $: getGameScores(nflMatchups);
 </script>
 
 <style>
@@ -35,8 +46,8 @@
 </style>
 
 <div class="scoresHolder">
-    {#each gameScores as {gameID, home, away}} 
-        <GameScore {gameID} {home} {away} bind:gameSelection={gameSelection} {completeGames} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
+    {#each gameScores as {gameID, home, away, isComplete, gameState}} 
+        <GameScore {gameID} {home} {away} {isComplete} {gameState} bind:gameSelection={gameSelection} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
     {/each}
 </div>
 

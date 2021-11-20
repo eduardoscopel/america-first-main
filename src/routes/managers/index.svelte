@@ -7,15 +7,16 @@
         getLeagueTransactions,
         getAwards,
         getLeagueRecords,
-        managers as managersObj
+        managers as managersObj,
+        leagueID,
     } from '$lib/utils/helper';
 	
     export async function load({ page }) {
         if(!managersObj.length) return false;
         const managersInfo = waitForAll(
-            getLeagueRosters(),    
-            getLeagueUsers(),
-            getLeagueData(),
+            getLeagueRosters(leagueID),    
+            getLeagueUsers(leagueID),
+            getLeagueData(leagueID),
             getLeagueTransactions(),
             getAwards(),
             getLeagueRecords(),

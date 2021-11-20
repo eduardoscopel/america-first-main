@@ -1,4 +1,4 @@
-import { getLeagueUsers } from "$lib/utils/helper";
+import { getLeagueUser, leagueID } from "$lib/utils/helper";
 
 const lang = "en-US";
 
@@ -6,7 +6,7 @@ export async function post(req) {
     const authorID = req.params.id;
     const {comment, postID} = JSON.parse(req.body);
 
-    const users = await getLeagueUsers();
+    const users = await getLeagueUsers(leagueID);
 
     const author = validateID(users, authorID);
 

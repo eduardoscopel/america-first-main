@@ -1,12 +1,13 @@
 <script>
-    import { getNflScoreboard, managers, nflTeams } from '$lib/utils/helper'; 
+    import { getNflScoreboard, managers, nflTeams, creationYear, getYearMatchups } from '$lib/utils/helper'; 
     import Scoreboard from './Scoreboard.svelte';
     import PlayByPlay from './PlayByPlay.svelte';
     import GameBox from './GameBox.svelte';
     import ManagerBoard from './ManagerBoard.svelte';
+    import { Icon } from '@smui/tab';
 
 
-    export let leagueData, rosterData, users, playersInfo, nflWeek, matchupsInfo, standingsData;
+    export let playersInfo, nflWeek, matchupsInfo, standingsData;
 
     let viewPlayerID;
     let leaderBoardInfo;
@@ -23,10 +24,23 @@
 
     let nflMatchups = nflWeek.nflWeek;
     const week = matchupsInfo.week;
-    const season = leagueData.season;
+    const season = matchupsInfo.yearLeagueData.season;
 
     let leagueManagers = {};
-    const year = parseInt(leagueData.season);
+    const managerInfo = {};
+    let fantasyStarters = {};
+    let positionLeaders = {};
+    let weekMatchups = matchupsInfo.matchupWeeks[matchupsInfo.week - 1].matchups;
+    let yearLeagueData = matchupsInfo.yearLeagueData;
+    let rosterData = matchupsInfo.rosters;
+    let users = matchupsInfo.users;
+    let currentYear = null;
+
+    const year = parseInt(yearLeagueData.season);
+    if(currentYear == null) {
+        currentYear = year;
+    }
+
     for(const managerID in managers) {
 		const manager = managers[managerID];
 
@@ -45,97 +59,146 @@
 		leagueManagers[manager.roster].push(entryMan);
 	}
 
-    const managerInfo = {};
-    let fantasyStarters = {};
-    let positionLeaders = {};
-    let weekMatchups = matchupsInfo.matchupWeeks[matchupsInfo.week - 1].matchups;
-    for(const key in rosterData.rosters) {
-        const roster = rosterData.rosters[key];
-        const rosterID = roster.roster_id;
-		const user = users[roster.owner_id];
 
-        let recordManager = leagueManagers[rosterID].filter(m => m.yearsactive.includes(year));
-		let recordManID = recordManager[0].managerID;
+    let weekSelection = week;
+    const changeWeek = async (newWeekSelection) => {
+        weekSelection = newWeekSelection;
+        weekMatchups = matchupsInfo.matchupWeeks[newWeekSelection - 1].matchups;
+        completeGames = [];
 
-        if(user) {
-            managerInfo[recordManID] = {
-                avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
-                name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
-                realname: recordManager[0].name,
-                abbreviation: recordManager[0].abbreviation,
-                rosterID,
-                recordManID,
-            };
+        let newNflMatchups = await getNflScoreboard(yearSelection, newWeekSelection).catch((err) => { console.error(err); });;
+        nflMatchups = newNflMatchups.nflWeek;
+        // gameSelection = nflMatchups[0][0].gameID;
+    }
+    $: changeWeek(weekSelection);
+
+    let yearSelection = year;
+    const changeYearSelection = async (newYearSelection) => {
+        yearSelection = newYearSelection;
+        completeGames = [];
+        if(newYearSelection == year) {
+            weekSelection = week;
         } else {
-            managerInfo[recordManID] = {
-                avatar: `https://sleepercdn.com/images/v2/icons/player_default.webp`,
-                name: 'Unknown Manager',
-                realname: 'John Q. Rando',
-                abbreviation: 'JQR',
-                rosterID,
-                recordManID,
-            };
+            weekSelection = 1;
         }
-        // get starters
+
+        let newNflMatchups = await getNflScoreboard(newYearSelection, weekSelection).catch((err) => { console.error(err); });;
+        nflMatchups = newNflMatchups.nflWeek;
+
+        let newYearMatchups = await getYearMatchups(newYearSelection, weekSelection).catch((err) => { console.error(err); });;
+        weekMatchups = newYearMatchups.matchupWeeks[weekSelection - 1].matchups;
+        yearLeagueData = newYearMatchups.yearLeagueData;
+        rosterData = newYearMatchups.rosters;
+        users = newYearMatchups.users;
+    }
+    $: changeYearSelection(yearSelection);
+
+    const getStarters = (weekMatchups) => {
+        fantasyStarters = {};
+        for(const key in rosterData) {
+            const roster = rosterData[key];
+            const rosterID = roster.roster_id;
+            const user = users[roster.owner_id];
+
+            let recordManager = leagueManagers[rosterID].filter(m => m.yearsactive.includes(year));
+            let recordManID = recordManager[0].managerID;
+            if(!managerInfo[recordManID]) {
+                if(user) {
+                    managerInfo[recordManID] = {
+                        avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
+                        name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
+                        realname: recordManager[0].name,
+                        abbreviation: recordManager[0].abbreviation,
+                        rosterID,
+                        recordManID,
+                    };
+                } else {
+                    managerInfo[recordManID] = {
+                        avatar: `https://sleepercdn.com/images/v2/icons/player_default.webp`,
+                        name: 'Unknown Manager',
+                        realname: 'John Q. Rando',
+                        abbreviation: 'JQR',
+                        rosterID,
+                        recordManID,
+                    };
+                }
+            }
+            // get starters
+            for(const matchup in weekMatchups) {
+                const match = weekMatchups[matchup];
+                for(const managerKey in match) {
+                    const managerWeek = match[managerKey];
+                    if(managerWeek.recordManID == recordManID) {
+                        fantasyStarters[recordManID] = {
+                            starters: managerWeek.starters,
+                            startersPoints: managerWeek.points,
+                        }
+                    }
+                }
+            }
+        }
+    }
+    $: getStarters(weekMatchups);
+
+    //get position leaders
+    const getPositionLeaders = (weekMatchups) => {
+        positionLeaders = {};
         for(const matchup in weekMatchups) {
             const match = weekMatchups[matchup];
             for(const managerKey in match) {
                 const managerWeek = match[managerKey];
-                if(managerWeek.recordManID == recordManID) {
-                    fantasyStarters[recordManID] = {
-                        starters: managerWeek.starters,
-                        startersPoints: managerWeek.points,
-                    }
-                }
-            }
-        }
-    }
-    //get position leaders
-    for(const matchup in weekMatchups) {
-        const match = weekMatchups[matchup];
-        for(const managerKey in match) {
-            const managerWeek = match[managerKey];
-            for(let i = 0; i < managerWeek.starters.length; i++) {
-                if(managerWeek.starters[i] == '0') {
-                    continue;
-                } else {
-                    if(!positionLeaders[playersInfo.players[managerWeek.starters[i]].pos]) {
-                        positionLeaders[playersInfo.players[managerWeek.starters[i]].pos] = [];
-                    }
-                    const entry = {
-                        playerID: managerWeek.starters[i],
-                        pos: playersInfo.players[managerWeek.starters[i]].pos,
-                        fpts: managerWeek.points[i],
-                        owner: managerWeek.manager,
-                        recordManID: managerWeek.recordManID,
-                        fn: playersInfo.players[managerWeek.starters[i]].fn,
-                        ln: playersInfo.players[managerWeek.starters[i]].ln,
-                        t: playersInfo.players[managerWeek.starters[i]].t,
-                        avatar: playersInfo.players[managerWeek.starters[i]].pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${managerWeek.starters[i].toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${managerWeek.starters[i]}.jpg`,
-                        teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${playersInfo.players[managerWeek.starters[i]].t.toLowerCase()}.png`,
-                        teamColor: `background-color: #${nflTeams[playersInfo.players[managerWeek.starters[i]].t].color}6b`,
-                        teamAltColor: `background-color: #${nflTeams[playersInfo.players[managerWeek.starters[i]].t].alternateColor}52`,
-                    }
-                    if(playersInfo.players[managerWeek.starters[i]].pos == 'DB' || playersInfo.players[managerWeek.starters[i]].pos == 'CB' || playersInfo.players[managerWeek.starters[i]].pos == 'SS' || playersInfo.players[managerWeek.starters[i]].pos == 'FS') {
-                        positionLeaders['DB'].push(entry);
-                    } else if(playersInfo.players[managerWeek.starters[i]].pos == 'LB') {
-                        positionLeaders['LB'].push(entry);
-                    } else if(playersInfo.players[managerWeek.starters[i]].pos == 'DL' || playersInfo.players[managerWeek.starters[i]].pos == 'DE' || playersInfo.players[managerWeek.starters[i]].pos == 'DT') {
-                        positionLeaders['DL'].push(entry);
+                for(let i = 0; i < managerWeek.starters.length; i++) {
+                    if(managerWeek.starters[i] == '0') {
+                        continue;
                     } else {
-                        positionLeaders[playersInfo.players[managerWeek.starters[i]].pos].push(entry);
+                        if(!positionLeaders[playersInfo.players[managerWeek.starters[i]].pos]) {
+                            positionLeaders[playersInfo.players[managerWeek.starters[i]].pos] = [];
+                        }
+                        const entry = {
+                            playerID: managerWeek.starters[i],
+                            pos: playersInfo.players[managerWeek.starters[i]].pos,
+                            fpts: managerWeek.points[i],
+                            owner: managerWeek.manager,
+                            recordManID: managerWeek.recordManID,
+                            fn: playersInfo.players[managerWeek.starters[i]].fn,
+                            ln: playersInfo.players[managerWeek.starters[i]].ln,
+                            t: playersInfo.players[managerWeek.starters[i]].t,
+                            avatar: playersInfo.players[managerWeek.starters[i]].pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${managerWeek.starters[i].toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${managerWeek.starters[i]}.jpg`,
+                            teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${playersInfo.players[managerWeek.starters[i]].t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${managerWeek.starters[i]}.jpg`,
+                            teamColor: `background-color: #${nflTeams[playersInfo.players[managerWeek.starters[i]].t]?.color}6b` || `background-color: var(--boxShadowThree)`,
+                            teamAltColor: `background-color: #${nflTeams[playersInfo.players[managerWeek.starters[i]].t]?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
+                        }
+                        if(playersInfo.players[managerWeek.starters[i]].pos == 'DB' || playersInfo.players[managerWeek.starters[i]].pos == 'CB' || playersInfo.players[managerWeek.starters[i]].pos == 'SS' || playersInfo.players[managerWeek.starters[i]].pos == 'FS') {
+                            positionLeaders['DB'].push(entry);
+                        } else if(playersInfo.players[managerWeek.starters[i]].pos == 'LB') {
+                            positionLeaders['LB'].push(entry);
+                        } else if(playersInfo.players[managerWeek.starters[i]].pos == 'DL' || playersInfo.players[managerWeek.starters[i]].pos == 'DE' || playersInfo.players[managerWeek.starters[i]].pos == 'DT') {
+                            positionLeaders['DL'].push(entry);
+                        } else {
+                            positionLeaders[playersInfo.players[managerWeek.starters[i]].pos].push(entry);
+                        }
                     }
                 }
             }
         }
+        // sort position leaders
+        for(const key in positionLeaders) {
+            positionLeaders[key] = positionLeaders[key].sort((a, b) => b.fpts - a.fpts);
+        }
     }
-    // sort position leaders
-    for(const key in positionLeaders) {
-        positionLeaders[key] = positionLeaders[key].sort((a, b) => b.fpts - a.fpts);
-    }
+    $: getPositionLeaders(weekMatchups);
+
+
 </script>
 
 <style>
+    .default {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
     .mainWrapper {
         width: 100%;
         height: 100%;
@@ -148,7 +211,7 @@
 
     .mainConstrained {
         width: 100%;
-        height: 142em;
+        min-height: 132em;
         max-width: 1500px;
         margin: 0 auto 4em;
         background-color: var(--boxShadowThree);
@@ -173,6 +236,7 @@
     .weekInfoSeason {
         position: relative;
         display: inline-flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         width: 50%;
@@ -181,6 +245,7 @@
     .weekInfoWeek {
         position: relative;
         display: inline-flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         width: 50%;
@@ -217,11 +282,9 @@
         flex-direction: column;
         position:relative;
         width: 58%;
-        margin: 0 1%;
+        margin: 9% 1% 2%;
         align-content: center;
-        align-self: center;
         align-items: center;
-        justify-content: center;
     }
     .rightWrapper {
         display: inline-flex;
@@ -251,31 +314,77 @@
         align-items: center;
         width: 102%;
     }
+
+    :global(.changeWeekSelection) {
+        cursor: pointer;
+        color: #888;
+        transform: rotate(90deg) scale(2.2);
+        margin: 0.5em 0;
+    }
+
+   :global(.changeWeekSelection:hover) {
+        color: #00316b;
+    }
+
+    .spacer {
+        height: 48px;
+    }
 </style>
 
 <div class="mainWrapper">
     <div class="mainConstrained">
         <div class="leftWrapper">
             <div class="weekInfo">
-                <div class="weekInfoSeason">{season}</div>
-                <div class="weekInfoWeek">Week {week}</div>
+                <div class="weekInfoSeason">
+                    {#if yearSelection < season}
+                        <Icon class="material-icons changeWeekSelection" on:click={() => changeYearSelection(yearSelection + 1)}>chevron_left</Icon>
+                    {:else}
+                        <div class ="spacer" />
+                    {/if}
+                    <div class="default" style="height: 33.333%;" >{yearSelection}</div>
+                    {#if yearSelection > creationYear}
+                        <Icon class="material-icons changeWeekSelection" on:click={() => changeYearSelection(yearSelection - 1)}>chevron_right</Icon>
+                    {:else}
+                        <div class ="spacer" />
+                    {/if}
+                </div>
+                <div class="weekInfoWeek">
+                    {#if weekSelection < 17}
+                        <Icon class="material-icons changeWeekSelection" on:click={() => changeWeek(weekSelection + 1)}>chevron_left</Icon>
+                    {:else}
+                        <div class ="spacer" />
+                    {/if}
+                    <div class="default" style="height: 33.333%;" >Week {weekSelection}</div>
+                    {#if weekSelection > 1}
+                        <Icon class="material-icons changeWeekSelection" on:click={() => changeWeek(weekSelection - 1)}>chevron_right</Icon>
+                    {:else}
+                        <div class ="spacer" />
+                    {/if}
+                </div>
             </div>
             <div class="scoreboard">
-                <Scoreboard {nflMatchups} {week} bind:gameSelection={gameSelection} {completeGames} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
+                <Scoreboard {nflMatchups} bind:gameSelection={gameSelection} {completeGames} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
             </div>
         </div>
         <div class="centerWrapper">
             <div class="gameBox">
-                <GameBox {nflTeams} {nflMatchups} {week} {leagueData} {playersInfo} {fantasyStarters} {positionLeaders} {managerInfo} {weekMatchups} {standingsData} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
+                <GameBox {nflTeams} {nflMatchups} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} {currentYear} bind:yearLeagueData={yearLeagueData} {playersInfo} {fantasyStarters} {positionLeaders} {managerInfo} bind:weekMatchups={weekMatchups} {standingsData} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
             </div>
             <div class="playByPlay">
-                <PlayByPlay {nflTeams} {nflMatchups} {leagueData} {playersInfo} {fantasyStarters} {managerInfo} {weekMatchups} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
+                <PlayByPlay {nflTeams} {nflMatchups} bind:yearLeagueData={yearLeagueData} {playersInfo} {fantasyStarters} {managerInfo} bind:weekMatchups={weekMatchups} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
             </div>
         </div>
         <div class="rightWrapper">
-            <div class="weekInfo"></div>
+            <div class="weekInfo" style="margin: 15% 0;">
+                <div class="weekInfoSeason">
+                    <div class="default" style="height: 33.333%;" >{yearSelection}</div>
+                </div>
+                <div class="weekInfoWeek">
+                    <div class="default" style="height: 33.333%;" >Week {weekSelection}</div>
+                </div>
+            </div>
             <div class="managerboard">
-                <ManagerBoard {weekMatchups} {week} {managerInfo} {completeGames} {playersInfo} bind:matchSelection={matchSelection} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
+                <ManagerBoard bind:weekMatchups={weekMatchups} {week} {currentYear} bind:yearSelection={yearSelection} {completeGames} {playersInfo} bind:matchSelection={matchSelection} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
             </div>
         </div>
     </div>

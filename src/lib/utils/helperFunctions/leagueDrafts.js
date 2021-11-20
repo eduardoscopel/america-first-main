@@ -11,9 +11,9 @@ export const getUpcomingDraft = async () => {
 		return get(upcomingDraft);
 	}
 	const [rosterRes, users, leagueData] = await waitForAll(
-		getLeagueRosters(),
-		getLeagueUsers(),
-		getLeagueData()
+		getLeagueRosters(leagueID),
+		getLeagueUsers(leagueID),
+		getLeagueData(leagueID),
 	).catch((err) => { console.error(err); });
 
 	const draftID = leagueData.draft_id;

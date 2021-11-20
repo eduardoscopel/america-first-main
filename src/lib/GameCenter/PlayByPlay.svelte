@@ -1,7 +1,7 @@
 <script>
     import { getPlayByPlay, waitForAll, round, getGameDrives } from '$lib/utils/helper'; 
 
-    export let nflTeams, nflMatchups, leagueData, fantasyStarters, managerInfo, weekMatchups, playersInfo, gameSelection = nflMatchups[0][0].gameID, matchSelection, managerSelection, fantasyProducts, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo;
+    export let nflTeams, nflMatchups, yearLeagueData, fantasyStarters, managerInfo, weekMatchups, playersInfo, gameSelection, matchSelection, managerSelection, fantasyProducts, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo, weekSelection, yearSelection;
 
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/situation?lang=en&region=us CURRENT DOWN
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/plays?lang=en&region=us PLAY BY PLAY
@@ -14,8 +14,8 @@
     const loadPlayByPlay = async (gameSelection, matchSelection, startersArray, showGameBox, showMatchBox) => {
 
         let fantasyProducts = [];
-        const score = leagueData.scoring_settings;
-        const positions = leagueData.roster_positions.filter(p => p != 'BN');
+        const score = yearLeagueData.scoring_settings;
+        const positions = yearLeagueData.roster_positions.filter(p => p != 'BN');
 
         // extracts Espn Team ID from API link
         const parseEspnTeamID = (teamLink, linkType) => {
@@ -48,31 +48,33 @@
         }
 
         // checks whether play is relevant to Team DEF/ST scoring
-        const isDefRelevant = (play, playTeam, homeDefStarted, awayDefStarted, home, away, homeDefense, awayDefense, playerKey) => {
+        const isDefRelevant = (play, playType, playTeam, homeDefStarted, awayDefStarted, home, away, homeDefense, awayDefense, playerKey, playerTeam) => {
             let relevantEntry;
-            if(play.type.id == 7 || play.type.id == 9 || play.type.id == 26 ||     
-                play.type.id == 36 || play.type.id == 52 || play.type.id == 12 ||   
-                play.type.id == 32 || play.type.id == 17 || play.type.id == 29 ||
-                play.type.id == 37 || play.type.id == 39 || play.type.id == 18 ||
-                (play.type.id == 60 && play.alternativeText.includes('BLOCKED'))) {                                                      
-                if(awayDefStarted == true && playTeam == home) {
+            if(playType == 7 || playType == 9 || playType == 26 ||     
+                playType == 36 || playType == 52 || playType == 12 ||   
+                playType == 32 || playType == 17 || playType == 29 ||
+                playType == 37 || playType == 39 || playType == 18 ||
+                playType == 20 ||
+                (playType == 60 && play.alternativeText.includes('BLOCKED'))) {    
+
+                if(awayDefStarted == true && playTeam == home && playerTeam == away) {
                     const defense = awayDefense;
                     relevantEntry = {
                         playerInfo: defense,
                         manager: defense.owner,
                         statType: play.participants[playerKey].type,
                         yards: play.statYardage, 
-                        playType: play.type.id,
+                        playType: playType,
                         oppDef: away,
                     }
-                } else if(homeDefStarted == true && playTeam == away) {
+                } else if(homeDefStarted == true && playTeam == away && playerTeam == home) {
                     const defense = homeDefense;
                     relevantEntry = {
                         playerInfo: defense,
                         manager: defense.owner,
                         statType: play.participants[playerKey].type,
                         yards: play.statYardage, 
-                        playType: play.type.id,
+                        playType: playType,
                         oppDef: home,
                     }
                 }
@@ -80,6 +82,67 @@
                 relevantEntry = null;
             }
             return relevantEntry;
+        }
+
+        // determines true stat yardage on plays involving laterals - TO-DO: much stupid work to process "circus plays" ; also other types of plays besides pass
+        const processLateral = (play, player, relevantStartersArray) => {
+            const lateralInfo = [];
+
+            if(player.playType == 24 || play.secondDescription.includes('Pass for')) {
+                let firstPlayerIndex = play.description.indexOf('.', play.description.indexOf('.') + 1);
+                let firstPlayer = play.description.slice(firstPlayerIndex - 2, play.description.indexOf('. '));
+                let firstPlayerInitial;
+                if(firstPlayer[0] == ' ') { 
+                    firstPlayerInitial = firstPlayer.slice(1, 2);
+                } else {
+                    firstPlayerInitial = firstPlayer.slice(0, 1);
+                }
+                let firstPlayerSurname = firstPlayer.slice(firstPlayer.indexOf('.') + 1, firstPlayer.indexOf('to') - 1);
+                let firstPlayerYards = null;
+
+                firstPlayerYards = play.description.slice(play.description.indexOf('yards') - 3, play.description.indexOf('yards') - 1);
+                if(firstPlayerYards[0] == ' ') {
+                    firstPlayerYards = firstPlayerYards.slice(1)
+                }
+                firstPlayerYards = parseInt(firstPlayerYards);
+                
+                let lateralPlayerYards = play.description.slice(play.description.indexOf('Lateral'));
+                lateralPlayerYards = lateralPlayerYards.slice(lateralPlayerYards.indexOf(' yards') - 2, lateralPlayerYards.indexOf(' yards'));
+                if(lateralPlayerYards[0] == ' ') {
+                    lateralPlayerYards = lateralPlayerYards.slice(1);
+                }
+                lateralPlayerYards = parseInt(lateralPlayerYards);
+
+                if(firstPlayerYards < 0 && player.yards > 0) {
+                    firstPlayerYards = 0;
+                    lateralPlayerYards = player.yards;
+                } else if((firstPlayerYards < 0 && player.yards < 0) || (firstPlayerYards > 0 && lateralPlayerYards == 0 && firstPlayerYards > player.yards)) {
+                    firstPlayerYards = player.yards;
+                    lateralPlayerYards = 0;
+                } else if(firstPlayerYards > 0 && firstPlayerYards > player.yards && lateralPlayerYards > 0) {
+                    firstPlayerYards = firstPlayerYards - lateralPlayerYards;
+                } else if(firstPlayerYards > 0 && firstPlayerYards > player.yards && lateralPlayerYards < 0) {
+                    firstPlayerYards = player.yards - lateralPlayerYards;
+                } else if(firstPlayerYards > 0 && firstPlayerYards < player.yards && (player.yards - lateralPlayerYards < 0)) {
+                    firstPlayerYards += player.yards - lateralPlayerYards;
+                }
+
+                if(relevantStartersArray.find(s => s.ln == firstPlayerSurname && s.t == play.playTeam && s.fn.slice(1) == firstPlayerInitial)) {
+                    firstPlayer = relevantStartersArray.find(s => s.ln == firstPlayerSurname && s.t == play.playTeam && s.fn.slice(1) == firstPlayerInitial);
+                    lateralInfo.push({
+                        player: firstPlayer,
+                        yards: firstPlayerYards,
+                        stats: ['rec', 'rec_yd'],
+                    });
+                }
+                
+                lateralInfo.push({
+                    player: player,
+                    yards: lateralPlayerYards,
+                    stats: ['rec_yd'],
+                });
+            }
+            return lateralInfo;
         }
 
         // extracts enforced penalty yardage from play description 
@@ -186,7 +249,7 @@
                 if(awayStart == true) {
                     let oldYA = defensiveYardsInfo.newAwayYards;
 
-                    if((playObj.playType == 5 || playObj.playType == 7 || playObj.playType == 9 || playObj.playType == 24 || playObj.playType == 67 || playObj.playType == 68)) {
+                    if((playObj.playType == 5 || playObj.playType == 7 || playObj.playType == 9 || playObj.playType == 20 || playObj.playType == 24 || playObj.playType == 67 || playObj.playType == 68)) {
                         defensiveYardsInfo.newAwayYards += playObj.yards;  
                         if(playObj.penalty == true && playObj.penaltyInfo.against == awayTeam) {
                             defensiveYardsInfo.newAwayYards = defensiveYardsInfo.newAwayYards - playObj.penaltyInfo.totalYards;
@@ -202,13 +265,16 @@
                         // statYardage counts yards before fumble
                         defensiveYardsInfo.newAwayYards += playObj.yards; 
                         // now debit the defense with recovery yards
-                        let recoveryYards = playObj.secondDescription.slice(playObj.secondDescription.indexOf('Yrd Fumble Recovery') - 3, playObj.secondDescription.indexOf('Yrd Fumble Recovery'));
-                        if(recoveryYards.slice(0, 1) == ' ') {
-                            recoveryYards = parseInt(recoveryYards.slice(1, 2)); // TO-DO this doesn't always work, see buffalo game
-                        } else {
-                            recoveryYards = parseInt(recoveryYards.slice(0, 2));
+                        let recoveryYards = 0;
+                        if(playObj.secondDescription.includes('Yrd Fumble Recovery')) {
+                            recoveryYards = playObj.secondDescription.slice(playObj.secondDescription.indexOf('Yrd Fumble Recovery') - 3, playObj.secondDescription.indexOf('Yrd Fumble Recovery'));
+                            if(recoveryYards.slice(0, 1) == ' ') {
+                                recoveryYards = parseInt(recoveryYards.slice(1, 2)); // TO-DO this doesn't always work, see buffalo game, texans dolphins week 9
+                            } else {
+                                recoveryYards = parseInt(recoveryYards.slice(0, 2));
+                            }
+                            defensiveYardsInfo.newAwayYards = defensiveYardsInfo.newAwayYards - recoveryYards;
                         }
-                        defensiveYardsInfo.newAwayYards = defensiveYardsInfo.newAwayYards - recoveryYards;
                     }
                     // check if threshold broken
                     if((oldYA < 100 && defensiveYardsInfo.newAwayYards >= 100) || (oldYA < 200 && defensiveYardsInfo.newAwayYards >= 200) || (oldYA < 300 && defensiveYardsInfo.newAwayYards >= 300) || (oldYA < 350 && defensiveYardsInfo.newAwayYards >= 350) ||
@@ -244,7 +310,7 @@
                 if(homeStart == true) {
                     let oldYA = defensiveYardsInfo.newHomeYards;  
 
-                    if((playObj.playType == 5 || playObj.playType == 7 || playObj.playType == 9 || playObj.playType == 24 || playObj.playType == 67 || playObj.playType == 68)) {
+                    if((playObj.playType == 5 || playObj.playType == 7 || playObj.playType == 9 || playObj.playType == 20 || playObj.playType == 24 || playObj.playType == 67 || playObj.playType == 68)) {
                         defensiveYardsInfo.newHomeYards += playObj.yards;
                         if(playObj.penalty == true && playObj.penaltyInfo.against == homeTeam) {
                             defensiveYardsInfo.newHomeYards = defensiveYardsInfo.newHomeYards - playObj.penaltyInfo.totalYards;
@@ -260,11 +326,14 @@
                         // statYardage counts yards before fumble
                         defensiveYardsInfo.newHomeYards += playObj.yards; 
                         // now debit the defense with recovery yards
-                        let recoveryYards = playObj.secondDescription.slice(playObj.secondDescription.indexOf('Yrd Fumble Recovery') - 3, playObj.secondDescription.indexOf('Yrd Fumble Recovery'));
-                        if(recoveryYards.slice(0, 1) == ' ') {
-                            recoveryYards = parseInt(recoveryYards.slice(1, 2));
-                        } else {
-                            recoveryYards = parseInt(recoveryYards.slice(0, 2));
+                        let recoveryYards = 0;
+                        if(playObj.secondDescription.includes('Yrd Fumble Recovery')) {
+                            recoveryYards = playObj.secondDescription.slice(playObj.secondDescription.indexOf('Yrd Fumble Recovery') - 3, playObj.secondDescription.indexOf('Yrd Fumble Recovery'));
+                            if(recoveryYards.slice(0, 1) == ' ') {
+                                recoveryYards = parseInt(recoveryYards.slice(1, 2));
+                            } else {
+                                recoveryYards = parseInt(recoveryYards.slice(0, 2));
+                            }
                         }
                         defensiveYardsInfo.newHomeYards = defensiveYardsInfo.newHomeYards - recoveryYards;
                     }
@@ -300,6 +369,91 @@
             }
             return defensiveYardsInfo;
         }
+
+        // calculates (single) reception bonuses
+        const receptionBonus = (adjustedYards, statYDS, statRec, player) => {
+            let receptionBonusInfo = {
+                fpts: 0,
+                stat: [],
+                runningTotals: [],
+            }
+            if(0 < adjustedYards && adjustedYards < 5 && score.rec_0_4) {                                                                       // RECEPTION YD BONUS
+                receptionBonusInfo.fpts = score.rec_0_4;
+                receptionBonusInfo.stat.push('rec_0_4');
+                const sleeperStat = 'rec_0_4';
+                if(score.rec_0_4 != 0) {
+                    let runningTotal = pushRunningTotal(score.rec_0_4, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                    receptionBonusInfo.runningTotals.push(runningTotal);
+                }
+            } else if(4 < adjustedYards && adjustedYards < 10 && score.rec_5_9) {
+                receptionBonusInfo.fpts = score.rec_5_9;
+                receptionBonusInfo.stat.push('rec_5_9');
+                const sleeperStat = 'rec_5_9';
+                if(score.rec_5_9 != 0) {
+                    let runningTotal = pushRunningTotal(score.rec_5_9, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                    receptionBonusInfo.runningTotals.push(runningTotal);
+                }
+            } else if(9 < adjustedYards && adjustedYards < 20 && score.rec_10_19) {
+                receptionBonusInfo.fpts = score.rec_10_19;
+                receptionBonusInfo.stat.push('rec_10_19');
+                const sleeperStat = 'rec_10_19';
+                if(score.rec_10_19 != 0) {
+                    let runningTotal = pushRunningTotal(score.rec_10_19, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                    receptionBonusInfo.runningTotals.push(runningTotal);
+                }
+            } else if(19 < adjustedYards && adjustedYards < 30 && score.rec_20_29) {
+                receptionBonusInfo.fpts = score.rec_20_29;
+                receptionBonusInfo.stat.push('rec_20_29');
+                const sleeperStat = 'rec_20_29';
+                if(score.rec_0_4 != 0) {
+                    let runningTotal = pushRunningTotal(score.rec_20_29, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                    receptionBonusInfo.runningTotals.push(runningTotal);
+                }
+            } else if(29 < adjustedYards && adjustedYards < 40 && score.rec_30_39) {
+                receptionBonusInfo.fpts = score.rec_30_39;
+                receptionBonusInfo.stat.push('rec_30_39');
+                const sleeperStat = 'rec_30_39';
+                if(score.rec_0_4 != 0) {
+                    let runningTotal = pushRunningTotal(score.rec_30_39, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                    receptionBonusInfo.runningTotals.push(runningTotal);
+                }
+            } else if(adjustedYards >= 40 && score.rec_40p) {
+                receptionBonusInfo.fpts = score.rec_40p;
+                receptionBonusInfo.stat.push('rec_40p');
+                const sleeperStat = 'rec_40p';
+                if(score.rec_0_4 != 0) {
+                    let runningTotal = pushRunningTotal(score.rec_40p, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                    receptionBonusInfo.runningTotals.push(runningTotal);
+                }
+            }
+            if(player.playerInfo.pos == 'RB' && score.bonus_rec_rb) {                                                                               // RECEPTION POS BONUS
+                receptionBonusInfo.fpts += score.bonus_rec_rb;
+                receptionBonusInfo.stat.push('bonus_rec_rb');
+                const sleeperStat = 'bonus_rec_rb';
+                if(score.bonus_rec_rb != 0) {
+                    let runningTotal = pushRunningTotal(score.bonus_rec_rb, statRec, sleeperStat, 0, player.playerInfo.playerID, player.playerInfo.pos); 
+                    receptionBonusInfo.runningTotals.push(runningTotal);
+                }
+            } else if(player.playerInfo.pos == 'TE' && score.bonus_rec_te) {   
+                receptionBonusInfo.fpts += score.bonus_rec_te;
+                receptionBonusInfo.stat.push('bonus_rec_te');
+                const sleeperStat = 'bonus_rec_te';
+                if(score.bonus_rec_te != 0) {
+                    let runningTotal = pushRunningTotal(score.bonus_rec_te, statRec, sleeperStat, 0, player.playerInfo.playerID, player.playerInfo.pos); 
+                    receptionBonusInfo.runningTotals.push(runningTotal);
+                }
+            } else if(player.playerInfo.pos == 'WR' && score.bonus_rec_wr) {   
+                receptionBonusInfo.fpts += score.bonus_rec_wr;
+                receptionBonusInfo.stat.push('bonus_rec_wr');
+                const sleeperStat = 'bonus_rec_wr';
+                if(score.bonus_rec_wr != 0) {
+                    let runningTotal = pushRunningTotal(score.bonus_rec_wr, statRec, sleeperStat, 0, player.playerInfo.playerID, player.playerInfo.pos); 
+                    receptionBonusInfo.runningTotals.push(runningTotal);
+                }
+            }
+            return receptionBonusInfo;
+        }
+
         // tracks individual players' stat totals
         let runningTotals = {};
         const pushRunningTotal = (fpts, statDesc, stat, metric, playerID, position) => {
@@ -311,6 +465,7 @@
                     pos: position,
                     yardsAllowedScored: new Boolean (false),
                     pointsAllowedScored: new Boolean (false),
+                    bonus: [],
                 }
             }
             if(statDesc == 'PTS ALW:' || statDesc == 'YDS ALW:') {
@@ -443,7 +598,7 @@
             return {DEFscore, DEFthreshold, DEFdescription};
         }
         // processes plays and calculates FPTS
-        const processPlays = (playArray, defYardsArray, homeDefStarted, awayDefStarted, homeTeam, awayTeam, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed, gameState) => {
+        const processPlays = (playArray, defYardsArray, homeDefStarted, awayDefStarted, homeTeam, awayTeam, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed, gameState, relevantStartersArray) => {
             let processedPlays = [];
             let fantasyPlay = {};
             for(const playKey in playArray) {
@@ -575,6 +730,74 @@
                         let fumblerTeam;
                         if(player.statType == 'fumbler') {
                             fumblerTeam = player.playerInfo.t;
+                        } else if(player.playType == 20) {                                                              // SAFETY - TEAM DEF
+                            if(player.statType == 'sackedBy') {
+                                const fpts = (score?.sack || 0) + player.yards * (score?.sack_yd || 0) + (score?.qb_hit || 0) + (score?.tkl || 0) + (score?.tkl_loss || 0);
+                                const fptsSack = (score?.sack || 0);
+                                const fptsSackYDS = player.yards * (score?.sack_yd || 0);           
+                                const fptsQBHIT = (score?.qb_hit || 0);
+                                const fptsTKL = (score?.tkl || 0);
+                                const fptsLOSS = (score?.tkl_loss || 0);
+                                const statSack = 'SACK:';
+                                const statSackYDS = 'SACK YDS:';
+                                const statQBHIT = 'QB HIT:';
+                                const statTKL = 'TKL:'
+                                const statLOSS = 'TKL LOSS:'
+                                const entryDEF = {
+                                    order: play.order,
+                                    side: 'defense',
+                                    manager: player.manager,
+                                    playerInfo: player.playerInfo,
+                                    stat: ['sack', 'sack_yd', 'qb_hit', 'tkl', 'tkl_loss'],
+                                    runningTotals: [],
+                                    fpts,
+                                    yards: player.yards,
+                                    description: play.description,
+                                    shortDesc: 'Sack',
+                                }
+                                if(fptsSack != 0) {
+                                    let runningTotal = pushRunningTotal(fptsSack, statSack, entryDEF.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                if(fptsSackYDS != 0) {
+                                    let runningTotal = pushRunningTotal(fptsSackYDS, statSackYDS, entryDEF.stat[1], player.yards, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                if(fptsQBHIT != 0) {
+                                    let runningTotal = pushRunningTotal(fptsQBHIT, statQBHIT, entryDEF.stat[2], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                if(fptsTKL != 0) {
+                                    let runningTotal = pushRunningTotal(fptsTKL, statTKL, entryDEF.stat[3], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                if(fptsLOSS != 0) {
+                                    let runningTotal = pushRunningTotal(fptsLOSS, statLOSS, entryDEF.stat[4], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                fantasyPlay[play.playID].push(entryDEF);
+                                sackRecorded = true;       // so that split-sacks aren't counted twice
+                            } else if(player.statType == 'scorer' && score.safe) {
+                                const fpts = (score?.safe || 0);           
+                                const statDesc = 'SAFETY:';
+                                const entryDEF = {
+                                    order: play.order,
+                                    side: 'defense',
+                                    manager: player.manager,
+                                    playerInfo: player.playerInfo,
+                                    stat: ['safe'],
+                                    runningTotals: [],
+                                    fpts,
+                                    description: play.description,
+                                    shortDesc: 'Safety',
+                                }   
+                                if(fpts != 0) {
+                                    let runningTotal = pushRunningTotal(fpts, statDesc, entryDEF.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                fantasyPlay[play.playID].push(entryDEF);
+                            }
+                        
                         } else if(player.statType == 'scorer' && player.playType == 39 && score.def_td) {                       // FUMBLE 6 - TEAM DEF
                             const fpts = (score?.def_td || 0);           
                             const statDesc = 'TD(D):';
@@ -687,15 +910,17 @@
                                 fantasyPlay[play.playID].push(entryDEF);
                             }
                         } else if(player.statType == 'sackedBy' && sackRecorded == false) {            // SACK - TEAM DEF
-                            const fpts = (score?.sack || 0) + player.yards * (score?.sack_yd || 0) + (score?.qb_hit || 0) + (score?.tkl || 0);
+                            const fpts = (score?.sack || 0) + player.yards * (score?.sack_yd || 0) + (score?.qb_hit || 0) + (score?.tkl || 0) + (score?.tkl_loss || 0);
                             const fptsSack = (score?.sack || 0);
                             const fptsSackYDS = player.yards * (score?.sack_yd || 0);           
                             const fptsQBHIT = (score?.qb_hit || 0);
                             const fptsTKL = (score?.tkl || 0);
+                            const fptsLOSS = (score?.tkl_loss || 0);
                             const statSack = 'SACK:';
                             const statSackYDS = 'SACK YDS:';
                             const statQBHIT = 'QB HIT:';
-                            const statTKL = 'TKL:'
+                            const statTKL = 'TKL:';
+                            const statLOSS = 'TKL LOSS:';
                             const entryDEF = {
                                 order: play.order,
                                 side: 'defense',
@@ -722,6 +947,10 @@
                             }
                             if(fptsTKL != 0) {
                                 let runningTotal = pushRunningTotal(fptsTKL, statTKL, entryDEF.stat[3], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                entryDEF.runningTotals.push(runningTotal);
+                            }
+                            if(fptsLOSS != 0) {
+                                let runningTotal = pushRunningTotal(fptsLOSS, statLOSS, entryDEF.stat[4], 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                 entryDEF.runningTotals.push(runningTotal);
                             }
                             fantasyPlay[play.playID].push(entryDEF);
@@ -1035,8 +1264,8 @@
                             }
                             fantasyPlay[play.playID].push(entryIDP);
                         }
-                        if(play.description.includes('TWO-POINT CONVERSION') && play.description.includes('SUCCEEDS')) {            // 2-PT CONVERSIONS
-                            if(player.statType == 'patPasser') {                                                                    // 2-PT PASS
+                        if(play.pointAfterType == 15 && (score.rec_2pt || score.rec || score.pass_2pt || score.pass_att || score.pass_cmp)) {                         // 2-PT CONVERSIONS
+                            if(player.statType == 'patPasser' && (score.pass_2pt || score.pass_att || score.pass_cmp)) {                                                // 2-PT PASS
                                 const fpts = (score?.pass_2pt || 0) + (score?.pass_att || 0) + (score?.pass_cmp || 0);
                                 const fpts2PT = (score?.pass_2pt || 0);
                                 const fptsATT = (score?.pass_att || 0);
@@ -1068,7 +1297,7 @@
                                     entry.runningTotals.push(runningTotal);
                                 }
                                 fantasyPlay[play.playID].push(entry);
-                            } else if(play.description.includes('complete. ATTEMPT SUCCEEDS') && player.statType == 'patScorer' && (score.rec_2pt || score.rec)) {                             // 2-PT RECEPTION TO-DO differentiate 2pt rushing 
+                            } else if(player.statType == 'patScorer' && (score.rec_2pt || score.rec)) {                             // 2-PT RECEPTION 
                                 const fpts = (score?.rec_2pt || 0) + (score?.rec || 0);
                                 const fpts2PT = (score?.rec_2pt || 0);
                                 const fptsREC = (score?.rec || 0);
@@ -1092,6 +1321,48 @@
                                 if(fptsREC != 0) {
                                     let runningTotal = pushRunningTotal(fptsREC, statREC, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                     entry.runningTotals.push(runningTotal);
+                                }
+                                fantasyPlay[play.playID].push(entry);
+                            }
+                        } else if(play.pointAfterType == 16 && (score.rush_2pt || score.rush_att || score.bonus_rush_att_20)) {
+                            if(player.statType == 'patScorer' && (score.rush_2pt || score.rush_att || score.bonus_rush_att_20)) {                             // 2-PT RUSH
+                                const fpts = (score?.rush_2pt || 0) + (score?.rush_att || 0);
+                                const fpts2PT = (score?.rush_2pt || 0);
+                                const fptsATT = (score?.rush_att || 0);
+                                const stat2PT = '2PT RUSH:';
+                                const statREC = 'CARRIES:';
+                                const entry = {
+                                    order: play.order,
+                                    side: 'offense',
+                                    manager: player.manager,
+                                    playerInfo: player.playerInfo,
+                                    stat: ['rush_2pt', 'rush_att'],
+                                    runningTotals: [],
+                                    fpts,
+                                    description: play.description,
+                                    shortDesc: '2-PT Conversion (Rush)',
+                                }
+                                if(fpts2PT != 0) {
+                                    let runningTotal = pushRunningTotal(fpts2PT, stat2PT, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entry.runningTotals.push(runningTotal);
+                                }
+                                if(fptsATT != 0) {
+                                    let runningTotal = pushRunningTotal(fptsATT, statREC, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entry.runningTotals.push(runningTotal);
+                                }
+                                if(score.bonus_rush_att_20) {
+                                    const stat = 'CARRY BONUS(20+):';
+                                    const sleeperStat = 'bonus_rush_att_20';
+                                    let runningTotal = pushRunningTotal(0, stat, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    if(runningTotal.occurs == 20) {
+                                        const fpts = score.bonus_rush_att_20;
+                                        let runningTotal = pushRunningTotal(fpts, stat, sleeperStat, 0, player.playerInfo.playerID, player.playerInfo.pos); 
+                                        let bonusEntry = entry;
+                                        bonusEntry.shortDesc = 'Bonus: 20+ Carries';
+                                        bonusEntry.stat = ['bonus_rush_att_20'];
+                                        bonusEntry.runningTotals.push(runningTotal);
+                                        fantasyPlay[play.playID].push(bonusEntry);
+                                    }
                                 }
                                 fantasyPlay[play.playID].push(entry);
                             }
@@ -1137,6 +1408,20 @@
                                 if(fptsRun != 0) {
                                     let runningTotal = pushRunningTotal(score.rush_40p, stat, entry.stat[2], 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                     entry.runningTotals.push(runningTotal);
+                                }
+                            }
+                            if(score.bonus_rush_att_20) {
+                                const stat = 'CARRY BONUS(20+):';
+                                const sleeperStat = 'bonus_rush_att_20';
+                                let runningTotal = pushRunningTotal(0, stat, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                if(runningTotal.occurs == 20) {
+                                    const fpts = score.bonus_rush_att_20;
+                                    let runningTotal = pushRunningTotal(fpts, stat, sleeperStat, 0, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    let bonusEntry = entry;
+                                    bonusEntry.shortDesc = 'Bonus: 20+ Carries';
+                                    bonusEntry.stat = ['bonus_rush_att_20'];
+                                    bonusEntry.runningTotals.push(runningTotal);
+                                    fantasyPlay[play.playID].push(bonusEntry);
                                 }
                             }
                             fantasyPlay[play.playID].push(entry);
@@ -1201,6 +1486,20 @@
                                     entry.runningTotals.push(runningTotal);
                                 }
                             }
+                            if(score.bonus_rush_att_20) {
+                                const stat = 'CARRY BONUS(20+):';
+                                const sleeperStat = 'bonus_rush_att_20';
+                                let runningTotal = pushRunningTotal(0, stat, sleeperStat, 0, player.playerInfo.playerID, player.playerInfo.pos); 
+                                if(runningTotal.occurs == 20) {
+                                    const fpts = score.bonus_rush_att_20;
+                                    let runningTotal = pushRunningTotal(fpts, stat, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    let bonusEntry = entry;
+                                    bonusEntry.shortDesc = 'Bonus: 20+ Carries';
+                                    bonusEntry.stat = ['bonus_rush_att_20'];
+                                    bonusEntry.runningTotals.push(runningTotal);
+                                    fantasyPlay[play.playID].push(bonusEntry);
+                                }
+                            }
                             fantasyPlay[play.playID].push(entry);
                         } else if(player.playType == 26) {          // INTERCEPTION
                             if(player.statType == 'passer') {                       // INT QB PENALTY
@@ -1236,7 +1535,7 @@
                                 }
                                 fantasyPlay[play.playID].push(entry);
                             }       
-                        } else if(player.playType == 36) {            // PICK SIX 
+                        } else if(player.playType == 36 && player.statType != 'patScorer') {            // PICK SIX 
                             if(player.statType == 'scorer' && (score.idp_int || score.idp_def_td || score.idp_int_ret_yd)) {        // P6 IDP
                                 const fpts = (score?.idp_int || 0) + (score?.idp_def_td || 0) + player.yards * (score?.idp_int_ret_yd || 0);
                                 const fptsINT = (score?.idp_int || 0);
@@ -1370,8 +1669,56 @@
                                         }
                                     }
                                     fantasyPlay[play.playID].push(entry);
-                                } else if(player.statType == 'receiver') {              // RECEPTION
+                                } else if(player.statType == 'receiver') {                              // RECEPTION
+                                    const statRec = 'REC:';
+                                    const statYDS = 'REC YDS:';
                                     let adjustedYards = player.yards;
+                                    if(play.description.includes('Lateral')) {            // TO-DO for lateral play, see Colts-Jets week 9
+                                        let lateralInfo = processLateral(play, player, relevantStartersArray); 
+                                        adjustedYards = lateralInfo.find(p => p.player == player).yards;
+                                        // scoring the original receiver
+                                        if(lateralInfo.find(p => p.player != player)) {
+                                            let firstPlayer = lateralInfo.find(p => p.player != player);
+                                            let firstPlayerYards = firstPlayer.yards;
+                                            const fpts = firstPlayerYards * (score?.rec_yd || 0) + (score?.rec || 0);
+                                            const fptsREC = (score?.rec || 0);
+                                            const fptsYDS = firstPlayerYards * (score?.rec_yd || 0);
+                                            const entry = {
+                                                order: play.order,
+                                                side: 'offense',
+                                                manager: firstPlayer.player.manager,
+                                                playerInfo: firstPlayer.player.playerInfo,
+                                                stat: ['rec_yd', 'rec'],
+                                                runningTotals: [],
+                                                fpts,
+                                                yards: firstPlayerYards,
+                                                description: play.description,
+                                                shortDesc: 'Reception',
+                                            }
+                                            if(fptsRec != 0) {
+                                                let runningTotal = pushRunningTotal(fptsREC, statRec, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                                entry.runningTotals.push(runningTotal);
+                                            }
+                                            if(fptsYDS != 0) {
+                                                let runningTotal = pushRunningTotal(fptsYDS, statYDS, entry.stat[0], firstPlayerYards, player.playerInfo.playerID, player.playerInfo.pos); 
+                                                entry.runningTotals.push(runningTotal);
+                                            }
+                                            if(firstPlayerYards > 0) {
+                                                let receptionBonusInfo = receptionBonus(firstPlayerYards, statYDS, statRec, player)
+                                                if(receptionBonusInfo.stat.length > 0) {
+                                                    for(const stat in receptionBonusInfo.stat) {
+                                                        entry.stat.push(receptionBonusInfo.stat[stat]);
+                                                    }
+                                                }
+                                                if(receptionBonusInfo.runningTotals.length > 0) {
+                                                    for(const runTotal in receptionBonusInfo.runningTotals) {
+                                                        entry.runningTotals.push(receptionBonusInfo.runningTotals[runTotal]);
+                                                    }
+                                                }
+                                            }
+                                            fantasyPlay[play.playID].push(entry);
+                                        }
+                                    }
                                     if(play.penalty == true) {
                                         if(play.penaltyInfo.against == player.playerTeam) {
                                             adjustedYards += play.penaltyInfo.totalYards;
@@ -1379,23 +1726,43 @@
                                             adjustedYards = adjustedYards - play.penaltyInfo.totalYards;
                                         }
                                     }
-                                    const fpts = adjustedYards * (score?.rec_yd || 0) + (score?.rec || 0);
-                                    const fptsRec = (score?.rec || 0);
-                                    const fptsYDS = adjustedYards * (score?.rec_yd || 0)
-                                    const statRec = 'REC:';
-                                    const statYDS = 'REC YDS:';
-                                    const entry = {
-                                        order: play.order,
-                                        side: 'offense',
-                                        manager: player.manager,
-                                        playerInfo: player.playerInfo,
-                                        stat: ['rec_yd', 'rec'],
-                                        runningTotals: [],
-                                        fpts,
-                                        yards: adjustedYards,
-                                        description: play.description,
-                                        shortDesc: 'Reception',
+                                    let fpts = 0;
+                                    let fptsRec = 0;
+                                    let fptsYDS = 0;
+                                    let entry;
+                                    if(play.description.includes('Lateral')) {
+                                        fpts = adjustedYards * (score?.rec_yd || 0);
+                                        fptsYDS = fpts;
+                                        entry = {
+                                            order: play.order,
+                                            side: 'offense',
+                                            manager: player.manager,
+                                            playerInfo: player.playerInfo,
+                                            stat: ['rec_yd'],
+                                            runningTotals: [],
+                                            fpts,
+                                            yards: adjustedYards,
+                                            description: play.description,
+                                            shortDesc: 'Pass Yards After Lateral',
+                                        }
+                                    } else {
+                                        fpts = adjustedYards * (score?.rec_yd || 0) + (score?.rec || 0);
+                                        fptsRec = (score?.rec || 0);
+                                        fptsYDS = adjustedYards * (score?.rec_yd || 0);
+                                        entry = {
+                                            order: play.order,
+                                            side: 'offense',
+                                            manager: player.manager,
+                                            playerInfo: player.playerInfo,
+                                            stat: ['rec_yd', 'rec'],
+                                            runningTotals: [],
+                                            fpts,
+                                            yards: adjustedYards,
+                                            description: play.description,
+                                            shortDesc: 'Reception',
+                                        }
                                     }
+
                                     if(fptsRec != 0) {
                                         let runningTotal = pushRunningTotal(fptsRec, statRec, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                         entry.runningTotals.push(runningTotal);
@@ -1404,75 +1771,18 @@
                                         let runningTotal = pushRunningTotal(fptsYDS, statYDS, entry.stat[0], adjustedYards, player.playerInfo.playerID, player.playerInfo.pos); 
                                         entry.runningTotals.push(runningTotal);
                                     }
-                                    if(0 < adjustedYards && adjustedYards < 5 && score.rec_0_4) {     // RECEPTION YD BONUS
-                                        entry.fpts += score.rec_0_4;
-                                        entry.stat.push('rec_0_4');
-                                        const sleeperStat = 'rec_0_4';
-                                        if(score.rec_0_4 != 0) {
-                                            let runningTotal = pushRunningTotal(score.rec_0_4, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                            entry.runningTotals.push(runningTotal);
+                                    if(!play.description.includes('Lateral')) {
+                                        let receptionBonusInfo = receptionBonus(adjustedYards, statYDS, statRec, player);
+                                        entry.fpts += (receptionBonusInfo?.fpts || 0);
+                                        if(receptionBonusInfo.stat.length > 0) {
+                                            for(const stat in receptionBonusInfo.stat) {
+                                                entry.stat.push(receptionBonusInfo.stat[stat]);
+                                            }
                                         }
-                                    } else if(4 < adjustedYards && adjustedYards < 10 && score.rec_5_9) {
-                                        entry.fpts += score.rec_5_9;
-                                        entry.stat.push('rec_5_9');
-                                        const sleeperStat = 'rec_5_9';
-                                        if(score.rec_5_9 != 0) {
-                                            let runningTotal = pushRunningTotal(score.rec_5_9, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                            entry.runningTotals.push(runningTotal);
-                                        }
-                                    } else if(9 < adjustedYards && adjustedYards < 20 && score.rec_10_19) {
-                                        entry.fpts += score.rec_10_19;
-                                        entry.stat.push('rec_10_19');
-                                        const sleeperStat = 'rec_10_19';
-                                        if(score.rec_10_19 != 0) {
-                                            let runningTotal = pushRunningTotal(score.rec_10_19, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                            entry.runningTotals.push(runningTotal);
-                                        }
-                                    } else if(19 < adjustedYards && adjustedYards < 30 && score.rec_20_29) {
-                                        entry.fpts += score.rec_20_29;
-                                        entry.stat.push('rec_20_29');
-                                        const sleeperStat = 'rec_20_29';
-                                        if(score.rec_0_4 != 0) {
-                                            let runningTotal = pushRunningTotal(score.rec_20_29, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                            entry.runningTotals.push(runningTotal);
-                                        }
-                                    } else if(29 < adjustedYards && adjustedYards < 40 && score.rec_30_39) {
-                                        entry.fpts += score.rec_30_39;
-                                        entry.stat.push('rec_30_39');
-                                        const sleeperStat = 'rec_30_39';
-                                        if(score.rec_0_4 != 0) {
-                                            let runningTotal = pushRunningTotal(score.rec_30_39, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                            entry.runningTotals.push(runningTotal);
-                                        }
-                                    } else if(adjustedYards >= 40 && score.rec_40p) {
-                                        entry.fpts += score.rec_40p;
-                                        entry.stat.push('rec_40p');
-                                        const sleeperStat = 'rec_40p';
-                                        if(score.rec_0_4 != 0) {
-                                            let runningTotal = pushRunningTotal(score.rec_40p, statYDS, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                            entry.runningTotals.push(runningTotal);
-                                        }
-                                    }
-                                    if(player.playerInfo.pos == 'RB' && score.bonus_rec_rb) {   // RECEPTION POS BONUS
-                                        entry.fpts += score.bonus_rec_rb;
-                                        entry.stat.push('bonus_rec_rb');
-                                        if(score.bonus_rec_rb != 0) {
-                                            let runningTotal = pushRunningTotal(score.bonus_rec_rb, statRec, entry.stat[2], 0, player.playerInfo.playerID, player.playerInfo.pos); 
-                                            entry.runningTotals.push(runningTotal);
-                                        }
-                                    } else if(player.playerInfo.pos == 'TE' && score.bonus_rec_te) {   
-                                        entry.fpts += score.bonus_rec_te;
-                                        entry.stat.push('bonus_rec_te');
-                                        if(score.bonus_rec_te != 0) {
-                                            let runningTotal = pushRunningTotal(score.bonus_rec_te, statRec, entry.stat[2], 0, player.playerInfo.playerID, player.playerInfo.pos); 
-                                            entry.runningTotals.push(runningTotal);
-                                        }
-                                    } else if(player.playerInfo.pos == 'WR' && score.bonus_rec_wr) {   
-                                        entry.fpts += score.bonus_rec_wr;
-                                        entry.stat.push('bonus_rec_wr');
-                                        if(score.bonus_rec_wr != 0) {
-                                            let runningTotal = pushRunningTotal(score.bonus_rec_wr, statRec, entry.stat[2], 0, player.playerInfo.playerID, player.playerInfo.pos); 
-                                            entry.runningTotals.push(runningTotal);
+                                        if(receptionBonusInfo.runningTotals.length > 0) {
+                                            for(const runTotal in receptionBonusInfo.runningTotals) {
+                                                entry.runningTotals.push(receptionBonusInfo.runningTotals[runTotal]);
+                                            }
                                         }
                                     }
                                     fantasyPlay[play.playID].push(entry);
@@ -1611,26 +1921,87 @@
                                 entry.runningTotals.push(runningTotal);
                             }
                             fantasyPlay[play.playID].push(entry);
-                        } else if(player.playType == 7 && player.statType == 'passer' && score.pass_sack) {         // SACK - QB
-                            const fpts = score.pass_sack;
-                            const stat = 'SACK:';
-                            const entry = {
-                                order: play.order,
-                                side: 'offense',
-                                manager: player.manager,
-                                playerInfo: player.playerInfo,
-                                stat: ['pass_sack'],
-                                runningTotals: [],
-                                fpts,
-                                description: play.description,
-                                shortDesc: 'Sacked',
+                        } else if(player.playType == 7 && (score.pass_sack || score.idp_sack || score.idp_sack_yd || score.idp_qb_hit || score.idp_tkl || score.idp_tkl_loss || score.idp_tkl_ast || score.idp_tkl_solo)) {
+                            if(player.statType == 'passer' && score.pass_sack) {                                        // SACK - QB
+                                const fpts = score.pass_sack;
+                                const stat = 'SACK:';
+                                const entry = {
+                                    order: play.order,
+                                    side: 'offense',
+                                    manager: player.manager,
+                                    playerInfo: player.playerInfo,
+                                    stat: ['pass_sack'],
+                                    runningTotals: [],
+                                    fpts,
+                                    description: play.description,
+                                    shortDesc: 'Sacked',
+                                }
+                                if(fpts != 0) {
+                                    let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entry.runningTotals.push(runningTotal);
+                                }
+                                fantasyPlay[play.playID].push(entry);
+                            } else if(player.statType == 'sackedBy' && (score.idp_sack || score.idp_sack_yd || score.idp_qb_hit || score.idp_tkl || score.idp_tkl_loss || score.idp_tkl_ast || score.idp_tkl_solo || score.bonus_sack_2p)) {                                                     
+                                const fpts = (score?.idp_sack || 0) + player.yards * (score?.idp_sack_yd || 0) + (score?.idp_qb_hit || 0) + (score?.idp_tkl || 0) + (score?.idp_tkl_loss);
+                                const fptsSack = (score?.idp_sack || 0);
+                                const fptsSackYDS = player.yards * (score?.idp_sack_yd || 0);                                                   // SACK - IDP - TO-DO: account for assisted tackles/sacks IDP
+                                const fptsQBHIT = (score?.idp_qb_hit || 0);
+                                const fptsTKL = (score?.idp_tkl || 0);
+                                const fptsLOSS = (score?.idp_tkl_loss || 0);
+                                const statSack = 'SACK:';
+                                const statSackYDS = 'SACK YDS:';
+                                const statQBHIT = 'QB HIT:';
+                                const statTKL = 'TKL:'
+                                const statLOSS = 'TKL LOSS:'
+                                const entryDEF = {
+                                    order: play.order,
+                                    side: 'defense',
+                                    manager: player.manager,
+                                    playerInfo: player.playerInfo,
+                                    stat: ['idp_sack', 'idp_sack_yd', 'idp_qb_hit', 'idp_tkl', 'idp_tkl_loss'],
+                                    runningTotals: [],
+                                    fpts,
+                                    yards: player.yards,
+                                    description: play.description,
+                                    shortDesc: 'Sack',
+                                }
+                                if(fptsSack != 0) {
+                                    let runningTotal = pushRunningTotal(fptsSack, statSack, entryDEF.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                if(fptsSackYDS != 0) {
+                                    let runningTotal = pushRunningTotal(fptsSackYDS, statSackYDS, entryDEF.stat[1], player.yards, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                if(fptsQBHIT != 0) {
+                                    let runningTotal = pushRunningTotal(fptsQBHIT, statQBHIT, entryDEF.stat[2], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                if(fptsTKL != 0) {
+                                    let runningTotal = pushRunningTotal(fptsTKL, statTKL, entryDEF.stat[3], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                if(fptsLOSS != 0) {
+                                    let runningTotal = pushRunningTotal(fptsLOSS, statLOSS, entryDEF.stat[4], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                if(score.bonus_sack_2p) {
+                                    const stat = 'SACK BONUS(2+):';
+                                    const sleeperStat = 'bonus_sack_2p';
+                                    let runningTotal = pushRunningTotal(0, stat, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    if(runningTotal.occurs == 2) {
+                                        const fpts = score.bonus_sack_2p;
+                                        let runningTotal = pushRunningTotal(fpts, stat, sleeperStat, 0, player.playerInfo.playerID, player.playerInfo.pos); 
+                                        let bonusEntry = entry;
+                                        bonusEntry.shortDesc = 'Bonus: 2+ Sacks';
+                                        bonusEntry.stat = ['bonus_sack_2p'];
+                                        bonusEntry.runningTotals.push(runningTotal);
+                                        fantasyPlay[play.playID].push(bonusEntry);
+                                    }
+                                }
+                                fantasyPlay[play.playID].push(entryDEF);
                             }
-                            if(fpts != 0) {
-                                let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                entry.runningTotals.push(runningTotal);
-                            }
-                            fantasyPlay[play.playID].push(entry);
-                        } else if(player.playType == 59 && player.statType == 'kicker') {         // MADE FIELD GOAL
+                        } else if(player.playType == 59 && player.statType == 'kicker') {                                   // MADE FIELD GOAL
                             const fpts = (score?.fgm || 0) + player.yards * (score?.fgm_yds || 0);
                             const fptsFG = (score?.fgm || 0);
                             const fptsFGyds = player.yards * (score?.fgm_yds || 0);
@@ -1772,54 +2143,46 @@
                                     entry.runningTotals.push(runningTotal);
                                 }
                             } 
-                            fantasyPlay[play.playID].push(entry);                                                        // TO-DO (maybe) NOTE: ADD IF OTHER KINDS OF TOUCHDOWNS  ALSO NOT SURE IF THIS WORKS;       
-                        } else if(((player.playType == 68 || player.playType == 67) || play.scoringType == 'touchdown') // MISSED PAT
-                                    && score.xpmiss
-                                    && !play.description.includes('extra point is GOOD')
-                                    && play.description.includes('extra point is No Good')
-                                    && !play.description.includes('Kick)')
-                                    && (player.statType == 'patScorer' || player.statType == 'kicker')) {
-                                        const fpts = (score?.xpmiss || 0);
-                                        const stat = 'PAT MISS:';
-                                        const entry = {
-                                            order: play.order,
-                                            side: 'offense',
-                                            manager: player.manager,
-                                            playerInfo: player.playerInfo,
-                                            stat: ['xpmiss'],
-                                            runningTotals: [],
-                                            fpts,
-                                            description: play.description,
-                                            shortDesc: 'PAT Missed',
-                                        }   
-                                        if(fpts != 0) {
-                                            let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                            entry.runningTotals.push(runningTotal);
-                                        }
-                                        fantasyPlay[play.playID].push(entry);                                                                                    
-                        } else if(((player.playType == 68 || player.playType == 67) || play.scoringType == 'touchdown') // MADE PAT
-                                    && score.xpm
-                                    && (play.description.includes('extra point is GOOD') || play.description.includes('Kick)'))
-                                    && player.statType == 'patScorer') {
-                                        const fpts = (score?.xpm || 0);
-                                        const stat = 'PAT:';
-                                        const entry = {
-                                            order: play.order,
-                                            side: 'offense',
-                                            manager: player.manager,
-                                            playerInfo: player.playerInfo,
-                                            stat: ['xpm'],
-                                            runningTotals: [],
-                                            fpts,
-                                            description: play.description,
-                                            shortDesc: 'PAT Made',
-                                        }   
-                                        if(fpts != 0) {
-                                            let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                            entry.runningTotals.push(runningTotal);
-                                        }
-                                        fantasyPlay[play.playID].push(entry);                                                                                    
-                        } else if(player.statType == 'returner' && player.playType == 12 && score.kr_yd) {
+                            fantasyPlay[play.playID].push(entry);                                                          
+                        } else if(player.statType == 'patScorer' && play.scoringType == 'touchdown' && score.xpmiss && play.pointAfterType == 62) {
+                            const fpts = (score?.xpmiss || 0);
+                            const stat = 'PAT MISS:';
+                            const entry = {
+                                order: play.order,
+                                side: 'offense',
+                                manager: player.manager,
+                                playerInfo: player.playerInfo,
+                                stat: ['xpmiss'],
+                                runningTotals: [],
+                                fpts,
+                                description: play.description,
+                                shortDesc: 'PAT Missed',
+                            }   
+                            if(fpts != 0) {
+                                let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                entry.runningTotals.push(runningTotal);
+                            }
+                            fantasyPlay[play.playID].push(entry);                                                                                    
+                        } else if(player.statType == 'patScorer' && play.scoringType == 'touchdown' && score.xpm && play.pointAfterType == 61) {                    // PAT GOOD
+                            const fpts = (score?.xpm || 0);
+                            const stat = 'PAT:';
+                            const entry = {
+                                order: play.order,
+                                side: 'offense',
+                                manager: player.manager,
+                                playerInfo: player.playerInfo,
+                                stat: ['xpm'],
+                                runningTotals: [],
+                                fpts,
+                                description: play.description,
+                                shortDesc: 'PAT Made',
+                            }   
+                            if(fpts != 0) {
+                                let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                entry.runningTotals.push(runningTotal);
+                            }
+                            fantasyPlay[play.playID].push(entry);                                                                                    
+                        } else if(player.statType == 'returner' && player.playType == 12 && score.kr_yd) {                                  // ST PLAYER - KICK RETURN YDS
                             const fpts = player.yards * (score?.kr_yd || 0);
                             const stat = 'KO YDS:';
                             const entry = {
@@ -1900,6 +2263,86 @@
                                     entry.runningTotals.push(runningTotal);
                                 }
                                 fantasyPlay[play.playID].push(entry);
+                            }
+                        } else if(player.playType == 20 && (score.idp_safe || score.idp_sack || score.idp_sack_yd || score.idp_qb_hit || score.idp_tkl || score.idp_tkl_loss || score.idp_tkl_ast || score.idp_tkl_solo || score.bonus_sack_2p)) {
+                            if(player.statType == 'sackedBy' && (score.idp_sack || score.idp_sack_yd || score.idp_qb_hit || score.idp_tkl || score.idp_tkl_loss || score.idp_tkl_ast || score.idp_tkl_solo || score.bonus_sack_2p)) {                                                     
+                                const fpts = (score?.idp_sack || 0) + player.yards * (score?.idp_sack_yd || 0) + (score?.idp_qb_hit || 0) + (score?.idp_tkl || 0) + (score?.idp_tkl_loss);
+                                const fptsSack = (score?.idp_sack || 0);
+                                const fptsSackYDS = player.yards * (score?.idp_sack_yd || 0);                                                   // SAFETY - IDP - TO-DO: account for assisted tackles/sacks IDP
+                                const fptsQBHIT = (score?.idp_qb_hit || 0);
+                                const fptsTKL = (score?.idp_tkl || 0);
+                                const fptsLOSS = (score?.idp_tkl_loss || 0);
+                                const statSack = 'SACK:';
+                                const statSackYDS = 'SACK YDS:';
+                                const statQBHIT = 'QB HIT:';
+                                const statTKL = 'TKL:'
+                                const statLOSS = 'TKL LOSS:'
+                                const entryDEF = {
+                                    order: play.order,
+                                    side: 'defense',
+                                    manager: player.manager,
+                                    playerInfo: player.playerInfo,
+                                    stat: ['idp_sack', 'idp_sack_yd', 'idp_qb_hit', 'idp_tkl', 'idp_tkl_loss'],
+                                    runningTotals: [],
+                                    fpts,
+                                    yards: player.yards,
+                                    description: play.description,
+                                    shortDesc: 'Sack',
+                                }
+                                if(fptsSack != 0) {
+                                    let runningTotal = pushRunningTotal(fptsSack, statSack, entryDEF.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                if(fptsSackYDS != 0) {
+                                    let runningTotal = pushRunningTotal(fptsSackYDS, statSackYDS, entryDEF.stat[1], player.yards, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                if(fptsQBHIT != 0) {
+                                    let runningTotal = pushRunningTotal(fptsQBHIT, statQBHIT, entryDEF.stat[2], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                if(fptsTKL != 0) {
+                                    let runningTotal = pushRunningTotal(fptsTKL, statTKL, entryDEF.stat[3], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                if(fptsLOSS != 0) {
+                                    let runningTotal = pushRunningTotal(fptsLOSS, statLOSS, entryDEF.stat[4], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                if(score.bonus_sack_2p) {
+                                    const stat = 'SACK BONUS(2+):';
+                                    const sleeperStat = 'bonus_sack_2p';
+                                    let runningTotal = pushRunningTotal(0, stat, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    if(runningTotal.occurs == 2) {
+                                        const fpts = score.bonus_sack_2p;
+                                        let runningTotal = pushRunningTotal(fpts, stat, sleeperStat, 0, player.playerInfo.playerID, player.playerInfo.pos); 
+                                        let bonusEntry = entry;
+                                        bonusEntry.shortDesc = 'Bonus: 2+ Sacks';
+                                        bonusEntry.stat = ['bonus_sack_2p'];
+                                        bonusEntry.runningTotals.push(runningTotal);
+                                        fantasyPlay[play.playID].push(bonusEntry);
+                                    }
+                                }
+                                fantasyPlay[play.playID].push(entryDEF);
+                            } else if(player.statType == 'scorer' && score.idp_safe) {
+                                const fpts = (score?.idp_safe || 0);           
+                                const statDesc = 'SAFETY:';
+                                const entryDEF = {
+                                    order: play.order,
+                                    side: 'defense',
+                                    manager: player.manager,
+                                    playerInfo: player.playerInfo,
+                                    stat: ['safe'],
+                                    runningTotals: [],
+                                    fpts,
+                                    description: play.description,
+                                    shortDesc: 'Safety',
+                                }   
+                                if(fpts != 0) {
+                                    let runningTotal = pushRunningTotal(fpts, statDesc, entryDEF.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                    entryDEF.runningTotals.push(runningTotal);
+                                }
+                                fantasyPlay[play.playID].push(entryDEF);
                             }
                         }
                     }                      
@@ -2063,6 +2506,7 @@
             const relevancyKey = {
                 recordManIDs: [],
                 starters: {},
+                startersArray: [],
                 games: [],
             }
             runningTotals = {};
@@ -2082,27 +2526,30 @@
                             playerID: starter,
                             rosterSpot: positions[starters.indexOf(starter)],
                             fpts: match[opponent].points[starters.indexOf(starter)],
-                            owner: managerInfo[match[opponent].recordManID],
+                            owner: match[opponent].manager,
                             recordManID: match[opponent].recordManID,
                             fn: starterInfo.fn,
                             ln: starterInfo.ln,
                             pos: starterInfo.pos,
                             t: starterInfo.t,
                             avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                            teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t.toLowerCase()}.png`,
-                            teamColor: `background-color: #${nflTeams[starterInfo.t].color}6b`,
-                            teamAltColor: `background-color: #${nflTeams[starterInfo.t].alternateColor}52`,
+                            teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                            teamColor: `background-color: #${nflTeams[starterInfo.t]?.color}6b` || `background-color: var(--boxShadowThree)`,
+                            teamAltColor: `background-color: #${nflTeams[starterInfo.t]?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
                         }
-                        if(nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
+                        if(starterInfo.t && nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
                             starterEntry.teamAltColor = `background-color: #ffffff52`;
                         }
 
                         relevancyKey.starters[match[opponent].recordManID].push(starterEntry);
+                        relevancyKey.startersArray.push(starterEntry);
 
                         // get starters' game IDs
-                        let nflGameID = nflMatchups.find(m => m.some(m => m.sleeperID == starterInfo.t))[0].gameID;
-                        if(!relevancyKey.games.includes(nflGameID)) {
-                            relevancyKey.games.push(nflGameID);
+                        if(nflMatchups.find(m => m.some(m => m.sleeperID == starterInfo.t))) {
+                            let nflGameID = nflMatchups.find(m => m.some(m => m.sleeperID == starterInfo.t))[0].gameID;
+                            if(!relevancyKey.games.includes(nflGameID)) {
+                                relevancyKey.games.push(nflGameID);
+                            }
                         }
                     }
                 }
@@ -2132,7 +2579,7 @@
                 let awayDefPtsAllowed = 0;
                 let homeDefYdsAllowed = 0;
                 let awayDefYdsAllowed = 0;
-                const score = leagueData.scoring_settings;
+                const score = yearLeagueData.scoring_settings;
 
                 // check if either DEF is being started
                 for(const recordManID in relevancyKey.starters) {
@@ -2176,7 +2623,8 @@
                             oppTeam = homeEspn;
                         }
                         // flagging penalty-negated plays
-                        let noPlay = checkNoPlay(play.type.id, play.alternativeText);
+                        let playType = play.type?.id || 0;
+                        let noPlay = checkNoPlay(playType, play.alternativeText);
                         // flagging scoring plays & tracking DEF points allowed
                         let scoringPlay = new Boolean (false);
                         let scoreAgainstDEF = new Boolean (false);
@@ -2184,18 +2632,38 @@
                         let scoreValueAgainstDEF = 0;
                         let scoreValueAgainstOppDEF = 0;
                         let scoringType = null;
+                        let pointAfterType = null;
                         let scoreValue = 0;
                         if(play.scoreValue > 0) {
                             scoringPlay = true;
                             scoringType = play.scoringType.name;
-                            if(play.scoreValue == 6 && (play.alternativeText.includes('extra point is GOOD') || play.alternativeText.includes('Kick)'))) {
+                            scoringType = play.scoringType.name;
+                            if(scoringType == 'touchdown') {
+                                if(yearSelection >= 2021) {
+                                    pointAfterType = play.pointAfterAttempt.id;
+                                } else {
+                                    if(play.alternativeText.includes('Kick)')) {
+                                        pointAfterType = 61;
+                                    } else if(play.alternativeText.includes('PAT failed')) {
+                                        pointAfterType = 62;
+                                    } else if(play.alternativeText.includes('TWO-POINT') && play.alternativeText.includes('SUCCEEDS')) {
+                                        let twoPointText = play.alternativeText.slice(play.alternativeText.indexOf('TWO-POINT'));
+                                        if(twoPointText.includes('rush')) {
+                                            pointAfterType = 16;
+                                        } else {
+                                            pointAfterType = 15;
+                                        }
+                                    }
+                                }
+                            }
+                            if(play.scoreValue == 6 && pointAfterType == 61) {
                                 scoreValue = 7;
-                            } else if(play.scoreValue == 6 && play.alternativeText.includes('TWO-POINT CONVERSION') && play.alternativeText.includes('SUCCEEDS')) {
+                            } else if(play.scoreValue == 6 && (pointAfterType == 15 || pointAfterType == 16)) {
                                 scoreValue = 8;
                             } else {
                                 scoreValue = play.scoreValue;
                             }
-                            if(play.type.id == 17 || play.type.id == 37 || play.type.id == 32) {        // TO-DO add field goal kick 6 & 2pt return score
+                            if(playType == 17 || playType == 37 || playType == 32) {        // TO-DO add field goal kick 6 & 2pt return score
                                 scoreAgainstDEF = false;
                                 scoreAgainstOppDEF = true;
                                 if(playTeam == homeEspn) {
@@ -2204,8 +2672,8 @@
                                     awayDefPtsAllowed += scoreValue;
                                 }
                                 scoreValueAgainstOppDEF = scoreValue;
-                            } else if(play.type.id == 36 || play.type.id == 39 || play.type.id == 29) {     // pick 6 / fumble 6
-                                if(scoreValue == 6) {
+                            } else if(playType == 36 || playType == 39 || playType == 29 || playType == 20) {     // pick 6 / fumble 6
+                                if(scoreValue == 6 || scoreValue == 2) {
                                     scoreAgainstDEF = false;
                                     scoreAgainstOppDEF = false;
                                 } else if(scoreValue > 6) {
@@ -2217,7 +2685,7 @@
                                         homeDefPtsAllowed += scoreValue - 6;
                                     }
                                     scoreValueAgainstDEF = scoreValue - 6;
-                                } 
+                                }
                             } else {
                                 scoreAgainstDEF = true;
                                 scoreAgainstOppDEF = false;
@@ -2233,13 +2701,14 @@
                         const playEntry = {
                             playID: play.id,
                             order: parseInt(play.sequenceNumber),
-                            playType: play.type.id,
+                            playType: playType,
                             team: playTeam,
                             oppTeam,
                             description: play.alternativeText,
                             secondDescription: play.shortAlternativeText,
                             scoringPlay,
                             scoringType,
+                            pointAfterType,
                             scoreValue,
                             scoreValueAgainstDEF,
                             scoreValueAgainstOppDEF,
@@ -2256,7 +2725,7 @@
                         }
                         // get penalty info
                         if(noPlay == false && play.alternativeText.includes('PENALTY') && play.alternativeText.includes('enforced')) {
-                            let truePenaltyInfo = getTruePenalty(playTeam, oppTeam, play.alternativeText, play.shortAlternativeText, play.type.id, play.statYardage);
+                            let truePenaltyInfo = getTruePenalty(playTeam, oppTeam, play.alternativeText, play.shortAlternativeText, playType, play.statYardage);
                             playEntry.penalty = true;
                             playEntry.penaltyInfo = truePenaltyInfo;
                         }
@@ -2328,7 +2797,7 @@
                                         manager: sleeperMatch[0].owner,
                                         statType: play.participants[playerKey].type,
                                         yards: play.statYardage, 
-                                        playType: play.type.id,
+                                        playType: playType,
                                         playerTeam,
                                         oppDef: null,
                                     }
@@ -2342,7 +2811,7 @@
                                 } 
                                 // flagging DEF-relevant plays
                                 if(noPlay == false && (homeDefStarted == true || awayDefStarted == true)) {
-                                    let relevantDefEntry = isDefRelevant(play, playTeam, homeDefStarted, awayDefStarted, home, away, homeDefense, awayDefense, playerKey);
+                                    let relevantDefEntry = isDefRelevant(play, playType, playTeam, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, playerKey, playerTeam);
                                     if(relevantDefEntry != null) {
                                         playEntry.relevantDEF.push(relevantDefEntry);
                                     }
@@ -2422,6 +2891,7 @@
                                     secondDescription: lastPlay.shortAlternativeText,
                                     scoringPlay: false,
                                     scoringType: null,
+                                    pointAfterType: null,
                                     scoreValue: 0,
                                     scoreValueAgainstDEF: 0,
                                     scoreValueAgainstOppDEF: 0,
@@ -2483,6 +2953,7 @@
                                     description: lastPlay.alternativeText,
                                     scoringPlay: false,
                                     scoringType: null,
+                                    pointAfterType: null,
                                     scoreValue: 0,
                                     scoreValueAgainstDEF: 0,
                                     scoreValueAgainstOppDEF: 0,
@@ -2514,7 +2985,7 @@
                 }
 
                 let fantasyRelevantPlays = fantasyRelevantPlaysForward.slice().reverse();
-                let fantasyProducts_matchGame = processPlays(fantasyRelevantPlays, defYdsThreshBreakers, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed, gameState);
+                let fantasyProducts_matchGame = processPlays(fantasyRelevantPlays, defYdsThreshBreakers, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed, gameState, relevancyKey.startersArray);
 
                 for(const product of fantasyProducts_matchGame) {
                     fantasyProducts_match.push(product);
@@ -2616,7 +3087,8 @@
                         oppTeam = homeEspn;
                     }
                     // flagging penalty-negated plays
-                    let noPlay = checkNoPlay(play.type.id, play.alternativeText);
+                    let playType = play.type?.id || 0;
+                    let noPlay = checkNoPlay(playType, play.alternativeText);
                     // flagging scoring plays & tracking DEF points allowed
                     let scoringPlay = new Boolean (false);
                     let scoreAgainstDEF = new Boolean (false);
@@ -2624,18 +3096,37 @@
                     let scoreValueAgainstDEF = 0;
                     let scoreValueAgainstOppDEF = 0;
                     let scoringType = null;
+                    let pointAfterType = null;
                     let scoreValue = 0;
                     if(play.scoreValue > 0) {
                         scoringPlay = true;
                         scoringType = play.scoringType.name;
-                        if(play.scoreValue == 6 && (play.alternativeText.includes('extra point is GOOD') || play.alternativeText.includes('Kick)'))) {
+                        if(scoringType == 'touchdown') {
+                            if(yearSelection >= 2021) {
+                                pointAfterType = play.pointAfterAttempt.id;
+                            } else {
+                                if(play.alternativeText.includes('Kick)') || play.shortAlternativeText.includes('Kick)')) {
+                                    pointAfterType = 61;
+                                } else if(play.alternativeText.includes('PAT failed')) {
+                                    pointAfterType = 62;
+                                } else if(play.alternativeText.includes('TWO-POINT') && play.alternativeText.includes('SUCCEEDS')) {
+                                    let twoPointText = play.alternativeText.slice(play.alternativeText.indexOf('TWO-POINT'));
+                                    if(twoPointText.includes('rush')) {
+                                        pointAfterType = 16;
+                                    } else {
+                                        pointAfterType = 15;
+                                    }
+                                }
+                            }
+                        }
+                        if(play.scoreValue == 6 && pointAfterType == 61) {
                             scoreValue = 7;
-                        } else if(play.scoreValue == 6 && play.alternativeText.includes('TWO-POINT CONVERSION') && play.alternativeText.includes('SUCCEEDS')) {
+                        } else if(play.scoreValue == 6 && (pointAfterType == 15 || pointAfterType == 16)) {
                             scoreValue = 8;
                         } else {
                             scoreValue = play.scoreValue;
                         }
-                        if(play.type.id == 17 || play.type.id == 37 || play.type.id == 32) {        // TO-DO add field goal kick 6 & 2pt return score
+                        if(playType == 17 || playType == 37 || playType == 32) {        // TO-DO add field goal kick 6 & 2pt return score
                             scoreAgainstDEF = false;
                             scoreAgainstOppDEF = true;
                             if(playTeam == homeEspn) {
@@ -2644,8 +3135,8 @@
                                 awayDefPtsAllowed += scoreValue;
                             }
                             scoreValueAgainstOppDEF = scoreValue;
-                        } else if(play.type.id == 36 || play.type.id == 39 || play.type.id == 29) {    // pick 6 / fumble 6
-                            if(scoreValue == 6) {
+                        } else if(playType== 36 || playType == 39 || playType == 29 || playType == 20) {    // pick 6 / fumble 6 / safety
+                            if(scoreValue == 6 || scoreValue == 2) {
                                 scoreAgainstDEF = false;
                                 scoreAgainstOppDEF = false;
                             } else if(scoreValue > 6) {
@@ -2673,13 +3164,14 @@
                     const playEntry = {
                         playID: play.id,
                         order: parseInt(play.sequenceNumber),
-                        playType: play.type.id,
+                        playType: playType,
                         team: playTeam,
                         oppTeam,
                         description: play.alternativeText,
                         secondDescription: play.shortAlternativeText,
                         scoringPlay,
                         scoringType,
+                        pointAfterType,
                         scoreValue,
                         scoreValueAgainstDEF,
                         scoreValueAgainstOppDEF,
@@ -2696,7 +3188,7 @@
                     }
                     // get penalty info
                     if(noPlay == false && play.alternativeText.includes('PENALTY') && play.alternativeText.includes('enforced')) {
-                        let truePenaltyInfo = getTruePenalty(playTeam, oppTeam, play.alternativeText, play.shortAlternativeText, play.type.id, play.statYardage);
+                        let truePenaltyInfo = getTruePenalty(playTeam, oppTeam, play.alternativeText, play.shortAlternativeText, playType, play.statYardage);
                         playEntry.penalty = true;
                         playEntry.penaltyInfo = truePenaltyInfo;
                     }
@@ -2761,7 +3253,7 @@
                                     manager: sleeperMatch[0].owner,
                                     statType: play.participants[playerKey].type,
                                     yards: play.statYardage, 
-                                    playType: play.type.id,
+                                    playType: playType,
                                     playerTeam,
                                     oppDef: null,
                                 }
@@ -2775,7 +3267,7 @@
                             } 
                             // flagging DEF-relevant plays
                             if(noPlay == false && (homeDefStarted == true || awayDefStarted == true)) {
-                                let relevantDefEntry = isDefRelevant(play, playTeam, homeDefStarted, awayDefStarted, home, away, homeDefense, awayDefense, playerKey);
+                                let relevantDefEntry = isDefRelevant(play, playType, playTeam, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, playerKey, playerTeam);
                                 if(relevantDefEntry != null) {
                                     playEntry.relevantDEF.push(relevantDefEntry);
                                 }            
@@ -2855,6 +3347,7 @@
                                 secondDescription: lastPlay.shortAlternativeText,
                                 scoringPlay: false,
                                 scoringType: null,
+                                pointAfterType: null,
                                 scoreValue: 0,
                                 scoreValueAgainstDEF: 0,
                                 scoreValueAgainstOppDEF: 0,
@@ -2916,6 +3409,7 @@
                                 description: lastPlay.alternativeText,
                                 scoringPlay: false,
                                 scoringType: null,
+                                pointAfterType: null,
                                 scoreValue: 0,
                                 scoreValueAgainstDEF: 0,
                                 scoreValueAgainstOppDEF: 0,
@@ -2955,8 +3449,11 @@
             //     8: 'penalty',
             //     9: 'fumble offense recovery',
             //     12: 'kickoff (return)',
+            //     15: '2pt pass conversion',
+            //     16: '2pt rush conversion',
             //     17: 'blocked punt',
             //     18: 'blocked field goal',
+            //     20: 'safety',
             //     21: 'timeout',
             //     24: 'completed pass',
             //     26: 'interception (return)',
@@ -2968,7 +3465,9 @@
             //     52: 'punt',
             //     53: 'kickoff (no return)',
             //     59: 'FG good',
-            //     60: 'FG miss'
+            //     60: 'FG miss',
+            //     61: 'PAT good',
+            //     62: 'PAT missed',
             //     65: 'half-time',
             //     66: 'end game',
             //     67: 'pass TD', 
@@ -2978,7 +3477,7 @@
             // }
 
             let fantasyRelevantPlays = fantasyRelevantPlaysForward.slice().reverse();
-            let fantasyProducts_game = processPlays(fantasyRelevantPlays, defYdsThreshBreakers, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed, gameState);
+            let fantasyProducts_game = processPlays(fantasyRelevantPlays, defYdsThreshBreakers, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed, gameState, startersArray);
             fantasyProducts = fantasyProducts_game;
             fantasyProducts = fantasyProducts.filter(p => p.length > 0);
             fantasyProducts = fantasyProducts.sort((a, b) => b[0]?.order - a[0]?.order);
