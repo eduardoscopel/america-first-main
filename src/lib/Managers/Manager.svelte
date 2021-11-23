@@ -2,7 +2,7 @@
     import Button, { Group, Label } from '@smui/button';
     import DataTable, { Head, Body, Row, Cell } from '@smui/data-table'; 
 	import LinearProgress from '@smui/linear-progress';
-    import {loadPlayers, getLeagueStandings, getNflState, getLeagueData, leagueID, round} from '$lib/utils/helper';
+    import {loadPlayers, getLeagueStandings, getNflState, getLeagueData, getTable, leagueID, round} from '$lib/utils/helper';
 	import Roster from '../Rosters/Roster.svelte';
 	import TransactionsPage from '../Transactions/TransactionsPage.svelte';
     import { goto } from '$app/navigation';
@@ -10,7 +10,7 @@
     import ManagerAwards from './ManagerAwards.svelte';
     import { onMount } from 'svelte';
     import PlayerTable from './PlayerTable.svelte';
-    // import PancakeTable from './PancakeTable.svelte';
+    import PancakeTable from './PancakeTable.svelte';
 
     export let manager, managers, rostersData, users, rosterPositions, transactions, currentManagers, awards, records;
 
@@ -45,6 +45,7 @@
     let user = users[roster.owner_id];
 
     let players, playersInfo;
+    let positionsInfo;
     let loading = true;
     let curSeason = leagueID;
     let currentYear;
@@ -217,13 +218,18 @@
         const playerData = await loadPlayers();
         playersInfo = playerData;
         players = playerData.players;
-        loading = false;
 
         if(playerData.stale) {
             const newPlayerData = await loadPlayers(true);
             playersInfo = newPlayerData;
             players = newPlayerData.players;
         }
+
+        let recordManID = viewManager.managerID;
+        const positionsData = await getTable(recordManID);
+        positionsInfo = positionsData;
+
+        loading = false;
     })
     // current standings info
     const calculateRecord = async (standings, leagueDatum, nflStated, curSeason, viewManager) => {
@@ -341,7 +347,7 @@
         position: relative;
         width: 100%;
         min-height: 100%;
-		background-color: var(--ebebeb);
+		background-color: var(--gcBanner);
 		box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 40%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 8px 0px rgb(0 0 0 / 24%);
     }
 
@@ -350,7 +356,7 @@
         position: relative;
         width: 100%;
         padding: 15px 0;
-		background-color: var(--f3f3f3);
+		background-color: var(--gcMain);
         box-shadow: 5px 0 8px var(--champShadow);
     }
 
@@ -358,7 +364,7 @@
         display: inline-flex;
         position: relative;
         flex-direction: column;
-		background-color: var(--f3f3f3);
+		background-color: var(--gcMain);
         text-align: left;
         vertical-align: top;
         font-size: 2em;
@@ -371,12 +377,12 @@
         line-height: 1em;
         text-align: left;
         margin: 10px 0 0 0;
-        color: #888;
+        color: var(--gcPlayText);
     }
 
     .managerPlacement {
         display: inline-flex;
-		background-color: var(--f3f3f3);
+		background-color: var(--gcMain);
         position: relative;
         right: 0.7em;
         text-align: left;
@@ -388,7 +394,7 @@
 
     .managerRecord {
         display: inline-block;
-		background-color: var(--f3f3f3);
+		background-color: var(--gcMain);
         position: relative;
         right: 0.7em;
         text-align: left;
@@ -420,7 +426,7 @@
         display: inline-flex;
         min-height: 40em;
         width: 98%;
-		background-color: var(--f3f3f3);
+		background-color: var(--gcBox);
 		box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 40%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 8px 0px rgb(0 0 0 / 24%);
     }
 
@@ -431,6 +437,7 @@
         width: 50%;
         height: 100%;
         align-items: center;
+        color: var(--gcBannerText);
     }
 
     .seasonHistory {
@@ -438,7 +445,7 @@
         justify-content: center;
         display: inline-flex;
         position: relative;
-        background-color: var(--f3f3f3);
+        background-color: var(--gcComponent);
         margin: 2% 0;
     }
 
@@ -447,7 +454,7 @@
         position: relative;
         display: inline-flex;
         justify-content: center;
-        background-color: var(--f3f3f3);
+        background-color: var(--gcComponent);
         padding: 1%;
     }
 
@@ -457,13 +464,13 @@
         justify-content: space-evenly;
         align-items: center;
         vertical-align: center;
-        background-color: var(--ebebeb);
+        background-color: var(--gcBanner);
         height: 8%;
         width: 100%;
     }
 
     .summaryHeadings span {
-        color: #888;
+        color: var(--gcPlayRowText);
         font-size: 0.9em;
     }
 
@@ -500,7 +507,6 @@
         width: 100%;
         height: 100%;
         display: inline-flex;
-        background-color: var(--f3f3f3);
         position: relative;
         justify-content: center;
         align-items: center;
@@ -553,7 +559,7 @@
     }
 
     .basicInfo span {
-        color: #888;
+        color: var(--gcPlayRowText);
         font-size: 0.9em;
     }
 
@@ -907,19 +913,30 @@
             <p class="philosophy">{@html viewManager.philosophy}</p>
         {/if}
     </div> -->
-<div class="managerConstrained">
-    {#if !loading}
-        <!-- Favorite player -->
-        <ManagerFantasyInfo {viewManager} {players} />
-    {/if}
+    <div class="managerConstrained">
+        {#if !loading}
+            <!-- Favorite player -->
+            <ManagerFantasyInfo {viewManager} {players} />
+        {/if}
 
-    <ManagerAwards tookOver={viewManager.tookOver} {recordManID} {awards} {records} {roster} />
+        <ManagerAwards tookOver={viewManager.tookOver} {recordManID} {awards} {records} {roster} />
 
-    <PlayerTable {recordManID} {firstYear} {currentYear} />
-</div>
+        <!-- {#if loading}
+            Loading positions records...
+        {:else}
+        {/if} -->
+
+        <PlayerTable {recordManID} {firstYear} {currentYear} />
+    </div>
 
     <!-- UNDER CONSTRUCTION: dynamic tree map of fantasy points by NFL team -->
-    <!-- <PancakeTable {recordManID} /> -->
+    <div class="managerConstrained" style="min-height: auto">
+        {#if loading}
+            Loading positions records...
+        {:else}
+            <PancakeTable {positionsInfo} />
+        {/if}
+    </div>
 
     <h3>Team Transactions</h3>
     <div class="managerConstrained" bind:this={el}>

@@ -255,6 +255,7 @@ export const getLeagueRecords = async (refresh = false) => {
 		).catch((err) => { console.error(err); });
 	
 		let year = parseInt(leagueData.season);
+		const positions = leagueData.roster_positions.filter(p => p != 'BN');
 
 		// variables for playoff records
 		let numPOTeams = parseInt(leagueData.settings.playoff_teams);
@@ -731,6 +732,7 @@ export const getLeagueRecords = async (refresh = false) => {
 							let PTSasStarter;
 							let PTSonBench;
 							let benched = new Boolean (true);
+							let rosterSpot;
 		
 							if(starters.includes(playerID)) {
 								benched = false;
@@ -742,6 +744,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
 									bottomStarter = true;
 								}
+								rosterSpot = positions[starters.indexOf(playerID)];
 							} else {
 								benched = true;
 								PTSonBench = playerPoints;
@@ -780,6 +783,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								starterRankAVG: null,
 								playerInfo,
 								avatar,
+								rosterSpot,
 							}
 
 							// right now, acquisitions is just a list of the manager's draft picks
@@ -961,6 +965,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								let PTSasStarter;
 								let PTSonBench;
 								let benched = new Boolean (true);
+								let rosterSpot;
 			
 								if(starters.includes(playerID)) {
 									benched = false;
@@ -972,6 +977,7 @@ export const getLeagueRecords = async (refresh = false) => {
 									} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
 										bottomStarter = true;
 									}
+									rosterSpot = positions[starters.indexOf(playerID)];
 								} else {
 									benched = true;
 									PTSonBench = playerPoints;
@@ -1010,6 +1016,7 @@ export const getLeagueRecords = async (refresh = false) => {
 									starterRankAVG: null,
 									playerInfo,
 									avatar,
+									rosterSpot,
 								}
 			
 								// right now, acquisitions is just a list of the manager's draft picks
@@ -1187,6 +1194,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								let PTSasStarter;
 								let PTSonBench;
 								let benched = new Boolean (true);
+								let rosterSpot;
 			
 								if(starters.includes(playerID)) {
 									benched = false;
@@ -1198,6 +1206,7 @@ export const getLeagueRecords = async (refresh = false) => {
 									} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
 										bottomStarter = true;
 									}
+									rosterSpot = positions[starters.indexOf(playerID)];
 								} else {
 									benched = true;
 									PTSonBench = playerPoints;
@@ -1236,6 +1245,7 @@ export const getLeagueRecords = async (refresh = false) => {
 									starterRankAVG: null,
 									playerInfo,
 									avatar,
+									rosterSpot,
 								}
 			
 								// right now, acquisitions is just a list of the manager's draft picks
@@ -1413,6 +1423,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								let PTSasStarter;
 								let PTSonBench;
 								let benched = new Boolean (true);
+								let rosterSpot;
 			
 								if(starters.includes(playerID)) {
 									benched = false;
@@ -1424,6 +1435,7 @@ export const getLeagueRecords = async (refresh = false) => {
 									} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
 										bottomStarter = true;
 									}
+									rosterSpot = positions[starters.indexOf(playerID)];
 								} else {
 									benched = true;
 									PTSonBench = playerPoints;
@@ -1462,6 +1474,7 @@ export const getLeagueRecords = async (refresh = false) => {
 									starterRankAVG: null,
 									playerInfo,
 									avatar,
+									rosterSpot,
 								}
 			
 								// right now, acquisitions is just a list of the manager's draft picks
@@ -1650,6 +1663,7 @@ export const getLeagueRecords = async (refresh = false) => {
 					let PTSasStarter;
 					let PTSonBench;
 					let benched = new Boolean (true);
+					let rosterSpot;
 
 					if(starters.includes(playerID)) {
 						benched = false;
@@ -1661,6 +1675,7 @@ export const getLeagueRecords = async (refresh = false) => {
 						} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
 							bottomStarter = true;
 						}
+						rosterSpot = positions[starters.indexOf(playerID)];
 					} else {
 						benched = true;
 						PTSonBench = playerPoints;
@@ -1699,6 +1714,7 @@ export const getLeagueRecords = async (refresh = false) => {
 						starterRankAVG: null,
 						playerInfo,
 						avatar,
+						rosterSpot,
 					}
 
 					// right now, acquisitions is just a list of the manager's draft picks
@@ -2017,10 +2033,14 @@ export const getLeagueRecords = async (refresh = false) => {
 									starterRanks: 0,
 									playerInfo: player.playerInfo,
 									avatar: player.avatar,
+									rosterSpot: player.rosterSpot,
 								}
 								if(player.benched == false) {
 									uniqueStarters++;
 								}
+							}
+							if(playerTotals[player.playerID].rosterSpot == null || playerTotals[player.playerID].rosterSpot.includes('FLEX')) {
+								playerTotals[player.playerID].rosterSpot = player.rosterSpot;
 							}
 							playerTotals[player.playerID].weeksOwned++;
 							if(player.benched == false) {

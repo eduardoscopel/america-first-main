@@ -461,7 +461,7 @@
     .headerLabel {
         position: relative;
         display: inline-flex;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
         font-weight: 420;
         font-size: 2em;
         justify-content: center;
@@ -494,7 +494,7 @@
         flex-direction: column;
         align-items: center;
         align-content: center;
-        background-color: var(--f3f3f3);
+        background-color: var(--gcComponent);
         border-radius: 50px;
     }
 
@@ -514,7 +514,7 @@
         position: relative;
         width: 100%;
         height: 7em;
-        background-color: #222;
+        background-color: var(--gcBox);
         align-items: center;
         justify-content: center;
         box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 40%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 8px 0px rgb(0 0 0 / 24%);
@@ -524,7 +524,7 @@
         text-align: center;
         font-size: 2.25em;
         font-weight: 450;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
     }
 
 </style>

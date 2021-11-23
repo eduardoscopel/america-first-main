@@ -246,6 +246,7 @@ export const getManagerRecords = async (refresh = false) => {
 		).catch((err) => { console.error(err); });
 	
 		let year = parseInt(leagueData.season);
+		const positions = leagueData.roster_positions.filter(p => p != 'BN');
 
 		// variables for playoff records
 		let numPOTeams = parseInt(leagueData.settings.playoff_teams);
@@ -722,6 +723,7 @@ export const getManagerRecords = async (refresh = false) => {
 							let PTSasStarter;
 							let PTSonBench;
 							let benched = new Boolean (true);
+							let rosterSpot;
 		
 							if(starters.includes(playerID)) {
 								benched = false;
@@ -733,6 +735,7 @@ export const getManagerRecords = async (refresh = false) => {
 								} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
 									bottomStarter = true;
 								}
+								rosterSpot = positions[starters.indexOf(playerID)];
 							} else {
 								benched = true;
 								PTSonBench = playerPoints;
@@ -771,6 +774,8 @@ export const getManagerRecords = async (refresh = false) => {
 								starterRankAVG: null,
 								playerInfo,
 								avatar,
+								rosterSpot,
+								playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
 							}
 
 							// right now, acquisitions is just a list of the manager's draft picks
@@ -952,6 +957,7 @@ export const getManagerRecords = async (refresh = false) => {
 								let PTSasStarter;
 								let PTSonBench;
 								let benched = new Boolean (true);
+								let rosterSpot;
 			
 								if(starters.includes(playerID)) {
 									benched = false;
@@ -963,6 +969,7 @@ export const getManagerRecords = async (refresh = false) => {
 									} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
 										bottomStarter = true;
 									}
+									rosterSpot = positions[starters.indexOf(playerID)];
 								} else {
 									benched = true;
 									PTSonBench = playerPoints;
@@ -1001,6 +1008,8 @@ export const getManagerRecords = async (refresh = false) => {
 									starterRankAVG: null,
 									playerInfo,
 									avatar,
+									rosterSpot,
+									playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
 								}
 			
 								// right now, acquisitions is just a list of the manager's draft picks
@@ -1178,6 +1187,7 @@ export const getManagerRecords = async (refresh = false) => {
 								let PTSasStarter;
 								let PTSonBench;
 								let benched = new Boolean (true);
+								let rosterSpot;
 			
 								if(starters.includes(playerID)) {
 									benched = false;
@@ -1189,6 +1199,7 @@ export const getManagerRecords = async (refresh = false) => {
 									} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
 										bottomStarter = true;
 									}
+									rosterSpot = positions[starters.indexOf(playerID)];
 								} else {
 									benched = true;
 									PTSonBench = playerPoints;
@@ -1227,6 +1238,8 @@ export const getManagerRecords = async (refresh = false) => {
 									starterRankAVG: null,
 									playerInfo,
 									avatar,
+									rosterSpot,
+									playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
 								}
 			
 								// right now, acquisitions is just a list of the manager's draft picks
@@ -1404,6 +1417,7 @@ export const getManagerRecords = async (refresh = false) => {
 								let PTSasStarter;
 								let PTSonBench;
 								let benched = new Boolean (true);
+								let rosterSpot;
 			
 								if(starters.includes(playerID)) {
 									benched = false;
@@ -1415,6 +1429,7 @@ export const getManagerRecords = async (refresh = false) => {
 									} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
 										bottomStarter = true;
 									}
+									rosterSpot = positions[starters.indexOf(playerID)];
 								} else {
 									benched = true;
 									PTSonBench = playerPoints;
@@ -1453,6 +1468,8 @@ export const getManagerRecords = async (refresh = false) => {
 									starterRankAVG: null,
 									playerInfo,
 									avatar,
+									rosterSpot,
+									playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
 								}
 			
 								// right now, acquisitions is just a list of the manager's draft picks
@@ -1641,6 +1658,7 @@ export const getManagerRecords = async (refresh = false) => {
 					let PTSasStarter;
 					let PTSonBench;
 					let benched = new Boolean (true);
+					let rosterSpot;
 
 					if(starters.includes(playerID)) {
 						benched = false;
@@ -1652,6 +1670,7 @@ export const getManagerRecords = async (refresh = false) => {
 						} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
 							bottomStarter = true;
 						}
+						rosterSpot = positions[starters.indexOf(playerID)];
 					} else {
 						benched = true;
 						PTSonBench = playerPoints;
@@ -1690,6 +1709,8 @@ export const getManagerRecords = async (refresh = false) => {
 						starterRankAVG: null,
 						playerInfo,
 						avatar,
+						rosterSpot,
+						playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
 					}
 
 					// right now, acquisitions is just a list of the manager's draft picks
@@ -2008,11 +2029,17 @@ export const getManagerRecords = async (refresh = false) => {
 									starterRanks: 0,
 									playerInfo: player.playerInfo,
 									avatar: player.avatar,
+									rosterSpot: player.rosterSpot,
+									playerAvatar: player.playerAvatar,
 								}
 								if(player.benched == false) {
 									uniqueStarters++;
 								}
 							}
+							if(playerTotals[player.playerID].rosterSpot == null || playerTotals[player.playerID].rosterSpot.includes('FLEX')) {
+								playerTotals[player.playerID].rosterSpot = player.rosterSpot;
+							}
+
 							playerTotals[player.playerID].weeksOwned++;
 							if(player.benched == false) {
 								playerTotals[player.playerID].playerPoints += player.playerPoints;
@@ -2435,6 +2462,7 @@ export const getManagerRecords = async (refresh = false) => {
 	const managerRecordsData = {
 		playerPositionRecords: playerPositionRecords.managers,
 		managerRecordArrays: recordArrays.managers,
+		playerBook: masterRecordBook.players.managers,
 	}
 
 	managerrecords.update(() => managerRecordsData);
