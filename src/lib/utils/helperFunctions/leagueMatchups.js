@@ -84,7 +84,9 @@ export const getLeagueMatchups = async () => {
 		matchupWeeks,
 		year,
 		week,
-		regularSeasonLength
+		regularSeasonLength,
+		rawData: matchupsData,
+		managers: yearManagers,
 	}
 	
 	matchupsStore.update(() => matchupsResponse);

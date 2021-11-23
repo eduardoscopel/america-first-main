@@ -16,7 +16,7 @@ import { cleanName, round, min, max, generateGraph, gotoManager, getAuthor, pars
 import { predictScores } from './helperFunctions/predictOptimalScore';
 import { getBrackets } from './helperFunctions/leagueBrackets';
 import { getBlogPosts } from './helperFunctions/getBlogPosts';
-import { getLeagueStandings } from './helperFunctions/leagueStandings';
+import { getLeagueStandings, processStandings } from './helperFunctions/leagueStandings';
 import { getNflScoreboard, getPlayByPlay, getGameDrives, getYearMatchups } from './helperFunctions/gameCenter';
 import { nflTeams } from './NFLinfo';
 import { getTable } from './helperFunctions/positionTable';
@@ -57,6 +57,7 @@ export {
     getBlogPosts,
     predictScores,
     getLeagueStandings,
+    processStandings,
     getNflScoreboard,
     getPlayByPlay,
     getGameDrives,

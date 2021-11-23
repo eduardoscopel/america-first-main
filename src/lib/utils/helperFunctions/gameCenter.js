@@ -462,6 +462,8 @@ export const getYearMatchups = async (yearSelection) => {
             yearLeagueData,
             rosters: rosters,
             users: users,
+            rawData: yearMatchupsData,
+            managers: yearManagers,
         }
     
     }

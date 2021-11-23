@@ -92,7 +92,7 @@ export const getLeagueStandings = async () => {
 	return response;
 }
 
-const processStandings = (matchup, standingsData, rosters, medianMatch, yearManagers) => {
+export const processStandings = (matchup, standingsData, rosters, medianMatch, yearManagers) => {
 	const matchups = {};
 	let scoresArray = [];
 	for(const match of matchup) {

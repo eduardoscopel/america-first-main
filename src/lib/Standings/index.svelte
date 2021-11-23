@@ -1,9 +1,10 @@
 <script>
-    import { leagueName, round } from '$lib/utils/helper';
+    import { leagueName, round, creationYear, getYearMatchups, processStandings } from '$lib/utils/helper';
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
 	import LinearProgress from '@smui/linear-progress';
     import { onMount } from 'svelte';
     import Standing from './Standing.svelte';
+    import { Icon } from '@smui/tab';
 
     export let standingsData, usersData;
 
@@ -18,11 +19,17 @@
 
     let loading = true;
     let rosters, standings, year, users;
+    let currentYear;
+    let displayYear;
+    let selectedYear;
     onMount(async () => {
         const {standingsInfo, yearData, rostersData} = await standingsData;
         users = await usersData;
         rosters = rostersData;
+        currentYear = yearData;
         year = yearData;
+        displayYear = yearData;
+        selectedYear = yearData;
         for(const standingKey in standingsInfo) {
             const roster = rosters[standingsInfo[standingKey].rosterID - 1];
             standingsInfo[standingKey].fpts = round(roster.settings.fpts + (roster.settings.fpts_decimal / 100));
@@ -45,6 +52,54 @@
 
     let innerWidth;
 
+    let newLoading = false;
+    const changeYear = async (selectedYear) => {
+        newLoading = true;
+        displayYear = selectedYear;
+        let yearMatchups = await getYearMatchups(selectedYear);
+
+        let regularSeasonLength = yearMatchups.yearLeagueData.settings.playoff_week_start - 1;
+        yearMatchups.rawData = yearMatchups.rawData.slice(0, regularSeasonLength - 1);
+
+        let medianMatch = new Boolean (false);
+        if(yearMatchups.yearLeagueData.settings.league_average_match == 1) {
+            medianMatch = true;
+        }
+
+        let newStandings = {};
+        for(const matchup of yearMatchups.rawData) {
+            newStandings = processStandings(matchup, newStandings, yearMatchups.rosters, medianMatch, yearMatchups.managers);
+        }
+
+        for(const standingKey in newStandings) {
+            const roster = yearMatchups.rosters[newStandings[standingKey].rosterID - 1];
+            newStandings[standingKey].fpts = round(roster.settings.fpts + (roster.settings.fpts_decimal / 100));
+            newStandings[standingKey].fptsAgainst = round(roster.settings.fpts_against + (roster.settings.fpts_against_decimal / 100));
+            if(selectedYear >= 2021) {
+                newStandings[standingKey].streak = roster.metadata.streak;
+            } else {
+                newStandings[standingKey].streak = '-';
+
+            }
+        }
+
+        let finalStandings = Object.keys(newStandings).map((key) => newStandings[key]);
+
+        for(const sortType of sortOrder) {
+            if(!finalStandings[0][sortType] && finalStandings[0][sortType] != 0) {
+                continue;
+            }
+            finalStandings = [...finalStandings].sort((a,b) => b[sortType] - a[sortType]);
+        }
+
+        standings = finalStandings;
+        users = yearMatchups.users;
+        year = yearMatchups.year;
+        rosters = yearMatchups.rosters;
+        newLoading = false;
+    }
+    $: changeYear(selectedYear);
+
 </script>
 
 <svelte:window bind:innerWidth={innerWidth} />
@@ -66,20 +121,75 @@
         line-height: 1.2em;
     }
 
-    h1 {
-        font-size: 2.2em;
-        line-height: 1.3em;
-        margin: 1.5em 0 2em;
-    }
-
     .standingsTable {
-        max-width: 100%;
+        width: 45%;
         overflow-x: scroll;
         margin: 0.5em 0 5em;
+        justify-content: center;
+        display: inline-flex;
+    }
+
+    .spacer {
+        width: 20%;
+    }
+
+    :global(.changeYear) {
+        font-size: 3em;
+        cursor: pointer;
+        color: #888;
+        margin: 0 2.5%;
+    }
+
+    :global(.changeYear:hover) {
+        color: #00316b;
+    }
+
+    .headingText {
+        text-align: center;
+        font-size: 2.25em;
+        font-weight: 450;
+        width: 60%;
+        color: var(--gcPlayRowText);
+    }
+
+    .headingRow {
+        display: inline-flex;
+        position:relative;
+        margin: 5em 0 2em 0;
+        align-items: center;
+        width: 60%;
+        justify-content: center;
+    }
+
+    .modal {
+        display: inline-flex;
+        flex-direction: column;
+        position: absolute; 
+        z-index: 1; 
+        width: 45%;
+        height: 77%; 
+        background-color: rgb(0,0,0); 
+        background-color: rgba(0,0,0,0.8); 
+        justify-content: center;
+        align-items: center;
+    }
+
+    .columnWrap {
+        display: inline-flex;
+        position: relative;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modalContent {
+        justify-content: center;
+        align-items: center;
+        color: #ededed;
     }
 </style>
-
-<h1>{year} {leagueName} Standings</h1>
 
 {#if loading}
     <!-- promise is pending -->
@@ -88,22 +198,43 @@
         <LinearProgress indeterminate />
     </div>
 {:else}
-    <div class="standingsTable">
-        <DataTable table$aria-label="League Standings" >
-            <Head> <!-- Team name  -->
-                <Row>
-                    <Cell class="center">Team</Cell>
-                    {#each columnOrder as column}
-                        <Cell class="center wrappable">{column.name}</Cell>
+    <div class="columnWrap">
+        <div class="headingRow">
+            {#if displayYear > creationYear}
+                <Icon class="material-icons changeYear" style="width: 15%;" on:click={() => changeYear(displayYear - 1)}>chevron_left</Icon>
+            {:else}
+                <span class="spacer" />
+            {/if}  
+            <div class="headingText">{displayYear} {leagueName} Standings</div>
+            {#if displayYear < currentYear}
+                <Icon class="material-icons changeYear" style="width: 15%;" on:click={() => changeYear(displayYear + 1)}>chevron_right</Icon>
+            {:else}
+                <span class="spacer" />
+            {/if}  
+        </div>
+        <div class="standingsTable">
+            {#if newLoading}
+                <div class="modal">
+                    <div class="modalContent">Loading Standings...</div>
+                    <LinearProgress indeterminate />
+                </div>
+            {/if}
+            <DataTable table$aria-label="League Standings" style="width: 100%;">
+                <Head> <!-- Team name  -->
+                    <Row>
+                        <Cell class="center">Team</Cell>
+                        {#each columnOrder as column}
+                            <Cell class="center wrappable">{column.name}</Cell>
+                        {/each}
+                    </Row>
+                </Head>
+                <Body>
+                    <!-- 	Standing	 -->
+                    {#each standings as standing}
+                        <Standing {columnOrder} {standing} user={users[rosters[standing.rosterID - 1].owner_id]} roster={rosters[standing.rosterID - 1]} />
                     {/each}
-                </Row>
-            </Head>
-            <Body>
-                <!-- 	Standing	 -->
-                {#each standings as standing}
-                    <Standing {columnOrder} {standing} user={users[rosters[standing.rosterID - 1].owner_id]} roster={rosters[standing.rosterID - 1]} />
-                {/each}
-            </Body>
-        </DataTable>
+                </Body>
+            </DataTable>
+        </div>
     </div>
 {/if}
