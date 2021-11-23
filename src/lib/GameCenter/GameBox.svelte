@@ -1,5 +1,6 @@
 <script>
     import {round} from '$lib/utils/helper'; 
+    import LinearProgress from '@smui/linear-progress';
 
     export let nflTeams, nflMatchups, weekSelection, yearSelection, currentYear, yearLeagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, standingsData, matchSelection, managerSelection, fantasyProducts, gameSelection = nflMatchups[0][0].gameID, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo;
     
@@ -1364,7 +1365,7 @@
         justify-content: space-around;
         flex-direction: row;
         width: 100%;
-        height: 100%;
+        top: -1.8em;
     }
 
     .totalPointsWrap {
@@ -1402,6 +1403,19 @@
         position: relative;
         display: inline-flex;
         width: 100%;
+        align-items: center;
+    }
+
+    .modal {
+        display: inline-flex;
+        flex-direction: column;
+        position: absolute; 
+        z-index: 1; 
+        width: 45%;
+        height: 77%; 
+        background-color: rgb(0,0,0); 
+        background-color: rgba(0,0,0,0.8); 
+        justify-content: center;
         align-items: center;
     }
 </style>
