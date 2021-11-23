@@ -20,35 +20,40 @@
     let leaderBoardSpec;
     let leaderboardHeading = 'Game';
 
-    const allStarters = {};
-    for(const recordManID in fantasyStarters) {
-        const starters = fantasyStarters[recordManID].starters;
-        allStarters[recordManID] = [];
-        for(const starter of starters) {
-            const starterInfo = playersInfo.players[starter];
-            if(starter != '0') {
-                const starterEntry = {
-                    playerID: starter,
-                    fpts: fantasyStarters[recordManID].startersPoints[starters.indexOf(starter)],
-                    owner: managerInfo[recordManID],
-                    recordManID,
-                    fn: starterInfo.fn,
-                    ln: starterInfo.ln,
-                    pos: starterInfo.pos,
-                    t: starterInfo.t,
-                    projection: yearSelection == currentYear ? starterInfo.wi[weekSelection].p : null,
-                    avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                    teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                    teamColor: `background-color: #${nflTeams[starterInfo.t]?.color}6b` || `background-color: var(--boxShadowThree)`,
-                    teamAltColor: `background-color: #${nflTeams[starterInfo.t]?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
+    let allStarters = {};
+
+    const getAllStarters = (fantasyStarters, playersInfo) => {
+        allStarters = {};
+        for(const recordManID in fantasyStarters) {
+            const starters = fantasyStarters[recordManID].starters;
+            allStarters[recordManID] = [];
+            for(const starter of starters) {
+                const starterInfo = playersInfo.players[starter];
+                if(starter != '0') {
+                    const starterEntry = {
+                        playerID: starter,
+                        fpts: fantasyStarters[recordManID].startersPoints[starters.indexOf(starter)],
+                        owner: managerInfo[recordManID],
+                        recordManID,
+                        fn: starterInfo.fn,
+                        ln: starterInfo.ln,
+                        pos: starterInfo.pos,
+                        t: starterInfo.t,
+                        projection: yearSelection == currentYear ? starterInfo.wi[weekSelection].p : null,
+                        avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                        teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                        teamColor: `background-color: #${nflTeams[starterInfo.t]?.color}6b` || `background-color: var(--boxShadowThree)`,
+                        teamAltColor: `background-color: #${nflTeams[starterInfo.t]?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
+                    }
+                    if(starterInfo.t && nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
+                        starterEntry.teamAltColor = `background-color: #ffffff52`;
+                    }
+                    allStarters[recordManID].push(starterEntry);
                 }
-                if(starterInfo.t && nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
-                    starterEntry.teamAltColor = `background-color: #ffffff52`;
-                }
-                allStarters[recordManID].push(starterEntry);
             }
         }
     }
+    $: getAllStarters(fantasyStarters, playersInfo);
 
     // create top 10 points-scorers arrays for each position
     const positionRankArrays = {};
@@ -112,7 +117,7 @@
         positionRankArrays['IDP_FLEX'] = positionRankArrays['IDP_FLEX'].sort((a, b) => b.fpts - a.fpts);
     }
     // assign managers for selected matchID
-    const displayMatch = (matchSelection, showMatchBox) => {
+    const displayMatch = (matchSelection, showMatchBox, playersInfo) => {
         if(showMatchBox == true && matchSelection != null && matchSelection > 0) {
             let match = weekMatchups[matchSelection];
             const projections = {};
@@ -205,7 +210,7 @@
             return {home, away, matchStarters};
         } 
     }
-    $: match = displayMatch(matchSelection, showMatchBox);
+    $: match = displayMatch(matchSelection, showMatchBox, playersInfo);
 
     // assign teams for selected gameID
     const selectGame = (gameSelection) => {
@@ -223,7 +228,7 @@
         positions: {},
         rowHeights: {},
     };
-    const findStarters = (game, showGameBox) => {
+    const findStarters = (game, showGameBox, fantasyStarters, playersInfo) => {
         if(showGameBox == true) {
             const gameStarters = {};
             for(const nflPosition of nflPositions){
@@ -246,6 +251,10 @@
             if(!positionGameStarters.rowHeights[gameSelection]) {
                 positionGameStarters.rowHeights[gameSelection] = [];
             }
+            positionGameStarters[gameSelection][game.home.sleeperID].starters = [];
+            positionGameStarters[gameSelection][game.away.sleeperID].starters = [];
+            positionGameStarters.rowHeights[gameSelection] = [];
+
             for(const recordManID in fantasyStarters) {
                 const starters = fantasyStarters[recordManID].starters;
                 for(const starter of starters) {
@@ -310,7 +319,7 @@
             })
         }
     }
-    $: gameStarters = findStarters(game, showGameBox);
+    $: gameStarters = findStarters(game, showGameBox, fantasyStarters, playersInfo);
 
     export const changePlayer = (viewPlayerID) => {
         let newViewPlayer;
@@ -791,6 +800,7 @@
         margin: 0 1%;
         font-weight: 410;
         justify-content: center;
+        line-height: 1em;
     }
 
     .posPlayerFpts {
@@ -1435,7 +1445,7 @@
                                                 {:else}
                                                     <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 3% 0 0;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                                 {/if}
-                                                <div class="rosterPlayer" style="justify-content: flex-start; color: var(--g555); font-size: 0.75em; {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0; line-height: 1em;"}">{starter.owner.name}</div>
+                                                <div class="rosterPlayer" style="justify-content: flex-start; color: var(--g555); font-size: 0.75em; line-height: 1em; {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">{starter.owner.name}</div>
                                                 <div class="rosterPlayer" style="{yearSelection != currentYear ? "justify-content: flex-end;" : "justify-content: space-between;"} {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">
                                                     {#if yearSelection == currentYear}
                                                         <div style="display: inline-flex; color: var(--g555); justify-content: flex-end; margin: 0 5% 0 0;">({starter.projection})</div>
@@ -1462,7 +1472,7 @@
                                                 {:else}
                                                     <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 3%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                                 {/if}
-                                                <div class="rosterPlayer" style="justify-content: flex-end; color: var(--g555); font-size: 0.75em; {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%; line-height: 1em;"}">{starter.owner.name}</div>
+                                                <div class="rosterPlayer" style="justify-content: flex-end; color: var(--g555); font-size: 0.75em; line-height: 1em; {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">{starter.owner.name}</div>
                                                 <div class="rosterPlayer" style="{yearSelection != currentYear ? "justify-content: flex-start;" : "justify-content: space-between;"} {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">
                                                     <div style="display: inline-flex; font-weight: 600;">{round(starter.fpts)}</div>  
                                                     {#if yearSelection == currentYear}

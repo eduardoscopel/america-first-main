@@ -27,7 +27,7 @@
     const season = matchupsInfo.yearLeagueData.season;
 
     let leagueManagers = {};
-    const managerInfo = {};
+    let managerInfo = {};
     let fantasyStarters = {};
     let positionLeaders = {};
     let weekMatchups = matchupsInfo.matchupWeeks[matchupsInfo.week - 1].matchups;
@@ -102,27 +102,26 @@
 
             let recordManager = leagueManagers[rosterID].filter(m => m.yearsactive.includes(year));
             let recordManID = recordManager[0].managerID;
-            if(!managerInfo[recordManID]) {
-                if(user) {
-                    managerInfo[recordManID] = {
-                        avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
-                        name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
-                        realname: recordManager[0].name,
-                        abbreviation: recordManager[0].abbreviation,
-                        rosterID,
-                        recordManID,
-                    };
-                } else {
-                    managerInfo[recordManID] = {
-                        avatar: `https://sleepercdn.com/images/v2/icons/player_default.webp`,
-                        name: 'Unknown Manager',
-                        realname: 'John Q. Rando',
-                        abbreviation: 'JQR',
-                        rosterID,
-                        recordManID,
-                    };
-                }
+            if(user) {
+                managerInfo[recordManID] = {
+                    avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
+                    name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
+                    realname: recordManager[0].name,
+                    abbreviation: recordManager[0].abbreviation,
+                    rosterID,
+                    recordManID,
+                };
+            } else {
+                managerInfo[recordManID] = {
+                    avatar: `https://sleepercdn.com/images/v2/icons/player_default.webp`,
+                    name: 'Unknown Manager',
+                    realname: 'John Q. Rando',
+                    abbreviation: 'JQR',
+                    rosterID,
+                    recordManID,
+                };
             }
+            
             // get starters
             for(const matchup in weekMatchups) {
                 const match = weekMatchups[matchup];
@@ -141,7 +140,7 @@
     $: getStarters(weekMatchups);
 
     //get position leaders
-    const getPositionLeaders = (weekMatchups) => {
+    const getPositionLeaders = (weekMatchups, playersInfo) => {
         positionLeaders = {};
         for(const matchup in weekMatchups) {
             const match = weekMatchups[matchup];
@@ -186,7 +185,7 @@
             positionLeaders[key] = positionLeaders[key].sort((a, b) => b.fpts - a.fpts);
         }
     }
-    $: getPositionLeaders(weekMatchups);
+    $: getPositionLeaders(weekMatchups, playersInfo);
 
 
 </script>
@@ -385,10 +384,10 @@
         </div>
         <div class="centerWrapper">
             <div class="gameBox">
-                <GameBox {nflTeams} {nflMatchups} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} {currentYear} bind:yearLeagueData={yearLeagueData} {playersInfo} {fantasyStarters} {positionLeaders} {managerInfo} bind:weekMatchups={weekMatchups} {standingsData} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
+                <GameBox {nflTeams} {nflMatchups} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} {currentYear} bind:yearLeagueData={yearLeagueData} bind:playersInfo={playersInfo} bind:fantasyStarters={fantasyStarters} bind:positionLeaders={positionLeaders} bind:managerInfo={managerInfo} bind:weekMatchups={weekMatchups} {standingsData} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
             </div>
             <div class="playByPlay">
-                <PlayByPlay {nflTeams} {nflMatchups} bind:yearLeagueData={yearLeagueData} {playersInfo} {fantasyStarters} {managerInfo} bind:weekMatchups={weekMatchups} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
+                <PlayByPlay {nflTeams} {nflMatchups} bind:yearLeagueData={yearLeagueData} bind:playersInfo={playersInfo} bind:fantasyStarters={fantasyStarters} bind:managerInfo={managerInfo} bind:weekMatchups={weekMatchups} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
             </div>
         </div>
         <div class="rightWrapper">
@@ -401,7 +400,7 @@
                 </div>
             </div>
             <div class="managerboard">
-                <ManagerBoard bind:weekMatchups={weekMatchups} {week} {currentYear} bind:yearSelection={yearSelection} {completeGames} {playersInfo} bind:matchSelection={matchSelection} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
+                <ManagerBoard bind:weekMatchups={weekMatchups} {week} {currentYear} bind:yearSelection={yearSelection} {completeGames} bind:playersInfo={playersInfo} bind:matchSelection={matchSelection} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
             </div>
         </div>
     </div>

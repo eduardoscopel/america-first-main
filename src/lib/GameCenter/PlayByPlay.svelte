@@ -18,7 +18,7 @@
         const positions = yearLeagueData.roster_positions.filter(p => p != 'BN');
 
         // extracts Espn Team ID from API link
-        const parseEspnTeamID = (teamLink, linkType) => {
+        const parseEspnTeamID = async (teamLink, linkType) => {
             let espnTeamID;
             if(linkType == 'play') {
                 if(teamLink.slice(82, 84)[1] != '?') {
@@ -26,11 +26,38 @@
                 } else {
                     espnTeamID = teamLink.slice(82, 83);
                 }
-            } else if(linkType == 'participants') {
-                if(teamLink.slice(115, 117)[1] != '/') {           
-                    espnTeamID = teamLink.slice(115, 117);
+            } else if(linkType == 'participants' || linkType == 'info') {
+
+                const espnPlayerLink = 'https' + teamLink.slice(4); 
+                const playerPromises = [];
+                playerPromises.push(fetch(`${espnPlayerLink}`, {compress: true}));
+                const playersRes = await waitForAll(...playerPromises).catch((err) => { console.error(err); });
+        
+                const playerJsonPromises = [];
+                for(const playerRes of playersRes) {
+                    const data = playerRes.json();
+                    playerJsonPromises.push(data)
+                    if (!playerRes.ok) {
+                        throw new Error(data);
+                    }
+                }
+                const espnPlayerData = await waitForAll(...playerJsonPromises).catch((err) => { console.error(err); });
+                // which team is player on
+
+                if(espnPlayerData[0].team.$ref.slice(82, 84)[1] != '?') {
+                    espnTeamID = espnPlayerData[0].team.$ref.slice(82, 84);
                 } else {
-                    espnTeamID = teamLink.slice(115, 116);
+                    espnTeamID = espnPlayerData[0].team.$ref.slice(82, 83);
+                }
+
+                if(linkType == 'info') {
+                    const espnPlayerInfo = {
+                        fn: espnPlayerData[0].firstName,
+                        ln: espnPlayerData[0].lastName,
+                        pos: espnPlayerData[0].position.abbreviation,  
+                        t: espnTeamID
+                    }
+                    espnTeamID = espnPlayerInfo;
                 }
             }
             return espnTeamID;
@@ -241,6 +268,7 @@
                 penalties: [],
                 totalYards: 0,
                 against: null,
+                trueYards: 0,
             };
 
             if(description.includes(`PENALTY on ${playTeam}`)) {
@@ -250,7 +278,7 @@
             }
 
             // && description.indexOf('Unnecessary Roughness') - description.indexOf(`PENALTY on ${espnAbbv}`) > 0 
-            //     && description.indexOf('Unnecessary Roughness') - description.indexOf(`PENALTY on ${espnAbbv}`) < 50)
+            //     && description.indexOf('Unnecessary Roughness') - description.indexOf(`PENALTY on ${espnAbbv}`) < 50)            
             
             if(description.includes('Roughing the Passer')) {
                 let penaltyYards;
@@ -318,6 +346,27 @@
             if(description.includes('Defensive Holding')){
                 let penaltyYards = 5;
                 truePenaltyInfo.penalties.push(penaltyYards);
+            }
+            if(description.includes('Illegal Block Above the Waist')){
+                let penaltyYards = 10;
+                truePenaltyInfo.penalties.push(penaltyYards);
+            }
+            if(description.includes('Horse Collar')){
+                let penaltyYards = 15;
+                truePenaltyInfo.penalties.push(penaltyYards);
+            }
+            if(description.includes('Disqualification')){
+                let penaltyYards = 15;
+                truePenaltyInfo.penalties.push(penaltyYards);
+            }
+
+            if(playType == 5 || playType == 9 || playType == 29 || playType == 39) {
+                let trueYards = description.slice(description.indexOf('for ') + 4, description.indexOf('for ') + 6);
+                if(trueYards[trueYards.length - 1] == ' ') {
+                    trueYards = trueYards.slice(0, 1);
+                }
+                trueYards = parseInt(trueYards);
+                truePenaltyInfo.trueYards = trueYards;
             }
 
             for(let i = 0; i < truePenaltyInfo.penalties.length; i++) {
@@ -1284,7 +1333,7 @@
 
                 if(play.relevantPlayers.length > 0) {                   // OFFENSIVE & IDP FPTS 
                     for(const relevantKey in play.relevantPlayers) {
-                        const player = play.relevantPlayers[relevantKey];       // NOTE TO-DO: ACCOUNT FOR PENALTIES (unclear how/when penalties screw with ESPN's yardage value)
+                        const player = play.relevantPlayers[relevantKey];       
                         if(player.statType == 'fumbler' && (score.fum || score.fum_lost)) {                  // FUMBLE 
                             const fpts = (score?.fum || 0);             // PENALTY for FUMBLE FORCED
                             const statFF = 'FUM:';
@@ -1304,7 +1353,7 @@
                                 let runningTotal = pushRunningTotal(fpts, statFF, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                 entry.runningTotals.push(runningTotal);
                             }            
-                            if(!play.description.includes(`recovered by ${player.playerTeam}`) & !play.description.includes(`and recovers`)) {      // PENALTY for FUMBLE -> TURNOVER
+                            if(player.playType == 29 || player.playType == 39 || (player.playType != 9 && !play.description.includes(`recovered by ${player.playerTeam}`) && !play.description.includes(`and recovers`) && !play.description.includes(`ball out of bounds`))) {      // NEGATIVE POINTS for FUMBLE -> TURNOVER
                                 entry.fpts += (score?.fum_lost || 0); 
                                 const fptsFUMTO = (score?.fum_lost || 0);                                  
                                 entry.stat.push('fum_lost');
@@ -1354,117 +1403,77 @@
                             }
                             fantasyPlay[play.playID].push(entryIDP);
                         }
-                        if(play.pointAfterType == 15 && (score.rec_2pt || score.rec || score.pass_2pt || score.pass_att || score.pass_cmp)) {                         // 2-PT CONVERSIONS
-                            if(player.statType == 'patPasser' && (score.pass_2pt || score.pass_att || score.pass_cmp)) {                                                // 2-PT PASS
-                                const fpts = (score?.pass_2pt || 0) + (score?.pass_att || 0) + (score?.pass_cmp || 0);
-                                const fpts2PT = (score?.pass_2pt || 0);
-                                const fptsATT = (score?.pass_att || 0);
-                                const fptsCMP = (score?.pass_cmp || 0);
+                        if(play.pointAfterType == 15 && (score.rec_2pt || score.pass_2pt)) {                         // 2-PT CONVERSIONS
+                            if(player.statType == 'patPasser' && score.pass_2pt) {                                                // 2-PT PASS
+                                const fpts = (score?.pass_2pt || 0);
                                 const stat2PT = '2PT PASS:';
-                                const statATT = 'PASS:';
-                                const statCMP = 'CMP:';
                                 const entry = {
                                     order: play.order,
                                     side: 'offense',
                                     manager: player.manager,
                                     playerInfo: player.playerInfo,
-                                    stat: ['pass_2pt', 'pass_att', 'pass_comp'],
+                                    stat: ['pass_2pt'],
                                     runningTotals: [],
                                     fpts,
                                     description: play.description,
                                     shortDesc: '2-PT Conversion (Pass)',
                                 }
-                                if(fpts2PT != 0) {
-                                    let runningTotal = pushRunningTotal(fpts2PT, stat2PT, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                    entry.runningTotals.push(runningTotal);
-                                }
-                                if(fptsATT != 0) {
-                                    let runningTotal = pushRunningTotal(fptsATT, statATT, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                    entry.runningTotals.push(runningTotal);
-                                }
-                                if(fptsCMP != 0) {
-                                    let runningTotal = pushRunningTotal(fptsCMP, statCMP, entry.stat[2], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                if(fpts != 0) {
+                                    let runningTotal = pushRunningTotal(fpts, stat2PT, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                     entry.runningTotals.push(runningTotal);
                                 }
                                 fantasyPlay[play.playID].push(entry);
-                            } else if(player.statType == 'patScorer' && (score.rec_2pt || score.rec)) {                             // 2-PT RECEPTION 
-                                const fpts = (score?.rec_2pt || 0) + (score?.rec || 0);
-                                const fpts2PT = (score?.rec_2pt || 0);
-                                const fptsREC = (score?.rec || 0);
+                            } else if(player.statType == 'patScorer' && score.rec_2pt) {                             // 2-PT RECEPTION 
+                                const fpts = (score?.rec_2pt || 0);
                                 const stat2PT = '2PT REC:';
-                                const statREC = 'REC:';
                                 const entry = {
                                     order: play.order,
                                     side: 'offense',
                                     manager: player.manager,
                                     playerInfo: player.playerInfo,
-                                    stat: ['rec_2pt', 'rec'],
+                                    stat: ['rec_2pt'],
                                     runningTotals: [],
                                     fpts,
                                     description: play.description,
                                     shortDesc: '2-PT Conversion (Reception)',
                                 }
-                                if(fpts2PT != 0) {
-                                    let runningTotal = pushRunningTotal(fpts2PT, stat2PT, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                    entry.runningTotals.push(runningTotal);
-                                }
-                                if(fptsREC != 0) {
-                                    let runningTotal = pushRunningTotal(fptsREC, statREC, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                if(fpts != 0) {
+                                    let runningTotal = pushRunningTotal(fpts, stat2PT, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                     entry.runningTotals.push(runningTotal);
                                 }
                                 fantasyPlay[play.playID].push(entry);
                             }
-                        } else if(play.pointAfterType == 16 && (score.rush_2pt || score.rush_att || score.bonus_rush_att_20)) {
-                            if(player.statType == 'patScorer' && (score.rush_2pt || score.rush_att || score.bonus_rush_att_20)) {                             // 2-PT RUSH
-                                const fpts = (score?.rush_2pt || 0) + (score?.rush_att || 0);
-                                const fpts2PT = (score?.rush_2pt || 0);
-                                const fptsATT = (score?.rush_att || 0);
+                        } else if(play.pointAfterType == 16 && score.rush_2pt) {
+                            if(player.statType == 'patScorer' && score.rush_2pt) {                             // 2-PT RUSH
+                                const fpts = (score?.rush_2pt || 0);
                                 const stat2PT = '2PT RUSH:';
-                                const statREC = 'CARRIES:';
                                 const entry = {
                                     order: play.order,
                                     side: 'offense',
                                     manager: player.manager,
                                     playerInfo: player.playerInfo,
-                                    stat: ['rush_2pt', 'rush_att'],
+                                    stat: ['rush_2pt'],
                                     runningTotals: [],
                                     fpts,
                                     description: play.description,
                                     shortDesc: '2-PT Conversion (Rush)',
                                 }
-                                if(fpts2PT != 0) {
-                                    let runningTotal = pushRunningTotal(fpts2PT, stat2PT, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                if(fpts != 0) {
+                                    let runningTotal = pushRunningTotal(fpts, stat2PT, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
                                     entry.runningTotals.push(runningTotal);
-                                }
-                                if(fptsATT != 0) {
-                                    let runningTotal = pushRunningTotal(fptsATT, statREC, entry.stat[1], 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                    entry.runningTotals.push(runningTotal);
-                                }
-                                if(score.bonus_rush_att_20) {
-                                    const stat = 'CARRY BONUS(20+):';
-                                    const sleeperStat = 'bonus_rush_att_20';
-                                    let runningTotal = pushRunningTotal(0, stat, sleeperStat, 1, player.playerInfo.playerID, player.playerInfo.pos); 
-                                    if(runningTotal.occurs == 20) {
-                                        const fpts = score.bonus_rush_att_20;
-                                        let runningTotal = pushRunningTotal(fpts, stat, sleeperStat, 0, player.playerInfo.playerID, player.playerInfo.pos); 
-                                        let bonusEntry = entry;
-                                        bonusEntry.shortDesc = 'Bonus: 20+ Carries';
-                                        bonusEntry.stat = ['bonus_rush_att_20'];
-                                        bonusEntry.runningTotals.push(runningTotal);
-                                        fantasyPlay[play.playID].push(bonusEntry);
-                                    }
                                 }
                                 fantasyPlay[play.playID].push(entry);
                             }
                         }
-                        if((player.playType == 5 || player.playType == 9) && player.statType == 'rusher') {         // RUSH
+                        if((player.playType == 5 || player.playType == 9 || player.playType == 29 || player.playType == 39) && player.statType == 'rusher') {         // RUSH
                             let adjustedYards = player.yards;
                             if(play.penalty == true) {
-                                if(play.penaltyInfo.against == player.playerTeam) {
-                                    adjustedYards += play.penaltyInfo.totalYards;
-                                } else {
-                                    adjustedYards = adjustedYards - play.penaltyInfo.totalYards;
-                                }
+                                // if(play.penaltyInfo.against == player.playerTeam) {
+                                //     adjustedYards += play.penaltyInfo.totalYards;
+                                // } else {
+                                //     adjustedYards = adjustedYards - play.penaltyInfo.totalYards;
+                                // }
+                                adjustedYards = play.penaltyInfo.trueYards;
                             }
                             const fpts = adjustedYards * (score?.rush_yd || 0) + (score?.rush_att || 0);
                             const fptsRun = (score?.rush_att || 0);
@@ -2718,12 +2727,12 @@
                         // find which team made the play (checking team of first play participant is most reliably correct way)
                         let espnTeamID;
                         let linkType;
-                        if(play.participants && play.participants[0].statistics) {
+                        if(play.participants && play.participants[0].athlete) {
                             linkType = 'participants';
-                            espnTeamID = parseEspnTeamID(play.participants[0].statistics.$ref, linkType);
+                            espnTeamID = await parseEspnTeamID(play.participants[0].athlete.$ref, linkType);
                         } else {
                             linkType = 'play';
-                            espnTeamID = parseEspnTeamID(play.team.$ref, linkType);
+                            espnTeamID = await parseEspnTeamID(play.team.$ref, linkType);
                         }
                         let playTeam;
                         let oppTeam;
@@ -2861,53 +2870,50 @@
                         if(noPlay == false && play.participants) {
                             // loop thru every player involved in play
                             for(const playerKey in play.participants) {
-                                // ESPN PBP API includes direct links to player APIs
-                                const espnPlayerLink = 'https' + play.participants[playerKey].athlete.$ref.slice(4); 
-                                const playerPromises = [];
-                                playerPromises.push(fetch(`${espnPlayerLink}`, {compress: true}));
-                                const playersRes = await waitForAll(...playerPromises).catch((err) => { console.error(err); });
-                        
-                                const playerJsonPromises = [];
-                                for(const playerRes of playersRes) {
-                                    const data = playerRes.json();
-                                    playerJsonPromises.push(data)
-                                    if (!playerRes.ok) {
-                                        throw new Error(data);
-                                    }
-                                }
-                                const espnPlayerData = await waitForAll(...playerJsonPromises).catch((err) => { console.error(err); });
                                 // which team is player on
-                                const linkType = 'play';
-                                let espnPlayerTeamID = parseEspnTeamID(espnPlayerData[0].team.$ref, linkType);
+                                const linkType = 'info';
+                                let espnPlayerInfo = await parseEspnTeamID(play.participants[playerKey].athlete.$ref, linkType);
                                 let playerTeam;
+                                let playerTeam_sleeper;
                                 for(const key in nflTeams) {
-                                    if(nflTeams[key].espnID == espnPlayerTeamID) {
+                                    if(nflTeams[key].espnID == espnPlayerInfo.t) {
                                         playerTeam = nflTeams[key].espnAbbreviation;
+                                        playerTeam_sleeper = key;
                                         break;
                                     }
                                 }
-                                // full name & position should be enough identifying info to match our sleeper info to espn's player API
-                                const espnMatch = {
-                                    fn: espnPlayerData[0].firstName,
-                                    ln: espnPlayerData[0].lastName,
-                                    pos: espnPlayerData[0].position.abbreviation,
-                                }
                                 // Catching exceptions with different names
-                                if(espnMatch.ln.includes('Jr.') || espnMatch.ln.includes('Sr.') || espnMatch.ln.includes('III')) {
-                                    espnMatch.ln = espnMatch.ln.slice(0, espnMatch.ln.length - 4);
+                                if(espnPlayerInfo.fn == 'William' && espnPlayerInfo.ln == 'Fuller V') {
+                                    espnPlayerInfo.fn == 'Will';
+                                    espnPlayerInfo.ln == 'Fuller';
                                 }
-                                if(espnMatch.pos == 'PK') {
-                                    espnMatch.pos = 'K';
+                                if(espnPlayerInfo.ln.includes('Jr.') || espnPlayerInfo.ln.includes('Sr.') || espnPlayerInfo.ln.includes('III')) {
+                                    espnPlayerInfo.ln = espnPlayerInfo.ln.slice(0, espnPlayerInfo.ln.length - 4);
+                                } else if(espnPlayerInfo.ln.includes('II')) {
+                                    espnPlayerInfo.ln = espnPlayerInfo.ln.slice(0, espnPlayerInfo.ln.length - 3);
+                                } else if(espnPlayerInfo.ln.slice(espnPlayerInfo.ln.length - 2) == ' V') {
+                                    espnPlayerInfo.ln = espnPlayerInfo.ln.slice(0, espnPlayerInfo.ln.length - 2);
+                                }
+                                if(espnPlayerInfo.pos == 'PK') {
+                                    espnPlayerInfo.pos = 'K';
+                                }
+                                if(espnPlayerInfo.pos == 'FB') {
+                                    espnPlayerInfo.pos = 'RB';
                                 }
                                 let sleeperMatch = null;
                                 for(const recordManID in relevancyKey.starters) {
-                                    if(relevancyKey.starters[recordManID].filter(s => s.fn == espnMatch.fn && s.ln == espnMatch.ln && s.pos == espnMatch.pos).length > 0) {
-                                        sleeperMatch = relevancyKey.starters[recordManID].filter(s => s.fn == espnMatch.fn && s.ln == espnMatch.ln && s.pos == espnMatch.pos);
+                                    if(relevancyKey.starters[recordManID].filter(s => s.fn == espnPlayerInfo.fn && s.ln == espnPlayerInfo.ln && s.pos == espnPlayerInfo.pos).length > 0) {
+                                        sleeperMatch = relevancyKey.starters[recordManID].filter(s => s.fn == espnPlayerInfo.fn && s.ln == espnPlayerInfo.ln && s.pos == espnPlayerInfo.pos);
                                         break;
                                     }
                                 }
                                 // if the current player involved in the play is a starter, we combine the sleeper and espn info for their entry in the playEntry
                                 if(sleeperMatch != null) {
+                                    // assigning correct team if player has retired (& thus Sleeper team info is blank) OR player was with different team than he is currently
+                                    if(sleeperMatch[0].t == null || sleeperMatch[0].t != playerTeam_sleeper) {
+                                        sleeperMatch[0].t = playerTeam_sleeper;
+                                        playersInfo.players[sleeperMatch[0].playerID].t = playerTeam_sleeper;
+                                    }
                                     const relevantEntry = {
                                         playerInfo: sleeperMatch[0],
                                         manager: sleeperMatch[0].owner,
@@ -2973,7 +2979,7 @@
                                 const lastPlay = drive.plays.items[drive.plays.items.length - 1];
 
                                 let linkType = 'participants';
-                                let espnTeamID = parseEspnTeamID(lastPlay.participants[0].statistics.$ref, linkType);
+                                let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
 
                                 let playTeam;
                                 let oppTeam;
@@ -3037,7 +3043,7 @@
                                 const lastPlay = drive.plays.items[drive.plays.items.length - 1];
 
                                 let linkType = 'participants';
-                                let espnTeamID = parseEspnTeamID(lastPlay.participants[0].statistics.$ref, linkType);
+                                let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
                                 let playTeam;
                                 let oppTeam;
                                 let defense;
@@ -3182,12 +3188,12 @@
                     // which team made the play
                     let espnTeamID;
                     let linkType;
-                    if(play.participants && play.participants[0].statistics) {
+                    if(play.participants && play.participants[0].athlete) {
                         linkType = 'participants';
-                        espnTeamID = parseEspnTeamID(play.participants[0].statistics.$ref, linkType);
+                        espnTeamID = await parseEspnTeamID(play.participants[0].athlete.$ref, linkType);
                     } else {
                         linkType = 'play';
-                        espnTeamID = parseEspnTeamID(play.team.$ref, linkType);
+                        espnTeamID = await parseEspnTeamID(play.team.$ref, linkType);
                     }
                     let playTeam;
                     let oppTeam;
@@ -3323,47 +3329,45 @@
                     if(noPlay == false && play.participants) {
                         // loop thru every player involved in play
                         for(const playerKey in play.participants) {
-                            // ESPN PBP API includes direct links to player APIs
-                            const espnPlayerLink = 'https' + play.participants[playerKey].athlete.$ref.slice(4); 
-                            const playerPromises = [];
-                            playerPromises.push(fetch(`${espnPlayerLink}`, {compress: true}));
-                            const playersRes = await waitForAll(...playerPromises).catch((err) => { console.error(err); });
-                    
-                            const playerJsonPromises = [];
-                            for(const playerRes of playersRes) {
-                                const data = playerRes.json();
-                                playerJsonPromises.push(data)
-                                if (!playerRes.ok) {
-                                    throw new Error(data);
-                                }
-                            }
-                            const espnPlayerData = await waitForAll(...playerJsonPromises).catch((err) => { console.error(err); });
                             // which team is player on
-                            const linkType = 'play';
-                            let espnPlayerTeamID = parseEspnTeamID(espnPlayerData[0].team.$ref, linkType);
+                            const linkType = 'info';
+                            let espnPlayerInfo = await parseEspnTeamID(play.participants[playerKey].athlete.$ref, linkType);
                             let playerTeam;
+                            let playerTeam_sleeper;
                             for(const key in nflTeams) {
-                                if(nflTeams[key].espnID == espnPlayerTeamID) {
+                                if(nflTeams[key].espnID == espnPlayerInfo.t) {
                                     playerTeam = nflTeams[key].espnAbbreviation;
+                                    playerTeam_sleeper = key;
                                     break;
                                 }
                             }
-                            // full name & position should be enough identifying info to match our sleeper info to espn's player API
-                            const espnMatch = {
-                                fn: espnPlayerData[0].firstName,
-                                ln: espnPlayerData[0].lastName,
-                                pos: espnPlayerData[0].position.abbreviation,
+
+                            // Catching exceptions with different names
+                            if(espnPlayerInfo.fn == 'William' && espnPlayerInfo.ln == 'Fuller V') {
+                                espnPlayerInfo.fn == 'Will';
+                                espnPlayerInfo.ln == 'Fuller';
                             }
-                            // Catching exceptions with different names TO-DO: Jr. exception is probably universal -> automate
-                            if(espnMatch.ln.includes('Jr.') || espnMatch.ln.includes('Sr.') || espnMatch.ln.includes('III')) {
-                                espnMatch.ln = espnMatch.ln.slice(0, espnMatch.ln.length - 4);
+                            if(espnPlayerInfo.ln.includes('Jr.') || espnPlayerInfo.ln.includes('Sr.') || espnPlayerInfo.ln.includes('III')) {
+                                espnPlayerInfo.ln = espnPlayerInfo.ln.slice(0, espnPlayerInfo.ln.length - 4);
+                            } else if(espnPlayerInfo.ln.includes('II')) {
+                                espnPlayerInfo.ln = espnPlayerInfo.ln.slice(0, espnPlayerInfo.ln.length - 3);
+                            } else if(espnPlayerInfo.ln.slice(espnPlayerInfo.ln.length - 2) == ' V') {
+                                espnPlayerInfo.ln = espnPlayerInfo.ln.slice(0, espnPlayerInfo.ln.length - 2);
                             }
-                            if(espnMatch.pos == 'PK') {
-                                espnMatch.pos = 'K';
+                            if(espnPlayerInfo.pos == 'PK') {
+                                espnPlayerInfo.pos = 'K';
                             }
-                            let sleeperMatch = startersArray.filter(s => s.fn == espnMatch.fn && s.ln == espnMatch.ln && s.pos == espnMatch.pos);
+                            if(espnPlayerInfo.pos == 'FB') {
+                                espnPlayerInfo.pos = 'RB';
+                            }
+                            let sleeperMatch = startersArray.filter(s => s.fn == espnPlayerInfo.fn && s.ln == espnPlayerInfo.ln && s.pos == espnPlayerInfo.pos);
                             // if the current player involved in the play is a starter, we combine the sleeper and espn info for their entry in the playEntry
                             if(sleeperMatch.length > 0) {
+                                // assigning correct team if player has retired (& thus Sleeper team info is blank)
+                                if(sleeperMatch[0].t == null || sleeperMatch[0].t != playerTeam_sleeper) {
+                                    sleeperMatch[0].t = playerTeam_sleeper;
+                                    playersInfo.players[sleeperMatch[0].playerID].t = playerTeam_sleeper;
+                                }
                                 const relevantEntry = {
                                     playerInfo: sleeperMatch[0],
                                     manager: sleeperMatch[0].owner,
@@ -3429,7 +3433,7 @@
                             const lastPlay = drive.plays.items[drive.plays.items.length - 1];
 
                             let linkType = 'participants';
-                            let espnTeamID = parseEspnTeamID(lastPlay.participants[0].statistics.$ref, linkType);
+                            let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
 
                             let playTeam;
                             let oppTeam;
@@ -3493,7 +3497,7 @@
                             const lastPlay = drive.plays.items[drive.plays.items.length - 1];
 
                             let linkType = 'participants';
-                            let espnTeamID = parseEspnTeamID(lastPlay.participants[0].statistics.$ref, linkType);
+                            let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
                             let playTeam;
                             let oppTeam;
                             let defense;
