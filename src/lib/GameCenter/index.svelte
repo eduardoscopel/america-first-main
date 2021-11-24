@@ -61,6 +61,7 @@
 
 
     let weekSelection = week;
+    let yearSelection = year;
     const changeWeek = async (newWeekSelection) => {
         weekSelection = newWeekSelection;
         weekMatchups = matchupsInfo.matchupWeeks[newWeekSelection - 1].matchups;
@@ -72,7 +73,6 @@
     }
     $: changeWeek(weekSelection);
 
-    let yearSelection = year;
     const changeYearSelection = async (newYearSelection) => {
         yearSelection = newYearSelection;
         completeGames = [];
@@ -387,7 +387,7 @@
                 <GameBox {nflTeams} {nflMatchups} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} {currentYear} bind:yearLeagueData={yearLeagueData} bind:playersInfo={playersInfo} bind:fantasyStarters={fantasyStarters} bind:positionLeaders={positionLeaders} bind:managerInfo={managerInfo} bind:weekMatchups={weekMatchups} {standingsData} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
             </div>
             <div class="playByPlay">
-                <PlayByPlay {nflTeams} {nflMatchups} bind:yearLeagueData={yearLeagueData} bind:playersInfo={playersInfo} bind:fantasyStarters={fantasyStarters} bind:managerInfo={managerInfo} bind:weekMatchups={weekMatchups} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
+                <PlayByPlay {nflTeams} {nflMatchups} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} bind:yearLeagueData={yearLeagueData} bind:playersInfo={playersInfo} bind:fantasyStarters={fantasyStarters} bind:managerInfo={managerInfo} bind:weekMatchups={weekMatchups} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
             </div>
         </div>
         <div class="rightWrapper">

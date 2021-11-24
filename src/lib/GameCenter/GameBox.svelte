@@ -118,7 +118,7 @@
         positionRankArrays['IDP_FLEX'] = positionRankArrays['IDP_FLEX'].sort((a, b) => b.fpts - a.fpts);
     }
     // assign managers for selected matchID
-    const displayMatch = (matchSelection, showMatchBox, playersInfo) => {
+    const displayMatch = (matchSelection, showMatchBox) => {
         if(showMatchBox == true && matchSelection != null && matchSelection > 0) {
             let match = weekMatchups[matchSelection];
             const projections = {};
@@ -211,7 +211,7 @@
             return {home, away, matchStarters};
         } 
     }
-    $: match = displayMatch(matchSelection, showMatchBox, playersInfo);
+    $: match = displayMatch(matchSelection, showMatchBox);
 
     // assign teams for selected gameID
     const selectGame = (gameSelection) => {
@@ -488,7 +488,11 @@
             if(leaderBoardType == 'matchup') {
                 matchSelection = leaderBoardSpec;
             } 
-            managerSelection = recordManID;
+            if(recordManID == managerSelection) {
+                managerSelection = 0;
+            } else {
+                managerSelection = recordManID;
+            }
             viewPlayerID = null;
             changeLeaderBoard(leaderBoardType, leaderBoardSpec, recordManID);
         }

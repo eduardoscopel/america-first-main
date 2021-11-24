@@ -67,7 +67,7 @@
         // determines whether play counts w.r.t. yards, penalties, etc.
         const checkNoPlay = (playType, playDescription) => {
             let noPlay = new Boolean (false);
-            if(playType == 8 || playDescription.includes('No Play.') || playType == 2 || playType == 21 || playType == 65 || playType == 66 || playType == 70 || playType == 75) {
+            if(playType == 8 || playDescription.includes('No Play.') || playType == 2 || playType == 21 || playType == 65 || playType == 66 || playType == 70 || playType == 74 || playType == 75) {
                 noPlay = true;
             } else {
                 noPlay = false;
@@ -118,7 +118,7 @@
                 playType == 36 || playType == 52 || playType == 12 ||   
                 playType == 32 || playType == 17 || playType == 29 ||
                 playType == 37 || playType == 39 || playType == 18 ||
-                playType == 20 ||
+                playType == 20 || play.pointAfterType == 43 ||
                 (playType == 60 && play.alternativeText.includes('BLOCKED'))) {    
 
                 if(awayDefStarted == true && playTeam == home && playerTeam == away) {
@@ -1351,6 +1351,26 @@
                                 }
                                 fantasyPlay[play.playID].push(entryDEF);
                             }
+                        } else if(score.blk_kick && play.pointAfterType == 43) {                                                    // BLOCKED PAT - TEAM DEF/ST
+                            const fpts = (score?.blk_kick || 0);  
+                            const stat = 'BLK:';
+                            const entryDEF = {
+                                order: play.order,
+                                side: 'defense',
+                                manager: player.manager,
+                                playerInfo: player.playerInfo,
+                                stat: ['blk_kick'],
+                                runningTotals: [],
+                                fpts,
+                                yards: player.yards,
+                                description: play.description,
+                                shortDesc: 'Blocked PAT',
+                            }
+                            if(fpts != 0) {
+                                let runningTotal = pushRunningTotal(fpts, stat, entryDEF.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                entryDEF.runningTotals.push(runningTotal);
+                            }
+                            fantasyPlay[play.playID].push(entryDEF);
                         } else if(score.blk_kick && (player.playType == 18 || (player.playType == 60 && play.description.includes('BLOCKED'))) && player.statType == 'blocker') {                  // BLOCKED FIELD GOAL - TEAM DEF/ST
                             const fpts = (score?.blk_kick || 0);   // TO-DO: add blk kick return yards (ESPN's statYardage norrmally represents kick distance)
                             const stat = 'BLK:';
@@ -2390,7 +2410,7 @@
                                 }
                             } 
                             fantasyPlay[play.playID].push(entry);                                                          
-                        } else if(player.statType == 'patScorer' && play.scoringType == 'touchdown' && score.xpmiss && play.pointAfterType == 62) {
+                        } else if(player.statType == 'patScorer' && play.scoringType == 'touchdown' && score.xpmiss && (play.pointAfterType == 62 || play.pointAfterType == 43)) {                 // PAT MISS
                             const fpts = (score?.xpmiss || 0);
                             const stat = 'PAT MISS:';
                             const entry = {
@@ -2402,7 +2422,7 @@
                                 runningTotals: [],
                                 fpts,
                                 description: play.description,
-                                shortDesc: 'PAT Missed',
+                                shortDesc: play.pointAfterType == 62 ? 'PAT Missed' : 'PAT Blocked',
                             }   
                             if(fpts != 0) {
                                 let runningTotal = pushRunningTotal(fpts, stat, entry.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
@@ -2887,11 +2907,16 @@
                             if(scoringType == 'touchdown') {
                                 if(yearSelection >= 2021) {
                                     pointAfterType = play.pointAfterAttempt.id;
+                                    if((pointAfterType == 15 || pointAfterType == 16) && play.pointAfterAttempt.value == 0) {
+                                        pointAfterType = -1        // MY id for failed 2-pt conversion
+                                    }
                                 } else {
                                     if(play.alternativeText.includes('Kick)')) {
                                         pointAfterType = 61;
                                     } else if(play.alternativeText.includes('PAT failed')) {
                                         pointAfterType = 62;
+                                    } else if(play.alternativeText.includes('PAT blocked')) {
+                                        pointAfterType = 43;
                                     } else if(play.alternativeText.includes('TWO-POINT') && play.alternativeText.includes('SUCCEEDS')) {
                                         let twoPointText = play.alternativeText.slice(play.alternativeText.indexOf('TWO-POINT'));
                                         if(twoPointText.includes('rush')) {
@@ -2899,6 +2924,8 @@
                                         } else {
                                             pointAfterType = 15;
                                         }
+                                    } else if(play.alternativeText.includes('Conversion Failed')) {
+                                        pointAfterType = -1;
                                     }
                                 }
                             }
@@ -2973,7 +3000,7 @@
                         }
                         // flagging injuries
                         if(play.alternativeText.includes('injured')) {
-                            let injuredPlayer = checkInjury(play.alternativeText, relevancyKey.starters);
+                            let injuredPlayer = checkInjury(play.alternativeText, relevancyKey.startersArray);
                             if(injuredPlayer != null) {
                                 playEntry.injuredStarter = true;
                                 playEntry.injuryInfo.push(injuredPlayer);
@@ -3017,6 +3044,9 @@
                                 if(espnPlayerInfo.fn == 'William' && espnPlayerInfo.ln == 'Fuller V') {
                                     espnPlayerInfo.fn == 'Will';
                                     espnPlayerInfo.ln == 'Fuller';
+                                } else if(espnPlayerInfo.fn == 'Jeff' && espnPlayerInfo.ln == 'Wilson Jr.') {
+                                    espnPlayerInfo.fn = 'Jeffery';
+                                    espnPlayerInfo.ln = 'Wilson';
                                 }
                                 if(espnPlayerInfo.ln.includes('Jr.') || espnPlayerInfo.ln.includes('Sr.') || espnPlayerInfo.ln.includes('III')) {
                                     espnPlayerInfo.ln = espnPlayerInfo.ln.slice(0, espnPlayerInfo.ln.length - 4);
@@ -3107,8 +3137,10 @@
                             let drive = driveData[e];
                              
                             if(score.def_3_and_out && drive.offensivePlays == 3 && drive.result == 'PUNT') {
-                                const lastPlay = drive.plays.items[drive.plays.items.length - 1];
-
+                                let lastPlay = drive.plays.items[drive.plays.items.length - 1];
+                                if(!lastPlay.participants) {
+                                    lastPlay = drive.plays.items[drive.plays.items.length - 2];
+                                }
                                 let linkType = 'participants';
                                 let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
 
@@ -3173,8 +3205,10 @@
                                 playEntry.relevantDEF.push(relevantEntry);
                                 fantasyRelevantPlaysForward.push(playEntry);
                             } else if(score.def_4_and_stop && drive.result == 'DOWNS') {
-                                const lastPlay = drive.plays.items[drive.plays.items.length - 1];
-
+                                let lastPlay = drive.plays.items[drive.plays.items.length - 1];
+                                if(!lastPlay.participants) {
+                                    lastPlay = drive.plays.items[drive.plays.items.length - 2];
+                                }
                                 let linkType = 'participants';
                                 let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
                                 let playTeam;
@@ -3362,11 +3396,16 @@
                         if(scoringType == 'touchdown') {
                             if(yearSelection >= 2021) {
                                 pointAfterType = play.pointAfterAttempt.id;
+                                if((pointAfterType == 15 || pointAfterType == 16) && play.pointAfterAttempt.value == 0) {
+                                    pointAfterType = -1        // MY id for failed 2-pt conversion
+                                }
                             } else {
                                 if(play.alternativeText.includes('Kick)') || play.shortAlternativeText.includes('Kick)')) {
                                     pointAfterType = 61;
                                 } else if(play.alternativeText.includes('PAT failed')) {
                                     pointAfterType = 62;
+                                } else if(play.alternativeText.includes('PAT blocked')) {
+                                    pointAfterType = 43;
                                 } else if(play.alternativeText.includes('TWO-POINT') && play.alternativeText.includes('SUCCEEDS')) {
                                     let twoPointText = play.alternativeText.slice(play.alternativeText.indexOf('TWO-POINT'));
                                     if(twoPointText.includes('rush')) {
@@ -3374,6 +3413,8 @@
                                     } else {
                                         pointAfterType = 15;
                                     }
+                                } else if(play.alternativeText.includes('Conversion Failed')) {
+                                    pointAfterType = -1;
                                 }
                             }
                         }
@@ -3492,6 +3533,9 @@
                             if(espnPlayerInfo.fn == 'William' && espnPlayerInfo.ln == 'Fuller V') {
                                 espnPlayerInfo.fn == 'Will';
                                 espnPlayerInfo.ln == 'Fuller';
+                            } else if(espnPlayerInfo.fn == 'Jeff' && espnPlayerInfo.ln == 'Wilson Jr.') {
+                                espnPlayerInfo.fn = 'Jeffery';
+                                espnPlayerInfo.ln = 'Wilson';
                             }
                             if(espnPlayerInfo.ln.includes('Jr.') || espnPlayerInfo.ln.includes('Sr.') || espnPlayerInfo.ln.includes('III')) {
                                 espnPlayerInfo.ln = espnPlayerInfo.ln.slice(0, espnPlayerInfo.ln.length - 4);
@@ -3576,8 +3620,10 @@
                         let drive = driveData[e];
                             
                         if(score.def_3_and_out && drive.offensivePlays == 3 && drive.result == 'PUNT') {
-                            const lastPlay = drive.plays.items[drive.plays.items.length - 1];
-
+                            let lastPlay = drive.plays.items[drive.plays.items.length - 1];
+                            if(!lastPlay.participants) {
+                                lastPlay = drive.plays.items[drive.plays.items.length - 2];
+                            }
                             let linkType = 'participants';
                             let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
 
@@ -3642,8 +3688,10 @@
                             playEntry.relevantDEF.push(relevantEntry);
                             fantasyRelevantPlaysForward.push(playEntry);
                         } else if(score.def_4_and_stop && drive.result == 'DOWNS') {
-                            const lastPlay = drive.plays.items[drive.plays.items.length - 1];
-
+                            let lastPlay = drive.plays.items[drive.plays.items.length - 1];
+                            if(!lastPlay.participants) {
+                                lastPlay = drive.plays.items[drive.plays.items.length - 2];
+                            }
                             let linkType = 'participants';
                             let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
                             let playTeam;
@@ -3732,6 +3780,7 @@
             //     36: 'pick six',
             //     37: 'blocked punt td',
             //     39: 'fumble six',
+            //     43: 'blocked PAT',
             //     52: 'punt',
             //     53: 'kickoff (no return)',
             //     59: 'FG good',
@@ -3743,6 +3792,7 @@
             //     67: 'pass TD', 
             //     68: 'rush TD',
             //     70: 'coin toss',
+            //     74: 'official timeout',
             //     75: '2-min warning',
             // }
 
@@ -3774,6 +3824,7 @@
             if(viewPlayerID != null && viewPlayerID != 'flush') {
                 filteredProducts = filteredProducts.filter(p => p.some(p => p.playerInfo.playerID == viewPlayerID));
             }
+            filteredProducts = filteredProducts.sort((a, b) => b[0]?.order - a[0]?.order);
         }
         return filteredProducts;
     }
