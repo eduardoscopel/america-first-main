@@ -2,9 +2,8 @@
     import {round} from '$lib/utils/helper'; 
     import LinearProgress from '@smui/linear-progress';
 
-    export let nflTeams, nflMatchups, weekSelection, yearSelection, currentYear, yearLeagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, standingsData, matchSelection, managerSelection, fantasyProducts, gameSelection = nflMatchups[0][0].gameID, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo;
+    export let nflTeams, nflMatchups, weekSelection, yearSelection, currentYear, yearLeagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, standingsData, matchSelection, managerSelection, fantasyProducts, gameSelection = nflMatchups[0][0].gameID, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo, newLoading;
     
-    const score = yearLeagueData.scoring_settings;
     const positions = yearLeagueData.roster_positions.filter(p => p != 'BN');
     const nflPositions = [];
     for(const position in positions) {
@@ -57,66 +56,70 @@
     $: getAllStarters(fantasyStarters, playersInfo);
 
     // create top 10 points-scorers arrays for each position
-    const positionRankArrays = {};
-    if(positions.includes('FLEX')) {
-        positionRankArrays['FLEX'] = [];
-    }
-    if(positions.includes('WRRB_FLEX')) {
-        positionRankArrays['WRRB_FLEX'] = [];
-    }
-    if(positions.includes('REC_FLEX')) {
-        positionRankArrays['REC_FLEX'] = [];
-    }
-    if(positions.includes('SUPER_FLEX')) {
-        positionRankArrays['SUPER_FLEX'] = [];
-    }
-    if(positions.includes('IDP_FLEX')) {
-        positionRankArrays['IDP_FLEX'] = [];
-    }
-    
-    for(const position in positionLeaders) {
-        positionRankArrays[position] = positionLeaders[position];
-        if(positions.includes('FLEX') && (position == 'RB' || position == 'WR' || position == 'TE')) {
-            for(let i = 0; i < 10 && i < positionLeaders[position].length; i++) {
-                positionRankArrays['FLEX'].push(positionLeaders[position][i]);
+    let positionRankArrays = {};
+    const getPositionRankArrays = (positionLeaders) => {
+        positionRankArrays = {};
+        if(positions.includes('FLEX')) {
+            positionRankArrays['FLEX'] = [];
+        }
+        if(positions.includes('WRRB_FLEX')) {
+            positionRankArrays['WRRB_FLEX'] = [];
+        }
+        if(positions.includes('REC_FLEX')) {
+            positionRankArrays['REC_FLEX'] = [];
+        }
+        if(positions.includes('SUPER_FLEX')) {
+            positionRankArrays['SUPER_FLEX'] = [];
+        }
+        if(positions.includes('IDP_FLEX')) {
+            positionRankArrays['IDP_FLEX'] = [];
+        }
+        
+        for(const position in positionLeaders) {
+            positionRankArrays[position] = positionLeaders[position];
+            if(positions.includes('FLEX') && (position == 'RB' || position == 'WR' || position == 'TE')) {
+                for(let i = 0; i < 10 && i < positionLeaders[position].length; i++) {
+                    positionRankArrays['FLEX'].push(positionLeaders[position][i]);
+                }
+            }
+            if(positions.includes('SUPER_FLEX') && (position == 'QB' || position == 'RB' || position == 'WR' || position == 'TE')) {
+                for(let i = 0; i < 10 && i < positionLeaders[position].length; i++) {
+                    positionRankArrays['SUPER_FLEX'].push(positionLeaders[position][i]);
+                }
+            }
+            if(positions.includes('WRRB_FLEX') && (position == 'RB' || position == 'WR')) {
+                for(let i = 0; i < 10 && i < positionLeaders[position].length; i++) {
+                    positionRankArrays['WRRB_FLEX'].push(positionLeaders[position][i]);
+                }
+            }
+            if(positions.includes('REC_FLEX') && (position == 'WR' || position == 'TE')) {
+                for(let i = 0; i < 10 && i < positionLeaders[position].length; i++) {
+                    positionRankArrays['REC_FLEX'].push(positionLeaders[position][i]);
+                }
+            }
+            if(positions.includes('IDP_FLEX') && (position == 'DL' || position == 'LB' || position == 'DB')) {
+                for(let i = 0; i < 10 && i < positionLeaders[position].length; i++) {
+                    positionRankArrays['IDP_FLEX'].push(positionLeaders[position][i]);
+                }
             }
         }
-        if(positions.includes('SUPER_FLEX') && (position == 'QB' || position == 'RB' || position == 'WR' || position == 'TE')) {
-            for(let i = 0; i < 10 && i < positionLeaders[position].length; i++) {
-                positionRankArrays['SUPER_FLEX'].push(positionLeaders[position][i]);
-            }
+        if(positionRankArrays['FLEX']) {
+            positionRankArrays['FLEX'] = positionRankArrays['FLEX'].sort((a, b) => b.fpts - a.fpts);
         }
-        if(positions.includes('WRRB_FLEX') && (position == 'RB' || position == 'WR')) {
-            for(let i = 0; i < 10 && i < positionLeaders[position].length; i++) {
-                positionRankArrays['WRRB_FLEX'].push(positionLeaders[position][i]);
-            }
+        if(positionRankArrays['SUPER_FLEX']) {
+            positionRankArrays['SUPER_FLEX'] = positionRankArrays['SUPER_FLEX'].sort((a, b) => b.fpts - a.fpts);
         }
-        if(positions.includes('REC_FLEX') && (position == 'WR' || position == 'TE')) {
-            for(let i = 0; i < 10 && i < positionLeaders[position].length; i++) {
-                positionRankArrays['REC_FLEX'].push(positionLeaders[position][i]);
-            }
+        if(positionRankArrays['WRRB_FLEX']) {
+            positionRankArrays['WRRB_FLEX'] = positionRankArrays['WRRB_FLEX'].sort((a, b) => b.fpts - a.fpts);
         }
-        if(positions.includes('IDP_FLEX') && (position == 'DL' || position == 'LB' || position == 'DB')) {
-            for(let i = 0; i < 10 && i < positionLeaders[position].length; i++) {
-                positionRankArrays['IDP_FLEX'].push(positionLeaders[position][i]);
-            }
+        if(positionRankArrays['REC_FLEX']) {
+            positionRankArrays['REC_FLEX'] = positionRankArrays['REC_FLEX'].sort((a, b) => b.fpts - a.fpts);
+        }
+        if(positionRankArrays['IDP_FLEX']) {
+            positionRankArrays['IDP_FLEX'] = positionRankArrays['IDP_FLEX'].sort((a, b) => b.fpts - a.fpts);
         }
     }
-    if(positionRankArrays['FLEX']) {
-        positionRankArrays['FLEX'] = positionRankArrays['FLEX'].sort((a, b) => b.fpts - a.fpts);
-    }
-    if(positionRankArrays['SUPER_FLEX']) {
-        positionRankArrays['SUPER_FLEX'] = positionRankArrays['SUPER_FLEX'].sort((a, b) => b.fpts - a.fpts);
-    }
-    if(positionRankArrays['WRRB_FLEX']) {
-        positionRankArrays['WRRB_FLEX'] = positionRankArrays['WRRB_FLEX'].sort((a, b) => b.fpts - a.fpts);
-    }
-    if(positionRankArrays['REC_FLEX']) {
-        positionRankArrays['REC_FLEX'] = positionRankArrays['REC_FLEX'].sort((a, b) => b.fpts - a.fpts);
-    }
-    if(positionRankArrays['IDP_FLEX']) {
-        positionRankArrays['IDP_FLEX'] = positionRankArrays['IDP_FLEX'].sort((a, b) => b.fpts - a.fpts);
-    }
+    $: getPositionRankArrays(positionLeaders);
     // assign managers for selected matchID
     const displayMatch = (matchSelection, showMatchBox) => {
         if(showMatchBox == true && matchSelection != null && matchSelection > 0) {
@@ -746,7 +749,7 @@
         display: inline-flex;
         top: 0.4em;
         font-size: 1.2em;
-        width: 9em;
+        width: auto;
         justify-content: flex-start;
         color: var(--gcPlayRowText);
     }
@@ -1031,7 +1034,7 @@
     .gameHeaderBox {
         display: inline-flex;
         position: absolute;
-        z-index: 1;
+        z-index: 2;
         width: 96%;
         height: 104%;
         border: 0.25px solid #555;
@@ -1149,7 +1152,6 @@
         align-items: flex-start;
         height: 86%;
         padding: 2%;
-        top: -3%;
     }
 
     .gameContainer {
@@ -1282,7 +1284,7 @@
 
     .avatarHolder:hover {
         cursor: pointer;
-        background-color: var(--gcSelect);
+        background-color: var(--aaa);
         border: 0.5px solid var(--g111);
         z-index: 1;
     }
@@ -1417,22 +1419,35 @@
         flex-direction: column;
         position: absolute; 
         z-index: 1; 
-        width: 45%;
-        height: 77%; 
+        width: 100%;
+        height: 99%; 
         background-color: rgb(0,0,0); 
         background-color: rgba(0,0,0,0.8); 
         justify-content: center;
         align-items: center;
+        border-radius: 1em;
+    }
+
+    .modalContent {
+        justify-content: center;
+        align-items: center;
+        color: #ededed;
     }
 </style>
 
 <div class="bigBox">
     <div class="bigBoxLeftWrap">
         <div class="gameManagers">
+            {#if newLoading}
+                <div class="modal">
+                    <div class="modalContent">Loading Scores...</div>
+                    <LinearProgress indeterminate />
+                </div>
+            {/if}
             <!-- shows specific NFL games -->
             {#if showGameBox == true}
                 <div class="gameHeader">
-                    <div class="gameHeaderBox" style="{showGameBox == true && positionPlayFilter.length == 0 && managerSelection == 0 ? "border: 0.5px solid var(--g111); border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'nflGame', game, 0)} />
+                    <div class="gameHeaderBox" style="{showGameBox == true && newLoading == false  && positionPlayFilter.length == 0 && managerSelection == 0 ? "border: 0.5px solid var(--g111); border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'nflGame', game, 0)} />
                     <div class="gameOpponent">
                         <img class="gameAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{game.home.sleeperID.toLowerCase()}.png" alt="{game.home.sleeperID}">
                         <div class="gameTeamWrapper" style="align-items: flex-start;">
@@ -1456,10 +1471,10 @@
                                 <div class="positionGroup">
                                     {#each positionGameStarters[gameSelection][game.home.sleeperID].starters[ix] as starter, iv}
                                         <div class="rosterRow" style="justify-content: flex-start; height: {100 / row}%">
-                                            <div class="avatarHolder" style="{row >= 2 && iv == 0 ? "border-radius: 1em 0 0 0;" : row >= 2 && iv == positionGameStarters[gameSelection][game.home.sleeperID].starters[ix].length - 1 ? "border-radius: 0 0 0 1em;" : row >= 2 && iv > 0 && iv < positionGameStarters[gameSelection][game.home.sleeperID].starters[ix].length - 1 ? "border-radius: 0;" : null} {starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 5% 0 0;" : "margin: 0 1% 0 0;"} right: 1%; {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 1; background-color: var(--gcSelect); border: 0.5px solid var(--g111);" : null}">
-                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--gcSelect);" : null}">
+                                            <div class="avatarHolder" style="{row >= 2 && iv == 0 ? "border-radius: 1em 0 0 0;" : row >= 2 && iv == positionGameStarters[gameSelection][game.home.sleeperID].starters[ix].length - 1 ? "border-radius: 0 0 0 1em;" : row >= 2 && iv > 0 && iv < positionGameStarters[gameSelection][game.home.sleeperID].starters[ix].length - 1 ? "border-radius: 0;" : null} {starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 1% 0 0;" : "margin: 0 1% 0 0;"} right: 1%; {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 1; background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}">
+                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa);" : null}">
                                             </div>
-                                            <div class="rosterPlayerInfo">
+                                            <div class="rosterPlayerInfo" style="{starter.pos == 'DEF' ? "margin: 0 2% 0 0;" : null}" >
                                                 {#if starter.pos == 'DEF'}
                                                     <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 7% 0 0;">{starter.ln} D/ST</div>
                                                 {:else}
@@ -1470,7 +1485,7 @@
                                                     {#if yearSelection == currentYear}
                                                         <div style="display: inline-flex; color: var(--g555); justify-content: flex-end;">({starter.projection})</div>
                                                     {/if}
-                                                    <div style="display: inline-flex; font-weight: 600; {starter.pos == 'DEF' ? "margin: 0 -5% 0 0;" : "margin: 0 5% 0 0;"}">{round(starter.fpts)}</div>
+                                                    <div style="display: inline-flex; font-weight: 600; {starter.pos == 'DEF' ? "margin: 0 2% 0 0;" : "margin: 0 5% 0 0;"}">{round(starter.fpts)}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1500,8 +1515,8 @@
                                                     {/if}
                                                 </div>
                                             </div>                                
-                                            <div class="avatarHolder" style="{starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 0 0 5%;" : "margin: 0 0 0 2%;"} left: 1%; {row >= 2 && iv == 0 ? "border-radius: 0 1em 0 0;" : row >= 2 && iv == positionGameStarters[gameSelection][game.away.sleeperID].starters[ix].length - 1 ? "border-radius: 0 0 1em 0;" : row >= 2 && iv > 0 && iv < positionGameStarters[gameSelection][game.away.sleeperID].starters[ix].length - 1 ? "border-radius: 0;" : "border-radius: 0 1em 1em 0;"} {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 1; background-color: var(--gcSelect); border: 0.5px solid var(--g111);" : null}">
-                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--gcSelect);" : null}">
+                                            <div class="avatarHolder" style="{starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 0 0 5%;" : "margin: 0 0 0 2%;"} left: 1%; {row >= 2 && iv == 0 ? "border-radius: 0 1em 0 0;" : row >= 2 && iv == positionGameStarters[gameSelection][game.away.sleeperID].starters[ix].length - 1 ? "border-radius: 0 0 1em 0;" : row >= 2 && iv > 0 && iv < positionGameStarters[gameSelection][game.away.sleeperID].starters[ix].length - 1 ? "border-radius: 0;" : "border-radius: 0 1em 1em 0;"} {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 1; background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}">
+                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa);" : null}">
                                             </div>
                                         </div>
                                     {/each}
@@ -1513,7 +1528,7 @@
                 <!-- shows league matchups -->
             {:else if showMatchBox == true}        
                 <div class="gameHeader">
-                    <div class="gameHeaderBox" style="height: 120%; {showMatchBox == true && positionPlayFilter.length == 0 && managerSelection == 0 ? "border: 0.5px solid var(--g111); border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'matchup', match.home.matchInfo.matchID, 0)} />
+                    <div class="gameHeaderBox" style="height: 120%; {showMatchBox == true && newLoading == false && positionPlayFilter.length == 0 && managerSelection == 0 ? "border: 0.5px solid var(--g111); border-radius: 1em;" : null}" on:click={() => multiFunction(null, null, 'matchup', match.home.matchInfo.matchID, 0)} />
                     <div class="matchOpponent">
                         <div class="matchTop" style="justify-content: flex-start; left: 2%; top: 8%;">
                             <img class="matchAvatar" src="{match.home.manager.avatar}" alt="" on:click={() => multiFunction(null, null, 'matchup',  match.home.matchInfo.matchID, match.home.manager.recordManID)} style="{match.home.manager.recordManID == managerSelection ? "background-color: var(--gcSelect); border: 0.5px solid var(--g111);" : null}" >
@@ -1554,10 +1569,10 @@
                     <div class="rosterWrap">
                         {#each match.home.starters as starter}
                             <div class="rosterRow" style="justify-content: flex-start;">
-                                <div class="avatarHolder" style="{starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 5% 0 0;" : "margin: 0 1% 0 0;"} right: 1%; {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 1; background-color: var(--gcSelect); border: 0.5px solid var(--g111);" : null}"> 
-                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--gcSelect);" : null}">
+                                <div class="avatarHolder" style="{starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 1% 0 0;" : "margin: 0 1% 0 0;"} right: 1%; {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 1; background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}"> 
+                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa);" : null}">
                                 </div>
-                                <div class="rosterPlayerInfo">
+                                <div class="rosterPlayerInfo" style="{starter.pos == 'DEF' ? "margin: 0 2% 0 0;" : null}" >
                                     {#if starter.pos == 'DEF'}
                                         <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 7% 0 0;">{starter.ln} D/ST</div>
                                     {:else}
@@ -1567,7 +1582,7 @@
                                         {#if yearSelection == currentYear}
                                             <div style="display: inline-flex; color: var(--g555); {yearSelection != currentYear ? "justify-content: flex-end;" : "justify-content: space-between;"}">({round(starter.projection)})</div>
                                         {/if}
-                                        <div style="display: inline-flex; font-weight: 600; {starter.pos == 'DEF' ? "margin: 0 -5% 0 0;" : "margin: 0 5% 0 0;"}">{round(starter.fpts)}</div>
+                                        <div style="display: inline-flex; font-weight: 600; {starter.pos == 'DEF' ? "margin: 0 2% 0 0;" : "margin: 0 5% 0 0;"}">{round(starter.fpts)}</div>
                                     </div>
                                 </div>
                             </div>
@@ -1598,8 +1613,8 @@
                                         {/if}
                                     </div>
                                 </div>                                
-                                <div class="avatarHolder" style="{starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 0 0 5%;" : "margin: 0 0 0 2%;"} left: 1%; border-radius: 0 1em 1em 0; {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 1; background-color: var(--gcSelect); border: 0.5px solid var(--g111);" : null}">
-                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--gcSelect);" : null}">
+                                <div class="avatarHolder" style="{starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 0 0 5%;" : "margin: 0 0 0 2%;"} left: 1%; border-radius: 0 1em 1em 0; {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 1; background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}">
+                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa);" : null}">
                                 </div>
                             </div>
                         {/each}
@@ -1646,8 +1661,6 @@
                                         {/each}
                                     </div>
                                 {/each}
-                            {:else}
-                                No points yet...
                             {/if}
                         {/await}         
                     </div>
@@ -1655,6 +1668,12 @@
             </div>
         </div>
         <div class="leaderboardPOS">
+            {#if newLoading}
+                <div class="modal" style="width: 98%">
+                    <div class="modalContent">Loading Leaderboard...</div>
+                    <LinearProgress indeterminate />
+                </div>
+            {/if}
             <div class="heading">
                 {leaderboardHeading} Leaderboard
             </div>

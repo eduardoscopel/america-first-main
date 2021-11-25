@@ -1,7 +1,7 @@
 <script>
     import MatchScore from "./MatchScore.svelte";
 
-    export let weekMatchups, week, matchSelection, completeGames, playersInfo, showGameBox, showMatchBox, yearSelection, currentYear;
+    export let weekMatchups, week, matchSelection, completeGames, playersInfo, showGameBox, showMatchBox, yearSelection, weekSelection, currentYear;
 
     let matchScores = [];
     const matchesObj = {};
@@ -16,7 +16,7 @@
                 0: matchTeams[0].starters.length,
                 1: matchTeams[1].starters.length,
             };
-            if(yearSelection == currentYear) {
+            if(yearSelection == currentYear && weekSelection == week) {
                 for(let i = 0; i < matchTeams.length; i++) {
                     for(const starter of matchTeams[i].starters) {
                         if(starter == '0' || !playersInfo.players[starter].wi[week] || playersInfo.players[starter].wi[week].o == null || completeGames.includes(starter) || completeGames.includes(playersInfo.players[starter].t)) {

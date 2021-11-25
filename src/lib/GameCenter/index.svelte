@@ -71,7 +71,8 @@
 
         let newNflMatchups = await getNflScoreboard(yearSelection, newWeekSelection).catch((err) => { console.error(err); });;
         nflMatchups = newNflMatchups.nflWeek;
-        // gameSelection = nflMatchups[0][0].gameID;
+        gameSelection = nflMatchups[0][0].gameID;
+        viewPlayerID = null;
         newLoading = false;
     }
     $: changeWeek(weekSelection);
@@ -94,6 +95,8 @@
         yearLeagueData = newYearMatchups.yearLeagueData;
         rosterData = newYearMatchups.rosters;
         users = newYearMatchups.users;
+        gameSelection = nflMatchups[0][0].gameID;
+        viewPlayerID = null;
         newLoading = false;
     }
     $: changeYearSelection(yearSelection);
@@ -414,10 +417,10 @@
         </div>
         <div class="centerWrapper">
             <div class="gameBox">
-                <GameBox {nflTeams} {nflMatchups} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} {currentYear} bind:yearLeagueData={yearLeagueData} bind:playersInfo={playersInfo} bind:fantasyStarters={fantasyStarters} bind:positionLeaders={positionLeaders} bind:managerInfo={managerInfo} bind:weekMatchups={weekMatchups} {standingsData} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
+                <GameBox {nflTeams} {nflMatchups} bind:newLoading={newLoading} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} {currentYear} bind:yearLeagueData={yearLeagueData} bind:playersInfo={playersInfo} bind:fantasyStarters={fantasyStarters} bind:positionLeaders={positionLeaders} bind:managerInfo={managerInfo} bind:weekMatchups={weekMatchups} {standingsData} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
             </div>
             <div class="playByPlay">
-                <PlayByPlay {nflTeams} {nflMatchups} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} bind:yearLeagueData={yearLeagueData} bind:playersInfo={playersInfo} bind:fantasyStarters={fantasyStarters} bind:managerInfo={managerInfo} bind:weekMatchups={weekMatchups} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
+                <PlayByPlay {nflTeams} {nflMatchups} bind:newLoading={newLoading} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} bind:yearLeagueData={yearLeagueData} bind:playersInfo={playersInfo} bind:fantasyStarters={fantasyStarters} bind:managerInfo={managerInfo} bind:weekMatchups={weekMatchups} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
             </div>
         </div>
         <div class="rightWrapper">
@@ -436,7 +439,7 @@
                         <LinearProgress indeterminate />
                     </div>
                 {/if}
-                <ManagerBoard bind:weekMatchups={weekMatchups} {week} {currentYear} bind:yearSelection={yearSelection} {completeGames} bind:playersInfo={playersInfo} bind:matchSelection={matchSelection} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
+                <ManagerBoard bind:weekMatchups={weekMatchups} {week} {currentYear} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} {completeGames} bind:playersInfo={playersInfo} bind:matchSelection={matchSelection} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
             </div>
         </div>
     </div>
