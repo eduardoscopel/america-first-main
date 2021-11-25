@@ -63,9 +63,9 @@
         position: relative;
         display: inline-flex;
         flex-direction: column;
+        z-index: inherit;
         padding: 0.75em;
         margin: 0.5em;
-        z-index: auto;
         width: 16.75em;
         height: 100%;
         border-radius: 1em;

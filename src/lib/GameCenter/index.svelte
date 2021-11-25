@@ -5,7 +5,7 @@
     import GameBox from './GameBox.svelte';
     import ManagerBoard from './ManagerBoard.svelte';
     import { Icon } from '@smui/tab';
-
+    import LinearProgress from '@smui/linear-progress';
 
     export let playersInfo, nflWeek, matchupsInfo, standingsData;
 
@@ -62,7 +62,9 @@
 
     let weekSelection = week;
     let yearSelection = year;
+    let newLoading = false;
     const changeWeek = async (newWeekSelection) => {
+        newLoading = true;
         weekSelection = newWeekSelection;
         weekMatchups = matchupsInfo.matchupWeeks[newWeekSelection - 1].matchups;
         completeGames = [];
@@ -70,10 +72,12 @@
         let newNflMatchups = await getNflScoreboard(yearSelection, newWeekSelection).catch((err) => { console.error(err); });;
         nflMatchups = newNflMatchups.nflWeek;
         // gameSelection = nflMatchups[0][0].gameID;
+        newLoading = false;
     }
     $: changeWeek(weekSelection);
 
     const changeYearSelection = async (newYearSelection) => {
+        newLoading = true;
         yearSelection = newYearSelection;
         completeGames = [];
         if(newYearSelection == year) {
@@ -90,6 +94,7 @@
         yearLeagueData = newYearMatchups.yearLeagueData;
         rosterData = newYearMatchups.rosters;
         users = newYearMatchups.users;
+        newLoading = false;
     }
     $: changeYearSelection(yearSelection);
 
@@ -344,6 +349,25 @@
     .spacer {
         height: 48px;
     }
+
+    .modal {
+        display: inline-flex;
+        flex-direction: column;
+        position: absolute; 
+        z-index: 1; 
+        width: 100%;
+        height: 99%; 
+        background-color: rgb(0,0,0); 
+        background-color: rgba(0,0,0,0.8); 
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modalContent {
+        justify-content: center;
+        align-items: center;
+        color: #ededed;
+    }
 </style>
 
 <div class="mainWrapper">
@@ -379,6 +403,12 @@
                 </div>
             </div>
             <div class="scoreboard">
+                {#if newLoading}
+                    <div class="modal">
+                        <div class="modalContent">Loading NFL Scores...</div>
+                        <LinearProgress indeterminate />
+                    </div>
+                {/if}
                 <Scoreboard {nflMatchups} bind:gameSelection={gameSelection} {completeGames} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
             </div>
         </div>
@@ -400,6 +430,12 @@
                 </div>
             </div>
             <div class="managerboard">
+                {#if newLoading}
+                    <div class="modal">
+                        <div class="modalContent">Loading League Scores...</div>
+                        <LinearProgress indeterminate />
+                    </div>
+                {/if}
                 <ManagerBoard bind:weekMatchups={weekMatchups} {week} {currentYear} bind:yearSelection={yearSelection} {completeGames} bind:playersInfo={playersInfo} bind:matchSelection={matchSelection} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
             </div>
         </div>

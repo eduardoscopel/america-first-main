@@ -15,7 +15,7 @@
 <style>
     .showSelected {
         position: relative;
-        z-index: 1;
+        /* z-index: 2; */
         width: 100%;
 		background-color: var(--gcScore);
         padding: 0 0.5em;
@@ -26,7 +26,6 @@
 
     .scoresBlock {
         position: relative;
-        z-index: auto;
         margin: 0.5em 0;
         width: 100%;
 		background-color: var(--gcScore);
@@ -41,7 +40,6 @@
     .teamsBlock {
         display: inline-flex;
         position: relative;
-        z-index: auto;
         padding: 0.7em;
         align-items: center;
     }
@@ -58,7 +56,6 @@
     .teamAbbrev {
         display: inline-flex;
         position: relative;
-        z-index: auto;
         color: var(--g111);
         font-weight: 600;
         font-size: 1.1em;
@@ -68,7 +65,6 @@
     .teamScoreContainer {
         display: inline-flex;
         position: absolute;
-        z-index: auto;
         left: 7.7em;
         width: 2em;
         align-items: center;
@@ -79,7 +75,6 @@
         color: var(--g555);
         display: inline-flex;
         position: relative;
-        z-index: auto;
         font-weight: 500;
         font-size: 1.05em;
         align-items: center;
@@ -100,7 +95,6 @@
         display: inline-flex;
         flex-direction: column;
         position: absolute;
-        z-index: auto;
         align-items: center;
         justify-content: center;
         top: 1.75em;
@@ -111,7 +105,6 @@
     .gameStatusPeriod {
         display: inline-flex;
         position: relative;
-        z-index: auto;
         font-size: 1.05em;
         align-content: center;
         justify-content: center;
@@ -121,7 +114,6 @@
     .gameStatusClock {
         display: inline-flex;
         position: relative;
-        z-index: auto;
         font-size: 1.05em;
         align-content: center;
         justify-content: center;
