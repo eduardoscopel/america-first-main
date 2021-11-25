@@ -40,7 +40,7 @@
                         ln: starterInfo.ln,
                         pos: starterInfo.pos,
                         t: starterInfo.t,
-                        projection: yearSelection == currentYear ? starterInfo.wi[weekSelection].p : null,
+                        projection: yearSelection == currentYear ? starterInfo.wi[weekSelection]?.p : null,
                         avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                         teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                         teamColor: `background-color: #${nflTeams[starterInfo.t]?.color}6b` || `background-color: var(--boxShadowThree)`,

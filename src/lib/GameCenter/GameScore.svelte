@@ -16,46 +16,55 @@
     
 
     const timezoneShift = (timezone, time) => {
-        let timeHour;
+        let newTimeHour;
+        let oldTimeHour;
+        let timePart = time.slice(time.length-2);
         if(time.slice(0, 2) == '12') {
-            timeHour = 12;
+            oldTimeHour = 12;
         } else {
             let strTimeHour = time.slice(1, 2);
-            timeHour = parseInt(strTimeHour);
+            oldTimeHour = parseInt(strTimeHour);
         }
 
         if(timezone == 'CST') {
-            if(timeHour == 1) {
-                timeHour = 12;
+            if(oldTimeHour == 1) {
+                newTimeHour = 12;
             } else {
-                timeHour = timeHour - 1;
+                newTimeHour = oldTimeHour - 1;
+            }
+            if(oldTimeHour == 12) {
+                timePart = 'AM';
             }
         } else if(timezone == 'MST') {
-            if(timeHour == 1) {
-                timeHour = 11;
-            } else if(timeHour == 2) {
-                timeHour = 12;
+            if(oldTimeHour == 1) {
+                newTimeHour = 11;
+                timePart = 'AM';
+            } else if(oldTimeHour == 2) {
+                newTimeHour = 12;
             } else {
-                timeHour = timeHour - 2;
+                newTimeHour = oldTimeHour - 2;
+            }
+            if(oldTimeHour == 12) {
+                timePart = 'AM';
             }
         } else if(timezone == 'PST') {
-            if(timeHour == 1) {
-                timeHour = 10;
-            } else if(timeHour == 2) {
-                timeHour = 11;
-            } else if(timeHour == 3) {
-                timeHour = 12;
+            if(oldTimeHour == 1) {
+                newTimeHour = 10;
+                timePart = 'AM';
+            } else if(oldTimeHour == 2) {
+                newTimeHour = 11;
+                timePart = 'AM';
+            } else if(oldTimeHour == 3) {
+                newTimeHour = 12;
             } else {
-                timeHour = timeHour - 3;
+                newTimeHour = oldTimeHour - 3;
+            }
+            if(oldTimeHour == 12) {
+                timePart = 'AM';
             }
         }
 
-        let shiftedTime;
-        if(time.slice(0, 2) == '12') {
-            shiftedTime = timeHour.toString() + time.slice(3)
-        } else {
-            shiftedTime = timeHour.toString() + time.slice(2)
-        }
+        let shiftedTime = newTimeHour.toString() + time.slice(2, time.length - 2) + timePart;
        
         return shiftedTime;
     }

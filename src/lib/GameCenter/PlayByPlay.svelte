@@ -374,12 +374,18 @@
                 truePenaltyInfo.penalties.push(parseInt(penaltyYards));
             }
             if(description.includes('Taunting')){
-                let penaltyYards = 10;
-                truePenaltyInfo.penalties.push(penaltyYards);
+                let penaltyYards = description.slice(description.indexOf('Taunting') + 10, description.indexOf('Taunting') + 12);
+                if(penaltyYards[1] == ' ') {
+                    penaltyYards = penaltyYards.slice(0, 1);
+                }
+                truePenaltyInfo.penalties.push(parseInt(penaltyYards));
             }
             if(description.includes('Defensive Holding')){
-                let penaltyYards = 5;
-                truePenaltyInfo.penalties.push(penaltyYards);
+                let penaltyYards = description.slice(description.indexOf('Defensive Holding') + 19, description.indexOf('Defensive Holding') + 21);
+                if(penaltyYards[1] == ' ') {
+                    penaltyYards = penaltyYards.slice(0, 1);
+                }
+                truePenaltyInfo.penalties.push(parseInt(penaltyYards));
             }
             if(description.includes('Offensive Holding')){
                 let penaltyYards = description.slice(description.indexOf('Offensive Holding') + 19, description.indexOf('Offensive Holding') + 21);
@@ -389,12 +395,18 @@
                 truePenaltyInfo.penalties.push(parseInt(penaltyYards));
             }
             if(description.includes('Illegal Block Above the Waist')){
-                let penaltyYards = 10;
-                truePenaltyInfo.penalties.push(penaltyYards);
+                let penaltyYards = description.slice(description.indexOf('Waist') + 7, description.indexOf('Waist') + 9);
+                if(penaltyYards[1] == ' ') {
+                    penaltyYards = penaltyYards.slice(0, 1);
+                }
+                truePenaltyInfo.penalties.push(parseInt(penaltyYards));
             }
             if(description.includes('Horse Collar')){
-                let penaltyYards = 15;
-                truePenaltyInfo.penalties.push(penaltyYards);
+                let penaltyYards = description.slice(description.indexOf('Collar') + 8, description.indexOf('Collar') + 10);
+                if(penaltyYards[1] == ' ') {
+                    penaltyYards = penaltyYards.slice(0, 1);
+                }
+                truePenaltyInfo.penalties.push(parseInt(penaltyYards));
             }
             if(description.includes('Disqualification')){
                 let penaltyYards = description.slice(description.indexOf('Disqualification') + 18, description.indexOf('Disqualification') + 20);
