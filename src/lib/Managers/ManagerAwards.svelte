@@ -1,7 +1,7 @@
 <script>
     import { round } from "$lib/utils/helper";
 
-    export let awards, records, roster, tookOver, recordManID;
+    export let awards, records, roster, recordManID;
 
     let displayAwards = [];
 
@@ -15,31 +15,22 @@
         formerGlobal = false;
         displayAwards = [];
 
-        // first lookl through annual awards (champion, second, etc)
+        // first look through annual awards (champion, second, etc)
         for(const podium of awards.podiums) {
             for(const award in podium) {
 
                 if(podium[award]?.recordManID == recordManID) {
-                    // const former = tookOver && tookOver > podium.year;
-                    // if(former) {
-                    //     formerGlobal = true;
-                    // }
                     displayAwards.push({
                         award: capitalizeFirstLetter(award),
                         icon: '/awards/' + award + '.png',
                         type: 'award',
                         originalName: podium[award].name,
                         year: podium.year,
-                        // former
                     })
                 }
                 if(award == 'divisions') {
                     for(const division of podium[award]) {
                         if(division.recordManID == recordManID) {
-                            // const former = tookOver && tookOver > podium.year;
-                            // if(former) {
-                            //     formerGlobal = true;
-                            // }
                             let awardTitle = 'Regular Season Champion';
                             if(division.name) {
                                 awardTitle = `${division.name} Division Champion`;
@@ -50,7 +41,6 @@
                                 type: 'award',
                                 originalName: division.manager.name,
                                 year: podium.year,
-                                // former
                             })
                         }
                     }
@@ -106,10 +96,6 @@
             }
 
             if(leagueWeekRecord.recordManID == recordManID) {
-                // const former = tookOver && tookOver > leagueWeekRecord.year;
-                // if(former) {
-                //     formerGlobal = true;
-                // }
                 displayAwards.push({
                     award: i + 1,
                     icon: '/awards/' + (i < 3 ? `record-${i+1}` : 'generic') + '.png',
@@ -118,15 +104,10 @@
                     year: leagueWeekRecord.year,
                     week: leagueWeekRecord.week,
                     extraInfo: round(leagueWeekRecord.fpts),
-                    // former
                 })
             }
 
             if(seasonLongRecord.recordManID == recordManID) {
-                // const former = tookOver && tookOver > seasonLongRecord.year;
-                // if(former) {
-                //     formerGlobal = true;
-                // }
                 displayAwards.push({
                     award: i + 1,
                     icon: '/awards/' + (i < 3 ? `record-${i+1}` : 'generic') + '.png',
@@ -134,7 +115,6 @@
                     originalName: seasonLongRecord.manager.name,
                     year: seasonLongRecord.year,
                     extraInfo: round(seasonLongRecord.fpts),
-                    // former
                 })
             }
         }
@@ -143,10 +123,6 @@
                 const seasonPointsRecord = yearRecords.seasonPointsRecords[i];
 
                 if(seasonPointsRecord.recordManID == recordManID) {
-                //     const former = tookOver && tookOver > yearRecords.year;
-                // if(former) {
-                //     formerGlobal = true;
-                // }
                     displayAwards.push({
                         award: i + 1,
                         icon: '/awards/' + (i < 3 ? `record-${i+1}` : 'generic') + '.png',
@@ -155,7 +131,6 @@
                         year: null,
                         week: seasonPointsRecord.week,
                         extraInfo: seasonPointsRecord.fpts,
-                        // former
                     })
                 }
             }
@@ -313,7 +288,7 @@
 
         .subText {
             font-size: 0.6em;
-            width: 65px;
+            width: 65px; 
         }
     }
 

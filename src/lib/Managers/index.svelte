@@ -7,7 +7,7 @@
 
     const refreshTransactions = async () => {
         const newTransactions = await getLeagueTransactions(false, true);
-        transactionsData = newTransactions;
+        transactionsData = newTransactions; 
     }
 
     if(transactionsData.stale) {

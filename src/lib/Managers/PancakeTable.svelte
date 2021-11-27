@@ -19,7 +19,7 @@
 
 	let root = treemap(hierarchy);
 
-	let selected = root;
+	let selected = root; 
 
 	$: $extents = {
 		x1: selected.x0,

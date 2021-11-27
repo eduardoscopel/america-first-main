@@ -83,7 +83,7 @@
         width: 40px;
         justify-content: center;
         align-items: center;
-        border-radius: 100%;
+        border-radius: 100%; 
         border: 1px solid #ccc;
         overflow: hidden;
         background-color: var(--fff);

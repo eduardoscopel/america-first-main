@@ -25,7 +25,7 @@
     }
 
     let firstYear = viewManager.yearsactive[0];
-    let inactiveLastYear;
+    let inactiveLastYear; 
     let inactiveLastManaged;
     if(viewManager.status == "inactive") {
         showRoster = false;
@@ -919,7 +919,7 @@
             <ManagerFantasyInfo {viewManager} {players} />
         {/if}
 
-        <ManagerAwards tookOver={viewManager.tookOver} {recordManID} {awards} {records} {roster} />
+        <ManagerAwards {recordManID} {awards} {records} {roster} />
 
         <!-- {#if loading}
             Loading positions records...

@@ -1,6 +1,6 @@
 <script>
 	import * as Pancake from '@sveltejs/pancake';
-	import { getContext } from 'svelte';
+	import { getContext } from 'svelte'; 
 
 	export let node;
 </script>

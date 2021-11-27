@@ -9,7 +9,7 @@
     let post;
     let createdAt;
     let loading = true;
-    let users, rosters = [];
+    let users, rosters = []; 
 
     onMount(async() => {
 		const {posts, fresh} = await getBlogPosts();

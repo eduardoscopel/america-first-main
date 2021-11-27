@@ -11,7 +11,7 @@
 
     let showEmpty = new Boolean (false);
     let emptyMessage;
-    let selection = 'regular';
+    let selection = 'regular'; 
     let recordPrefix;
     let masterSelection = 'alltime';
     let masterPrefix;
