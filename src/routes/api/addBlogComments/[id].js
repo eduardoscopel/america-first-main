@@ -1,4 +1,4 @@
-import { getLeagueUser, leagueID } from "$lib/utils/helper";
+import { getLeagueUsers, leagueID } from "$lib/utils/helper";
 
 const lang = "en-US";
 
