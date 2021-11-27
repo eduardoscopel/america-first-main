@@ -20,7 +20,7 @@
         width: 85%;
         max-width: 500px;
         margin: 80px auto;
-    }
+    } 
 </style>
 
 {#await helperPromises}

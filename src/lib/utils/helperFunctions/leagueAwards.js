@@ -21,7 +21,7 @@ export const getAwards = async () => {
 
 	const currentManagers = {};
 
-	let leagueManagers = {};
+	let leagueManagers = {}; 
 
 	for(const managerID in managers) {
 		const manager = managers[managerID];

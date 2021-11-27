@@ -96,7 +96,7 @@ export const getLeagueMatchups = async () => {
 
 const processMatchups = (inputMatchups, yearManagers, rosters, users, week) => {
 	if(!inputMatchups || inputMatchups.length == 0) {
-		return false;
+		return false; 
 	}
 	const matchups = {};
 	for(const match of inputMatchups) {

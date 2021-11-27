@@ -11,7 +11,7 @@ export const getBlogPosts = async (bypass = false) => {
 	// sort the results by create date
 	const finalPosts = [...newPosts.items].sort((a, b) => Date.parse(b.sys.createdAt) - Date.parse(a.sys.createdAt));
 
-	posts.update(() => finalPosts);
+	posts.update(() => finalPosts); 
 
 	return {posts: finalPosts, fresh: true};
 }

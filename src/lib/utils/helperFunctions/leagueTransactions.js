@@ -143,7 +143,7 @@ const combThroughTransactions = async (week, currentLeagueID) => {
 	
 		for(const roster of rosters) {
 			const rosterID = roster.roster_id;
-			const user = users[roster.owner_id];
+			const user = users[roster.owner_id]; 
 			
 			let recordManager = leagueManagers[rosterID].filter(m => m.yearsactive.includes(year));
 			let recordManID = recordManager[0].managerID;

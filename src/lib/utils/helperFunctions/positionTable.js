@@ -78,7 +78,7 @@ export const getTable = async (recordManID) => {
 					playerPositionData[player.playerInfo.pos].players[player.playerID].children[0].value += player.playerPoints;
 				}		
 				if(player.weeksStarted > 0) {
-					playerPositionData[player.playerInfo.pos].players[player.playerID].started = true;
+					playerPositionData[player.playerInfo.pos].players[player.playerID].started = true; 
 				}
 			}
 			const yearsObj = {};

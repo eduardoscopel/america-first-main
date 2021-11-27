@@ -372,7 +372,7 @@ export const getYearMatchups = async (yearSelection) => {
 
             if(!yearManagers[manager.roster] && manager.yearsactive.includes(yearSelection)) {
                 yearManagers[manager.roster] = [];
-                yearManagers[manager.roster].push(entryMan);
+                yearManagers[manager.roster].push(entryMan); 
             }
         }
 

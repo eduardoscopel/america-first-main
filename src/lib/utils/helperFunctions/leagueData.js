@@ -11,7 +11,7 @@ export const getLeagueData = async (queryLeagueID) => {
 	const data = await res.json().catch((err) => { console.error(err); });
 	
 	if (res.ok) {
-		leagueData.update(ld => {ld[queryLeagueID] = data; return ld});
+		leagueData.update(ld => {ld[queryLeagueID] = data; return ld}); 
 		return data;
 	} else {
 		throw new Error(data);

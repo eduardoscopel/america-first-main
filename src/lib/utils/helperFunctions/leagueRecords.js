@@ -2400,7 +2400,7 @@ export const getLeagueRecords = async (refresh = false) => {
 							importRecords[recordManID].weekWins++;
 						} else if(compareScore < medianScore) {
 							importRecords[recordManID].years[year].weekLosses++;
-							importRecords[recordManID].weekLosses++;
+							importRecords[recordManID].weekLosses++; 
 						} else if(compareScore == medianScore) {
 							importRecords[recordManID].years[year].weekTies++;
 							importRecords[recordManID].weekTies++;

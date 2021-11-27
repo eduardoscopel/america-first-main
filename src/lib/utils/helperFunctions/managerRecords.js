@@ -2094,7 +2094,7 @@ export const getManagerRecords = async (refresh = false) => {
 							masterRecordBook.players.league.totals.years[year][recordType].push(player);
 
 							masterRecordBook.players.managers.totals.alltime[recordManID][recordType].push(player);
-							masterRecordBook.players.league.totals.alltime[recordType].push(player);
+							masterRecordBook.players.league.totals.alltime[recordType].push(player); 
 						}
 					}
 				}

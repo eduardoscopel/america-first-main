@@ -19,7 +19,7 @@ export const getUpcomingDraft = async () => {
 	const draftID = leagueData.draft_id;
 	const regularSeasonLength = leagueData.settings.playoff_week_start - 1;
 
-	let year = parseInt(leagueData.season);
+	let year = parseInt(leagueData.season); 
 
 	const rosters = rosterRes.rosters;
 

@@ -21,7 +21,7 @@ export const getBrackets = async () => {
 	const rosters = rosterRes.rosters;
 
     // Number of rosters (in order to determine the number of places, i.e. 1st - 12th)
-    const numRosters = rosters.length;
+    const numRosters = rosters.length; 
 
     // get bracket data for winners and losers
 	const bracketsAndMatchupFetches = [

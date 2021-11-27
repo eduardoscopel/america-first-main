@@ -13,7 +13,7 @@ export const getLeagueUsers = async (queryLeagueID) => {
 	if (res.ok) {
 		const usersData = processUsers(data);
 		users.update(u => {u[queryLeagueID] = usersData; return u});
-		return usersData;
+		return usersData; 
 	} else {
 		throw new Error(data);
 	}
