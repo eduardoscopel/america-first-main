@@ -21,7 +21,7 @@
 	import LinearProgress from '@smui/linear-progress';
 	import { Rosters } from '$lib/components'
 
-	export let rostersInfo;
+	export let rostersInfo; 
 </script>
 
 <style>

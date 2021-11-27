@@ -30,7 +30,7 @@
             managersInfo
         }
         if(manager && (manager >= 0 && manager < managersObj.length)) {
-            props.manager = manager;
+            props.manager = manager; 
         }
     
 		return { props };

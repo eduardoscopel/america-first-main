@@ -20,7 +20,7 @@
     import LinearProgress from '@smui/linear-progress';
 	import { GameCenter } from '$lib/components';
 
-    export let scoreboardInfo;
+    export let scoreboardInfo; 
 </script>
 
 <style>

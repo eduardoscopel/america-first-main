@@ -7,7 +7,7 @@
         const filterKey = page.query.get('filter') || '';
 		const postsData = getBlogPosts();
 		const usersData = getLeagueUsers(leagueID);
-		const rostersData = getLeagueRosters(leagueID);
+		const rostersData = getLeagueRosters(leagueID); 
 	
 		return {
 			props: {

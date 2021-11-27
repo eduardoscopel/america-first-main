@@ -4,7 +4,7 @@
     export async function load() {
 
 		const standingsData = getLeagueStandings();
-		const usersData = getLeagueUsers(leagueID);
+		const usersData = getLeagueUsers(leagueID); 
 	
 		return {
 			props: {
