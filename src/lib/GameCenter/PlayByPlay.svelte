@@ -298,177 +298,431 @@
             }
             return lateralInfo;
         }
+        // determines yardage on fumble plays
+        const processFumble = (play, player) => {
+
+            let fumbleInfo;
+            let finalDescription = play.description;
+            if(finalDescription.includes('REVERSED')) {
+                finalDescription = finalDescription.slice(finalDescription.indexOf('REVERSED'));
+            }
+
+            if(finalDescription.includes('FUMBLES')) {
+
+                fumbleInfo = {
+                    initialYards: null,
+                    initialSpot: null,
+                    recoverySpot: null,
+                    ballMoved: null,
+                    statYards: [],
+                    oppYards: [],
+                    turnover: false,
+                }
+
+                let statEntry = {
+                    player,
+                    yards: 0,
+                    recovery: false,
+                }
+
+                let fumbleText = [];
+            
+
+                let firstFumble = finalDescription.slice(finalDescription.indexOf('FUMBLES'));
+                let secondFumble = finalDescription.slice(finalDescription.indexOf('FUMBLES') + 7);
+                // current logic maxes out at 3 fumbles
+                if(secondFumble.includes('FUMBLES')) {
+                    let index = firstFumble.indexOf('FUMBLES', firstFumble.indexOf('FUMBLES') + 1);
+                    secondFumble = firstFumble.slice(index);
+                    firstPenalty = firstFumble.slice(0, index);
+                    fumbleText.push(firstFumble);
+
+                    let thirdFumble = secondFumble.slice(secondFumble.indexOf('FUMBLES') + 7);
+                    if(thirdFumble.includes('FUMBLES')) {
+                        let secondIndex = secondFumble.indexOf('FUMBLES', secondFumble.indexOf('FUMBLES') + 1);
+                        thirdFumble = secondFumble.slice(secondIndex);
+                        secondFumble = secondFumble.slice(0, secondIndex);
+                        fumbleText.push(secondFumble);
+                        fumbleText.push(thirdFumble);
+                    } else {
+                        fumbleText.push(secondFumble);
+                    }
+                } else {
+                    fumbleText.push(firstFumble);
+                }
+
+                if(play.playType != 9 && (play.playType == 29 || fumbleText[fumbleText.length - 1].includes(`RECOVERED by ${play.oppTeam}`))) {
+                    fumbleInfo.turnover = true;
+                }
+
+
+                // STRIP-SACKS
+                if(play.playType == 7 || play.secondDescription.includes('Sacked')) {
+
+                    fumbleInfo.initialSpot = finalDescription.slice(finalDescription.indexOf(' at ' ) + 4, finalDescription.indexOf(' at ' ) + 10);
+                    if(fumbleInfo.initialSpot[5] == ' ') {
+                        fumbleInfo.initialSpot = fumbleInfo.initialSpot.slice(0, 5);
+                    } else if(fumbleInfo.initialSpot[5] == 'f') {
+                        fumbleInfo.initialSpot = fumbleInfo.initialSpot.slice(0, 4);
+                    }
+
+                    fumbleInfo.initialYards = finalDescription.slice(finalDescription.indexOf(' for ') + 5, finalDescription.indexOf(' for ') + 8);
+                    if(fumbleInfo.initialYards[2] == ' ') {
+                        fumbleInfo.initialYards = fumbleInfo.initialYards.slice(0, 2);
+                    } else if(fumbleInfo.initialYards[2] == 'y') {
+                        fumbleInfo.initialYards = fumbleInfo.initialYards.slice(0, 1);
+                    }
+                    fumbleInfo.initialYards = parseInt(fumbleInfo.initialYards);
+
+                    if(play.secondDescription.includes('Yrd Loss')) {
+                        fumbleInfo.ballMoved = play.secondDescription.slice(play.secondDescription.indexOf(' Yrd Loss') - 2, play.secondDescription.indexOf(' Yrd Loss'))
+                        if(fumbleInfo.ballMoved[0] == ' ') {
+                            fumbleInfo.ballMoved = fumbleInfo.ballMoved.slice(1);
+                        }
+                        fumbleInfo.ballMoved = parseInt(fumbleInfo.ballMoved)
+                        if(fumbleInfo.ballMoved != 0) {
+                            fumbleInfo.ballMoved = fumbleInfo.ballMoved * (-1);
+                        }
+                    }  
+
+                    statEntry.yards = fumbleInfo.initialYards;
+                    fumbleInfo.statYards.push(statEntry);
+                }
+
+
+                // RUSHING PLAYS
+                if((play.playType == 5 || play.playType == 9) && (play.secondDescription.includes('Yard Rush') || play.secondDescription.includes('Yrd Rush') || play.secondDescription.includes('Loss of'))) {
+
+                    fumbleInfo.initialSpot = finalDescription.slice(finalDescription.indexOf(' to ' ) + 4, finalDescription.indexOf(' to ' ) + 10);
+                    if(fumbleInfo.initialSpot[5] == ' ') {
+                        fumbleInfo.initialSpot = fumbleInfo.initialSpot.slice(0, 5);
+                    } else if(fumbleInfo.initialSpot[5] == 'f') {
+                        fumbleInfo.initialSpot = fumbleInfo.initialSpot.slice(0, 4);
+                    }
+
+                    fumbleInfo.initialYards = finalDescription.slice(finalDescription.indexOf(' for ') + 5, finalDescription.indexOf(' for ') + 8);
+                    if(fumbleInfo.initialYards[2] == ' ') {
+                        fumbleInfo.initialYards = fumbleInfo.initialYards.slice(0, 2);
+                    } else if(fumbleInfo.initialYards[2] == 'y') {
+                        fumbleInfo.initialYards = fumbleInfo.initialYards.slice(0, 1);
+                    }
+                    fumbleInfo.initialYards = parseInt(fumbleInfo.initialYards);
+
+                    if(play.secondDescription.includes('Yard Rush')) {
+                        fumbleInfo.ballMoved = play.secondDescription.slice(play.secondDescription.indexOf(' Yard Rush') - 2, play.secondDescription.indexOf(' Yard Rush'))
+                        if(fumbleInfo.ballMoved[0] == ' ') {
+                            fumbleInfo.ballMoved = fumbleInfo.ballMoved.slice(1);
+                        }
+                        fumbleInfo.ballMoved = parseInt(fumbleInfo.ballMoved);
+                    } else if(play.secondDescription.includes('Yrd Rush')) {
+                        fumbleInfo.ballMoved = play.secondDescription.slice(play.secondDescription.indexOf(' Yrd Rush') - 2, play.secondDescription.indexOf(' Yrd Rush'))
+                        if(fumbleInfo.ballMoved[0] == ' ') {
+                            fumbleInfo.ballMoved = fumbleInfo.ballMoved.slice(1);
+                        }
+                        fumbleInfo.ballMoved = parseInt(fumbleInfo.ballMoved);
+                    } else if(play.secondDescription.includes('Loss of')) {
+                        fumbleInfo.ballMoved = play.secondDescription.slice(play.secondDescription.indexOf('Loss of') + 8, play.secondDescription.indexOf('Loss of') + 10);
+                        if(fumbleInfo.ballMoved[1] == ' ') {
+                            fumbleInfo.ballMoved = fumbleInfo.ballMoved.slice(0, 1);
+                        }
+                        fumbleInfo.ballMoved = parseInt(fumbleInfo.ballMoved) * (-1);
+                    }
+
+                    if(finalDescription.includes('and recovers')) {
+                        fumbleInfo.recoverySpot = finalDescription.slice(finalDescription.indexOf(' at ') + 4, finalDescription.length - 1);
+                    }
+
+                    let initialSpotYard = fumbleInfo.initialSpot.slice(fumbleInfo.initialSpot.length - 2);
+                    if(initialSpotYard[0] == ' ') {
+                        initialSpotYard = initialSpotYard.slice(1);
+                    }
+                    initialSpotYard = parseInt(initialSpotYard);
+
+                    let recoverySpotYard = fumbleInfo.recoverySpot.slice(fumbleInfo.recoverySpot.length - 2);
+                    if(recoverySpotYard[0] == ' ') {
+                        recoverySpotYard = recoverySpotYard.slice(1);
+                    }
+                    recoverySpotYard = parseInt(recoverySpotYard);
+
+                    if(fumbleInfo.ballMoved > 0 && fumbleInfo.initialYards > 0 && fumbleInfo.initialYards > fumbleInfo.ballMoved) {
+                        statEntry.yards = fumbleInfo.ballMoved;
+                    } else if(fumbleInfo.ballMoved > 0 && fumbleInfo.initialYards > 0 && fumbleInfo.initialYards < fumbleInfo.ballMoved) {
+                        statEntry.yards = fumbleInfo.initialYards;
+                    } else if(fumbleInfo.initialYards < 0 && play.yards >= 0) {
+                        fumbleInfo.initialYards = 0;
+                    } else if(fumbleInfo.initialYards < 0 && play.yards < 0 && play.yards > fumbleInfo.initialYards) {
+                        fumbleInfo.initialYards = play.yards;
+                        statEntry.yards = play.yards;
+                    }
+                    fumbleInfo.statYards.push(statEntry);
+                }
+
+                let totalRecoveryYards = 0;
+                for(const key in fumbleText) {
+
+                    let recoveryTeam = fumbleText[key].slice(fumbleText[key].indexOf(' by ') + 4, fumbleText[key].indexOf(' by ') + 7);
+                    if(recoveryTeam[2] == '-') {
+                        recoveryTeam = recoveryTeam.slice(0, 2);
+                    }
+
+                    let recoveryYards = fumbleText[key].slice(fumbleText[key].indexOf(' for ') + 5, fumbleText[key].indexOf(' for ') + 8);
+                    if(recoveryYards.includes('no')) {
+                        recoveryYards = 0;
+                    } else if(recoveryYards[2] == ' ') {
+                        recoveryYards = recoveryYards.slice(0, 2);
+                    } else if(recoveryYards[2] == 'y') {
+                        recoveryYards = recoveryYards.slice (0, 1);
+                    }
+                    recoveryYards = parseInt(recoveryYards);
+
+                    if(fumbleInfo.turnover == false) {
+                        if(fumbleInfo.initialYards < 0 && recoveryYards > 0 && play.yards <= 0) {
+                            recoveryYards = 0;
+                        } else if(fumbleInfo.initialYards < 0 && recoveryYards > 0 && play.yards > 0) {
+                            if(key == 0 && recoveryYards + fumbleInfo.initialYards <= 0) {
+                                recoveryYards = 0;
+                            } else {
+                                recoveryYards = recoveryYards + fumbleInfo.initialYards;
+                            }
+                        }
+                    }
+
+                    let recoveryEntry = {
+                        player: recoveryTeam,
+                        yards: recoveryYards,
+                    }
+                    if(recoveryTeam == play.team) {
+                        fumbleInfo.statYards.push(recoveryEntry);
+                        totalRecoveryYards += recoveryYards;
+                    } else {
+                        fumbleInfo.oppYards.push(recoveryEntry);
+                    }
+                }
+
+                if(fumbleInfo.turnover == false) {
+                    if(fumbleInfo.initialYards < 0 && fumbleInfo.statYards[1] && fumbleInfo.statYards[1] <= 0) {
+                        fumbleInfo.statYards[0].yards = fumbleInfo.ballMoved - fumbleInfo.statYards[1].yards;
+                    } else if(fumbleInfo.initialYards < 0 && totalRecoveryYards > 0 && play.yards <= 0) {
+                        fumbleInfo.statYards[0].yards = play.yards;
+                    } 
+                } else {
+                    if(fumbleInfo.initialYards < 0 && !fumbleInfo.statYards[1]) {
+                        fumbleInfo.statYards[0].yards = fumbleInfo.ballMoved;
+                    }
+                }
+                 
+            } 
+
+            
+            return fumbleInfo;
+        }
 
         // extracts enforced penalty yardage from play description 
         const getTruePenalty = (playTeam, oppTeam, description, secondDescription, playType, playYardage) => {
             let truePenaltyInfo = {
                 penalties: [],
-                totalYards: 0,
-                against: null,
                 trueYards: 0,
-                spotEnforced: null,
             };
 
-            if(description.includes(`PENALTY on ${playTeam}`)) {
-                truePenaltyInfo.against = playTeam;
+            let penaltyText = [];
+
+            let firstPenalty = description.slice(description.indexOf('PENALTY'));
+            let secondPenalty = description.slice(description.indexOf('PENALTY') + 7);
+            // current logic maxes out at 3 penalties
+            if(secondPenalty.includes('PENALTY')) {
+                let index = firstPenalty.indexOf('PENALTY', firstPenalty.indexOf('PENALTY') + 1);
+                secondPenalty = firstPenalty.slice(index);
+                firstPenalty = firstPenalty.slice(0, index);
+                penaltyText.push(firstPenalty);
+
+                let thirdPenalty = secondPenalty.slice(secondPenalty.indexOf('PENALTY') + 7);
+                if(thirdPenalty.includes('PENALTY')) {
+                    let secondIndex = secondPenalty.indexOf('PENALTY', secondPenalty.indexOf('PENALTY') + 1);
+                    thirdPenalty = secondPenalty.slice(secondIndex);
+                    secondPenalty = secondPenalty.slice(0, secondIndex);
+                    penaltyText.push(secondPenalty);
+                    penaltyText.push(thirdPenalty);
+                } else {
+                    penaltyText.push(secondPenalty);
+                }
             } else {
-                truePenaltyInfo.against = oppTeam;
+                penaltyText.push(firstPenalty);
             }
-
-            truePenaltyInfo.spotEnforced = description.slice(description.indexOf('enforced at') + 12, description.length - 1);
-
-            // && description.indexOf('Unnecessary Roughness') - description.indexOf(`PENALTY on ${espnAbbv}`) > 0 
-            //     && description.indexOf('Unnecessary Roughness') - description.indexOf(`PENALTY on ${espnAbbv}`) < 50)            
             
-            if(description.includes('Roughing the Passer')) {
-                let penaltyYards;
-                if(playType == 24) {
-                    let trueYards = secondDescription.slice(secondDescription.indexOf('Pass for') + 9, secondDescription.indexOf('Pass for') + 11);
-                    if(trueYards[trueYards.length - 1] == ' ') {
-                        trueYards = trueYards.slice(0, 1);
-                    }
-                    trueYards = parseInt(trueYards);
-                    penaltyYards = playYardage - trueYards;
-                } else if(description.includes('(15 Yards)')) {        
-                    penaltyYards = description.substring(description.indexOf('(15 Yards)') + 12, description.indexOf('(15 Yards)') + 14);
-                    if(penaltyYards[penaltyYards.length - 1] == ' ') {
-                        penaltyYards = penaltyYards.slice(0, 1);
-                    }
-                    penaltyYards = parseInt(penaltyYards);
-                } else {
-                    penaltyYards = 15;
+            for(let i = 0; i < penaltyText.length; i++) {
+                let entry = {
+                    against: null,
+                    yards: 0,
+                    spotEnforced: null,
+                    between: false,
                 }
-                truePenaltyInfo.penalties.push(penaltyYards);
-            }
-            if(description.includes('Unsportsmanlike Conduct')) {
-                let penaltyYards;
-                if(description.includes('(15 Yards)')) {
-                    penaltyYards = description.substring(description.indexOf('(15 Yards)') + 12, description.indexOf('(15 Yards)') + 14);
-                    if(penaltyYards[penaltyYards.length - 1] == ' ') {
-                        penaltyYards = penaltyYards.slice(0, 1);
-                    }
-                    penaltyYards = parseInt(penaltyYards);
-                } else {
-                    penaltyYards = 15;
-                }
-                truePenaltyInfo.penalties.push(penaltyYards);
-            }
-            if(description.includes('Face Mask (15 Yards)')) {
-                let penaltyYards;
-                if(description.includes('(15 Yards)')) {
-                    penaltyYards = description.substring(description.indexOf('(15 Yards)') + 12, description.indexOf('(15 Yards)') + 14);
-                    if(penaltyYards[penaltyYards.length - 1] == ' ') {
-                        penaltyYards = penaltyYards.slice(0, 1);
-                    }
-                    penaltyYards = parseInt(penaltyYards);
-                } else {
-                    penaltyYards = 15;
-                }
-                truePenaltyInfo.penalties.push(penaltyYards);
-            }
-            if(description.includes('Unnecessary Roughness')) {
-                let penaltyYards = description.slice(description.indexOf('Unnecessary Roughness') + 23, description.indexOf('Unnecessary Roughness') + 25);
-                if(penaltyYards[1] == ' ') {
-                    penaltyYards = penaltyYards.slice(0, 1);
-                }
-                truePenaltyInfo.penalties.push(parseInt(penaltyYards));
-            }
-            if(description.includes('Taunting')){
-                let penaltyYards = description.slice(description.indexOf('Taunting') + 10, description.indexOf('Taunting') + 12);
-                if(penaltyYards[1] == ' ') {
-                    penaltyYards = penaltyYards.slice(0, 1);
-                }
-                truePenaltyInfo.penalties.push(parseInt(penaltyYards));
-            }
-            if(description.includes('Defensive Holding')){
-                let penaltyYards = description.slice(description.indexOf('Defensive Holding') + 19, description.indexOf('Defensive Holding') + 21);
-                if(penaltyYards[1] == ' ') {
-                    penaltyYards = penaltyYards.slice(0, 1);
-                }
-                truePenaltyInfo.penalties.push(parseInt(penaltyYards));
-            }
-            if(description.includes('Offensive Holding')){
-                let penaltyYards = description.slice(description.indexOf('Offensive Holding') + 19, description.indexOf('Offensive Holding') + 21);
-                if(penaltyYards[1] == ' ') {
-                    penaltyYards = penaltyYards.slice(0, 1);
-                }
-                truePenaltyInfo.penalties.push(parseInt(penaltyYards));
-            }
-            if(description.includes('Illegal Block Above the Waist')){
-                let penaltyYards = description.slice(description.indexOf('Waist') + 7, description.indexOf('Waist') + 9);
-                if(penaltyYards[1] == ' ') {
-                    penaltyYards = penaltyYards.slice(0, 1);
-                }
-                truePenaltyInfo.penalties.push(parseInt(penaltyYards));
-            }
-            if(description.includes('Horse Collar')){
-                let penaltyYards = description.slice(description.indexOf('Collar') + 8, description.indexOf('Collar') + 10);
-                if(penaltyYards[1] == ' ') {
-                    penaltyYards = penaltyYards.slice(0, 1);
-                }
-                truePenaltyInfo.penalties.push(parseInt(penaltyYards));
-            }
-            if(description.includes('Disqualification')){
-                let penaltyYards = description.slice(description.indexOf('Disqualification') + 18, description.indexOf('Disqualification') + 20);
-                if(penaltyYards[1] == ' ') {
-                    penaltyYards = penaltyYards.slice(0, 1);
-                }
-                truePenaltyInfo.penalties.push(parseInt(penaltyYards));
-            }
 
-            if(playType == 5 || playType == 9 || playType == 29 || playType == 39) {
-                // if(!secondDescription.includes('Yrd Rush')) {
-                //     let trueYards = description.slice(description.indexOf('for ') + 4, description.indexOf('for ') + 6);
-                //     if(trueYards[trueYards.length - 1] == ' ') {
-                //         trueYards = trueYards.slice(0, 1);
-                //     }
-                //     trueYards = parseInt(trueYards);
-                //     let trueSpot = description.slice(description.indexOf(' for ') - 6, description.indexOf(' for '));
-                //     if(trueSpot[0] == ' ') {
-                //         trueSpot = trueSpot.slice(1);
-                //     } else if(trueSpot[0] == 't') {
-                //         trueSpot = trueSpot.slice(2);
-                //     }
+                if(penaltyText[i].includes(`PENALTY on ${playTeam}`)) {
+                    entry.against = playTeam;
+                } else {
+                    entry.against = oppTeam;
+                }
 
-                //     let trueSpotSide = trueSpot.slice(0, trueSpot[trueSpot.length - 2]).filter(c => c != ' ');
-                //     let trueSpotYard = parseInt(trueSpot.slice(trueSpot[trueSpot.length - 2]));
-
-                //     let spotEnforcedSide = spotEnforced.slice(0, spotEnforced[spotEnforced.length - 2]).filter(c => c != ' ');
-                //     let spotEnforcedYard = parseInt(spotEnforced.slice(spotEnforced[spotEnforced.length - 2]))
-                    
-                //     if(trueYards > 0                                // positive gain before penalty enforced
-                //         && truePenaltyInfo.against == playTeam      // penalty against rushing team
-                //         && spotEnforcedSide == trueSpotSide         // ball didn't cross 50
-                //         && trueSpotYard > spotEnforcedYard          // spot of enforcement behind line of gain
-                //         && spotEnforcedSide == playTeam) {          // rushing team is on own side
-                //             let lineScrimmage = trueSpotYard - trueYards;
-                //             trueYards = spotEnforcedYard - lineScrimmage;
-                //     }
-                //     truePenaltyInfo.trueYards = trueYards;
-                // } else {
-                    let trueYards;
-                    if(secondDescription.includes('Yrd Rush')) {
-                        trueYards = secondDescription.slice(secondDescription.indexOf(' Yrd Rush') - 2, secondDescription.indexOf(' Yrd Rush'))
-                        if(trueYards[0] == ' ') {
-                            trueYards = trueYards.slice(1);
+                if(penaltyText[i].includes('between downs')) {
+                    entry.between = true;
+                } else {
+                    if(penaltyText.length == 1) {
+                        entry.spotEnforced = penaltyText[i].slice(penaltyText[i].indexOf('enforced at') + 12, penaltyText[i].length - 1);
+                    } else if(penaltyText.length == 2) {
+                        if(i == 0) {
+                            entry.spotEnforced = penaltyText[i].slice(penaltyText[i].indexOf('enforced at') + 12);
+                            entry.spotEnforced = entry.spotEnforced.slice(0, entry.spotEnforced.indexOf('.'));
+                        } else {
+                            entry.spotEnforced = penaltyText[i].slice(penaltyText[i].indexOf('enforced at') + 12, penaltyText[i].length - 1);
                         }
-                        truePenaltyInfo.trueYards = parseInt(trueYards);
-                    } else if(secondDescription.includes('Loss of')) {
-                        trueYards = secondDescription.slice(secondDescription.indexOf('Loss of') + 8, secondDescription.indexOf('Loss of') + 10);
-                        if(trueYards[1] == ' ') {
+                    } else if(penaltyText.length == 3) {
+                        if(i < 2) {
+                            entry.spotEnforced = penaltyText[i].slice(penaltyText[i].indexOf('enforced at') + 12);
+                            entry.spotEnforced = entry.spotEnforced.slice(0, entry.spotEnforced.indexOf('.'));
+                        } else {
+                            entry.spotEnforced = penaltyText[i].slice(penaltyText[i].indexOf('enforced at') + 12, penaltyText[i].length - 1);
+                        }
+                    }
+                }
+                
+                if(penaltyText[i].includes('Roughing the Passer')) {
+                    let penaltyYards;
+
+                    if(playType == 24 && secondDescription.includes('Pass for')) {
+                        let trueYards = secondDescription.slice(secondDescription.indexOf('Pass for') + 9, secondDescription.indexOf('Pass for') + 11);
+                        if(trueYards[trueYards.length - 1] == ' ') {
                             trueYards = trueYards.slice(0, 1);
                         }
-                        trueYards = parseInt(trueYards) * (-1);
-                        truePenaltyInfo.trueYards = trueYards;
+                        truePenaltyInfo.trueYards = parseInt(trueYards);
+                        penaltyYards = playYardage - trueYards;
+                    } else {
+                        penaltyYards = penaltyText[i].slice(penaltyText[i].indexOf('Passer') + 8, penaltyText[i].indexOf('Passer') + 10);
+                        if(penaltyYards[1] == ' ') {
+                            penaltyYards = penaltyYards.slice(0, 1);
+                        }
                     }
+                    entry.yards = penaltyYards;
+                } else if(penaltyText[i].includes('Unsportsmanlike Conduct')) {
+                    let penaltyYards = penaltyText[i].slice(penaltyText[i].indexOf('Conduct') + 9, penaltyText[i].indexOf('Conduct') + 11);
+                    if(penaltyYards[1] == ' ') {
+                        penaltyYards = penaltyYards.slice(0, 1);
+                    }
+                    entry.yards = parseInt(penaltyYards);
+                } else if(penaltyText[i].includes('Face Mask')) {
+                    let penaltyYards;
+                    if(description.includes('(15 Yards)')) {
+                        penaltyYards = penaltyText[i].substring(penaltyText[i].indexOf('(15 Yards)') + 12, penaltyText[i].indexOf('(15 Yards)') + 14);
+                        if(penaltyYards[penaltyYards.length - 1] == ' ') {
+                            penaltyYards = penaltyYards.slice(0, 1);
+                        }
+                        penaltyYards = parseInt(penaltyYards);
+                    } else {
+                        penaltyYards = penaltyText[i].slice(penaltyText[i].indexOf('Mask') + 6, penaltyText[i].indexOf('Mask') + 8);
+                        if(penaltyYards[1] == ' ') {
+                            penaltyYards = penaltyYards.slice(0, 1);
+                        }
+                        penaltyYards = parseInt(penaltyYards);                    
+                    }
+                    entry.yards = penaltyYards;
+                } else if(penaltyText[i].includes('Unnecessary Roughness')) {
+                    let penaltyYards = penaltyText[i].slice(penaltyText[i].indexOf('Unnecessary Roughness') + 23, penaltyText[i].indexOf('Unnecessary Roughness') + 25);
+                    if(penaltyYards[1] == ' ') {
+                        penaltyYards = penaltyYards.slice(0, 1);
+                    }
+                    entry.yards = parseInt(penaltyYards);
+                } else if(penaltyText[i].includes('Taunting')){
+                    let penaltyYards = penaltyText[i].slice(penaltyText[i].indexOf('Taunting') + 10, penaltyText[i].indexOf('Taunting') + 12);
+                    if(penaltyYards[1] == ' ') {
+                        penaltyYards = penaltyYards.slice(0, 1);
+                    }
+                    entry.yards = parseInt(penaltyYards);
+                } else if(penaltyText[i].includes('Defensive Holding')){
+                    let penaltyYards = penaltyText[i].slice(penaltyText[i].indexOf('Defensive Holding') + 19, penaltyText[i].indexOf('Defensive Holding') + 21);
+                    if(penaltyYards[1] == ' ') {
+                        penaltyYards = penaltyYards.slice(0, 1);
+                    }
+                    entry.yards = parseInt(penaltyYards);
+                } else if(penaltyText[i].includes('Offensive Holding')){
+                    let penaltyYards = penaltyText[i].slice(penaltyText[i].indexOf('Offensive Holding') + 19, penaltyText[i].indexOf('Offensive Holding') + 21);
+                    if(penaltyYards[1] == ' ') {
+                        penaltyYards = penaltyYards.slice(0, 1);
+                    }
+                    entry.yards = parseInt(penaltyYards);
+                } else if(penaltyText[i].includes('Illegal Block Above the Waist')){
+                    let penaltyYards = penaltyText[i].slice(penaltyText[i].indexOf('Waist') + 7, penaltyText[i].indexOf('Waist') + 9);
+                    if(penaltyYards[1] == ' ') {
+                        penaltyYards = penaltyYards.slice(0, 1);
+                    }
+                    entry.yards = parseInt(penaltyYards);
+                } else if(penaltyText[i].includes('Horse Collar')){
+                    let penaltyYards = penaltyText[i].slice(penaltyText[i].indexOf('Collar') + 8, penaltyText[i].indexOf('Collar') + 10);
+                    if(penaltyYards[1] == ' ') {
+                        penaltyYards = penaltyYards.slice(0, 1);
+                    }
+                    entry.yards = parseInt(penaltyYards);
+                } else if(penaltyText[i].includes('Disqualification')){
+                    let penaltyYards = penaltyText[i].slice(penaltyText[i].indexOf('Disqualification') + 18, penaltyText[i].indexOf('Disqualification') + 20);
+                    if(penaltyYards[1] == ' ') {
+                        penaltyYards = penaltyYards.slice(0, 1);
+                    }
+                    entry.yards = parseInt(penaltyYards);
+                } else if(penaltyText[i].includes('Illegal Use of Hands')){
+                    let penaltyYards = penaltyText[i].slice(penaltyText[i].indexOf('Hands') + 7, penaltyText[i].indexOf('Hands') + 9);
+                    if(penaltyYards[1] == ' ') {
+                        penaltyYards = penaltyYards.slice(0, 1);
+                    }
+                    entry.yards = parseInt(penaltyYards);
+                }
 
-                // }
-            }
+                if(playType == 5 || playType == 9 || playType == 29 || playType == 39) {
+                    // if(!secondDescription.includes('Yrd Rush')) {
+                    //     let trueYards = penaltyText[i].slice(penaltyText[i].indexOf('for ') + 4, penaltyText[i].indexOf('for ') + 6);
+                    //     if(trueYards[trueYards.length - 1] == ' ') {
+                    //         trueYards = trueYards.slice(0, 1);
+                    //     }
+                    //     trueYards = parseInt(trueYards);
+                    //     let trueSpot = penaltyText[i].slice(penaltyText[i].indexOf(' for ') - 6, penaltyText[i].indexOf(' for '));
+                    //     if(trueSpot[0] == ' ') {
+                    //         trueSpot = trueSpot.slice(1);
+                    //     } else if(trueSpot[0] == 't') {
+                    //         trueSpot = trueSpot.slice(2);
+                    //     }
 
+                    //     let trueSpotSide = trueSpot.slice(0, trueSpot[trueSpot.length - 2]).filter(c => c != ' ');
+                    //     let trueSpotYard = parseInt(trueSpot.slice(trueSpot[trueSpot.length - 2]));
 
+                    //     let spotEnforcedSide = spotEnforced.slice(0, spotEnforced[spotEnforced.length - 2]).filter(c => c != ' ');
+                    //     let spotEnforcedYard = parseInt(spotEnforced.slice(spotEnforced[spotEnforced.length - 2]))
+                        
+                    //     if(trueYards > 0                                // positive gain before penalty enforced
+                    //         && truePenaltyInfo.against == playTeam      // penalty against rushing team
+                    //         && spotEnforcedSide == trueSpotSide         // ball didn't cross 50
+                    //         && trueSpotYard > spotEnforcedYard          // spot of enforcement behind line of gain
+                    //         && spotEnforcedSide == playTeam) {          // rushing team is on own side
+                    //             let lineScrimmage = trueSpotYard - trueYards;
+                    //             trueYards = spotEnforcedYard - lineScrimmage;
+                    //     }
+                    //     truePenaltyInfo.trueYards = trueYards;
+                    // } else {
+                        let trueYards;
+                        if(secondDescription.includes('Yrd Rush')) {
+                            trueYards = secondDescription.slice(secondDescription.indexOf(' Yrd Rush') - 2, secondDescription.indexOf(' Yrd Rush'))
+                            if(trueYards[0] == ' ') {
+                                trueYards = trueYards.slice(1);
+                            }
+                            truePenaltyInfo.trueYards = parseInt(trueYards);
+                        } else if(secondDescription.includes('Loss of')) {
+                            trueYards = secondDescription.slice(secondDescription.indexOf('Loss of') + 8, secondDescription.indexOf('Loss of') + 10);
+                            if(trueYards[1] == ' ') {
+                                trueYards = trueYards.slice(0, 1);
+                            }
+                            trueYards = parseInt(trueYards) * (-1);
+                            truePenaltyInfo.trueYards = trueYards;
+                        }
 
-            for(let i = 0; i < truePenaltyInfo.penalties.length; i++) {
-                truePenaltyInfo.totalYards += truePenaltyInfo.penalties[i];
+                    // }
+                }
+                truePenaltyInfo.penalties.push(entry);
             }
 
             return truePenaltyInfo;
@@ -494,21 +748,77 @@
                             } else {
                                 defensiveYardsInfo.newAwayYards += playObj.yards;
                             }
+                        } else if(playObj.playType == 9) {
+                            let fumbleInfo = processFumble(playObj, awayTeam);
+                            if(fumbleInfo != null) {
+                                for(const fumble in fumbleInfo.statYards) {
+                                    defensiveYardsInfo.newAwayYards += fumbleInfo.statYards[fumble].yards;
+                                }
+                            }
+
+                            if(playObj.penalty == true) {
+                                for(const key in playObj.penaltyInfo.penalties) {
+                                    if(playObj.penaltyInfo.penalties[key].against == awayTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                        defensiveYardsInfo.newAwayYards = defensiveYardsInfo.newAwayYards - playObj.penaltyInfo.penalties[key].yards;
+                                    } else if(playObj.penaltyInfo.penalties[key].against == homeTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                        defensiveYardsInfo.newAwayYards += playObj.penaltyInfo.penalties[key].yards;
+                                    }
+                                }
+                            }  
+                            
+                        } else if(playObj.playType == 7 && playObj.description.includes('FUMBLES')) {
+                            let fumbleInfo = processFumble(playObj, awayTeam);
+                            if(fumbleInfo != null) {
+                                for(const fumble in fumbleInfo.statYards) {
+                                    defensiveYardsInfo.newAwayYards += fumbleInfo.statYards[fumble].yards;
+                                }
+                                if(fumbleInfo.turnover == true) {
+                                    for(const fumble in fumbleInfo.oppYards) {
+                                        defensiveYardsInfo.newAwayYards = defensiveYardsInfo.newAwayYards - fumbleInfo.oppYards[fumble].yards;
+                                    }
+                                }
+                            } else {
+                                defensiveYardsInfo.newAwayYards += playObj.yards;
+                            }
+
+                            if(playObj.penalty == true) {
+                                for(const key in playObj.penaltyInfo.penalties) {
+                                    if(playObj.penaltyInfo.penalties[key].against == awayTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                        defensiveYardsInfo.newAwayYards = defensiveYardsInfo.newAwayYards - playObj.penaltyInfo.penalties[key].yards;
+                                    } else if(playObj.penaltyInfo.penalties[key].against == homeTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                        defensiveYardsInfo.newAwayYards += playObj.penaltyInfo.penalties[key].yards;
+                                    }
+                                }
+                            }  
                         } else {
+                            
                             defensiveYardsInfo.newAwayYards += playObj.yards;  
-                            if(playObj.penalty == true && playObj.penaltyInfo.against == awayTeam) {
-                                defensiveYardsInfo.newAwayYards = defensiveYardsInfo.newAwayYards - playObj.penaltyInfo.totalYards;
-                            } else if(playObj.penalty == true && playObj.penaltyInfo.against == homeTeam) {
-                                defensiveYardsInfo.newAwayYards += playObj.penaltyInfo.totalYards;
-                            }   
+
+                            if(playObj.penalty == true) {
+                                for(const key in playObj.penaltyInfo.penalties) {
+                                    if(playObj.penaltyInfo.penalties[key].against == awayTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                        defensiveYardsInfo.newAwayYards = defensiveYardsInfo.newAwayYards - playObj.penaltyInfo.penalties[key].yards;
+                                    } else if(playObj.penaltyInfo.penalties[key].against == homeTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                        defensiveYardsInfo.newAwayYards += playObj.penaltyInfo.penalties[key].yards;
+                                    }
+                                }
+                            }  
                         }  
                                         
                     } else if(playObj.playType == 26 || playObj.playType == 36 || playObj.playType == 39 || (playObj.playType == 52 && score.def_pr_yd) || ((playObj.playType == 12 || playObj.playType == 32) && score.def_kr_yd) || ((playObj.playType == 17 || playObj.playType == 37) && score.blk_kick_ret_yd)) {
-                        if(playObj.penalty == false || (playObj.penalty == true && playObj.penaltyInfo.against == awayTeam && playObj.yards > 0)) {
+
+                        if(playObj.penalty == true) {
+                            for(const key in playObj.penaltyInfo.penalties) {
+                                if(playObj.penaltyInfo.penalties[key].against == awayTeam && playObj.yards > 0 && playObj.penaltyInfo.penalties[key].between == false) {
+                                    defensiveYardsInfo.newAwayYards = defensiveYardsInfo.newAwayYards - playObj.yards;
+                                } else if(playObj.penaltyInfo.penalties[key].against == homeTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                    defensiveYardsInfo.newAwayYards += playObj.penaltyInfo.penalties[key].yards - playObj.yards;
+                                }
+                            }
+                        } else {
                             defensiveYardsInfo.newAwayYards = defensiveYardsInfo.newAwayYards - playObj.yards;
-                        } else if(playObj.penalty == true && playObj.penaltyInfo.against == homeTeam) {
-                            defensiveYardsInfo.newAwayYards += playObj.penaltyInfo.totalYards - playObj.yards;
-                        } 
+                        }
+
                     } else if(playObj.playType == 29) {
                         // statYardage counts yards before fumble
                         defensiveYardsInfo.newAwayYards += playObj.yards; 
@@ -539,9 +849,14 @@
                 if(homeStart == true && ((playObj.playType == 52 && score.def_pr_yd) || ((playObj.playType == 12 || playObj.playType == 32) && score.def_kr_yd) || ((playObj.playType == 17 || playObj.playType == 37) && score.blk_kick_ret_yd))) {
                     let oldYA = defensiveYardsInfo.newHomeYards;
                     defensiveYardsInfo.newHomeYards += playObj.yards;
-                    if(playObj.penalty == true && playObj.penaltyInfo.against == homeTeam) {
-                        defensiveYardsInfo.newHomeYards = defensiveYardsInfo.newHomeYards - playObj.penaltyInfo.totalYards;
-                    }    
+
+                    if(playObj.penalty == true) {
+                        for(const key in playObj.penaltyInfo.penalties) {
+                            if(playObj.penaltyInfo.penalties[key].against == homeTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                defensiveYardsInfo.newHomeYards = defensiveYardsInfo.newHomeYards - playObj.penaltyInfo.penalties[key].yards;
+                            } 
+                        }
+                    }  
 
                     // check if threshold broken
                     if((oldYA < 100 && defensiveYardsInfo.newHomeYards >= 100) || (oldYA < 200 && defensiveYardsInfo.newHomeYards >= 200) || (oldYA < 300 && defensiveYardsInfo.newHomeYards >= 300) || (oldYA < 350 && defensiveYardsInfo.newHomeYards >= 350) ||
@@ -566,21 +881,76 @@
                             } else {
                                 defensiveYardsInfo.newHomeYards += playObj.yards;
                             }
+                        }  else if(playObj.playType == 7 && playObj.description.includes('FUMBLES')) {
+                            let fumbleInfo = processFumble(playObj, awayTeam);
+                            if(fumbleInfo != null) {
+                                for(const fumble in fumbleInfo.statYards) {
+                                    defensiveYardsInfo.newHomeYards += fumbleInfo.statYards[fumble].yards;
+                                }
+                                if(fumbleInfo.turnover == true) {
+                                    for(const fumble in fumbleInfo.oppYards) {
+                                        defensiveYardsInfo.newHomeYards = defensiveYardsInfo.newHomeYards - fumbleInfo.oppYards[fumble].yards;
+                                    }
+                                }
+                            } else {
+                                defensiveYardsInfo.newHomeYards += playObj.yards;
+                            }
+
+                            if(playObj.penalty == true) {
+                                for(const key in playObj.penaltyInfo.penalties) {
+                                    if(playObj.penaltyInfo.penalties[key].against == homeTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                        defensiveYardsInfo.newHomeYards = defensiveYardsInfo.newHomeYards - playObj.penaltyInfo.penalties[key].yards;
+                                    } else if (playObj.penaltyInfo.penalties[key].against == awayTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                        defensiveYardsInfo.newHomeYards += playObj.penaltyInfo.penalties[key].yards;
+                                    }
+                                }
+                            }  
+                        } else if(playObj.playType == 9) {
+                            let fumbleInfo = processFumble(playObj, homeTeam);
+                            if(fumbleInfo != null) {
+                                for(const fumble in fumbleInfo.statYards) {
+                                    defensiveYardsInfo.newHomeYards += fumbleInfo.statYards[fumble].yards;
+                                }
+                            }
+
+                            if(playObj.penalty == true) {
+                                for(const key in playObj.penaltyInfo.penalties) {
+                                    if(playObj.penaltyInfo.penalties[key].against == homeTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                        defensiveYardsInfo.newHomeYards = defensiveYardsInfo.newHomeYards - playObj.penaltyInfo.penalties[key].yards;
+                                    } else if (playObj.penaltyInfo.penalties[key].against == awayTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                        defensiveYardsInfo.newHomeYards += playObj.penaltyInfo.penalties[key].yards;
+                                    }
+                                }
+                            }  
                         } else {
+
                             defensiveYardsInfo.newHomeYards += playObj.yards;  
-                            if(playObj.penalty == true && playObj.penaltyInfo.against == homeTeam) {
-                                defensiveYardsInfo.newHomeYards = defensiveYardsInfo.newHomeYards - playObj.penaltyInfo.totalYards;
-                            } else if(playObj.penalty == true && playObj.penaltyInfo.against == awayTeam) {
-                                defensiveYardsInfo.newHomeYards += playObj.penaltyInfo.totalYards;
-                            }   
+
+                            if(playObj.penalty == true) {
+                                for(const key in playObj.penaltyInfo.penalties) {
+                                    if(playObj.penaltyInfo.penalties[key].against == homeTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                        defensiveYardsInfo.newHomeYards = defensiveYardsInfo.newHomeYards - playObj.penaltyInfo.penalties[key].yards;
+                                    } else if (playObj.penaltyInfo.penalties[key].against == awayTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                        defensiveYardsInfo.newHomeYards += playObj.penaltyInfo.penalties[key].yards;
+                                    }
+                                }
+                            }  
                         }  
                         
                     } else if(playObj.playType == 26 || playObj.playType == 36 || playObj.playType == 39 || (playObj.playType == 52 && score.def_pr_yd) || ((playObj.playType == 12 || playObj.playType == 32) && score.def_kr_yd) || ((playObj.playType == 17 || playObj.playType == 37) && score.blk_kick_ret_yd)) {
-                        if(playObj.penalty == false || (playObj.penalty == true && playObj.penaltyInfo.against == homeTeam && playObj.yards > 0)) {
+
+                        if(playObj.penalty == true) {
+                            for(const key in playObj.penaltyInfo.penalties) {
+                                if(playObj.penaltyInfo.penalties[key].against == homeTeam && playObj.yards > 0 && playObj.penaltyInfo.penalties[key].between == false) {
+                                    defensiveYardsInfo.newHomeYards = defensiveYardsInfo.newHomeYards - playObj.yards;
+                                } else if(playObj.penaltyInfo.penalties[key].against == awayTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                    defensiveYardsInfo.newHomeYards += playObj.penaltyInfo.penalties[key].yards - playObj.yards;
+                                }
+                            }
+                        } else {
                             defensiveYardsInfo.newHomeYards = defensiveYardsInfo.newHomeYards - playObj.yards;
-                        } else if(playObj.penalty == true && playObj.penaltyInfo.against == awayTeam) {
-                            defensiveYardsInfo.newHomeYards += playObj.penaltyInfo.totalYards - playObj.yards;
-                        } 
+                        }
+
                     } else if(playObj.playType == 29) {
                         // statYardage counts yards before fumble
                         defensiveYardsInfo.newHomeYards += playObj.yards; 
@@ -611,9 +981,14 @@
                 if(awayStart == true && ((playObj.playType == 52 && score.def_pr_yd) || ((playObj.playType == 12 || playObj.playType == 32) && score.def_kr_yd) || ((playObj.playType == 17 || playObj.playType == 37) && score.blk_kick_ret_yd))) {
                     let oldYA = defensiveYardsInfo.newAwayYards;
                     defensiveYardsInfo.newAwayYards = defensiveYardsInfo.newAwayYards - playObj.yards;
-                    if(playObj.penalty == true && playObj.penaltyInfo.against == awayTeam) {
-                        defensiveYardsInfo.newAwayYards = defensiveYardsInfo.newAwayYards - playObj.penaltyInfo.totalYards;
-                    }    
+
+                    if(playObj.penalty == true) {
+                        for(const key in playObj.penaltyInfo.penalties) {
+                            if(playObj.penaltyInfo.penalties[key].against == awayTeam && playObj.penaltyInfo.penalties[key].between == false) {
+                                defensiveYardsInfo.newAwayYards = defensiveYardsInfo.newAwayYards - playObj.penaltyInfo.penalties[key].yards;
+                            } 
+                        }
+                    }  
                     // check if threshold broken
                     if((oldYA < 100 && defensiveYardsInfo.newAwayYards >= 100) || (oldYA < 200 && defensiveYardsInfo.newAwayYards >= 200) || (oldYA < 300 && defensiveYardsInfo.newAwayYards >= 300) || (oldYA < 350 && defensiveYardsInfo.newAwayYards >= 350) ||
                         (oldYA < 400 && defensiveYardsInfo.newAwayYards >= 400) || (oldYA < 450 && defensiveYardsInfo.newAwayYards >= 450) || (oldYA < 500 && defensiveYardsInfo.newAwayYards >= 500) || (oldYA < 550 && defensiveYardsInfo.newAwayYards >= 550)) {
@@ -865,6 +1240,11 @@
                 // create play-array to group fpts by multiple players in one play
                 if(!fantasyPlay[play.playID]) {
                     fantasyPlay[play.playID] = [];
+                }
+
+                let fumbleInfo;
+                if((play.description.includes('FUMBLES'))) {
+                    fumbleInfo = processFumble(play, play.relevantPlayers);
                 }
 
                 // INJURY PLAYS
@@ -1874,11 +2254,7 @@
                                 if(player.statType == 'passer') {
                                     let adjustedYards = player.yards;
                                     if(play.penalty == true) {
-                                        if(play.penaltyInfo.against == player.playerTeam) {
-                                            adjustedYards += play.penaltyInfo.totalYards;
-                                        } else {
-                                            adjustedYards = adjustedYards - play.penaltyInfo.totalYards;
-                                        }
+                                        adjustedYards = play.penaltyInfo.trueYards;
                                     }
                                     const fpts = adjustedYards * (score?.pass_yd || 0) + (score?.pass_att || 0) + (score?.pass_cmp || 0);
                                     const fptsPass = (score?.pass_att || 0);
@@ -1998,11 +2374,14 @@
                                         }
                                     }
                                     if(play.penalty == true) {
-                                        if(play.penaltyInfo.against == player.playerTeam) {
-                                            adjustedYards += play.penaltyInfo.totalYards;
-                                        } else {
-                                            adjustedYards = adjustedYards - play.penaltyInfo.totalYards;
+                                        for(const key in play.penaltyInfo.penalties) {
+                                            if(play.penaltyInfo.penalties[key].against == player.playerTeam) {
+                                                adjustedYards += play.penaltyInfo.penalties[key].yards;
+                                            } else {
+                                                adjustedYards = adjustedYards - play.penaltyInfo.penalties[key].yards;
+                                            }
                                         }
+                                        
                                     }
                                     let fpts = 0;
                                     let fptsRec = 0;
