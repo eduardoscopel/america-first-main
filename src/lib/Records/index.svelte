@@ -104,12 +104,12 @@
 
         {#if displayType == 'alltime'}
             {#if leagueWeekRecords.length}
-                <AllTimeRecords transactionTotals={totals} {leagueWeekRecords} {leagueRosterRecords} {allManagers} {leagueRecordArrays} bind:masterSelection={masterSelection} />
+                <AllTimeRecords transactionTotals={totals} {leagueWeekRecords} {leagueRosterRecords} {allManagers} {leagueRecordArrays} />
             {:else}
                 <p class="empty">No records <i>yet</i>...</p>
             {/if}
         {:else if displayType == 'yearly'}
-            <PerSeasonRecords transactionTotals={totals} {leagueRosterRecords} {seasonWeekRecords} {allManagers} {currentYear} {lastYear} bind:masterSelection={masterSelection} />
+            <PerSeasonRecords transactionTotals={totals} {leagueRosterRecords} {seasonWeekRecords} {allManagers} {currentYear} {lastYear} />
         {/if}
     </div>
 </div>

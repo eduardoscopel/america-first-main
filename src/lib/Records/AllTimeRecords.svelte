@@ -2,7 +2,7 @@
     import {round} from '$lib/utils/helper';
   	import RecordsAndRankings from './RecordsAndRankings.svelte'; 
 
-    export let masterSelection, leagueRosterRecords, allManagers, transactionTotals, leagueWeekRecords, leagueRecordArrays;
+    export let leagueRosterRecords, allManagers, transactionTotals, leagueWeekRecords, leagueRecordArrays;
 
     let lineupIQs = [];
     const tradesData = [];
@@ -232,5 +232,4 @@
     allTime={true}
     regular={selection == 'regular'}
     bind:selection={selection}
-    bind:masterSelection={masterSelection} 
 />

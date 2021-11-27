@@ -2,9 +2,8 @@
     import {round} from '$lib/utils/helper';
   	import RecordsAndRankings from './RecordsAndRankings.svelte';
     import { Icon } from '@smui/tab';
-import AllManagers from '$lib/Managers/AllManagers.svelte';
 
-    export let masterSelection, leagueRosterRecords, seasonWeekRecords, allManagers, currentYear, lastYear, transactionTotals;
+    export let leagueRosterRecords, seasonWeekRecords, allManagers, currentYear, lastYear, transactionTotals;
 
     const yearsObj = {};
     let years = [];
@@ -363,5 +362,4 @@ import AllManagers from '$lib/Managers/AllManagers.svelte';
         regular={selection == 'regular'}
         bind:selection={selection}
         bind:displayYear={displayYear}
-        bind:masterSelection={masterSelection} 
     />

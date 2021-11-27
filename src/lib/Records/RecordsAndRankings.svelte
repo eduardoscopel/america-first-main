@@ -1,17 +1,14 @@
 <script>
     import Button, { Group, Label } from '@smui/button';
     import BarChart from '../BarChart.svelte'
-    import { cleanName, generateGraph, gotoManager, round } from '$lib/utils/helper';
-    import { managers } from '$lib/utils/leagueInfo';
+    import { generateGraph, gotoManager, round, managers } from '$lib/utils/helper';
 
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table'; 
 
-    export let selection = 'regular', masterSelection, displayYear, waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerWeekTOPS, allManagers, displayObject, allTime=false;
+    export let selection = 'regular', displayYear, waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerWeekTOPS, allManagers, displayObject, allTime=false;
 
     let leagueManagers = {};
     const numManagers = managers.length;
-
-    let masterPrefix;
 
     const changeSelection = (s) => {
         selection = s;
@@ -475,17 +472,9 @@
 
     .playerInfo {
         display: inline-block;
-        /* display: flex; */
         padding: 0 0 0 20px;
     }
-
-    .fullFlex {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-around;
-        margin: 3em auto 5em;
-    }
-
+    
     .rankingHolder {
         display: block;
         width: 100%;
