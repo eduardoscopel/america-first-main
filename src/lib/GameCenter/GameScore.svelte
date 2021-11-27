@@ -33,7 +33,7 @@
                 newTimeHour = oldTimeHour - 1;
             }
             if(oldTimeHour == 12) {
-                timePart = 'AM';
+                timePart = 'AM'; 
             }
         } else if(timezone == 'MST') {
             if(oldTimeHour == 1) {

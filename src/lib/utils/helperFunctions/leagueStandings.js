@@ -66,7 +66,7 @@ export const getLeagueStandings = async () => {
 	// convert the json matchup responses
 	const matchupsJsonPromises = [];
 	for(const matchupRes of matchupsRes) {
-		const data = matchupRes.json();
+		const data = matchupRes.json(); 
 		matchupsJsonPromises.push(data)
 		if (!matchupRes.ok) {
 			throw new Error(data);

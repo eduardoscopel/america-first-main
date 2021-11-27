@@ -10,7 +10,7 @@
         matchScores = [];
         for(const matchup in weekMatchups) {
             const matchTeams = weekMatchups[matchup];
-            let matchID = matchTeams[0].matchID;
+            let matchID = matchTeams[0].matchID; 
 
             let toPlay = {
                 0: matchTeams[0].starters.length,

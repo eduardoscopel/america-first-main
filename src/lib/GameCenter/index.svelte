@@ -159,7 +159,7 @@
                         continue;
                     } else {
                         if(!positionLeaders[playersInfo.players[managerWeek.starters[i]].pos]) {
-                            positionLeaders[playersInfo.players[managerWeek.starters[i]].pos] = [];
+                            positionLeaders[playersInfo.players[managerWeek.starters[i]].pos] = []; 
                         }
                         const entry = {
                             playerID: managerWeek.starters[i],

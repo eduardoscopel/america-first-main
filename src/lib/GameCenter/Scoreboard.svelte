@@ -10,7 +10,7 @@
         gameScores = [];
         for(const matchup in nflMatchups) {
             const matchTeams = nflMatchups[matchup];
-            let gameID = matchTeams[0].gameID
+            let gameID = matchTeams[0].gameID;
             gamesObj[gameID] = {
                 gameID,
                 home: matchTeams[0],

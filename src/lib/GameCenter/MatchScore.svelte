@@ -7,7 +7,7 @@
         matchSelection = newMatchSelection;
         showMatchBox = true;
         showGameBox = false;
-        return matchSelection;
+        return matchSelection; 
     }
 
 </script>

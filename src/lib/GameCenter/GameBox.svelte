@@ -58,7 +58,7 @@
     // create top 10 points-scorers arrays for each position
     let positionRankArrays = {};
     const getPositionRankArrays = (positionLeaders) => {
-        positionRankArrays = {};
+        positionRankArrays = {}; 
         if(positions.includes('FLEX')) {
             positionRankArrays['FLEX'] = [];
         }
