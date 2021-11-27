@@ -4436,7 +4436,7 @@
                                             {/if}
                                         </div>
                                     {:else}
-                                        <img src="./injury.png" class="injury" alt="injury" />
+                                        <img src="./injured.png" class="injury" alt="injury" />
                                     {/if}
                                     {#if play.side == 'offense' || play.side == 'injury'}
                                         <img class="playerAvatar" style="{play.side == 'injury' ? "background-color: var(--gcInjury)" : null}" src="{play.playerInfo ? play.playerInfo.avatar : "https://sleepercdn.com/images/v2/icons/player_default.webp"}" alt="{play.playerInfo ? play.playerInfo.ln : "Player"}">
