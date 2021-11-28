@@ -45,9 +45,6 @@
                         teamColor: `background-color: #${nflTeams[starterInfo.t]?.color}6b` || `background-color: var(--boxShadowThree)`,
                         teamAltColor: `background-color: #${nflTeams[starterInfo.t]?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
                     }
-                    if(starterInfo.t && nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
-                        starterEntry.teamAltColor = `background-color: #ffffff52`;
-                    }
                     allStarters[recordManID].push(starterEntry);
                 }
             }
@@ -148,10 +145,6 @@
                             teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                             teamColor: `background-color: #${nflTeams[starterInfo.t]?.color}6b` || `background-color: var(--boxShadowThree)`,
                             teamAltColor: `background-color: #${nflTeams[starterInfo.t]?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
-                        }
-
-                        if(starterInfo.t && nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
-                            starterEntry.teamAltColor = `background-color: #ffffff52`;
                         }
 
                         if(yearSelection == currentYear) {
@@ -279,9 +272,6 @@
                             teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                             teamColor: `background-color: #${nflTeams[starterInfo.t]?.color}6b` || `background-color: var(--boxShadowThree)`,
                             teamAltColor: `background-color: #${nflTeams[starterInfo.t]?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
-                        }
-                        if(starterInfo.t && nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
-                            starterEntry.teamAltColor = `background-color: #ffffff52`;
                         }
                         if(!gameStarters[recordManID]) {
                             gameStarters[recordManID] = [];
@@ -1034,7 +1024,7 @@
     .gameHeaderBox {
         display: inline-flex;
         position: absolute;
-        z-index: 2;
+        z-index: 3;
         width: 96%;
         height: 104%;
         border: 0.25px solid #555;
@@ -1128,7 +1118,7 @@
     }
 
     .matchAvatar {
-        z-index: 1;
+        z-index: 2;
         display: inline-flex;
         flex-direction: row;
         position: relative;
@@ -1286,7 +1276,7 @@
         cursor: pointer;
         background-color: var(--aaa);
         border: 0.5px solid var(--g111);
-        z-index: 1;
+        z-index: 2;
     }
 
     .rosterRow {
@@ -1352,7 +1342,7 @@
     .selectedPosition:hover {
         cursor: pointer;
         border: 0.5px solid var(--g111);
-        z-index: 1;
+        z-index: 2;
     }
 
     .rosterRowBox {
@@ -1471,8 +1461,8 @@
                                 <div class="positionGroup">
                                     {#each positionGameStarters[gameSelection][game.home.sleeperID].starters[ix] as starter, iv}
                                         <div class="rosterRow" style="justify-content: flex-start; height: {100 / row}%">
-                                            <div class="avatarHolder" style="{row >= 2 && iv == 0 ? "border-radius: 1em 0 0 0;" : row >= 2 && iv == positionGameStarters[gameSelection][game.home.sleeperID].starters[ix].length - 1 ? "border-radius: 0 0 0 1em;" : row >= 2 && iv > 0 && iv < positionGameStarters[gameSelection][game.home.sleeperID].starters[ix].length - 1 ? "border-radius: 0;" : null} {starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 1% 0 0;" : "margin: 0 1% 0 0;"} right: 1%; {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 1; background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}">
-                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa);" : null}">
+                                            <div class="avatarHolder" style="{row >= 2 && iv == 0 ? "border-radius: 1em 0 0 0;" : row >= 2 && iv == positionGameStarters[gameSelection][game.home.sleeperID].starters[ix].length - 1 ? "border-radius: 0 0 0 1em;" : row >= 2 && iv > 0 && iv < positionGameStarters[gameSelection][game.home.sleeperID].starters[ix].length - 1 ? "border-radius: 0;" : null} {starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 1% 0 0;" : "margin: 0 1% 0 0;"} right: 1%; {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 2; background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}">
+                                                <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 2; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa);" : null}">
                                             </div>
                                             <div class="rosterPlayerInfo" style="{starter.pos == 'DEF' ? "margin: 0 2% 0 0;" : null}" >
                                                 {#if starter.pos == 'DEF'}
@@ -1495,7 +1485,7 @@
                                     <div class="rosterPosition {nflPositions[ix]}" style="height: {100 / row}%;">
                                         <div class="rosterRowBox" style="top: -2%; height: {100 * row}%; {positionPlayFilter.length > 0 && positionPlayFilter.includes(nflPositions[ix]) ? "border: 0.5px solid var(--g111); border-radius: 1em;" : null}"></div>
                                         {nflPositions[ix]}
-                                        <div class="selectedPosition" id="selectedPosition" on:click={() => multiFunction(null, null, 'position', nflPositions[ix], 0)} style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(nflPositions[ix]) ? "border: 0.5px solid var(--g111); border-radius: 1em; z-index: 1;" : null}"></div>
+                                        <div class="selectedPosition" id="selectedPosition" on:click={() => multiFunction(null, null, 'position', nflPositions[ix], 0)} style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(nflPositions[ix]) ? "border: 0.5px solid var(--g111); border-radius: 1em; z-index: 2;" : null}"></div>
                                     </div>
                                 </div>
                                 <div class="positionGroup">
@@ -1515,7 +1505,7 @@
                                                     {/if}
                                                 </div>
                                             </div>                                
-                                            <div class="avatarHolder" style="{starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 0 0 5%;" : "margin: 0 0 0 2%;"} left: 1%; {row >= 2 && iv == 0 ? "border-radius: 0 1em 0 0;" : row >= 2 && iv == positionGameStarters[gameSelection][game.away.sleeperID].starters[ix].length - 1 ? "border-radius: 0 0 1em 0;" : row >= 2 && iv > 0 && iv < positionGameStarters[gameSelection][game.away.sleeperID].starters[ix].length - 1 ? "border-radius: 0;" : "border-radius: 0 1em 1em 0;"} {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 1; background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}">
+                                            <div class="avatarHolder" style="{starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 0 0 5%;" : "margin: 0 0 0 2%;"} left: 1%; {row >= 2 && iv == 0 ? "border-radius: 0 1em 0 0;" : row >= 2 && iv == positionGameStarters[gameSelection][game.away.sleeperID].starters[ix].length - 1 ? "border-radius: 0 0 1em 0;" : row >= 2 && iv > 0 && iv < positionGameStarters[gameSelection][game.away.sleeperID].starters[ix].length - 1 ? "border-radius: 0;" : "border-radius: 0 1em 1em 0;"} {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 2; background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}">
                                                 <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa);" : null}">
                                             </div>
                                         </div>
@@ -1569,8 +1559,8 @@
                     <div class="rosterWrap">
                         {#each match.home.starters as starter}
                             <div class="rosterRow" style="justify-content: flex-start;">
-                                <div class="avatarHolder" style="{starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 1% 0 0;" : "margin: 0 1% 0 0;"} right: 1%; {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 1; background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}"> 
-                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 1; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa);" : null}">
+                                <div class="avatarHolder" style="{starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 1% 0 0;" : "margin: 0 1% 0 0;"} right: 1%; {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 2; background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}"> 
+                                    <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 2; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa);" : null}">
                                 </div>
                                 <div class="rosterPlayerInfo" style="{starter.pos == 'DEF' ? "margin: 0 2% 0 0;" : null}" >
                                     {#if starter.pos == 'DEF'}
@@ -1593,7 +1583,7 @@
                             <div class="rosterPosition {position}">
                                 <div class="rosterRowBox" style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(position)  ? "border: 0.5px solid var(--g111); border-radius: 1em;" : null}" />
                                 {position}
-                                <div class="selectedPosition" on:click={() => multiFunction(null, null, 'position', position, 0)} style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(position) ? "border: 0.5px solid var(--g111); border-radius: 1em; z-index: 1;" : null}"></div>
+                                <div class="selectedPosition" on:click={() => multiFunction(null, null, 'position', position, 0)} style="{positionPlayFilter.length > 0 && positionPlayFilter.includes(position) ? "border: 0.5px solid var(--g111); border-radius: 1em; z-index: 2;" : null}"></div>
                             </div>
                         {/each}
                     </div>
@@ -1613,7 +1603,7 @@
                                         {/if}
                                     </div>
                                 </div>                                
-                                <div class="avatarHolder" style="{starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 0 0 5%;" : "margin: 0 0 0 2%;"} left: 1%; border-radius: 0 1em 1em 0; {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 1; background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}">
+                                <div class="avatarHolder" style="{starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 0 0 5%;" : "margin: 0 0 0 2%;"} left: 1%; border-radius: 0 1em 1em 0; {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 2; background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}">
                                     <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="{viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa);" : null}">
                                 </div>
                             </div>

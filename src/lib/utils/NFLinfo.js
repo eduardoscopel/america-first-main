@@ -18,7 +18,7 @@ export const nflTeams = {
         fn: "Atlanta",
         ln: "Falcons",
         color: "000000",
-        alternateColor: "000000",
+        alternateColor: "c4223d",
         status: "active",
     },
     BAL: {
@@ -58,7 +58,7 @@ export const nflTeams = {
         fn: "Chicago",
         ln: "Bears",
         color: "152644",
-        alternateColor: "0b162a",
+        alternateColor: "f26522",
         status: "active",
     },
     CIN: {
@@ -230,8 +230,8 @@ export const nflTeams = {
         espnAbbreviation: 'NO',
         fn: "New Orleans",
         ln: "Saints",
-        color: "020202",
-        alternateColor: "000000",
+        color: "c7a876",
+        alternateColor: "020202",
         status: "active",
     },
     NYG: {
