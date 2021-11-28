@@ -3228,6 +3228,8 @@
                 let away = game[1].sleeperID;
                 let awayEspn = game[1].team.espnAbbreviation;
                 let awayDefense = null;
+
+                let gameStartersArray = relevancyKey.startersArray.filter(s => s.t == home || s.t == away);
             
                 let homeDefStarted = new Boolean (false);
                 let awayDefStarted = new Boolean (false);
@@ -3421,6 +3423,13 @@
                             if(noPlay == false && play.participants) {
                                 // loop thru every player involved in play
                                 for(const playerKey in play.participants) {
+
+                                    // skip play participants that aren't scored
+                                    if((play.participants[playerKey].type == 'tackler' && !score.idp_tkl && !score.idp_tkl_loss && !score.idp_tkl_solo && !score.tkl && !score.tkl_loss && !score.tkl_solo && !score.def_st_tkl_solo && !score.st_tkl_solo && !score.bonus_tkl_10p)
+                                        || (play.participants[playerKey].type == 'assistedBy' && !score.idp_tkl_ast && score.tkl_ast)) {
+                                        continue;
+                                    } 
+
                                     // which team is player on
                                     const linkType = 'info';
                                     let espnPlayerInfo = await parseEspnTeamID(play.participants[playerKey].athlete.$ref, linkType);
@@ -3468,6 +3477,9 @@
                                             sleeperMatch[0].t = playerTeam_sleeper;
                                             playersInfo.players[sleeperMatch[0].playerID].t = playerTeam_sleeper;
                                         }
+                                        // remove from gameStartersArray (later we check who is left and then update their team if necessary)
+                                        gameStartersArray = gameStartersArray.filter(s => s.playerID != sleeperMatch[0].playerID);
+
                                         const relevantEntry = {
                                             playerInfo: sleeperMatch[0],
                                             manager: sleeperMatch[0].owner,
@@ -3668,6 +3680,14 @@
                         }
                     }
 
+                    // if player NEVER showed up in any way, but scored points this week, we know he's on different team
+                    // set team to null so that he's removed from this Game Box (and he'll get updated when he shows up in play-by-play of actual team)
+                    for(const noParticipant in gameStartersArray) {
+                        if(gameStartersArray[noParticipant].fpts != 0) {
+                            playersInfo.players[gameStartersArray[noParticipant].playerID].t = null;
+                        }
+                    }
+
                     let fantasyRelevantPlays = fantasyRelevantPlaysForward.slice().reverse();
                     let fantasyProducts_matchGame = processPlays(fantasyRelevantPlays, defYdsThreshBreakers, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, homeDefPtsAllowed, awayDefPtsAllowed, gameState, relevancyKey.startersArray);
 
@@ -3723,6 +3743,8 @@
             let away = game[1].sleeperID;
             let awayEspn = game[1].team.espnAbbreviation;
             let awayDefense = null;
+
+            let gameStartersArray = startersArray.filter(s => s.t == home || s.t == away);
 
             let homeDefStarted = new Boolean (false);
             let awayDefStarted = new Boolean (false);
@@ -3911,6 +3933,13 @@
                         if(noPlay == false && play.participants) {
                             // loop thru every player involved in play
                             for(const playerKey in play.participants) {
+
+                                // skip play participants that aren't scored
+                                if((play.participants[playerKey].type == 'tackler' && !score.idp_tkl && !score.idp_tkl_loss && !score.idp_tkl_solo && !score.tkl && !score.tkl_loss && !score.tkl_solo && !score.def_st_tkl_solo && !score.st_tkl_solo && !score.bonus_tkl_10p)
+                                    || (play.participants[playerKey].type == 'assistedBy' && !score.idp_tkl_ast && score.tkl_ast)) {
+                                    continue;
+                                } 
+
                                 // which team is player on
                                 const linkType = 'info';
                                 let espnPlayerInfo = await parseEspnTeamID(play.participants[playerKey].athlete.$ref, linkType);
@@ -3953,6 +3982,9 @@
                                         sleeperMatch[0].t = playerTeam_sleeper;
                                         playersInfo.players[sleeperMatch[0].playerID].t = playerTeam_sleeper;
                                     }
+                                    // remove from gameStartersArray (later we check who is left and then update their team if necessary)
+                                    gameStartersArray = gameStartersArray.filter(s => s.playerID != sleeperMatch[0].playerID);
+
                                     const relevantEntry = {
                                         playerInfo: sleeperMatch[0],
                                         manager: sleeperMatch[0].owner,
@@ -4150,6 +4182,14 @@
                                 fantasyRelevantPlaysForward.push(playEntry);
                             }
                         }
+                    }
+                }
+
+                // if player NEVER showed up in any way, but scored points this week, we know he's on different team
+                // set team to null so that he's removed from this Game Box (and he'll get updated when he shows up in play-by-play of actual team)
+                for(const noParticipant in gameStartersArray) {
+                    if(gameStartersArray[noParticipant].fpts != 0) {
+                        playersInfo.players[gameStartersArray[noParticipant].playerID].t = null;
                     }
                 }
                 

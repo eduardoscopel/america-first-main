@@ -309,7 +309,7 @@ const leagueIdArray = [];
 const leagueDataArray = [];
 leagueIdArray.push(curSeason);
 
-export const getYearMatchups = async (yearSelection) => {
+export const getYearMatchups = async (yearSelection, weekSelection, purpose) => {
 
     let matchupsData;
 
@@ -361,18 +361,15 @@ export const getYearMatchups = async (yearSelection) => {
         for(const managerID in managers) {
             const manager = managers[managerID];
 
-            const entryMan = {
-                managerID: manager.managerID,
-                rosterID: manager.roster,
-                name: manager.name,
-                status: manager.status,
-                yearsactive: manager.yearsactive,
-                abbreviation: manager.abbreviation,
-            }
-
-            if(!yearManagers[manager.roster] && manager.yearsactive.includes(yearSelection)) {
-                yearManagers[manager.roster] = [];
-                yearManagers[manager.roster].push(entryMan); 
+            if(manager.yearsactive.includes(yearSelection)) {
+                yearManagers[manager.roster] = {
+                    managerID: manager.managerID,
+                    rosterID: manager.roster,
+                    name: manager.name,
+                    status: manager.status,
+                    yearsactive: manager.yearsactive,
+                    abbreviation: manager.abbreviation,
+                }
             }
         }
 
@@ -418,14 +415,18 @@ export const getYearMatchups = async (yearSelection) => {
             }
         }
 
-
-        let POrecordsWeek = playoffStart + playoffLength - 1;
+        let searchStart;
+        if(purpose == 'gameCenter') {
+            searchStart = playoffStart + playoffLength - 1;
+        } else if(purpose == 'standings') {
+            searchStart = playoffStart - 1;
+        }
 
         const matchupsPromises = [];
 
-        while(POrecordsWeek > 0) {
-            matchupsPromises.push(fetch(`https://api.sleeper.app/v1/league/${yearLeagueID}/matchups/${POrecordsWeek}`, {compress: true}))
-            POrecordsWeek--;
+        while(searchStart > 0) {
+            matchupsPromises.push(fetch(`https://api.sleeper.app/v1/league/${yearLeagueID}/matchups/${searchStart}`, {compress: true}))
+            searchStart--;
         }
 
         const matchupsRes = await waitForAll(...matchupsPromises).catch((err) => { console.error(err); });
@@ -483,14 +484,14 @@ const processMatchups = (inputMatchups, yearManagers, rosters, users, week) => {
 		}
 		let user = users[rosters[match.roster_id - 1].owner_id];
         let recordManager = yearManagers[match.roster_id]; 
-		let recordManID = yearManagers[match.roster_id][0].managerID;
+		let recordManID = recordManager.managerID;
 
 		matchups[match.matchup_id].push({
 			manager: {
 				name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
 				avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
-				realname: recordManager[0].name,
-                abbreviation: recordManager[0].abbreviation,
+				realname: recordManager.name,
+                abbreviation: recordManager.abbreviation,
                 rosterID: match.roster_id,
                 recordManID,
 			},

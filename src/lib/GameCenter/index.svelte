@@ -90,8 +90,10 @@
         let newNflMatchups = await getNflScoreboard(newYearSelection, weekSelection).catch((err) => { console.error(err); });;
         nflMatchups = newNflMatchups.nflWeek;
 
-        let newYearMatchups = await getYearMatchups(newYearSelection, weekSelection).catch((err) => { console.error(err); });;
+        let purpose = 'gameCenter';
+        let newYearMatchups = await getYearMatchups(newYearSelection, weekSelection, purpose).catch((err) => { console.error(err); });;
         weekMatchups = newYearMatchups.matchupWeeks[weekSelection - 1].matchups;
+        matchupsInfo = newYearMatchups;
         yearLeagueData = newYearMatchups.yearLeagueData;
         rosterData = newYearMatchups.rosters;
         users = newYearMatchups.users;

@@ -56,10 +56,15 @@
     const changeYear = async (selectedYear) => {
         newLoading = true;
         displayYear = selectedYear;
-        let yearMatchups = await getYearMatchups(selectedYear);
+        let purpose = 'standings';
+        let yearMatchups = await getYearMatchups(selectedYear, 1, purpose);
 
         let regularSeasonLength = yearMatchups.yearLeagueData.settings.playoff_week_start - 1;
-        yearMatchups.rawData = yearMatchups.rawData.slice(0, regularSeasonLength - 1);
+        if(displayYear != currentYear) {
+            yearMatchups.rawData = yearMatchups.rawData.slice(0, regularSeasonLength + 1);
+        } else {
+            yearMatchups.rawData = yearMatchups.rawData.slice(0, yearMatchups.week - 1);
+        }
 
         let medianMatch = new Boolean (false);
         if(yearMatchups.yearLeagueData.settings.league_average_match == 1) {
@@ -67,8 +72,9 @@
         }
 
         let newStandings = {};
-        for(const matchup of yearMatchups.rawData) {
-            newStandings = processStandings(matchup, newStandings, yearMatchups.rosters, medianMatch, yearMatchups.managers);
+        
+        for(let i = 0; i < yearMatchups.rawData.length; i++) {
+            newStandings = processStandings(yearMatchups.rawData[i], newStandings, yearMatchups.rosters, medianMatch, yearMatchups.managers);
         }
 
         for(const standingKey in newStandings) {
