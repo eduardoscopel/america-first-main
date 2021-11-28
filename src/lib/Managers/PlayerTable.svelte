@@ -17,7 +17,8 @@
     let masterPrefix;
     let selectedYear = currentYear;
 
-    let weekBests, weekWorsts, periodBests, periodWorsts, blowoutBests, blowoutWorsts, narrowBests, narrowWorsts, playerWeekBests, playerWeekMissedBests, playerPeriodBests;
+    let weekBests, weekWorsts, periodBests, periodWorsts, blowoutBests, blowoutWorsts, narrowBests, narrowWorsts, playerWeekBests, playerWeekMissedBests, playerPeriodBests, headToHeads;
+    let headShowTies = false;
     const positionRecords = {
         week_Top: {},
         period_Top: {},
@@ -56,6 +57,8 @@
         recordPrefix = "Regular Season";
         selection = 'regular';
         showEmpty = false;
+        headToHeads = [];
+        headShowTies = false;
         
         if(displayType == 'alltime') {
             masterPrefix = "All-Time";
@@ -77,6 +80,14 @@
                 positionRecords.period_Top[position] = managerRecords.playerPositionRecords.alltime.regularSeason[recordManID][position].period_Top;
             }
 
+            for(const opponent in managerRecords.headToHeadRecords.regularSeason.alltime[recordManID]) {
+                headToHeads.push(managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][opponent]);
+                if(managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][opponent].ties > 0) {
+                    headShowTies = true;
+                }
+            }
+            headToHeads = headToHeads.sort((a, b) => b.wins - a.wins);
+
         } else if(displayType == 'yearly') {
             masterPrefix = displayYear;
             masterSelection = 'yearly';
@@ -96,12 +107,22 @@
                 positionRecords.week_Top[position] = managerRecords.playerPositionRecords.years[displayYear].regularSeason[recordManID][position].week_Top;
                 positionRecords.period_Top[position] = managerRecords.playerPositionRecords.years[displayYear].regularSeason[recordManID][position].period_Top;
             }
+
+            for(const opponent in managerRecords.headToHeadRecords.regularSeason.years[displayYear][recordManID]) {
+                headToHeads.push(managerRecords.headToHeadRecords.regularSeason.years[displayYear][recordManID][opponent]);
+                if(managerRecords.headToHeadRecords.regularSeason.years[displayYear][recordManID][opponent].ties > 0) {
+                    headShowTies = true;
+                }
+            }
+            headToHeads = headToHeads.sort((a, b) => b.wins - a.wins);
         }
     }
 
     const setPlayoffsTable = (managerRecords, displayType, displayYear) => {
         recordPrefix = "Playoffs";
         selection = 'playoffs';
+        headToHeads = [];
+        headShowTies = false;
 
         if(displayType == 'alltime' && managerRecords.managerRecordArrays.alltime.playoffs[recordManID]) {
             showEmpty = false;
@@ -123,6 +144,14 @@
                 positionRecords.week_Top[position] = managerRecords.playerPositionRecords.alltime.playoffs[recordManID][position].week_Top;
                 positionRecords.period_Top[position] = managerRecords.playerPositionRecords.alltime.playoffs[recordManID][position].period_Top;
             }
+
+            for(const opponent in managerRecords.headToHeadRecords.playoffs.alltime[recordManID]) {
+                headToHeads.push(managerRecords.headToHeadRecords.playoffs.alltime[recordManID][opponent]);
+                if(managerRecords.headToHeadRecords.playoffs.alltime[recordManID][opponent].ties > 0) {
+                    headShowTies = true;
+                }
+            }
+            headToHeads = headToHeads.sort((a, b) => b.wins - a.wins);
         } else if(displayType == 'yearly' && managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID]) {
             showEmpty = false;
             masterPrefix = displayYear;
@@ -143,6 +172,14 @@
                 positionRecords.week_Top[position] = managerRecords.playerPositionRecords.years[displayYear].playoffs[recordManID][position].week_Top;
                 positionRecords.period_Top[position] = managerRecords.playerPositionRecords.years[displayYear].playoffs[recordManID][position].period_Top;
             }
+
+            for(const opponent in managerRecords.headToHeadRecords.playoffs.years[displayYear][recordManID]) {
+                headToHeads.push(managerRecords.headToHeadRecords.playoffs.years[displayYear][recordManID][opponent]);
+                if(managerRecords.headToHeadRecords.playoffs.years[displayYear][recordManID][opponent].ties > 0) {
+                    headShowTies = true;
+                }
+            }
+            headToHeads = headToHeads.sort((a, b) => b.wins - a.wins);
         } else if(displayType == 'alltime' && !managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID]) {
             showEmpty = true;
             emptyMessage = "No Playoff Records Yet...";
@@ -160,6 +197,8 @@
         recordPrefix = "Combined";
         selection = 'combined';
         showEmpty = false;
+        headToHeads = [];
+        headShowTies = false;
 
         if(displayType == 'alltime') {
             masterPrefix = "All-Time";
@@ -180,6 +219,14 @@
                 positionRecords.week_Top[position] = managerRecords.playerPositionRecords.alltime.combined[recordManID][position].week_Top;
                 positionRecords.period_Top[position] = managerRecords.playerPositionRecords.alltime.combined[recordManID][position].period_Top;
             }
+
+            for(const opponent in managerRecords.headToHeadRecords.combined.alltime[recordManID]) {
+                headToHeads.push(managerRecords.headToHeadRecords.combined.alltime[recordManID][opponent]);
+                if(managerRecords.headToHeadRecords.combined.alltime[recordManID][opponent].ties > 0) {
+                    headShowTies = true;
+                }
+            }
+            headToHeads = headToHeads.sort((a, b) => b.wins - a.wins);
         } else if(displayType == 'yearly') {
             masterPrefix = displayYear;
             masterSelection = 'yearly';
@@ -199,6 +246,14 @@
                 positionRecords.week_Top[position] = managerRecords.playerPositionRecords.years[displayYear].combined[recordManID][position].week_Top;
                 positionRecords.period_Top[position] = managerRecords.playerPositionRecords.years[displayYear].combined[recordManID][position].period_Top;
             }
+
+            for(const opponent in managerRecords.headToHeadRecords.comined.years[displayYear][recordManID]) {
+                headToHeads.push(managerRecords.headToHeadRecords.combined.years[displayYear][recordManID][opponent]);
+                if(managerRecords.headToHeadRecords.combined.years[displayYear][recordManID][opponent].ties > 0) {
+                    headShowTies = true;
+                }
+            }
+            headToHeads = headToHeads.sort((a, b) => b.wins - a.wins);
         }
     }
 
@@ -1236,6 +1291,64 @@
                 {:else}
                     <div class="showEmpty">{emptyMessage}</div>
                 {/if}    
+            </div>
+        </div>
+        <div class="headerRow">
+            <div class="headerLabel" style="justify-content: center">Head to Head</div>
+        </div>
+        <div class="recordsWrap">
+            <div class="columnWrap" style="width: 98%;">
+                {#if showEmpty == false}
+                    {#if headToHeads && headToHeads.length}
+                        <DataTable class="recordTable" style="width: 525px;">
+                            <Head>
+                                <Row>
+                                    <Cell class="header" colspan=8>
+                                        <p>
+                                            Records Against Other Managers<br>
+                                            {recordPrefix} 
+                                        </p>
+                                    </Cell>  
+                                </Row>
+                                <Row>
+                                    <Cell class="header"></Cell>
+                                    <Cell class="header">Manager</Cell>
+                                    <Cell class="header">W</Cell>
+                                    {#if headShowTies == true}
+                                        <Cell class="header">T</Cell>
+                                    {/if}
+                                    <Cell class="header">L</Cell>
+                                    <Cell class="header">PF</Cell>
+                                    <Cell class="header">PA</Cell>
+                                    <Cell class="header">Diff</Cell>
+                                </Row>
+                            </Head>
+                            <Body>
+                                {#each headToHeads as opponent, ix}
+                                    <Row>
+                                        <Cell>{ix + 1}</Cell>
+                                        <Cell class="cellName" on:click={() => gotoManager(opponent.againstRecordManID)}>
+                                            {opponent.againstManager.realname}
+                                            {#if masterSelection == 'yearly'}
+                                                <div class="fantasyTeamName">({opponent.againstManager.name})</div>
+                                            {/if}
+                                        </Cell>
+                                        <Cell class="center">{opponent.wins}</Cell>
+                                        {#if headShowTies == true}
+                                            <Cell class="center">{opponent.ties}</Cell>
+                                        {/if}
+                                        <Cell class="center">{opponent.losses}</Cell>
+                                        <Cell class="center">{round(opponent.fpts)}</Cell>
+                                        <Cell class="center">{round(opponent.fptsAgainst)}</Cell>
+                                        <Cell class="center">{round(opponent.fpts - opponent.fptsAgainst)}</Cell>
+                                    </Row>
+                                {/each}
+                            </Body>
+                        </DataTable>
+                    {/if}
+                {:else}
+                    <div class="showEmpty">{emptyMessage}</div>
+                {/if}   
             </div>
         </div>
     </div>

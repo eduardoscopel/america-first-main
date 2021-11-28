@@ -151,6 +151,21 @@ export const getManagerRecords = async (refresh = false) => {
 
 	let POplayerRecords = {};
 
+	let headToHeadRecords = {
+		regularSeason: {
+			alltime: {},
+			years: {},
+		},
+		playoffs: {
+			alltime: {},
+			years: {},
+		},
+		combined: {
+			alltime: {},
+			years: {},
+		},
+	}
+
 	let playerPositionRecords = {
 		league: {
 			years: {},
@@ -557,6 +572,10 @@ export const getManagerRecords = async (refresh = false) => {
 		masterRecordBook.players.managers.regularSeason.years[year] = [];
 		masterRecordBook.players.managers.combined.years[year] = [];
 		masterRecordBook.players.managers.totals.years[year] = [];
+		// Head to Head Objects
+		headToHeadRecords.regularSeason.years[year] = {};
+		headToHeadRecords.playoffs.years[year] = {};
+		headToHeadRecords.combined.years[year] = {};
 	
 		if(startWeek > playoffStart - 1 || leagueData.status == 'complete') {
 			// process all the PLAYOFFS matchups
@@ -1767,81 +1786,81 @@ export const getManagerRecords = async (refresh = false) => {
 
 				// update recordbook entries
 				if(home.fpts != away.fpts) {
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchWin = true;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchLoss = true;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchDifferential = home.fpts - away.fpts;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchDifferential = away.fpts - home.fpts;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchWin = true;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchLoss = true;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchDifferential = home.fpts - away.fpts;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchDifferential = away.fpts - home.fpts;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).matchWin = true;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).matchLoss = true;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).fptsAgainst = away.fpts;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).fptsAgainst = home.fpts;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).againstManager = away.manager;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).againstManager = home.manager;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).againstRecordManID = away.recordManID;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).againstRecordManID = home.recordManID;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).matchDifferential = home.fpts - away.fpts;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).matchDifferential = away.fpts - home.fpts;
+					masterRecordBook.league.combined.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).matchWin = true;
+					masterRecordBook.league.combined.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).matchLoss = true;
+					masterRecordBook.league.combined.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).fptsAgainst = away.fpts;
+					masterRecordBook.league.combined.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).fptsAgainst = home.fpts;
+					masterRecordBook.league.combined.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).againstManager = away.manager;
+					masterRecordBook.league.combined.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).againstManager = home.manager;
+					masterRecordBook.league.combined.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).againstRecordManID = away.recordManID;
+					masterRecordBook.league.combined.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).againstRecordManID = home.recordManID;
+					masterRecordBook.league.combined.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).matchDifferential = home.fpts - away.fpts;
+					masterRecordBook.league.combined.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).matchDifferential = away.fpts - home.fpts;
 
-					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchWin = true;
-					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchLoss = true;
-					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
-					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
-					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
-					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
-					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
-					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
-					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchDifferential = home.fpts - away.fpts;
-					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchDifferential = away.fpts - home.fpts;
-					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchWin = true;
-					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchLoss = true;
-					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
-					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
-					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
-					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
-					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
-					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
-					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchDifferential = home.fpts - away.fpts;
-					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchDifferential = away.fpts - home.fpts;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).matchWin = true;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).matchLoss = true;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).fptsAgainst = away.fpts;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).fptsAgainst = home.fpts;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).againstManager = away.manager;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).againstManager = home.manager;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).againstRecordManID = away.recordManID;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).againstRecordManID = home.recordManID;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).matchDifferential = home.fpts - away.fpts;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).matchDifferential = away.fpts - home.fpts;
+					masterRecordBook.managers.combined.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).matchWin = true;
+					masterRecordBook.managers.combined.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).matchLoss = true;
+					masterRecordBook.managers.combined.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).fptsAgainst = away.fpts;
+					masterRecordBook.managers.combined.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).fptsAgainst = home.fpts;
+					masterRecordBook.managers.combined.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).againstManager = away.manager;
+					masterRecordBook.managers.combined.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).againstManager = home.manager;
+					masterRecordBook.managers.combined.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).againstRecordManID = away.recordManID;
+					masterRecordBook.managers.combined.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).againstRecordManID = home.recordManID;
+					masterRecordBook.managers.combined.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).matchDifferential = home.fpts - away.fpts;
+					masterRecordBook.managers.combined.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).matchDifferential = away.fpts - home.fpts;
 				} else if(home.fpts == away.fpts) {
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchTie = true;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchTie = true;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
-					masterRecordBook.league.regularSeason.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchTie = true;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchTie = true;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
-					masterRecordBook.league.combined.years[year].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).matchTie = true;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).matchTie = true;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).fptsAgainst = away.fpts;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).fptsAgainst = home.fpts;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).againstManager = away.manager;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).againstManager = home.manager;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).againstRecordManID = away.recordManID;
+					masterRecordBook.league.regularSeason.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).againstRecordManID = home.recordManID;
+					masterRecordBook.league.combined.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).matchTie = true;
+					masterRecordBook.league.combined.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).matchTie = true;
+					masterRecordBook.league.combined.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).fptsAgainst = away.fpts;
+					masterRecordBook.league.combined.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).fptsAgainst = home.fpts;
+					masterRecordBook.league.combined.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).againstManager = away.manager;
+					masterRecordBook.league.combined.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).againstManager = home.manager;
+					masterRecordBook.league.combined.years[year].find(p => p.week == home.week && p.recordManID == home.recordManID).againstRecordManID = away.recordManID;
+					masterRecordBook.league.combined.years[year].find(p => p.week == away.week && p.recordManID == away.recordManID).againstRecordManID = home.recordManID;
 
-					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchTie = true;
-					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchTie = true;
-					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
-					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
-					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
-					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
-					masterRecordBook.managers.regularSeason.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
-					masterRecordBook.managers.regularSeason.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
-					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].matchTie = true;
-					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].matchTie = true;
-					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].fptsAgainst = away.fpts;
-					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].fptsAgainst = home.fpts;
-					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstManager = away.manager;
-					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstManager = home.manager;
-					masterRecordBook.managers.combined.years[year][home.recordManID].filter(p => p.week == home.week && p.recordManID == home.recordManID)[0].againstRecordManID = away.recordManID;
-					masterRecordBook.managers.combined.years[year][away.recordManID].filter(p => p.week == away.week && p.recordManID == away.recordManID)[0].againstRecordManID = home.recordManID;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).matchTie = true;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).matchTie = true;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).fptsAgainst = away.fpts;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).fptsAgainst = home.fpts;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).againstManager = away.manager;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).againstManager = home.manager;
+					masterRecordBook.managers.regularSeason.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).againstRecordManID = away.recordManID;
+					masterRecordBook.managers.regularSeason.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).againstRecordManID = home.recordManID;
+					masterRecordBook.managers.combined.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).matchTie = true;
+					masterRecordBook.managers.combined.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).matchTie = true;
+					masterRecordBook.managers.combined.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).fptsAgainst = away.fpts;
+					masterRecordBook.managers.combined.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).fptsAgainst = home.fpts;
+					masterRecordBook.managers.combined.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).againstManager = away.manager;
+					masterRecordBook.managers.combined.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).againstManager = home.manager;
+					masterRecordBook.managers.combined.years[year][home.recordManID].find(p => p.week == home.week && p.recordManID == home.recordManID).againstRecordManID = away.recordManID;
+					masterRecordBook.managers.combined.years[year][away.recordManID].find(p => p.week == away.week && p.recordManID == away.recordManID).againstRecordManID = home.recordManID;
 				}	
 			}
 		}
@@ -1862,6 +1881,13 @@ export const getManagerRecords = async (refresh = false) => {
 					for(const recordManID in typeRecord.years[year]) {
 						const recordMan = typeRecord.years[year][recordManID];
 
+						if(!headToHeadRecords[recordType].alltime[recordManID]) {
+							headToHeadRecords[recordType].alltime[recordManID] = {};
+						}
+						if(!headToHeadRecords[recordType].years[year][recordManID]) {
+							headToHeadRecords[recordType].years[year][recordManID] = {};
+						}
+
 						let fptsTotal = 0;
 						let fptsAgainstTotal = 0;
 						let winTotal = 0;
@@ -1878,6 +1904,47 @@ export const getManagerRecords = async (refresh = false) => {
 						let bottomScores = 0;
 						// looping thru each week in that year
 						for(let i = 0; i < recordMan.length; i++) {
+
+							// add each week's win/loss to head-to-head records
+							if(!headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID]) {
+								headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID] = {
+									wins: 0,
+									ties: 0,
+									losses: 0,
+									fpts: 0,
+									fptsAgainst: 0,
+									againstRecordManID: recordMan[i].againstRecordManID,
+									againstManager: recordMan[i].againstManager,
+									showTies: false,
+								}
+							}
+							if(!headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID]) {
+								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID] = {
+									wins: 0,
+									ties: 0,
+									losses: 0,
+									fpts: 0,
+									fptsAgainst: 0,
+									againstRecordManID: recordMan[i].againstRecordManID,
+									againstManager: recordMan[i].againstManager,
+									showTies: false,
+								}
+							}
+							if(recordMan[i].matchWin == true) {
+								headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].wins++;
+								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].wins++;
+							} else if(recordMan[i].matchTie == true) {
+								headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].ties++;
+								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].ties++;
+								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].showTies = true;
+							} else if(recordMan[i].matchLoss == true) {
+								headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].losses++;
+								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].losses++;
+							}
+							headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].fpts += recordMan[i].fpts;
+							headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].fpts += recordMan[i].fpts;
+							headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].fptsAgainst += recordMan[i].fptsAgainst;
+							headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].fptsAgainst += recordMan[i].fptsAgainst;
 							// add each week's score to running total
 							fptsTotal += recordMan[i].fpts;
 							fptsAgainstTotal += recordMan[i].fptsAgainst;
@@ -1902,17 +1969,17 @@ export const getManagerRecords = async (refresh = false) => {
 							epeTiesTotal += epeTies;
 							// update that week's EPE stats in league & manager(??) records
 							const epePerc = (epeWins + epeTies / 2) / (epeWins + epeTies + epeLosses) * 100;
-							masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID)[0].epeWins = epeWins;
-							masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID)[0].epeLosses = epeLosses;
-							masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID)[0].epeTies = epeTies;
-							masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID)[0].epePerc = epePerc;
+							masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).epeWins = epeWins;
+							masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).epeLosses = epeLosses;
+							masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).epeTies = epeTies;
+							masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).epePerc = epePerc;
 							// determine if top score of week AND update that week's entry in league & manager records
 							if(epeLosses == 0) {			
 								topScores++;
-								masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID)[0].topScore = true;
+								masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).topScore = true;
 							} else if(epeWins == 0) {
 								bottomScores++;
-								masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID)[0].bottomScore = true;
+								masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).bottomScore = true;
 							}
 							// determine if beat median score AND update that week's entry in league & manager(??) records
 							let scoresArray = masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week);
@@ -1921,13 +1988,13 @@ export const getManagerRecords = async (refresh = false) => {
 							const medianScore = (scoresArray[0].fpts + scoresArray[1].fpts) / 2;
 							if(recordMan[i].fpts > medianScore) {
 								weekWinners++;
-								masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID)[0].weekWinner = true;
+								masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).weekWinner = true;
 							} else if(recordMan[i].fpts < medianScore) {
 								weekLosers++;
-								masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID)[0].weekLoser = true;
+								masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).weekLoser = true;
 							} else if(recordMan[i].fpts == medianScore) {
 								weekTies++;
-								masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID)[0].weekTie = true;
+								masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).weekTie = true;
 							}
 						}
 
@@ -2463,6 +2530,7 @@ export const getManagerRecords = async (refresh = false) => {
 		playerPositionRecords: playerPositionRecords.managers,
 		managerRecordArrays: recordArrays.managers,
 		playerBook: masterRecordBook.players.managers,
+		headToHeadRecords,
 	}
 
 	managerrecords.update(() => managerRecordsData);
