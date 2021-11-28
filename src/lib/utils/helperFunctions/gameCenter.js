@@ -125,6 +125,10 @@ export const getNflScoreboard = async (yearSelection, weekSelection) => {
         weekSelection = week;
     }
 
+    const getSleeperID = (searchID) => {
+        let sleeperID = nflTeams.find(n => n.espnID == searchID).sleeperID;
+        return sleeperID;
+    }
 
     if(yearSelection == year && weekSelection == week) {
 
@@ -142,15 +146,6 @@ export const getNflScoreboard = async (yearSelection, weekSelection) => {
             }
         }
         const scoreboardsData = await waitForAll(...scoreboardJsonPromises).catch((err) => { console.error(err); });
-        const getSleeperID = (searchID) => {
-            let sleeperID;
-            for(const key in nflTeams) {
-                if(nflTeams[key].espnID == searchID) {
-                    sleeperID = key;
-                }
-            }
-            return sleeperID;
-        }
 
         const nflGames = scoreboardsData[0].events;
         let gameInfo = {};
@@ -165,7 +160,7 @@ export const getNflScoreboard = async (yearSelection, weekSelection) => {
                 let sleeperID = getSleeperID(team.id);
 
                 const teamEntry = {
-                    team: nflTeams[sleeperID],
+                    team: nflTeams.find(n => n.sleeperID == sleeperID),
                     sleeperID,
                     score: team.score,
                     homeAway: team.homeAway,
@@ -220,17 +215,6 @@ export const getNflScoreboard = async (yearSelection, weekSelection) => {
         }
         const gamesData = await waitForAll(...gameJsonPromises).catch((err) => { console.error(err); });
 
-
-        const getSleeperID = (searchID) => {
-            let sleeperID;
-            for(const key in nflTeams) {
-                if(nflTeams[key].espnID == searchID) {
-                    sleeperID = key;
-                }
-            }
-            return sleeperID;
-        }
-
         const getScore = async (scoreLink) => {
             const secureScoreLink = 'https' + scoreLink.slice(4); 
             const scoresPromises = [];
@@ -282,7 +266,7 @@ export const getNflScoreboard = async (yearSelection, weekSelection) => {
                 let status = await getStatus(nflGame.competitions[0].status.$ref);
 
                 const teamEntry = {
-                    team: nflTeams[sleeperID],
+                    team: nflTeams.find(n => n.sleeperID == sleeperID),
                     sleeperID,
                     score: score,
                     homeAway: team.homeAway,

@@ -216,9 +216,6 @@ export const getLeagueRecords = async (refresh = false) => {
 	let acquisitionRecords = {};
 
 	const nflPositions = ["RB", "QB", "WR", "TE", "DEF", "K", "DL", "DE", "DT", "LB", "DB", "CB", "SS", "FS"];
-	
-	const nflTeams = ["ARI", "ATL", "BAL", "BUF", "CAR", "CHI", "CIN", "CLE", "DAL", "DEN", "DET", "GB", "HOU", "IND", "JAX", "KC",	
-					  "LAC", "LAR", "LV", "OAK", "MIA", "MIN", "NE", "NO", "NYG", "NYJ", "PHI", "PIT", "SEA", "SF", "TEN", "TB", "WAS"];
 
 	const numManagers = managers.length;
 	const leagueRecordManagers = {};

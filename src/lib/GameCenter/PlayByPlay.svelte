@@ -3191,11 +3191,8 @@
                             t: starterInfo.t,
                             avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                             teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                            teamColor: `background-color: #${nflTeams[starterInfo.t]?.color}6b` || `background-color: var(--boxShadowThree)`,
-                            teamAltColor: `background-color: #${nflTeams[starterInfo.t]?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
-                        }
-                        if(starterInfo.t && nflTeams[starterInfo.t].color == nflTeams[starterInfo.t].alternateColor && nflTeams[starterInfo.t].color == '000000') {
-                            starterEntry.teamAltColor = `background-color: #ffffff52`;
+                            teamColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.color}6b` || `background-color: var(--boxShadowThree)`,
+                            teamAltColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
                         }
 
                         relevancyKey.starters[match[opponent].recordManID].push(starterEntry);
@@ -3270,14 +3267,8 @@
                                 linkType = 'play';
                                 espnTeamID = await parseEspnTeamID(play.team.$ref, linkType);
                             }
-                            let playTeam;
+                            let playTeam = nflTeams.find(n => n.espnID == espnTeamID).espnAbbreviation;
                             let oppTeam;
-                            for(const key in nflTeams) {
-                                if(nflTeams[key].espnID == espnTeamID) {
-                                    playTeam = nflTeams[key].espnAbbreviation;
-                                    break;
-                                }
-                            }
                             if(playTeam == homeEspn) {
                                 oppTeam = awayEspn;
                             } else {
@@ -3433,15 +3424,9 @@
                                     // which team is player on
                                     const linkType = 'info';
                                     let espnPlayerInfo = await parseEspnTeamID(play.participants[playerKey].athlete.$ref, linkType);
-                                    let playerTeam;
-                                    let playerTeam_sleeper;
-                                    for(const key in nflTeams) {
-                                        if(nflTeams[key].espnID == espnPlayerInfo.t) {
-                                            playerTeam = nflTeams[key].espnAbbreviation;
-                                            playerTeam_sleeper = key;
-                                            break;
-                                        }
-                                    }
+                                    let playerTeam = nflTeams.find(n => n.espnID == espnPlayerInfo.t).espnAbbreviation;
+                                    let playerTeam_sleeper = nflTeams.find(n => n.espnID == espnPlayerInfo.t).sleeperID;
+                                    
                                     // Catching exceptions with different names
                                     if(espnPlayerInfo.fn == 'William' && espnPlayerInfo.ln == 'Fuller V') {
                                         espnPlayerInfo.fn == 'Will';
@@ -3549,16 +3534,10 @@
                                     let linkType = 'participants';
                                     let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
 
-                                    let playTeam;
+                                    let playTeam = nflTeams.find(n => n.espnID == espnTeamID).espnAbbreviation;
                                     let oppTeam;
                                     let defense;
 
-                                    for(const key in nflTeams) {
-                                        if(nflTeams[key].espnID == espnTeamID) {
-                                            playTeam = nflTeams[key].espnAbbreviation;
-                                            break;
-                                        }
-                                    }
                                     if((playTeam == homeEspn && awayDefStarted == false) || (playTeam == awayEspn && homeDefStarted == false)) {
                                         continue;
                                     } else {
@@ -3616,16 +3595,10 @@
                                     }
                                     let linkType = 'participants';
                                     let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
-                                    let playTeam;
+                                    let playTeam = nflTeams.find(n => n.espnID == espnTeamID).espnAbbreviation;
                                     let oppTeam;
                                     let defense;
 
-                                    for(const key in nflTeams) {
-                                        if(nflTeams[key].espnID == espnTeamID) {
-                                            playTeam = nflTeams[key].espnAbbreviation;
-                                            break;
-                                        }
-                                    }
                                     if((playTeam == homeEspn && awayDefStarted == false) || (playTeam == awayEspn && homeDefStarted == false)) {
                                         continue;
                                     } else {
@@ -3781,14 +3754,9 @@
                             linkType = 'play';
                             espnTeamID = await parseEspnTeamID(play.team.$ref, linkType);
                         }
-                        let playTeam;
+                        let playTeam = nflTeams.find(n => n.espnID == espnTeamID).espnAbbreviation;
                         let oppTeam;
-                        for(const key in nflTeams) {
-                            if(nflTeams[key].espnID == espnTeamID) {
-                                playTeam = nflTeams[key].espnAbbreviation;
-                                break;
-                            }
-                        }
+              
                         if(playTeam == homeEspn) {
                             oppTeam = awayEspn;
                         } else {
@@ -3943,16 +3911,9 @@
                                 // which team is player on
                                 const linkType = 'info';
                                 let espnPlayerInfo = await parseEspnTeamID(play.participants[playerKey].athlete.$ref, linkType);
-                                let playerTeam;
-                                let playerTeam_sleeper;
-                                for(const key in nflTeams) {
-                                    if(nflTeams[key].espnID == espnPlayerInfo.t) {
-                                        playerTeam = nflTeams[key].espnAbbreviation;
-                                        playerTeam_sleeper = key;
-                                        break;
-                                    }
-                                }
-
+                                let playerTeam = nflTeams.find(n => n.espnID == espnPlayerInfo.t).espnAbbreviation;
+                                let playerTeam_sleeper = nflTeams.find(n => n.espnID == espnPlayerInfo.t).sleeperID;
+                                
                                 // Catching exceptions with different names
                                 if(espnPlayerInfo.fn == 'William' && espnPlayerInfo.ln == 'Fuller V') {
                                     espnPlayerInfo.fn == 'Will';
@@ -4054,16 +4015,10 @@
                                 let linkType = 'participants';
                                 let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
 
-                                let playTeam;
+                                let playTeam = nflTeams.find(n => n.espnID == espnTeamID).espnAbbreviation;
                                 let oppTeam;
                                 let defense;
 
-                                for(const key in nflTeams) {
-                                    if(nflTeams[key].espnID == espnTeamID) {
-                                        playTeam = nflTeams[key].espnAbbreviation;
-                                        break;
-                                    }
-                                }
                                 if((playTeam == homeEspn && awayDefStarted == false) || (playTeam == awayEspn && homeDefStarted == false)) {
                                     continue;
                                 } else {
@@ -4121,16 +4076,10 @@
                                 }
                                 let linkType = 'participants';
                                 let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
-                                let playTeam;
+                                let playTeam = nflTeams.find(n => n.espnID == espnTeamID).espnAbbreviation;
                                 let oppTeam;
                                 let defense;
 
-                                for(const key in nflTeams) {
-                                    if(nflTeams[key].espnID == espnTeamID) {
-                                        playTeam = nflTeams[key].espnAbbreviation;
-                                        break;
-                                    }
-                                }
                                 if((playTeam == homeEspn && awayDefStarted == false) || (playTeam == awayEspn && homeDefStarted == false)) {
                                     continue;
                                 } else {

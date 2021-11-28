@@ -42,8 +42,8 @@
                         projection: yearSelection == currentYear ? starterInfo.wi[weekSelection]?.p : null,
                         avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                         teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                        teamColor: `background-color: #${nflTeams[starterInfo.t]?.color}6b` || `background-color: var(--boxShadowThree)`,
-                        teamAltColor: `background-color: #${nflTeams[starterInfo.t]?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
+                        teamColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.color}6b` || `background-color: var(--boxShadowThree)`,
+                        teamAltColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
                     }
                     allStarters[recordManID].push(starterEntry);
                 }
@@ -143,8 +143,8 @@
                             projection: yearSelection == currentYear ? Number.parseFloat(starterInfo.wi[weekSelection].p) : null,
                             avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                             teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                            teamColor: `background-color: #${nflTeams[starterInfo.t]?.color}6b` || `background-color: var(--boxShadowThree)`,
-                            teamAltColor: `background-color: #${nflTeams[starterInfo.t]?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
+                            teamColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.color}6b` || `background-color: var(--boxShadowThree)`,
+                            teamAltColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
                         }
 
                         if(yearSelection == currentYear) {
@@ -270,8 +270,8 @@
                             projection: yearSelection == currentYear ? starterInfo.wi[weekSelection].p : null,
                             avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                             teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                            teamColor: `background-color: #${nflTeams[starterInfo.t]?.color}6b` || `background-color: var(--boxShadowThree)`,
-                            teamAltColor: `background-color: #${nflTeams[starterInfo.t]?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
+                            teamColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.color}6b` || `background-color: var(--boxShadowThree)`,
+                            teamAltColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
                         }
                         if(!gameStarters[recordManID]) {
                             gameStarters[recordManID] = [];

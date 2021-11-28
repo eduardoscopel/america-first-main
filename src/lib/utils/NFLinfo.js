@@ -1,7 +1,8 @@
 // Indexed by Sleeper player_id
 // espnID: for fetching rosters, stats, scores, etc. from ESPN
-export const nflTeams = {           
-    ARI: {
+export const nflTeams = [          
+    //ARI
+    {
         espnID: 22,
         sleeperID: "ARI",
         espnAbbreviation: 'ARZ',
@@ -11,7 +12,8 @@ export const nflTeams = {
         alternateColor: "000000",
         status: "active",
     },
-    ATL: {
+    //ATL
+    {
         espnID: 1,
         sleeperID: "ATL",
         espnAbbreviation: 'ATL',
@@ -21,7 +23,8 @@ export const nflTeams = {
         alternateColor: "c4223d",
         status: "active",
     },
-    BAL: {
+    //BAL
+    {
         espnID: 33,
         sleeperID: "BAL",
         espnAbbreviation: 'BLT',
@@ -31,7 +34,8 @@ export const nflTeams = {
         alternateColor: "9e7c0c",
         status: "active",
     },
-    BUF: {
+    //BUF
+    {
         espnID: 2,
         sleeperID: "BUF",
         espnAbbreviation: 'BUF',
@@ -41,7 +45,8 @@ export const nflTeams = {
         alternateColor: "c60c30",
         status: "active",
     },
-    CAR: {
+    //CAR 
+    {
         espnID: 29,
         sleeperID: "CAR",
         espnAbbreviation: 'CAR',
@@ -51,7 +56,8 @@ export const nflTeams = {
         alternateColor: "bfc0bf",
         status: "active",
     },
-    CHI: {
+    //CHI
+    {
         espnID: 3,
         sleeperID: "CHI",
         espnAbbreviation: 'CHI',
@@ -61,7 +67,8 @@ export const nflTeams = {
         alternateColor: "f26522",
         status: "active",
     },
-    CIN: {
+    //CIN
+    {
         espnID: 4,
         sleeperID: "CIN",
         espnAbbreviation: 'CIN',
@@ -71,7 +78,8 @@ export const nflTeams = {
         alternateColor: "000000",
         status: "active",
     },
-    CLE: {
+    //CLE
+    {
         espnID: 5,
         sleeperID: "CLE",
         espnAbbreviation: 'CLV',
@@ -81,7 +89,8 @@ export const nflTeams = {
         alternateColor: "4c230e",
         status: "active",
     },
-    DAL: {
+    //DAL
+    {
         espnID: 6,
         sleeperID: "DAL",
         espnAbbreviation: 'DAL',
@@ -91,7 +100,8 @@ export const nflTeams = {
         alternateColor: "b0b7bc",
         status: "active",
     },
-    DEN: {
+    //DEN
+    {
         espnID: 7,
         sleeperID: "DEN",
         espnAbbreviation: 'DEN',
@@ -101,7 +111,8 @@ export const nflTeams = {
         alternateColor: "fb4f14",
         status: "active",
     },
-    DET: {
+    //DET
+    {
         espnID: 8,
         sleeperID: "DET",
         espnAbbreviation: 'DET',
@@ -111,7 +122,8 @@ export const nflTeams = {
         alternateColor: "b0b7bc",
         status: "active",
     },
-    GB: {
+    //GB
+    {
         espnID: 9,
         sleeperID: "GB",
         espnAbbreviation: 'GB',
@@ -121,7 +133,8 @@ export const nflTeams = {
         alternateColor: "ffb612",
         status: "active",
     },
-    HOU: {
+    //HOU
+    {
         espnID: 34,
         sleeperID: "HOU",
         espnAbbreviation: 'HST',
@@ -131,7 +144,8 @@ export const nflTeams = {
         alternateColor: "a71930",
         status: "active",
     },
-    IND: {
+    //IND
+    {
         espnID: 11,
         sleeperID: "IND",
         espnAbbreviation: 'IND',
@@ -141,7 +155,8 @@ export const nflTeams = {
         alternateColor: "ffffff",
         status: "active",
     },
-    JAX: {
+    //JAX
+    {
         espnID: 30,
         sleeperID: "JAX",
         espnAbbreviation: 'JAX',
@@ -151,7 +166,8 @@ export const nflTeams = {
         alternateColor: "000000",
         status: "active",
     },
-    KC: {
+    //KC
+    {
         espnID: 12,
         sleeperID: "KC",
         espnAbbreviation: 'KC',
@@ -161,7 +177,8 @@ export const nflTeams = {
         alternateColor: "e31837",
         status: "active",
     },
-    LAC: {
+    //LAC
+    {
         espnID: 24,
         sleeperID: "LAC",
         espnAbbreviation: 'LAC',
@@ -172,7 +189,8 @@ export const nflTeams = {
         alternateColor: "0073cf",
         status: "active",
     },
-    LAR: {
+    //LAR
+    {
         espnID: 14,
         sleeperID: "LAR",
         espnAbbreviation: 'LA',
@@ -183,7 +201,8 @@ export const nflTeams = {
         alternateColor: "b3995d",
         status: "active",
     },
-    LV: {
+    //LV
+    {
         espnID: 13,
         sleeperID: "LV",
         espnAbbreviation: 'LV',
@@ -194,7 +213,8 @@ export const nflTeams = {
         alternateColor: "a5acaf",
         status: "active",
     },
-    MIA: {
+    //MIA
+    {
         espnID: 15,
         sleeperID: "MIA",
         espnAbbreviation: 'MIA',
@@ -204,7 +224,8 @@ export const nflTeams = {
         alternateColor: "005778",
         status: "active",
     },
-    MIN: {
+    //MIN
+    {
         espnID: 16,
         sleeperID: "MIN",
         espnAbbreviation: 'MIN',
@@ -214,7 +235,8 @@ export const nflTeams = {
         alternateColor: "ffc62f",
         status: "active",
     },
-    NE: {
+    //NE
+    {
         espnID: 17,
         sleeperID: "NE",
         espnAbbreviation: 'NE',
@@ -224,7 +246,8 @@ export const nflTeams = {
         alternateColor: "b0b7bc",
         status: "active",
     },
-    NO: {
+    //NO
+    {
         espnID: 18,
         sleeperID: "NO",
         espnAbbreviation: 'NO',
@@ -234,7 +257,8 @@ export const nflTeams = {
         alternateColor: "020202",
         status: "active",
     },
-    NYG: {
+    //NYG
+    {
         espnID: 19,
         sleeperID: "NYG",
         espnAbbreviation: 'NYG',
@@ -244,7 +268,8 @@ export const nflTeams = {
         alternateColor: "ffffff",
         status: "active",
     },
-    NYJ: {
+    //NYJ
+    {
         espnID: 20,
         sleeperID: "NYJ",
         espnAbbreviation: 'NYJ',
@@ -264,7 +289,8 @@ export const nflTeams = {
     //     status: "inactive",
     //     lastActive: 2019,
     // },
-    PHI: {
+    //PHI
+    {
         espnID: 21,
         sleeperID: "PHI",
         espnAbbreviation: 'PHI',
@@ -274,7 +300,8 @@ export const nflTeams = {
         alternateColor: "a5acaf",
         status: "active",
     },
-    PIT: {
+    //PIT 
+    {
         espnID: 23,
         sleeperID: "PIT",
         espnAbbreviation: 'PIT',
@@ -284,7 +311,8 @@ export const nflTeams = {
         alternateColor: "ffb612",
         status: "active",
     },
-    SEA: {
+    //SEA
+    {
         espnID: 26,
         sleeperID: "SEA",
         espnAbbreviation: 'SEA',
@@ -294,7 +322,8 @@ export const nflTeams = {
         alternateColor: "69be28",
         status: "active",
     },
-    SF: {
+    //SF
+    {
         espnID: 25,
         sleeperID: "SF",
         espnAbbreviation: 'SF',
@@ -304,7 +333,8 @@ export const nflTeams = {
         alternateColor: "b3995d",
         status: "active",
     },
-    TB: {
+    //TB
+    {
         espnID: 27,
         sleeperID: "TB",
         espnAbbreviation: 'TB',
@@ -314,7 +344,8 @@ export const nflTeams = {
         alternateColor: "34302b",
         status: "active",
     },
-    TEN: {
+    //TEN
+    {
         espnID: 10,
         sleeperID: "TEN",
         espnAbbreviation: 'TEN',
@@ -326,7 +357,8 @@ export const nflTeams = {
         alternateColor: "4b92db",
         status: "active",
     },
-    WAS: {
+    //WAS
+    {
         espnID: 28,
         sleeperID: "WAS",
         espnAbbreviation: 'WAS',
@@ -338,4 +370,4 @@ export const nflTeams = {
         status: "active",
     },
 
-}
+]

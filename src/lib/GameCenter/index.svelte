@@ -174,8 +174,8 @@
                             t: playersInfo.players[managerWeek.starters[i]].t,
                             avatar: playersInfo.players[managerWeek.starters[i]].pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${managerWeek.starters[i].toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${managerWeek.starters[i]}.jpg`,
                             teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${playersInfo.players[managerWeek.starters[i]].t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${managerWeek.starters[i]}.jpg`,
-                            teamColor: `background-color: #${nflTeams[playersInfo.players[managerWeek.starters[i]].t]?.color}6b` || `background-color: var(--boxShadowThree)`,
-                            teamAltColor: `background-color: #${nflTeams[playersInfo.players[managerWeek.starters[i]].t]?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
+                            teamColor: `background-color: #${nflTeams.find(n => n.sleeperID == playersInfo.players[managerWeek.starters[i]].t || n.ln == playersInfo.players[managerWeek.starters[i]].ln)?.color}6b` || `background-color: var(--boxShadowThree)`,
+                            teamAltColor: `background-color: #${nflTeams.find(n => n.sleeperID == playersInfo.players[managerWeek.starters[i]].t || n.ln == playersInfo.players[managerWeek.starters[i]].ln)?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
                         }
                         if(playersInfo.players[managerWeek.starters[i]].pos == 'DB' || playersInfo.players[managerWeek.starters[i]].pos == 'CB' || playersInfo.players[managerWeek.starters[i]].pos == 'SS' || playersInfo.players[managerWeek.starters[i]].pos == 'FS') {
                             positionLeaders['DB'].push(entry);
