@@ -3,7 +3,7 @@
     import {xIntervalFont, xIntervalHeight, barLabelFont, labelFont} from './barChartResize';
     import {round, min, max} from '$lib/utils/helper';
 
-    export let graphs, curGraph = 0, maxWidth = 1000, allTime, selection, displayObject, displayYear, leagueManagers, allManagers;
+    export let graphs, curGraph = 0, curTableDesc = 'lineupIQs.iq', maxWidth = 1000, allTime, selection, displayObject, displayYear, leagueManagers, allManagers;
 
     const colors = [
         "#52DEE5",
@@ -33,6 +33,10 @@
         if((selection && selection != null) || (displayYear && displayYear != null)) {
             for(const graph in graphs) {
                 let newStats = displayObject[selection][graphs[graph].statCat];
+                let newSecondStats; 
+                if(graphs[graph].secondStatCat) {
+                    newSecondStats = displayObject[selection][graphs[graph].secondStatCat]
+                }
                 // if yearly stats, refresh the recordManIDs
                 if(allTime == false) {
                     graphs[graph].recordManIDs = [];
@@ -47,15 +51,26 @@
                 for(let i = 0; i < graphs[graph].stats.length; i++) {
                     if(newStats.find(m => m.recordManID == graphs[graph].recordManIDs[i])) {
                         graphs[graph].stats[i] = Math.round(newStats.find(m => m.recordManID == graphs[graph].recordManIDs[i])[graphs[graph].field]);
-                        if(graphs[graph].secondField != null) {
-                            graphs[graph].secondStats[i] = Math.round(newStats.find(m => m.recordManID == graphs[graph].recordManIDs[i])[graphs[graph].secondField]);
-                        }
                     } else {
                         graphs[graph].stats[i] = 0;
                     }
                 }
                 graphs[graph].yMin = min(graphs[graph].stats, 10);
                 graphs[graph].yMax = max(graphs[graph].stats, 10);
+
+                if(graphs[graph].secondStatCat) {
+                    for(let i = 0; i < graphs[graph].secondStats.length; i++) {
+                        if(newSecondStats.find(m => m.recordManID == graphs[graph].recordManIDs[i])) {
+                            graphs[graph].secondStats[i] = Math.round(newSecondStats.find(m => m.recordManID == graphs[graph].recordManIDs[i])[graphs[graph].secondField]);
+                        } else {
+                            graphs[graph].secondStats[i] = 0;
+                        }
+                    }
+                    graphs[graph].yMin = min(graphs[graph].secondStats, 10);
+                }
+                if(graphs[graph].yMinOverride) {
+                    graphs[graph].yMin = graphs[graph].yMinOverride;
+                }
             }
             stats = graphs[curGraph].stats;
             secondStats = graphs[curGraph].secondStats
@@ -160,7 +175,7 @@
         transform: translate(-50%, 0);
         line-height: 1.1em;
         left: 50%;
-        color: #666;
+        color: var(--gcPlayRowText);
         bottom: 101%;
         text-align: center;
     }
@@ -252,12 +267,14 @@
         <div class="barChartInner" style="width: {width * .85}px; height: {width * .7 * .66}px" bind:this={el}>
             <!-- x Axis label and intervals -->
             {#each stats as stat, ix}
-                <div class="bar{secondStats.length == 0  ? '' : ' opacity'}" style="background-color: {colors[(recordManIDs[ix]-1) % 12]}; width: {chartWidthInterval * 0.8}px; left: {chartWidthInterval * ix + (chartWidthInterval / 2)}px; height: {(stat - yMin) / (yMax - yMin == 0 ? 1 : (yMax - yMin)) * 100}%;">
+                <div class="bar{secondStats.length == 0  ? '' : curTableDesc == `${graphs[curGraph].statCat}.${graphs[curGraph].field}` ? '' : ' opacity'}" style="background-color: {colors[(recordManIDs[ix]-1) % 12]}; width: {chartWidthInterval * 0.8}px; left: {chartWidthInterval * ix + (chartWidthInterval / 2)}px; height: {(stat - yMin) / (yMax - yMin == 0 ? 1 : (yMax - yMin)) * 100}%;">
                     <span class="barLabel" style="font-size: {barLFont}em;">{stat}{labels.stat}</span>
                 </div>
             {/each}
             {#each secondStats as stat, ix}
-                <div class="bar" style="background-color: {colors[(recordManIDs[ix]-1) % 12]}; width: {chartWidthInterval * 0.8}px; left: {chartWidthInterval * ix + (chartWidthInterval / 2)}px; height: {(stat - yMin) / (yMax - yMin == 0 ? 1 : (yMax - yMin)) * 100}%;" />
+                <div class="bar{curTableDesc == `${graphs[curGraph].secondStatCat}.${graphs[curGraph].secondField}` ? '' : ' opacity'}" style="background-color: {colors[(recordManIDs[ix]-1) % 12]}; width: {chartWidthInterval * 0.8}px; left: {chartWidthInterval * ix + (chartWidthInterval / 2)}px; height: {(stat - yMin) / (yMax - yMin == 0 ? 1 : (yMax - yMin)) * 100}%;">
+                    <span class="barLabel" style="font-size: {barLFont}em;">{stat}{labels.stat}</span>
+                </div>
             {/each}
         </div>
 

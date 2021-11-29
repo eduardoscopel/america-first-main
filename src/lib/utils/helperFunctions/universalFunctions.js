@@ -71,7 +71,7 @@ export const parseDate = (rawDate) => {
     return stringDate(d);
 }
 
-export const generateGraph = ({stats, x, y, stat, statCat, header, field, short, secondField = null}, roundOverride = 10, yMinOverride = null) => {
+export const generateGraph = ({stats, secondStats = null, x, y, stat, statCat, secondStatCat = null, header, field, short, secondField = null}, roundOverride = 10, yMinOverride = null) => {
     if(!stats) {
         return null;
     }
@@ -82,6 +82,7 @@ export const generateGraph = ({stats, x, y, stat, statCat, header, field, short,
         recordManIDs: [],
         labels: {x, y, stat},
         statCat,
+        secondStatCat,
         field,
         secondField,
         header,
@@ -94,11 +95,16 @@ export const generateGraph = ({stats, x, y, stat, statCat, header, field, short,
 
     for(const indivStat of sortedStats) {
         graph.stats.push(Math.round(indivStat[field]));
-        if(secondField) {
-            graph.secondStats.push(Math.round(indivStat[secondField]));
-        }
         graph.managers.push(indivStat.manager);
         graph.recordManIDs.push(indivStat.recordManID)
+    }
+
+    if(secondField) {
+        const sortedSecondStats = [...secondStats].sort((a, b) => a.recordManID - b.recordManID);
+
+        for(const indivSecondStat of sortedSecondStats) {
+            graph.secondStats.push(Math.round(indivSecondStat[secondField]));
+        }
     }
 
     graph.yMax = max(graph.stats, roundOverride);

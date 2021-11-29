@@ -53,16 +53,19 @@
 
     let potentialPointsGraph = {
         stats: displayObject[selection].lineupIQs,
+        secondStats: displayObject[selection].lineupIQs,
         x: "Manager",
         y: "Points",
         stat: "",
         statCat: 'lineupIQs',
+        secondStatCat: 'lineupIQs',
         header: "Potential Points vs Points",
         field: "potentialPoints",
         secondField: "fpts",
         short: "Potential Points"
     }
     $: potentialPointsGraph.stats = displayObject[selection].lineupIQs;
+    $: potentialPointsGraph.secondStats = displayObject[selection].lineupIQs;
 
     let winsGraph = {
         stats: displayObject[selection].winPercentages,
@@ -98,8 +101,7 @@
         field: "fptspg",
         short: "Fantasy Points"
     }
-    $: fptsHistoriesGraph.stats = displayObject[selection].fptsHistories
-    ;
+    $: fptsHistoriesGraph.stats = displayObject[selection].fptsHistories;
 
     let medianRecordsGraph = {
         stats: displayObject[selection].medianRecords,
@@ -114,32 +116,37 @@
     $: medianRecordsGraph.stats = displayObject[selection].medianRecords;
 
     let fptsSeasonBestGraph = {
-        stats: displayObject[selection].seasonBests, //fptsSeasonBest
+        stats: displayObject[selection].seasonBests, 
+        secondStats: displayObject[selection].seasonWorsts,
         x: "Manager",
         y: "Fantasy Points",
         stat: "",
         statCat: 'seasonBests',
+        secondStatCat: 'seasonWorsts',
         header: "Team Highest / Lowest Scoring Seasons",
         field: "fptspg",
-	    // secondField: "fptsFor",
+	    secondField: "fptspg",
         short: "Season Records"
     }
     $: fptsSeasonBestGraph.stats = displayObject[selection].seasonBests;
+    $: fptsSeasonBestGraph.secondStats = displayObject[selection].seasonWorsts;
 
     let fptsWeekBestGraph = {
         stats: displayObject[selection].weekBests,
-        // secondStats: weekWorsts, 
+        secondStats: displayObject[selection].weekWorsts, 
         x: "Manager",
         y: "Fantasy Points",
         stat: "",
         statCat: 'weekBests',
+        secondStatCat: 'weekWorsts',
         header: "Team Highest / Lowest Scoring Weeks",
         field: "fpts",
-        // secondField: "fpts",
-        // yMinOverride: 0,
-        short: "Weekly Records"
+        secondField: "fpts",
+        short: "Weekly Records",
+        yMinOverride: 0,
     }
     $: fptsWeekBestGraph.stats = displayObject[selection].weekBests;
+    $: fptsWeekBestGraph.secondStats = displayObject[selection].weekWorsts;
 
     let epeWinPercGraph = {
         stats: displayObject[selection].seasonEPERecords,
@@ -265,6 +272,7 @@
     }
 
     let curTable = 0;
+    let curTableDesc;
     let curGraph = 0;
 
     let iqOffset = 0;
@@ -285,8 +293,10 @@
 
     if(!lineupIQs[0]?.potentialPoints) {
         iqOffset = 1;
+        curTableDesc = 'winPercentages.wins';
     } else {
         tables.unshift('Lineup IQs');
+        curTableDesc = 'lineupIQs.iq';
     }
     const changeTable = (newGraph) => {
         switch (newGraph) {
@@ -345,46 +355,64 @@
                     break;
                 }
                 curGraph = 0;
+                curTableDesc = 'lineupIQs.iq';
                 break;
             case 1 - iqOffset:
                 if(curGraph == 1 - iqOffset || curGraph == 2 - iqOffset) {
                     break;
                 }
+                curTableDesc = 'winPercentages.wins';
                 curGraph = 1 - iqOffset;
                 break;
             case 2 - iqOffset:
+                curTableDesc = 'fptsHistories.fptspg';
                 curGraph = 3 - iqOffset;
                 break;
             case 3 - iqOffset:
+                curTableDesc = 'medianRecords.medianPerc';
                 curGraph = 4 - iqOffset;
                 break;
             case 4 - iqOffset:
                 if(curGraph == 6 - (2 * iqOffset) || curGraph == 7 - (2 * iqOffset)) {
                     break;
                 }
+                curTableDesc = 'tradesData.trades';
                 curGraph = 6 - (2 * iqOffset);
                 break;
             case 5 - iqOffset:
+                curTableDesc = 'seasonBests.fptspg';
+                curGraph = 8 - (2 * iqOffset);
+                break;
             case 6 - iqOffset:
+                curTableDesc = 'seasonWorsts.fptspg';
                 curGraph = 8 - (2 * iqOffset);
                 break;
             case 7 - iqOffset:
+                curTableDesc = 'weekBests.fpts';
+                curGraph = 9 - (2 * iqOffset);
+                break;
             case 8 - iqOffset:
+                curTableDesc = 'weekWorsts.fpts';
                 curGraph = 9 - (2 * iqOffset);
                 break;
 	        case 9 - iqOffset:
+                curTableDesc = 'sseasonEPERecords.epePerc';
                 curGraph = 10 - (2 * iqOffset);
                 break;
 	        case 10 - iqOffset:
+                curTableDesc = 'playerSeasonBests.playerPPStart';
                 curGraph = 11 - (2 * iqOffset);
                 break;
             case 11 - iqOffset:
+                curTableDesc = 'playerWeekBests.playerPoints';
                 curGraph = 12 - (2 * iqOffset);
                 break;
             case 12 - iqOffset:
+                curTableDesc = 'playerWeekMissedBests.benchPoints';
                 curGraph = 13 - (2 * iqOffset);
                 break;
             default:
+                curTableDesc = 'lineupIQs.iq';
                 curGraph = 0;
                 break;
         }
@@ -1223,7 +1251,7 @@
 </div>
 
 
-<BarChart maxWidth={innerWidth} {graphs} {displayObject} {leagueManagers} {allManagers} bind:displayYear={displayYear} bind:selection={selection} bind:allTime={allTime} bind:curGraph={curGraph} />
+<BarChart maxWidth={innerWidth} {graphs} {displayObject} {leagueManagers} {allManagers} bind:displayYear={displayYear} bind:selection={selection} bind:allTime={allTime} bind:curGraph={curGraph} bind:curTableDesc={curTableDesc} />
 
 <div class="rankingHolder">
     <div class="rankingInner" style="margin-left: -{100 * curTable}%;">

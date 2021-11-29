@@ -77,7 +77,9 @@
     }
     
     for(const season in transactionTotals.seasons) {
-        if(!yearsObj[season]) continue;
+        if(!yearsObj[season]) {
+            continue;
+        }
         for(const recordManID in transactionTotals.seasons[season]) {
             yearsObj[season].tradesData.push({
                 recordManID: transactionTotals.seasons[season][recordManID].recordManID,
@@ -121,7 +123,6 @@
         
         // sort rankings
         yearsObj[key].lineupIQs.sort((a, b) => b.iq - a.iq);
-        // yearsObj[key].fptsHistories.sort((a, b) => b.fptsFor - a.fptsFor);
         yearsObj[key].tradesData.sort((a, b) => b.trades - a.trades);
         yearsObj[key].waiversData.sort((a, b) => b.waivers - a.waivers);
 
