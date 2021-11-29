@@ -19,6 +19,7 @@
 
     let weekBests, weekWorsts, periodBests, periodWorsts, blowoutBests, blowoutWorsts, narrowBests, narrowWorsts, playerWeekBests, playerWeekMissedBests, playerPeriodBests, headToHeads;
     let headShowTies = false;
+    let headShowTiesEPE = false;
     const positionRecords = {
         week_Top: {},
         period_Top: {},
@@ -81,12 +82,17 @@
             }
 
             for(const opponent in managerRecords.headToHeadRecords.regularSeason.alltime[recordManID]) {
-                headToHeads.push(managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][opponent]);
+                if(managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][opponent].winPerc >= 0) {
+                    headToHeads.push(managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][opponent]);
+                }
                 if(managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][opponent].ties > 0) {
                     headShowTies = true;
                 }
+                if(managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][opponent].epeTies > 0) {
+                    headShowTiesEPE = true;
+                }
             }
-            headToHeads = headToHeads.sort((a, b) => b.wins - a.wins);
+            headToHeads = headToHeads.sort((a, b) => b.winPerc - a.winPerc);
 
         } else if(displayType == 'yearly') {
             masterPrefix = displayYear;
@@ -109,12 +115,17 @@
             }
 
             for(const opponent in managerRecords.headToHeadRecords.regularSeason.years[displayYear][recordManID]) {
-                headToHeads.push(managerRecords.headToHeadRecords.regularSeason.years[displayYear][recordManID][opponent]);
+                if(managerRecords.headToHeadRecords.regularSeason.years[displayYear][recordManID][opponent].winPerc >= 0) {
+                    headToHeads.push(managerRecords.headToHeadRecords.regularSeason.years[displayYear][recordManID][opponent]);
+                }
                 if(managerRecords.headToHeadRecords.regularSeason.years[displayYear][recordManID][opponent].ties > 0) {
                     headShowTies = true;
                 }
+                if(managerRecords.headToHeadRecords.regularSeason.years[displayYear][recordManID][opponent].epeTies > 0) {
+                    headShowTiesEPE = true;
+                }
             }
-            headToHeads = headToHeads.sort((a, b) => b.wins - a.wins);
+            headToHeads = headToHeads.sort((a, b) => b.winPerc - a.winPerc);
         }
     }
 
@@ -146,12 +157,17 @@
             }
 
             for(const opponent in managerRecords.headToHeadRecords.playoffs.alltime[recordManID]) {
-                headToHeads.push(managerRecords.headToHeadRecords.playoffs.alltime[recordManID][opponent]);
+                if(managerRecords.headToHeadRecords.playoffs.alltime[recordManID][opponent].winPerc >= 0) {
+                    headToHeads.push(managerRecords.headToHeadRecords.playoffs.alltime[recordManID][opponent]);
+                }
                 if(managerRecords.headToHeadRecords.playoffs.alltime[recordManID][opponent].ties > 0) {
                     headShowTies = true;
                 }
+                if(managerRecords.headToHeadRecords.playoffs.alltime[recordManID][opponent].epeTies > 0) {
+                    headShowTiesEPE = true;
+                }
             }
-            headToHeads = headToHeads.sort((a, b) => b.wins - a.wins);
+            headToHeads = headToHeads.sort((a, b) => b.winPerc - a.winPerc);
         } else if(displayType == 'yearly' && managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID]) {
             showEmpty = false;
             masterPrefix = displayYear;
@@ -174,12 +190,17 @@
             }
 
             for(const opponent in managerRecords.headToHeadRecords.playoffs.years[displayYear][recordManID]) {
-                headToHeads.push(managerRecords.headToHeadRecords.playoffs.years[displayYear][recordManID][opponent]);
+                if(managerRecords.headToHeadRecords.playoffs.years[displayYear][recordManID][opponent].winPerc >= 0) {
+                    headToHeads.push(managerRecords.headToHeadRecords.playoffs.years[displayYear][recordManID][opponent]);
+                }
                 if(managerRecords.headToHeadRecords.playoffs.years[displayYear][recordManID][opponent].ties > 0) {
                     headShowTies = true;
                 }
+                if(managerRecords.headToHeadRecords.playoffs.years[displayYear][recordManID][opponent].epeTies > 0) {
+                    headShowTiesEPE = true;
+                }
             }
-            headToHeads = headToHeads.sort((a, b) => b.wins - a.wins);
+            headToHeads = headToHeads.sort((a, b) => b.winPerc - a.winPerc);
         } else if(displayType == 'alltime' && !managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID]) {
             showEmpty = true;
             emptyMessage = "No Playoff Records Yet...";
@@ -221,12 +242,17 @@
             }
 
             for(const opponent in managerRecords.headToHeadRecords.combined.alltime[recordManID]) {
-                headToHeads.push(managerRecords.headToHeadRecords.combined.alltime[recordManID][opponent]);
+                if(managerRecords.headToHeadRecords.combined.alltime[recordManID][opponent].winPerc >= 0) {
+                    headToHeads.push(managerRecords.headToHeadRecords.combined.alltime[recordManID][opponent]);
+                }
                 if(managerRecords.headToHeadRecords.combined.alltime[recordManID][opponent].ties > 0) {
                     headShowTies = true;
                 }
+                if(managerRecords.headToHeadRecords.combined.alltime[recordManID][opponent].epeTies > 0) {
+                    headShowTiesEPE = true;
+                }
             }
-            headToHeads = headToHeads.sort((a, b) => b.wins - a.wins);
+            headToHeads = headToHeads.sort((a, b) => b.winPerc - a.winPerc);
         } else if(displayType == 'yearly') {
             masterPrefix = displayYear;
             masterSelection = 'yearly';
@@ -248,12 +274,17 @@
             }
 
             for(const opponent in managerRecords.headToHeadRecords.comined.years[displayYear][recordManID]) {
-                headToHeads.push(managerRecords.headToHeadRecords.combined.years[displayYear][recordManID][opponent]);
+                if(managerRecords.headToHeadRecords.combined.years[displayYear][recordManID][opponent].winPerc >= 0) {
+                    headToHeads.push(managerRecords.headToHeadRecords.combined.years[displayYear][recordManID][opponent]);
+                }
                 if(managerRecords.headToHeadRecords.combined.years[displayYear][recordManID][opponent].ties > 0) {
                     headShowTies = true;
                 }
+                if(managerRecords.headToHeadRecords.combined.years[displayYear][recordManID][opponent].epeTies > 0) {
+                    headShowTiesEPE = true;
+                }
             }
-            headToHeads = headToHeads.sort((a, b) => b.wins - a.wins);
+            headToHeads = headToHeads.sort((a, b) => b.winPerc - a.winPerc);
         }
     }
 
@@ -1300,10 +1331,10 @@
             <div class="columnWrap" style="width: 98%;">
                 {#if showEmpty == false}
                     {#if headToHeads && headToHeads.length}
-                        <DataTable class="recordTable" style="width: 525px;">
+                        <DataTable class="recordTable">
                             <Head>
                                 <Row>
-                                    <Cell class="header" colspan=8>
+                                    <Cell class="header" colspan=13>
                                         <p>
                                             Records Against Other Managers<br>
                                             {recordPrefix} 
@@ -1313,13 +1344,20 @@
                                 <Row>
                                     <Cell class="header"></Cell>
                                     <Cell class="header">Manager</Cell>
+                                    <Cell class="header">Win %</Cell>
                                     <Cell class="header">W</Cell>
                                     {#if headShowTies == true}
                                         <Cell class="header">T</Cell>
                                     {/if}
                                     <Cell class="header">L</Cell>
-                                    <Cell class="header">PF</Cell>
-                                    <Cell class="header">PA</Cell>
+                                    <Cell class="header">EPE Win %</Cell>
+                                    <Cell class="header">EPE W</Cell>
+                                    {#if headShowTiesEPE == true}
+                                        <Cell class="header">EPE T</Cell>
+                                    {/if}
+                                    <Cell class="header">EPE L</Cell>
+                                    <Cell class="header">PF (PPG)</Cell>
+                                    <Cell class="header">PA (PPG)</Cell>
                                     <Cell class="header">Diff</Cell>
                                 </Row>
                             </Head>
@@ -1333,13 +1371,20 @@
                                                 <div class="fantasyTeamName">({opponent.againstManager.name})</div>
                                             {/if}
                                         </Cell>
+                                        <Cell class="center">{round(opponent.winPerc)}</Cell>
                                         <Cell class="center">{opponent.wins}</Cell>
                                         {#if headShowTies == true}
                                             <Cell class="center">{opponent.ties}</Cell>
                                         {/if}
                                         <Cell class="center">{opponent.losses}</Cell>
-                                        <Cell class="center">{round(opponent.fpts)}</Cell>
-                                        <Cell class="center">{round(opponent.fptsAgainst)}</Cell>
+                                        <Cell class="center">{round(opponent.epePerc)}</Cell>
+                                        <Cell class="center">{opponent.epeWins}</Cell>
+                                        {#if headShowTiesEPE == true}
+                                            <Cell class="center">{opponent.epeTies}</Cell>
+                                        {/if}
+                                        <Cell class="center">{opponent.epeLosses}</Cell>
+                                        <Cell class="center">{round(opponent.fpts)}  <div style="font-size: 0.9em">({round(opponent.fptspg)})</div></Cell>
+                                        <Cell class="center">{round(opponent.fptsAgainst)}  <div style="font-size: 0.9em">({round(opponent.fptsAgainstPg)})</div></Cell>
                                         <Cell class="center">{round(opponent.fpts - opponent.fptsAgainst)}</Cell>
                                     </Row>
                                 {/each}

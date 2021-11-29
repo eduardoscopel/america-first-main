@@ -1878,16 +1878,58 @@ export const getLeagueRecords = async (refresh = false) => {
 					masterRecordBook.league.totals.alltime[recordType] = [];
 				}
 
+				for(const recordManID in allManagers) {
+					if(!headToHeadRecords[recordType].alltime[recordManID]) {
+						headToHeadRecords[recordType].alltime[recordManID] = {};
+					}
+
+					for(const otherManager in allManagers) {
+						if(otherManager != recordManID  && !headToHeadRecords[recordType].alltime[recordManID][otherManager]) {
+							headToHeadRecords[recordType].alltime[recordManID][otherManager] = {
+								wins: 0,
+								ties: 0,
+								losses: 0,
+								fpts: 0,
+								fptsAgainst: 0,
+								againstRecordManID: otherManager,
+								againstManager: allManagers[otherManager],
+								showTies: false,
+								epeWins: 0,
+								epeTies: 0,
+								epeLosses: 0,
+							}
+						}
+					}
+				}
+				
+				if(typeRecord.years[year].length > 0 && Object.keys(headToHeadRecords[recordType].years[year]).length == 0) {
+					for(const recordManID in typeRecord.years[year]) {
+
+						headToHeadRecords[recordType].years[year][recordManID] = {};
+
+						for(const otherManager in typeRecord.years[year]) {
+							if(otherManager != recordManID) {
+								headToHeadRecords[recordType].years[year][recordManID][otherManager] = {
+									wins: 0,
+									ties: 0,
+									losses: 0,
+									fpts: 0,
+									fptsAgainst: 0,
+									againstRecordManID: otherManager,
+									againstManager: typeRecord.years[year][otherManager][0].manager,
+									showTies: false,
+									epeWins: 0,
+									epeTies: 0,
+									epeLosses: 0,
+								}
+							}
+						}
+					}
+				}
+
 				if(typeRecord.years[year].length > 0) {
 					for(const recordManID in typeRecord.years[year]) {
 						const recordMan = typeRecord.years[year][recordManID];
-
-						if(!headToHeadRecords[recordType].alltime[recordManID]) {
-							headToHeadRecords[recordType].alltime[recordManID] = {};
-						}
-						if(!headToHeadRecords[recordType].years[year][recordManID]) {
-							headToHeadRecords[recordType].years[year][recordManID] = {};
-						}
 
 						let fptsTotal = 0;
 						let fptsAgainstTotal = 0;
@@ -1906,68 +1948,53 @@ export const getLeagueRecords = async (refresh = false) => {
 						// looping thru each week in that year
 						for(let i = 0; i < recordMan.length; i++) {
 
-							// add each week's win/loss to head-to-head records
-							if(!headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID]) {
-								headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID] = {
-									wins: 0,
-									ties: 0,
-									losses: 0,
-									fpts: 0,
-									fptsAgainst: 0,
-									againstRecordManID: recordMan[i].againstRecordManID,
-									againstManager: recordMan[i].againstManager,
-									showTies: false,
-								}
-							}
-							if(!headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID]) {
-								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID] = {
-									wins: 0,
-									ties: 0,
-									losses: 0,
-									fpts: 0,
-									fptsAgainst: 0,
-									againstRecordManID: recordMan[i].againstRecordManID,
-									againstManager: recordMan[i].againstManager,
-									showTies: false,
-								}
-							}
-							if(recordMan[i].matchWin == true) {
-								headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].wins++;
-								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].wins++;
-							} else if(recordMan[i].matchTie == true) {
-								headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].ties++;
-								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].ties++;
-								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].showTies = true;
-							} else if(recordMan[i].matchLoss == true) {
-								headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].losses++;
-								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].losses++;
-							}
+							// add each week's score to running total & head-to-head totals
 							headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].fpts += recordMan[i].fpts;
 							headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].fpts += recordMan[i].fpts;
 							headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].fptsAgainst += recordMan[i].fptsAgainst;
 							headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].fptsAgainst += recordMan[i].fptsAgainst;
-							// add each week's score to running total
+
 							fptsTotal += recordMan[i].fpts;
 							fptsAgainstTotal += recordMan[i].fptsAgainst;
 							runningDifferential += recordMan[i].matchDifferential;
 							if(recordMan[i].matchWin == true) {
 								winTotal++;
+								headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].wins++;
+								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].wins++;
 							} else if(recordMan[i].matchLoss == true) {
 								lossTotal++;
+								headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].losses++;
+								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].losses++;
 							} else if(recordMan[i].matchTie == true) {
 								tieTotal++;
+								headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].ties++;
+								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].ties++;
+								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].showTies = true;
 							}
 							// compare score to other scores from that week
 							const compareWins = masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.fpts < recordMan[i].fpts);
 							const compareLosses = masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.fpts > recordMan[i].fpts);
 							const compareTies = masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.fpts == recordMan[i].fpts && p.recordManID != recordMan[i].recordManID);
-							// add EPE stats to running totals
+							// add EPE stats to running totals & head-to-head totals
 							const epeWins = compareWins.length;
 							const epeLosses = compareLosses.length;
 							const epeTies = compareTies.length;
 							epeWinsTotal += epeWins;
 							epeLossesTotal += epeLosses;
 							epeTiesTotal += epeTies;
+
+							for(const opponent in compareWins) {
+								headToHeadRecords[recordType].alltime[recordManID][compareWins[opponent].recordManID].epeWins++;
+								headToHeadRecords[recordType].years[year][recordManID][compareWins[opponent].recordManID].epeWins++;
+							}
+							for(const opponent in compareLosses) {
+								headToHeadRecords[recordType].alltime[recordManID][compareLosses[opponent].recordManID].epeLosses++;
+								headToHeadRecords[recordType].years[year][recordManID][compareLosses[opponent].recordManID].epeLosses++;
+							}
+							for(const opponent in compareTies) {
+								headToHeadRecords[recordType].alltime[recordManID][compareTies[opponent].recordManID].epeTies++;
+								headToHeadRecords[recordType].years[year][recordManID][compareTies[opponent].recordManID].epeTies++;
+							}
 							// update that week's EPE stats in league & manager(??) records
 							const epePerc = (epeWins + epeTies / 2) / (epeWins + epeTies + epeLosses) * 100;
 							masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).epeWins = epeWins;
@@ -1997,6 +2024,13 @@ export const getLeagueRecords = async (refresh = false) => {
 								weekTies++;
 								masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).weekTie = true;
 							}
+						}
+
+						for(const opponent in headToHeadRecords[recordType].years[year][recordManID]) {
+							headToHeadRecords[recordType].years[year][recordManID][opponent].winPerc = (headToHeadRecords[recordType].years[year][recordManID][opponent].wins + headToHeadRecords[recordType].years[year][recordManID][opponent].ties / 2) / (headToHeadRecords[recordType].years[year][recordManID][opponent].wins + headToHeadRecords[recordType].years[year][recordManID][opponent].ties + headToHeadRecords[recordType].years[year][recordManID][opponent].losses) * 100;
+							headToHeadRecords[recordType].years[year][recordManID][opponent].epePerc = (headToHeadRecords[recordType].years[year][recordManID][opponent].epeWins + headToHeadRecords[recordType].years[year][recordManID][opponent].epeTies / 2) / (headToHeadRecords[recordType].years[year][recordManID][opponent].epeWins + headToHeadRecords[recordType].years[year][recordManID][opponent].epeTies + headToHeadRecords[recordType].years[year][recordManID][opponent].epeLosses) * 100;
+							headToHeadRecords[recordType].years[year][recordManID][opponent].fptspg = headToHeadRecords[recordType].years[year][recordManID][opponent].fpts / (headToHeadRecords[recordType].years[year][recordManID][opponent].wins + headToHeadRecords[recordType].years[year][recordManID][opponent].ties + headToHeadRecords[recordType].years[year][recordManID][opponent].losses);
+							headToHeadRecords[recordType].years[year][recordManID][opponent].fptsAgainstPg = headToHeadRecords[recordType].years[year][recordManID][opponent].fptsAgainst / (headToHeadRecords[recordType].years[year][recordManID][opponent].wins + headToHeadRecords[recordType].years[year][recordManID][opponent].ties + headToHeadRecords[recordType].years[year][recordManID][opponent].losses);
 						}
 
 						const totalPPG = fptsTotal / recordMan.length; 
@@ -2502,6 +2536,13 @@ export const getLeagueRecords = async (refresh = false) => {
 			const typeRecord = recordMan[recordType];
 
 			if(typeRecord.length > 0 && recordType != "totals" && recordType != "grandTotals") {
+
+				for(const opponent in headToHeadRecords[recordType].alltime[recordManID]) {
+					headToHeadRecords[recordType].alltime[recordManID][opponent].winPerc = (headToHeadRecords[recordType].alltime[recordManID][opponent].wins + headToHeadRecords[recordType].alltime[recordManID][opponent].ties / 2) / (headToHeadRecords[recordType].alltime[recordManID][opponent].wins + headToHeadRecords[recordType].alltime[recordManID][opponent].ties + headToHeadRecords[recordType].alltime[recordManID][opponent].losses) * 100;
+					headToHeadRecords[recordType].alltime[recordManID][opponent].epePerc = (headToHeadRecords[recordType].alltime[recordManID][opponent].epeWins + headToHeadRecords[recordType].alltime[recordManID][opponent].epeTies / 2) / (headToHeadRecords[recordType].alltime[recordManID][opponent].epeWins + headToHeadRecords[recordType].alltime[recordManID][opponent].epeTies + headToHeadRecords[recordType].alltime[recordManID][opponent].epeLosses) * 100;
+					headToHeadRecords[recordType].alltime[recordManID][opponent].fptspg = headToHeadRecords[recordType].alltime[recordManID][opponent].fpts / (headToHeadRecords[recordType].alltime[recordManID][opponent].wins + headToHeadRecords[recordType].alltime[recordManID][opponent].ties + headToHeadRecords[recordType].alltime[recordManID][opponent].losses);
+					headToHeadRecords[recordType].alltime[recordManID][opponent].fptsAgainstPg = headToHeadRecords[recordType].alltime[recordManID][opponent].fptsAgainst / (headToHeadRecords[recordType].alltime[recordManID][opponent].wins + headToHeadRecords[recordType].alltime[recordManID][opponent].ties + headToHeadRecords[recordType].alltime[recordManID][opponent].losses);
+				}
 				
 				let fptsTotal = 0;
 				let winTotal = 0;
