@@ -135,135 +135,135 @@ const getPodiums = async (previousSeasonID) => {
 		}
 		//final ranks of playoff-bracket teams
 		if(numPOTeams == 4){
-			const finalsMatch = winnersData.slice().filter(f => f.m == numPlayoffMatches - 1)[0];
-			podium.champion = prevManagers[recordManagers.filter(m => m.rosterID == finalsMatch.w)[0].managerID];
+			const finalsMatch = winnersData.slice().find(f => f.m == numPlayoffMatches - 1);
+			podium.champion = prevManagers[recordManagers.find(m => m.rosterID == finalsMatch.w).managerID];
 			finalRank.champion = podium.champion;
-			podium.second = prevManagers[recordManagers.filter(m => m.rosterID == finalsMatch.l)[0].managerID];
+			podium.second = prevManagers[recordManagers.find(m => m.rosterID == finalsMatch.l).managerID];
 			finalRank.second = podium.second;
 
-			const runnersUpMatch = winnersData.slice().filter(f => f.m == numPlayoffMatches)[0];
-			podium.third = prevManagers[recordManagers.filter(m => m.rosterID == runnersUpMatch.w)[0].managerID];
+			const runnersUpMatch = winnersData.slice().find(f => f.m == numPlayoffMatches);
+			podium.third = prevManagers[recordManagers.find(m => m.rosterID == runnersUpMatch.w).managerID];
 			finalRank.third = podium.third;
-			finalRank.fourth  = prevManagers[recordManagers.filter(m => m.rosterID == runnersUpMatch.l)[0].managerID];
+			finalRank.fourth  = prevManagers[recordManagers.find(m => m.rosterID == runnersUpMatch.l).managerID];
 		} else if(numPOTeams == 6) {
-			const finalsMatch = winnersData.slice().filter(f => f.m == numPlayoffMatches - 1)[0];
-			podium.champion = prevManagers[recordManagers.filter(m => m.rosterID == finalsMatch.w)[0].managerID];
+			const finalsMatch = winnersData.slice().find(f => f.m == numPlayoffMatches - 1);
+			podium.champion = prevManagers[recordManagers.find(m => m.rosterID == finalsMatch.w).managerID];
 			finalRank.champion = podium.champion;
-			podium.second = prevManagers[recordManagers.filter(m => m.rosterID == finalsMatch.l)[0].managerID];
+			podium.second = prevManagers[recordManagers.find(m => m.rosterID == finalsMatch.l).managerID];
 			finalRank.second = podium.second;
 
-			const runnersUpMatch = winnersData.slice().filter(f => f.m == numPlayoffMatches)[0];
-			podium.third = prevManagers[recordManagers.filter(m => m.rosterID == runnersUpMatch.w)[0].managerID];
+			const runnersUpMatch = winnersData.slice().find(f => f.m == numPlayoffMatches);
+			podium.third = prevManagers[recordManagers.find(m => m.rosterID == runnersUpMatch.w).managerID];
 			finalRank.third = podium.third;
-			finalRank.fourth  = prevManagers[recordManagers.filter(m => m.rosterID == runnersUpMatch.l)[0].managerID];
+			finalRank.fourth  = prevManagers[recordManagers.find(m => m.rosterID == runnersUpMatch.l).managerID];
 
-			const fiveSixMatch = winnersData.slice().filter(f => f.m == numPlayoffMatches - 2)[0];
-			finalRank[5] = prevManagers[recordManagers.filter(m => m.rosterID == fiveSixMatch.w)[0].managerID];
-			finalRank[6] = prevManagers[recordManagers.filter(m => m.rosterID == fiveSixMatch.l)[0].managerID];	
+			const fiveSixMatch = winnersData.slice().find(f => f.m == numPlayoffMatches - 2);
+			finalRank[5] = prevManagers[recordManagers.find(m => m.rosterID == fiveSixMatch.w).managerID];
+			finalRank[6] = prevManagers[recordManagers.find(m => m.rosterID == fiveSixMatch.l).managerID];	
 		} else if(numPOTeams == 8) {
-			const finalsMatch = winnersData.slice().filter(f => f.m == numPlayoffMatches - 3)[0];
-			podium.champion = prevManagers[recordManagers.filter(m => m.rosterID == finalsMatch.w)[0].managerID];
+			const finalsMatch = winnersData.slice().find(f => f.m == numPlayoffMatches - 3);
+			podium.champion = prevManagers[recordManagers.find(m => m.rosterID == finalsMatch.w).managerID];
 			finalRank.champion = podium.champion;
-			podium.second = prevManagers[recordManagers.filter(m => m.rosterID == finalsMatch.l)[0].managerID];
+			podium.second = prevManagers[recordManagers.find(m => m.rosterID == finalsMatch.l).managerID];
 			finalRank.second = podium.second;
 
-			const runnersUpMatch = winnersData.slice().filter(f => f.m == numPlayoffMatches - 2)[0];
-			podium.third = prevManagers[recordManagers.filter(m => m.rosterID == runnersUpMatch.w)[0].managerID];
+			const runnersUpMatch = winnersData.slice().find(f => f.m == numPlayoffMatches - 2);
+			podium.third = prevManagers[recordManagers.find(m => m.rosterID == runnersUpMatch.w).managerID];
 			finalRank.third = podium.third;
-			finalRank.fourth  = prevManagers[recordManagers.filter(m => m.rosterID == runnersUpMatch.l)[0].managerID];
+			finalRank.fourth  = prevManagers[recordManagers.find(m => m.rosterID == runnersUpMatch.l).managerID];
 
-			const fiveSixMatch = winnersData.slice().filter(f => f.m == numPlayoffMatches - 1)[0];
-			finalRank[5] = prevManagers[recordManagers.filter(m => m.rosterID == fiveSixMatch.w)[0].managerID];
-			finalRank[6] = prevManagers[recordManagers.filter(m => m.rosterID == fiveSixMatch.l)[0].managerID];	
+			const fiveSixMatch = winnersData.slice().find(f => f.m == numPlayoffMatches - 1);
+			finalRank[5] = prevManagers[recordManagers.find(m => m.rosterID == fiveSixMatch.w).managerID];
+			finalRank[6] = prevManagers[recordManagers.find(m => m.rosterID == fiveSixMatch.l).managerID];	
 			
-			const sevenEightMatch = winnersData.slice().filter(f => f.m == numPlayoffMatches)[0];
-			finalRank[7] = prevManagers[recordManagers.filter(m => m.rosterID == sevenEightMatch.w)[0].managerID];
-			finalRank[8] = prevManagers[recordManagers.filter(m => m.rosterID == sevenEightMatch.l)[0].managerID];	
+			const sevenEightMatch = winnersData.slice().find(f => f.m == numPlayoffMatches)[0];
+			finalRank[7] = prevManagers[recordManagers.find(m => m.rosterID == sevenEightMatch.w).managerID];
+			finalRank[8] = prevManagers[recordManagers.find(m => m.rosterID == sevenEightMatch.l).managerID];	
 		}
 		// // final ranks of losers-bracket teams
 		if(losersBracketType == "toilet") {
 			if(numToiletTeams == 0) {
 				const toilet = null;
 			} else if(numToiletTeams == 2) {
-				const toiletBowlMatch = losersData.filter(f => f.m == numToiletMatches)[0];
-				podium.toilet = prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID];
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID]); // last place
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.l)[0].managerID]); // second to last
+				const toiletBowlMatch = losersData.find(f => f.m == numToiletMatches);
+				podium.toilet = prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID];
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID]); // last place
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.l).managerID]); // second to last
 			} else if(numToiletTeams == 4) {
-				const toiletBowlMatch = losersData.filter(f => f.m == numToiletMatches - 1)[0];
-				podium.toilet = prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID];
-				const bronzeLoserMatch = losersData.filter(f => f.m == numToiletMatches)[0];
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID]); // last place
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.l)[0].managerID]); // second to last
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == bronzeLoserMatch.w)[0].managerID]); // third to last
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == bronzeLoserMatch.l)[0].managerID]); // fourth to last
+				const toiletBowlMatch = losersData.find(f => f.m == numToiletMatches - 1);
+				podium.toilet = prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID];
+				const bronzeLoserMatch = losersData.find(f => f.m == numToiletMatches);
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID]); // last place
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.l).managerID]); // second to last
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == bronzeLoserMatch.w).managerID]); // third to last
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == bronzeLoserMatch.l).managerID]); // fourth to last
 			} else if(numToiletTeams == 6) {																				// etc below
-				const toiletBowlMatch = losersData.filter(f => f.m == numToiletMatches - 1)[0];
-				podium.toilet = prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID];
-				const bronzeLoserMatch = losersData.filter(f => f.m == numToiletMatches)[0];
-				const fiveSixLoserMatch = losersData.filter(f => f.m == numToiletMatches - 2)[0];
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID]);
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.l)[0].managerID]);
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == bronzeLoserMatch.w)[0].managerID]);
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == bronzeLoserMatch.l)[0].managerID]);
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == fiveSixLoserMatch.w)[0].managerID]); 
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == fiveSixLoserMatch.l)[0].managerID]); 
+				const toiletBowlMatch = losersData.find(f => f.m == numToiletMatches - 1);
+				podium.toilet = prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID];
+				const bronzeLoserMatch = losersData.find(f => f.m == numToiletMatches);
+				const fiveSixLoserMatch = losersData.find(f => f.m == numToiletMatches - 2);
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID]);
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.l).managerID]);
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == bronzeLoserMatch.w).managerID]);
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == bronzeLoserMatch.l).managerID]);
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == fiveSixLoserMatch.w).managerID]); 
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == fiveSixLoserMatch.l).managerID]); 
 			} else if(numToiletTeams > 6) {
-				const toiletBowlMatch = losersData.filter(f => f.m == numToiletMatches - 3)[0];
-				podium.toilet = prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID];
-				const bronzeLoserMatch = losersData.filter(f => f.m == numToiletMatches - 2)[0];
-				const fiveSixLoserMatch = losersData.filter(f => f.m == numToiletMatches - 1)[0];
-				const sevenEightLoserMatch = losersData.filter(f => f.m == numToiletMatches)[0];
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID]);
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.l)[0].managerID]);
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == bronzeLoserMatch.w)[0].managerID]);
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == bronzeLoserMatch.l)[0].managerID]);
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == fiveSixLoserMatch.w)[0].managerID]);
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == fiveSixLoserMatch.l)[0].managerID]);
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == sevenEightLoserMatch.w)[0].managerID]);
-				toiletArray.push(prevManagers[recordManagers.filter(m => m.rosterID == sevenEightLoserMatch.l)[0].managerID]);
+				const toiletBowlMatch = losersData.find(f => f.m == numToiletMatches - 3);
+				podium.toilet = prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID];
+				const bronzeLoserMatch = losersData.find(f => f.m == numToiletMatches - 2);
+				const fiveSixLoserMatch = losersData.find(f => f.m == numToiletMatches - 1);
+				const sevenEightLoserMatch = losersData.find(f => f.m == numToiletMatches);
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID]);
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.l).managerID]);
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == bronzeLoserMatch.w).managerID]);
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == bronzeLoserMatch.l).managerID]);
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == fiveSixLoserMatch.w).managerID]);
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == fiveSixLoserMatch.l).managerID]);
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == sevenEightLoserMatch.w).managerID]);
+				toiletArray.push(prevManagers[recordManagers.find(m => m.rosterID == sevenEightLoserMatch.l).managerID]);
 			}
 		} else if(losersBracketType == "consolation") {
 			if(numToiletTeams == 0) {
 				podium.toilet = null;
 			} else if(numToiletTeams == 2) {
-				const toiletBowlMatch = losersData.filter(f => f.m == numToiletMatches)[0];
-				podium.toilet = prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID];
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID]); // first LOSER (e.g. 7th place in 6-team playoff league)
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.l)[0].managerID]); // second loser 
+				const toiletBowlMatch = losersData.find(f => f.m == numToiletMatches);
+				podium.toilet = prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID];
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID]); // first LOSER (e.g. 7th place in 6-team playoff league)
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.l).managerID]); // second loser 
 			} else if(numToiletTeams == 4) {																						// etc below
-				const toiletBowlMatch = losersData.filter(f => f.m == numToiletMatches - 1)[0];
-				podium.toilet = prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID];
-				const bronzeLoserMatch = losersData.filter(f => f.m == numToiletMatches)[0];
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.l)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == bronzeLoserMatch.w)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == bronzeLoserMatch.l)[0].managerID]);
+				const toiletBowlMatch = losersData.find(f => f.m == numToiletMatches - 1);
+				podium.toilet = prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID];
+				const bronzeLoserMatch = losersData.find(f => f.m == numToiletMatches);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.l).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == bronzeLoserMatch.w).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == bronzeLoserMatch.l).managerID]);
 			} else if(numToiletTeams == 6) {
-				const toiletBowlMatch = losersData.filter(f => f.m == numToiletMatches - 1)[0];
-				podium.toilet = prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID];
-				const bronzeLoserMatch = losersData.filter(f => f.m == numToiletMatches)[0];
-				const fiveSixLoserMatch = losersData.filter(f => f.m == numToiletMatches - 2)[0];
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.l)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == bronzeLoserMatch.w)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == bronzeLoserMatch.l)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == fiveSixLoserMatch.w)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == fiveSixLoserMatch.l)[0].managerID]);
+				const toiletBowlMatch = losersData.find(f => f.m == numToiletMatches - 1);
+				podium.toilet = prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID];
+				const bronzeLoserMatch = losersData.find(f => f.m == numToiletMatches);
+				const fiveSixLoserMatch = losersData.find(f => f.m == numToiletMatches - 2);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.l).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == bronzeLoserMatch.w).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == bronzeLoserMatch.l).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == fiveSixLoserMatch.w).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == fiveSixLoserMatch.l).managerID]);
 			} else if(numToiletTeams > 6) {
-				const toiletBowlMatch = losersData.filter(f => f.m == numToiletMatches - 3)[0];
-				podium.toilet = prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID];
-				const bronzeLoserMatch = losersData.filter(f => f.m == numToiletMatches - 2)[0];
-				const fiveSixLoserMatch = losersData.filter(f => f.m == numToiletMatches - 1)[0];
-				const sevenEightLoserMatch = losersData.filter(f => f.m == numToiletMatches)[0];
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.w)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == toiletBowlMatch.l)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == bronzeLoserMatch.w)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == bronzeLoserMatch.l)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == fiveSixLoserMatch.w)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == fiveSixLoserMatch.l)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == sevenEightLoserMatch.w)[0].managerID]);
-				consolationArray.push(prevManagers[recordManagers.filter(m => m.rosterID == sevenEightLoserMatch.l)[0].managerID]);
+				const toiletBowlMatch = losersData.find(f => f.m == numToiletMatches - 3);
+				podium.toilet = prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID];
+				const bronzeLoserMatch = losersData.find(f => f.m == numToiletMatches - 2);
+				const fiveSixLoserMatch = losersData.find(f => f.m == numToiletMatches - 1);
+				const sevenEightLoserMatch = losersData.find(f => f.m == numToiletMatches);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.w).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == toiletBowlMatch.l).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == bronzeLoserMatch.w).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == bronzeLoserMatch.l).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == fiveSixLoserMatch.w).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == fiveSixLoserMatch.l).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == sevenEightLoserMatch.w).managerID]);
+				consolationArray.push(prevManagers[recordManagers.find(m => m.rosterID == sevenEightLoserMatch.l).managerID]);
 			}
 		}
 		// translating final ranks depending on league size
@@ -295,7 +295,7 @@ const getPodiums = async (previousSeasonID) => {
 					}
 				}
 			}
-		} else if(losersBracketType == "coonsolation") { 						// up to 8 ranks can be found from consolation bracket, beginning with the winner of that bracket
+		} else if(losersBracketType == "consolation") { 						// up to 8 ranks can be found from consolation bracket, beginning with the winner of that bracket
 			for(let i = 1; i < 9; i++) {
 				if(consolationArray[i - 1] && consolationArray[i - 1] != null) {
 					processedFinalRanks[numPOTeams + i] = consolationArray[i - 1];			

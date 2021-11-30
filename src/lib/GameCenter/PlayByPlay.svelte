@@ -118,7 +118,7 @@
                 playType == 36 || playType == 52 || playType == 12 ||   
                 playType == 32 || playType == 17 || playType == 29 ||
                 playType == 37 || playType == 39 || playType == 18 ||
-                playType == 20 || play.pointAfterType == 43 ||
+                playType == 20 || playType == 57 || play.pointAfterType == 0 || play.pointAfterType == 43 ||
                 (playType == 60 && play.alternativeText.includes('BLOCKED'))) {    
 
                 if(awayDefStarted == true && playTeam == home && playerTeam == away) {
@@ -1743,7 +1743,30 @@
                                 }
                                 fantasyPlay[play.playID].push(entryDEF);
                             }
-                        } else if(score.blk_kick && play.pointAfterType == 43) {                                                    // BLOCKED PAT - TEAM DEF/ST
+                        } else if(score.def_2pt && play.playType == 57) {                                                                       // DEF 2-PT CONVERSION
+                            const fpts = (score?.def_2pt || 0);  
+                            const stat = 'DEF 2PT:';
+                            const entryDEF = {
+                                order: play.order,
+                                side: 'defense',
+                                manager: player.manager,
+                                playerInfo: player.playerInfo,
+                                stat: ['def_2pt'],
+                                runningTotals: [],
+                                fpts,
+                                yards: player.yards,
+                                description: play.description,
+                                shortDesc: 'Def. 2-PT Conversion',
+                            }
+                            if(play.description.includes('Blocked')) {
+                                entryDEF.shortDesc = 'Blocked PAT -> Def. 2-PT Conversion';
+                            }
+                            if(fpts != 0) {
+                                let runningTotal = pushRunningTotal(fpts, stat, entryDEF.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                                entryDEF.runningTotals.push(runningTotal);
+                            }
+                            fantasyPlay[play.playID].push(entryDEF);     
+                        } else if(score.blk_kick && (play.pointAfterType == 43 || play.pointAfterType == 0)) {                                                    // BLOCKED PAT - TEAM DEF/ST
                             const fpts = (score?.blk_kick || 0);  
                             const stat = 'BLK:';
                             const entryDEF = {
@@ -2882,7 +2905,7 @@
                             }
                             fantasyPlay[play.playID].push(entry);
                         } else if(score.idp_def_td && player.statType == 'scorer' && (player.playType == 17 || player.playType == 37 || player.playType == 29 || player.playType == 39)) {               // IDP - TD (other than pick 6)
-                            if(player.playType == 17 || player.playType == 37) {                        // IDP - BLOCKED PUNT RETURN TD
+                            if(player.playType == 17 || player.playType == 37) {                        // IDP - BLOCKED PUNT RETURN TD TO-DO: IDP blocked PAT -> 2pt conversion WFT v SEA week 12 2021
                                 const fpts = (score?.idp_def_td || 0);
                                 const stat = 'TD:';
                                 const entry = {
@@ -3303,16 +3326,18 @@
                                             pointAfterType = 62;
                                         } else if(play.alternativeText.includes('PAT blocked')) {
                                             pointAfterType = 43;
-                                        } else if(play.alternativeText.includes('TWO-POINT') && play.alternativeText.includes('SUCCEEDS')) {
+                                        } else if(play.alternativeText.includes('TWO-POINT') && !play.alternativeText.includes('DEFENSIVE TWO-POINT') && play.alternativeText.includes('SUCCEEDS')) {
                                             let twoPointText = play.alternativeText.slice(play.alternativeText.indexOf('TWO-POINT'));
                                             if(twoPointText.includes('rush')) {
                                                 pointAfterType = 16;
                                             } else {
                                                 pointAfterType = 15;
                                             }
+                                        } else if(play.alternativeText.includes('DEFENSIVE TWO-POINT') && play.alternativeText.includes('Blocked') ) {
+                                            pointAfterType = 0;
                                         } else if(play.alternativeText.includes('Conversion Failed')) {
                                             pointAfterType = -1;
-                                        }
+                                        } 
                                     }
                                 }
                                 if(play.scoreValue == 6 && pointAfterType == 61) {
@@ -3322,7 +3347,7 @@
                                 } else {
                                     scoreValue = play.scoreValue;
                                 }
-                                if(playType == 17 || playType == 37 || playType == 32) {        // TO-DO add field goal kick 6 & 2pt return score
+                                if(playType == 17 || playType == 37 || playType == 32 || playType == 57) {        // TO-DO add field goal kick 6 & 2pt return score
                                     scoreAgainstDEF = false;
                                     scoreAgainstOppDEF = true;
                                     if(playTeam == homeEspn) {
@@ -3791,13 +3816,15 @@
                                         pointAfterType = 62;
                                     } else if(play.alternativeText.includes('PAT blocked')) {
                                         pointAfterType = 43;
-                                    } else if(play.alternativeText.includes('TWO-POINT') && play.alternativeText.includes('SUCCEEDS')) {
+                                    } else if(play.alternativeText.includes('TWO-POINT') && !play.alternativeText.includes('DEFENSIVE TWO-POINT') && play.alternativeText.includes('SUCCEEDS')) {
                                         let twoPointText = play.alternativeText.slice(play.alternativeText.indexOf('TWO-POINT'));
                                         if(twoPointText.includes('rush')) {
                                             pointAfterType = 16;
                                         } else {
                                             pointAfterType = 15;
                                         }
+                                    } else if(play.alternativeText.includes('DEFENSIVE TWO-POINT') && play.alternativeText.includes('Blocked') ) {
+                                        pointAfterType = 0;
                                     } else if(play.alternativeText.includes('Conversion Failed')) {
                                         pointAfterType = -1;
                                     }
@@ -3810,7 +3837,7 @@
                             } else {
                                 scoreValue = play.scoreValue;
                             }
-                            if(playType == 17 || playType == 37 || playType == 32) {        // TO-DO add field goal kick 6 & 2pt return score
+                            if(playType == 17 || playType == 37 || playType == 32 || playType == 57) {        // TO-DO add field goal kick 6 & 2pt return score
                                 scoreAgainstDEF = false;
                                 scoreAgainstOppDEF = true;
                                 if(playTeam == homeEspn) {
@@ -4167,6 +4194,7 @@
                 //     43: 'blocked PAT',
                 //     52: 'punt',
                 //     53: 'kickoff (no return)',
+                //     57: 'defensive 2pt conversion',
                 //     59: 'FG good',
                 //     60: 'FG miss',
                 //     61: 'PAT good',

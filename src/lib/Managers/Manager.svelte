@@ -155,10 +155,10 @@
 
     // Overall Win - Loss Record
     let recordHistory = {
-        wins: records.leagueRecordArrays.combined.managerBests.winRecords.slice().filter(m => m.recordManID == recordManID)[0].wins,
-        losses: records.leagueRecordArrays.combined.managerBests.winRecords.slice().filter(m => m.recordManID == recordManID)[0].losses,
-        ties: records.leagueRecordArrays.combined.managerBests.winRecords.slice().filter(m => m.recordManID == recordManID)[0].ties,
-        winPerc: records.leagueRecordArrays.combined.managerBests.winRecords.slice().filter(m => m.recordManID == recordManID)[0].winPerc,
+        wins: records.leagueRecordArrays.combined.managerBests.winRecords.find(m => m.recordManID == recordManID).wins,
+        losses: records.leagueRecordArrays.combined.managerBests.winRecords.find(m => m.recordManID == recordManID).losses,
+        ties: records.leagueRecordArrays.combined.managerBests.winRecords.find(m => m.recordManID == recordManID).ties,
+        winPerc: records.leagueRecordArrays.combined.managerBests.winRecords.find(m => m.recordManID == recordManID).winPerc,
         showTies: new Boolean (false),
     }
     if(recordHistory.ties > 0) {
@@ -168,10 +168,10 @@
     }
     // Overall EPE Win - Loss Record
     let epeHistory = {
-        wins: records.leagueRecordArrays.combined.managerBests.epeRecords.slice().filter(m => m.recordManID == recordManID)[0].epeWins,
-        losses: records.leagueRecordArrays.combined.managerBests.epeRecords.slice().filter(m => m.recordManID == recordManID)[0].epeLosses,
-        ties: records.leagueRecordArrays.combined.managerBests.epeRecords.slice().filter(m => m.recordManID == recordManID)[0].epeTies,
-        epePerc: records.leagueRecordArrays.combined.managerBests.epeRecords.slice().filter(m => m.recordManID == recordManID)[0].epePerc,
+        wins: records.leagueRecordArrays.combined.managerBests.epeRecords.find(m => m.recordManID == recordManID).epeWins,
+        losses: records.leagueRecordArrays.combined.managerBests.epeRecords.find(m => m.recordManID == recordManID).epeLosses,
+        ties: records.leagueRecordArrays.combined.managerBests.epeRecords.find(m => m.recordManID == recordManID).epeTies,
+        epePerc: records.leagueRecordArrays.combined.managerBests.epeRecords.find(m => m.recordManID == recordManID).epePerc,
         showTies: new Boolean (false),
     }
     if(epeHistory.ties > 0) {
@@ -181,18 +181,18 @@
     }
     // FPTS history
     let fptsHistory = {
-        fpts: records.leagueRecordArrays.combined.managerBests.cumulativePoints.slice().filter(m => m.recordManID == recordManID)[0].fpts,
-        fptsAgainst: records.leagueRecordArrays.combined.managerBests.cumulativePoints.slice().filter(m => m.recordManID == recordManID)[0].fptsAgainst,
-        fptspg: records.leagueRecordArrays.combined.managerBests.cumulativePoints.slice().filter(m => m.recordManID == recordManID)[0].fptspg,
+        fpts: records.leagueRecordArrays.combined.managerBests.cumulativePoints.find(m => m.recordManID == recordManID).fpts,
+        fptsAgainst: records.leagueRecordArrays.combined.managerBests.cumulativePoints.find(m => m.recordManID == recordManID).fptsAgainst,
+        fptspg: records.leagueRecordArrays.combined.managerBests.cumulativePoints.find(m => m.recordManID == recordManID).fptspg,
     }
     // Median Win - Loss Record
     let medianHistory = {
-        wins: records.leagueRecordArrays.combined.managerBests.medianRecords.slice().filter(m => m.recordManID == recordManID)[0].weekWinners,
-        losses: records.leagueRecordArrays.combined.managerBests.medianRecords.slice().filter(m => m.recordManID == recordManID)[0].weekLosers,
-        ties: records.leagueRecordArrays.combined.managerBests.medianRecords.slice().filter(m => m.recordManID == recordManID)[0].weekTies,
-        medianPerc: records.leagueRecordArrays.combined.managerBests.medianRecords.slice().filter(m => m.recordManID == recordManID)[0].medianPerc,
-        topScores: records.leagueRecordArrays.combined.managerBests.medianRecords.slice().filter(m => m.recordManID == recordManID)[0].topScores,
-        bottomScores: records.leagueRecordArrays.combined.managerBests.medianRecords.slice().filter(m => m.recordManID == recordManID)[0].bottomScores,
+        wins: records.leagueRecordArrays.combined.managerBests.medianRecords.find(m => m.recordManID == recordManID).weekWinners,
+        losses: records.leagueRecordArrays.combined.managerBests.medianRecords.find(m => m.recordManID == recordManID).weekLosers,
+        ties: records.leagueRecordArrays.combined.managerBests.medianRecords.find(m => m.recordManID == recordManID).weekTies,
+        medianPerc: records.leagueRecordArrays.combined.managerBests.medianRecords.find(m => m.recordManID == recordManID).medianPerc,
+        topScores: records.leagueRecordArrays.combined.managerBests.medianRecords.find(m => m.recordManID == recordManID).topScores,
+        bottomScores: records.leagueRecordArrays.combined.managerBests.medianRecords.find(m => m.recordManID == recordManID).bottomScores,
         showTies: new Boolean (false),
     }
     if(medianHistory.ties > 0) {
