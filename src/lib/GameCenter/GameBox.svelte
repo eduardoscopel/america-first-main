@@ -211,7 +211,7 @@
 
     // assign teams for selected gameID
     const selectGame = (gameSelection) => {
-        let game = nflMatchups.filter(m => m[0].gameID == gameSelection)[0];
+        let game = nflMatchups.find(m => m[0].gameID == gameSelection);
         let home = game[0].team;
         let away = game[1].team;
         freshGame = true;

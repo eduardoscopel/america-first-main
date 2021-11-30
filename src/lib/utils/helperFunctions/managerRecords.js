@@ -22,10 +22,7 @@ export const getManagerRecords = async (refresh = false) => {
 
 	for(const key in previousDraftsData) {
 		const prevDraft = previousDraftsData[key];
-		
-		if(!draftInfo[prevDraft.year]) {
-			draftInfo[prevDraft.year] = prevDraft;
-		}
+		draftInfo[prevDraft.year] = prevDraft;
 	}
 
 	const nflState = await getNflState().catch((err) => { console.error(err); });
@@ -45,9 +42,7 @@ export const getManagerRecords = async (refresh = false) => {
 	let lastYear;
 
 	let leagueRosterRecords = {}; 				// every full season stat point (for each year and all years combined)
-	let playoffRosterRecords = {}; 
 	let seasonWeekRecords = []; 				// highest weekly points within a single season
-	let playoffWeekRecords = [];
 
 	let masterRecordBook = {
 		managers: {
@@ -145,11 +140,6 @@ export const getManagerRecords = async (refresh = false) => {
 
 	let leagueManagers = {};
 	let activeManagers = [];
-
-	let playerRecords = {};
-	let seasonPlayerRecords = {};
-
-	let POplayerRecords = {};
 
 	let headToHeadRecords = {
 		regularSeason: {
@@ -468,38 +458,7 @@ export const getManagerRecords = async (refresh = false) => {
 				recordManID,
 			}
 
-			leagueRosterRecords[recordManID].years.push(singleYearInfo);
-			
-			if(!playoffRosterRecords[recordManID]) {
-				playoffRosterRecords[recordManID] = {
-					wins: 0,
-					losses: 0,
-					ties: 0,
-					fptsFor: 0,
-					fptsAgainst: 0,
-					potentialPoints: 0,
-					fptspg: 0,
-					POgames: 0,
-					manager: originalManagers[recordManID],
-					years: {},
-					recordManID,
-				}
-			}
-
-			playoffRosterRecords[recordManID].years[year] = {
-				wins: 0,
-				losses: 0,
-				ties: 0,
-				fpts: 0,
-				fptsAgainst: 0,
-				potentialPoints: 0,
-				fptspg: 0,
-				POgames: 0,
-				manager: originalManagers[recordManID],
-				year,
-				recordManID,
-			}
-				
+			leagueRosterRecords[recordManID].years.push(singleYearInfo);			
 		}
 
 		// loop through each week of the season
@@ -545,8 +504,6 @@ export const getManagerRecords = async (refresh = false) => {
 
 		// now that we've used the current season ID for everything we need, set it to the previous season
 		curSeason = leagueData.previous_league_id;
-
-		const playoffPointsRecord = [];
 
 		// CREATING YEARLY RECORD OBJECTS/ARRAYS
 		// League Objects/Arrays (for all-around records)
@@ -625,23 +582,6 @@ export const getManagerRecords = async (refresh = false) => {
 					for(const key in champMatch) {
 						const opponent = champMatch[key];
 
-						playoffRosterRecords[opponent.recordManID].years[year].fpts += opponent.fpts;
-						playoffRosterRecords[opponent.recordManID].years[year].POgames++;
-
-						const POweekEntry = {
-							manager: opponent.manager,
-							recordManID: opponent.recordManID,
-							rosterID: opponent.rosterID,
-							fpts: opponent.fpts,
-							epePOWins: 0,
-							epePOTies: 0,
-							epePOLosses: 0,
-							POweekWinner: new Boolean(false),
-							POweekLoser: new Boolean(false),
-							week: opponent.week,
-							year,
-						}
-
 						const comboEntry = {
 							manager: opponent.manager,
 							recordManID: opponent.recordManID,
@@ -692,8 +632,6 @@ export const getManagerRecords = async (refresh = false) => {
 							}
 						}
 
-						playoffPointsRecord.push(POweekEntry);
-
 						masterRecordBook.league.playoffs.alltime.push(comboEntry);
 						masterRecordBook.league.combined.alltime.push(comboEntry);
 						if(!masterRecordBook.managers.playoffs.alltime[opponent.recordManID]) {
@@ -726,14 +664,6 @@ export const getManagerRecords = async (refresh = false) => {
 						for(let i = 0; i < players.length; i++) {
 		
 							const playerID = players[i];
-		
-							if(!POplayerRecords[year]) {
-								POplayerRecords[year] = {};
-							}
-							if(!POplayerRecords[year][opponent.recordManID]) {
-								POplayerRecords[year][opponent.recordManID] = {};
-							}
-		
 							const playerPoints = playersPTS[playerID];
 		
 							let topStarter = new Boolean (false);
@@ -767,10 +697,6 @@ export const getManagerRecords = async (refresh = false) => {
 							let playerInfo = playersInfo[playerID];
 							let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`;
 
-							if(!POplayerRecords[year][opponent.recordManID][playerID]) {
-								POplayerRecords[year][opponent.recordManID][playerID] = [];
-							}
-		
 							const playerEntry = {		
 								recordManID: opponent.recordManID,
 								manager: originalManagers[opponent.recordManID],
@@ -805,7 +731,6 @@ export const getManagerRecords = async (refresh = false) => {
 									playerEntry.weekAcquired = 0;
 								} 
 							}
-							POplayerRecords[year][opponent.recordManID][playerID].push(playerEntry);
 
 							// add player arrays to ALLTIME
 
@@ -834,9 +759,6 @@ export const getManagerRecords = async (refresh = false) => {
 							masterRecordBook.players.managers.combined.years[year][opponent.recordManID].push(playerEntry);
 						}
 					}
-
-					playoffRosterRecords[home.recordManID].years[year].fptsAgainst += away.fpts;
-					playoffRosterRecords[away.recordManID].years[year].fptsAgainst += home.fpts;
 				} else if(playoffCase == 3 ||														// Relevant Match IDs: 1, 2
 				   		  playoffCase == 9 ||
 				   		  playoffCase == 6 && POstartWeek < POrecordsWeek + playoffLength ||
@@ -858,23 +780,6 @@ export const getManagerRecords = async (refresh = false) => {
 
 						for(const key in POmatchups[i]) {
 							const opponent = POmatchups[i][key];
-
-							playoffRosterRecords[opponent.recordManID].years[year].fpts += opponent.fpts;
-							playoffRosterRecords[opponent.recordManID].years[year].POgames++;
-	
-							const POweekEntry = {
-								manager: opponent.manager,
-								recordManID: opponent.recordManID,
-								rosterID: opponent.rosterID,
-								fpts: opponent.fpts,
-								epePOWins: 0,
-								epePOTies: 0,
-								epePOLosses: 0,
-								POweekWinner: new Boolean(false),
-								POweekLoser: new Boolean(false),
-								week: opponent.week,
-								year,
-							}
 
 							const comboEntry = {
 								manager: opponent.manager,
@@ -926,8 +831,6 @@ export const getManagerRecords = async (refresh = false) => {
 								}
 							}
 							
-							playoffPointsRecord.push(POweekEntry);
-
 							masterRecordBook.league.playoffs.alltime.push(comboEntry);
 							masterRecordBook.league.combined.alltime.push(comboEntry);
 							if(!masterRecordBook.managers.playoffs.alltime[opponent.recordManID]) {
@@ -960,14 +863,6 @@ export const getManagerRecords = async (refresh = false) => {
 							for(let i = 0; i < players.length; i++) {
 			
 								const playerID = players[i];
-			
-								if(!POplayerRecords[year]) {
-									POplayerRecords[year] = {};
-								}
-								if(!POplayerRecords[year][opponent.recordManID]) {
-									POplayerRecords[year][opponent.recordManID] = {};
-								}
-			
 								const playerPoints = playersPTS[playerID];
 			
 								let topStarter = new Boolean (false);
@@ -1000,11 +895,7 @@ export const getManagerRecords = async (refresh = false) => {
 								
 								let playerInfo = playersInfo[playerID];
 								let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`;
-	
-								if(!POplayerRecords[year][opponent.recordManID][playerID]) {
-									POplayerRecords[year][opponent.recordManID][playerID] = [];
-								}
-			
+
 								const playerEntry = {		
 									recordManID: opponent.recordManID,
 									manager: originalManagers[opponent.recordManID],
@@ -1038,9 +929,7 @@ export const getManagerRecords = async (refresh = false) => {
 										playerEntry.howAcquired = 'draft';
 										playerEntry.weekAcquired = 0;
 									} 
-								}
-								POplayerRecords[year][opponent.recordManID][playerID].push(playerEntry);
-	
+								}	
 								// add player arrays to ALLTIME
 
 								masterRecordBook.players.league.playoffs.alltime.push(playerEntry);
@@ -1068,9 +957,6 @@ export const getManagerRecords = async (refresh = false) => {
 								masterRecordBook.players.managers.combined.years[year][opponent.recordManID].push(playerEntry);
 							}
 						}
-	
-						playoffRosterRecords[home.recordManID].years[year].fptsAgainst += away.fpts;
-						playoffRosterRecords[away.recordManID].years[year].fptsAgainst += home.fpts;
 					}
 				} else if(playoffCase == 7 && 2 < POround < 5 ||									// Relevant Match IDs: 1, 2, 3
 				   		  playoffCase == 4 && POround == 2 ||
@@ -1088,23 +974,6 @@ export const getManagerRecords = async (refresh = false) => {
 	
 						for(const key in POmatchups[i]) {
 							const opponent = POmatchups[i][key];
-
-							playoffRosterRecords[opponent.recordManID].years[year].fpts += opponent.fpts;
-							playoffRosterRecords[opponent.recordManID].years[year].POgames++;
-	
-							const POweekEntry = {
-								manager: opponent.manager,
-								recordManID: opponent.recordManID,
-								rosterID: opponent.rosterID,
-								fpts: opponent.fpts,
-								epePOWins: 0,
-								epePOTies: 0,
-								epePOLosses: 0,
-								POweekWinner: new Boolean(false),
-								POweekLoser: new Boolean(false),
-								week: opponent.week,
-								year,
-							}
 
 							const comboEntry = {
 								manager: opponent.manager,
@@ -1156,8 +1025,6 @@ export const getManagerRecords = async (refresh = false) => {
 								}
 							}
 
-							playoffPointsRecord.push(POweekEntry);
-
 							masterRecordBook.league.playoffs.alltime.push(comboEntry);
 							masterRecordBook.league.combined.alltime.push(comboEntry);
 							if(!masterRecordBook.managers.playoffs.alltime[opponent.recordManID]) {
@@ -1190,14 +1057,6 @@ export const getManagerRecords = async (refresh = false) => {
 							for(let i = 0; i < players.length; i++) {
 			
 								const playerID = players[i];
-			
-								if(!POplayerRecords[year]) {
-									POplayerRecords[year] = {};
-								}
-								if(!POplayerRecords[year][opponent.recordManID]) {
-									POplayerRecords[year][opponent.recordManID] = {};
-								}
-			
 								const playerPoints = playersPTS[playerID];
 			
 								let topStarter = new Boolean (false);
@@ -1230,10 +1089,6 @@ export const getManagerRecords = async (refresh = false) => {
 								
 								let playerInfo = playersInfo[playerID];
 								let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`;
-	
-								if(!POplayerRecords[year][opponent.recordManID][playerID]) {
-									POplayerRecords[year][opponent.recordManID][playerID] = [];
-								}
 			
 								const playerEntry = {		
 									recordManID: opponent.recordManID,
@@ -1269,7 +1124,6 @@ export const getManagerRecords = async (refresh = false) => {
 										playerEntry.weekAcquired = 0;
 									} 
 								}
-								POplayerRecords[year][opponent.recordManID][playerID].push(playerEntry);
 	
 								// add player arrays to ALLTIME
 
@@ -1298,9 +1152,6 @@ export const getManagerRecords = async (refresh = false) => {
 								masterRecordBook.players.managers.combined.years[year][opponent.recordManID].push(playerEntry);
 							}
 						}
-	
-						playoffRosterRecords[home.recordManID].years[year].fptsAgainst += away.fpts;
-						playoffRosterRecords[away.recordManID].years[year].fptsAgainst += home.fpts;
 					}
 				} else if(playoffCase == 8 ||														// Relevant Match IDs: 1, 2, 3, 4
 				   		  playoffCase == 2 ||
@@ -1318,23 +1169,6 @@ export const getManagerRecords = async (refresh = false) => {
 	
 						for(const key in POmatchups[i]) {
 							const opponent = POmatchups[i][key];
-
-							playoffRosterRecords[opponent.recordManID].years[year].fpts += opponent.fpts;
-							playoffRosterRecords[opponent.recordManID].years[year].POgames++;
-	
-							const POweekEntry = {
-								manager: opponent.manager,
-								recordManID: opponent.recordManID,
-								rosterID: opponent.rosterID,
-								fpts: opponent.fpts,
-								epePOWins: 0,
-								epePOTies: 0,
-								epePOLosses: 0,
-								POweekWinner: new Boolean(false),
-								POweekLoser: new Boolean(false),
-								week: opponent.week,
-								year,
-							}
 
 							const comboEntry = {
 								manager: opponent.manager,
@@ -1386,8 +1220,6 @@ export const getManagerRecords = async (refresh = false) => {
 								}
 							}
 
-							playoffPointsRecord.push(POweekEntry);
-
 							masterRecordBook.league.playoffs.alltime.push(comboEntry);
 							masterRecordBook.league.combined.alltime.push(comboEntry);
 							if(!masterRecordBook.managers.playoffs.alltime[opponent.recordManID]) {
@@ -1419,15 +1251,7 @@ export const getManagerRecords = async (refresh = false) => {
 							
 							for(let i = 0; i < players.length; i++) {
 			
-								const playerID = players[i];
-			
-								if(!POplayerRecords[year]) {
-									POplayerRecords[year] = {};
-								}
-								if(!POplayerRecords[year][opponent.recordManID]) {
-									POplayerRecords[year][opponent.recordManID] = {};
-								}
-			
+								const playerID = players[i];		
 								const playerPoints = playersPTS[playerID];
 			
 								let topStarter = new Boolean (false);
@@ -1460,10 +1284,6 @@ export const getManagerRecords = async (refresh = false) => {
 								
 								let playerInfo = playersInfo[playerID];
 								let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`;
-	
-								if(!POplayerRecords[year][opponent.recordManID][playerID]) {
-									POplayerRecords[year][opponent.recordManID][playerID] = [];
-								}
 			
 								const playerEntry = {		
 									recordManID: opponent.recordManID,
@@ -1499,8 +1319,6 @@ export const getManagerRecords = async (refresh = false) => {
 										playerEntry.weekAcquired = 0;
 									} 
 								}
-
-								POplayerRecords[year][opponent.recordManID][playerID].push(playerEntry);
 	
 								// add player arrays to ALLTIME
 
@@ -1529,48 +1347,13 @@ export const getManagerRecords = async (refresh = false) => {
 								masterRecordBook.players.managers.combined.years[year][opponent.recordManID].push(playerEntry);
 							}
 						}
-	
-						playoffRosterRecords[home.recordManID].years[year].fptsAgainst += away.fpts;
-						playoffRosterRecords[away.recordManID].years[year].fptsAgainst += home.fpts;
 					}
 				}
 
 				POstartWeek--;
 
 			}
-						// calculate playoff records
 
-			for(const recordManID in playoffRosterRecords) {
-				const playoffRosterRecord = playoffRosterRecords[recordManID];
-
-				if(playoffRosterRecord.years[year] && playoffRosterRecord.years[year].POgames > 0) {
-
-					playoffRosterRecord.fptsFor += playoffRosterRecord.years[year].fpts;
-					playoffRosterRecord.fptsAgainst += playoffRosterRecord.years[year].fptsAgainst;
-					playoffRosterRecord.wins += playoffRosterRecord.years[year].wins;
-					playoffRosterRecord.ties += playoffRosterRecord.years[year].ties;
-					playoffRosterRecord.losses += playoffRosterRecord.years[year].losses;
-					playoffRosterRecord.POgames += playoffRosterRecord.years[year].POgames;
-					playoffRosterRecord.potentialPoints += playoffRosterRecord.years[year].potentialPoints;
-				
-					const fptspg = playoffRosterRecord.years[year].fpts / playoffRosterRecord.years[year].POgames;
-
-				} else {
-					continue;
-				}
-			}
-			// per-season ranks & records to push thru seasonWeekRecords
-			const interSeasonPOEntry = {
-				year,
-				playoffPointsRecords: playoffPointsRecord.sort((a, b) => b.fpts - a.fpts).slice(0, 10),
-			}
-
-			if(interSeasonPOEntry.playoffPointsRecords.length > 0) {
-				if(!currentYear) {
-					currentYear = year;
-				}
-				playoffWeekRecords.push(interSeasonPOEntry);
-			};
 		}
 		
 		// process all the REGULAR SEASON matchups
@@ -1661,14 +1444,6 @@ export const getManagerRecords = async (refresh = false) => {
 				for(let i = 0; i < players.length; i++) {
 
 					const playerID = players[i];
-
-					if(!playerRecords[year]) {
-						playerRecords[year] = {};
-					}
-					if(!playerRecords[year][recordManID]) {
-						playerRecords[year][recordManID] = {};
-					}
-
 					const playerPoints = playersPTS[playerID];
 
 					let topStarter = new Boolean (false);
@@ -1701,10 +1476,6 @@ export const getManagerRecords = async (refresh = false) => {
 					
 					let playerInfo = playersInfo[playerID];
     				let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`;
-
-					if(!playerRecords[year][recordManID][playerID]) {
-						playerRecords[year][recordManID][playerID] = [];
-					}
 
 					const playerEntry = {		
 						recordManID,
@@ -1740,7 +1511,6 @@ export const getManagerRecords = async (refresh = false) => {
 							playerEntry.weekAcquired = 0;
 						} 
 					}
-					playerRecords[year][recordManID][playerID].push(playerEntry);
 
 					// add player arrays to ALLTIME
 

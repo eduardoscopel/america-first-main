@@ -11,6 +11,7 @@
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2021/types/2/weeks ALL WEEKS
     // 4035687
     let startersArray = [];
+    let downloadData;
 
     const loadPlayByPlay = async (gameSelection, matchSelection, startersArray, showGameBox, showMatchBox) => {
 
@@ -334,7 +335,7 @@
                 if(secondFumble.includes('FUMBLES')) {
                     let index = firstFumble.indexOf('FUMBLES', firstFumble.indexOf('FUMBLES') + 1);
                     secondFumble = firstFumble.slice(index);
-                    firstPenalty = firstFumble.slice(0, index);
+                    firstFumble = firstFumble.slice(0, index);
                     fumbleText.push(firstFumble);
 
                     let thirdFumble = secondFumble.slice(secondFumble.indexOf('FUMBLES') + 7);
@@ -3234,6 +3235,7 @@
             // process every relevant game's play by play for plays relevant to matchup
             for(const gameSelect in relevancyKey.games) {
                 let playByPlayData = await getPlayByPlay(relevancyKey.games[gameSelect], true).catch((err) => { console.error(err); });
+                downloadData = playByPlayData;
                 let fantasyRelevantPlaysForward = [];
                 let defYdsThreshBreakers = [];
 
@@ -3704,6 +3706,7 @@
             runningTotals = {};
 
             let playByPlayData = await getPlayByPlay(gameSelection, true).catch((err) => { console.error(err); });
+            downloadData = playByPlayData;
             let fantasyRelevantPlaysForward = [];
             let defYdsThreshBreakers = [];
             // startersArray will help us match our sleeper playerInfo to espn player APIs, and also check if someone is starting one of the DEFs
@@ -4243,6 +4246,19 @@
     }
     $: filteredProducts = filterPlays(fantasyProducts, leaderBoardInfo, viewPlayerID, managerSelection);
 
+    // const download_txt = (dataToSave) => {
+    //     let textToSave;
+    //     for(let i = 0; i < dataToSave.length; i++) {
+    //         textToSave = JSON.stringify(dataToSave[i]);
+    //         let hiddenElement = document.createElement('a');
+    //         hiddenElement.href = 'data:attachment/text,' + encodeURI(textToSave);
+    //         hiddenElement.target = '_blank';
+    //         hiddenElement.download = 'myFile.txt';
+    //         hiddenElement.click();
+    //     }
+    // }
+
+
 </script>
 
 <style>
@@ -4421,6 +4437,12 @@
         color: #ededed;
     }
 
+    /* #test {
+        display:inline-flex;
+        height: 50px;
+        width: 50px;
+    } */
+
 </style>
 
     <div class="bigBox">
@@ -4439,6 +4461,7 @@
             {#if !fantasyProducts.fantasyProducts.length > 0}
                 <div class="noPlays">No plays yet...</div>
             {:else}
+                <!-- <div id="test" on:click={() => download_txt(downloadData)}>Click Me</div> -->
                 {#each filteredProducts as filteredProduct}
                     <div class="playContainer">
                         {#if filteredProduct[0] && filteredProduct[0]?.fpts != 0}
