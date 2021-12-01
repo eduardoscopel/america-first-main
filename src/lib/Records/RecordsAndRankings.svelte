@@ -7,7 +7,7 @@
 
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table'; 
 
-    export let selection = 'regular', displayYear, waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerWeekTOPS, allManagers, displayObject, headToHeadRecords, allTime=false;
+    export let selection = 'regular', displayPositionRecord = 'ALL', displayYear, waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerWeekTOPS, allManagers, displayObject, headToHeadRecords, leaguePlayerRecords, allTime=false;
 
     let leagueManagers = {};
     const numManagers = managers.length;
@@ -636,10 +636,28 @@
             displayPlayerRecord = 'season';
         } else if(playerType == 'bench') {
             displayPlayerRecord = 'bench';
-        }
+        } 
     }
     $: changePlayerRecord(displayPlayerRecord);
 
+    let positionsArray = [];
+    const getPositions = (displayYear) => {
+        positionsArray = [];
+        for(const position in leaguePlayerRecords) {
+            if(position != 'managerBests' && !positionsArray.includes(position) && leaguePlayerRecords[position].week_Top.length > 0) {
+                positionsArray.push(position);
+            }
+        }
+    }
+    $: getPositions(displayYear);
+    
+    
+
+    const changePositionRecord = (positionType) => {
+        displayPositionRecord = positionType;
+    }
+    $: changePositionRecord(displayPositionRecord);
+    
     
     let innerWidth;
 
@@ -1418,14 +1436,26 @@
                 </Button>
             </Group>
         </div>
+        <div class="buttonHolder" style="margin: 0.5em 0;">
+            <Group variant="outlined">
+                <Button class="selectionButtons" on:click={() => changePositionRecord('ALL')} variant="{displayPositionRecord == 'ALL' ? "raised" : "outlined"}">
+                    <Label>ALL</Label>
+                </Button>
+                {#each positionsArray as position}
+                    <Button class="selectionButtons" on:click={() => changePositionRecord(position)} variant="{displayPositionRecord == position ? "raised" : "outlined"}">
+                        <Label>{position}</Label>
+                    </Button>
+                {/each}
+            </Group>
+        </div>
         {#if displayPlayerRecord == 'week'}
             {#if playerWeekTOPS && playerWeekTOPS.length}
                 <DataTable class="recordTable">
                     <Head>
                         <Row>
-                            <Cell class="header" colspan=8>
+                            <Cell class="header" colspan=9>
                                 <p>
-                                    Top 10 Week Scores - Players<br>
+                                    Top 10 Week Scores - {displayPositionRecord == 'ALL' ? 'Players' : displayPositionRecord}<br>
                                     {prefix} – {recordPrefix} 
                                 </p>
                             </Cell>                  
@@ -1434,12 +1464,14 @@
                             <Cell class="header rank"></Cell>
                             <div class="playerAvatar playerInfo" />
                             <Cell class="header">Player</Cell>
-                            <Cell class="header">POS</Cell>
+                            {#if displayPositionRecord == 'ALL'}
+                                <Cell class="header">POS</Cell>
+                            {/if}
                             <Cell class="header">NFL Team</Cell>
                             <Cell class="header">Manager</Cell>
-                                {#if allTime}
-                                    <Cell class="header">Year</Cell>
-                                {/if}
+                            {#if allTime}
+                                <Cell class="header">Year</Cell>
+                            {/if}
                             <Cell class="header">Week</Cell>
                             <Cell class="header">PF</Cell>
                         </Row>
@@ -1450,7 +1482,9 @@
                                 <Cell class="rank">{ix + 1}</Cell>
                                 <div class="playerAvatar playerInfo" style="{playerATWeekTOP.avatar}" />
                                 <Cell class="left">{playerATWeekTOP.playerInfo.fn} {playerATWeekTOP.playerInfo.ln}</Cell>
-                                <Cell class="center">{playerATWeekTOP.playerInfo.pos}</Cell>
+                                {#if displayPositionRecord == 'ALL'}
+                                    <Cell class="center">{playerATWeekTOP.playerInfo.pos}</Cell>
+                                {/if}
                                 <Cell class="center">{playerATWeekTOP.playerInfo.t}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATWeekTOP.recordManID)}>
                                     {playerATWeekTOP.manager.realname}
@@ -1458,9 +1492,9 @@
                                         <div class="fantasyTeamName">({playerATWeekTOP.manager.name})</div>
                                     {/if}
                                 </Cell>
-                                    {#if allTime}
-                                        <Cell class="center">{playerATWeekTOP.year}</Cell>
-                                    {/if}
+                                {#if allTime}
+                                    <Cell class="center">{playerATWeekTOP.year}</Cell>
+                                {/if}
                                 <Cell class="center">{playerATWeekTOP.week}</Cell>
                                 <Cell class="center">{round(playerATWeekTOP.playerPoints)}</Cell>
                             </Row>
@@ -1473,9 +1507,9 @@
                 <DataTable class="recordTable">
                     <Head>
                         <Row>
-                            <Cell class="header" colspan=11>
+                            <Cell class="header" colspan=12>
                                 <p>
-                                    Top 10 Season-Long Scores – Players<br>
+                                    Top 10 Season-Long Scores – {displayPositionRecord == 'ALL' ? 'Players' : displayPositionRecord}<br>
                                     {prefix} – {recordPrefix} 
                                 </p>
                             </Cell>                  
@@ -1484,12 +1518,14 @@
                             <Cell class="header rank"></Cell>
                             <div class="playerAvatar playerInfo" />
                             <Cell class="header">Player</Cell>
-                            <Cell class="header">POS</Cell>
+                            {#if displayPositionRecord == 'ALL'}
+                                <Cell class="header">POS</Cell>
+                            {/if}
                             <Cell class="header">NFL Team</Cell>
                             <Cell class="header">Manager</Cell>
-                                {#if allTime}
-                                    <Cell class="header">Year</Cell>
-                                {/if}
+                            {#if allTime}
+                                <Cell class="header">Year</Cell>
+                            {/if}
                             <Cell class="header">Led Team</Cell>
                             <Cell class="header">Avg Rank</Cell>
                             <Cell class="header">Starts</Cell>
@@ -1503,7 +1539,9 @@
                                 <Cell class="rank">{ix + 1}</Cell>
                                 <div class="playerAvatar playerInfo" style="{playerATSeasonTOP.avatar}" />
                                 <Cell class="left">{playerATSeasonTOP.playerInfo.fn} {playerATSeasonTOP.playerInfo.ln}</Cell>
-                                <Cell class="center">{playerATSeasonTOP.playerInfo.pos}</Cell>
+                                {#if displayPositionRecord == 'ALL'}
+                                    <Cell class="center">{playerATSeasonTOP.playerInfo.pos}</Cell>
+                                {/if}
                                 <Cell class="center">{playerATSeasonTOP.playerInfo.t}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATSeasonTOP.recordManID)}>
                                     {playerATSeasonTOP.manager.realname}
@@ -1511,9 +1549,9 @@
                                         <div class="fantasyTeamName">({playerATSeasonTOP.manager.name})</div>
                                     {/if}
                                 </Cell>
-                                    {#if allTime}
-                                        <Cell class="center">{playerATSeasonTOP.year}</Cell>
-                                    {/if}
+                                {#if allTime}
+                                    <Cell class="center">{playerATSeasonTOP.year}</Cell>
+                                {/if}
                                 <Cell class="center">{playerATSeasonTOP.topStarters}</Cell>
                                 <Cell class="center">{round(playerATSeasonTOP.starterRankAVG)}</Cell>
                                 <Cell class="center">{playerATSeasonTOP.weeksStarted} / {playerATSeasonTOP.weeksOwned}</Cell>
@@ -1529,9 +1567,9 @@
                 <DataTable class="recordTable">
                     <Head>
                         <Row>
-                            <Cell class="header" colspan=8>
+                            <Cell class="header" colspan=9>
                                 <p>
-                                    Top 10 Benchwarmers – Players<br>
+                                    Top 10 Benchwarmers – {displayPositionRecord == 'ALL' ? 'Players' : displayPositionRecord}<br>
                                     {prefix} – {recordPrefix} 
                                 </p>
                             </Cell>                  

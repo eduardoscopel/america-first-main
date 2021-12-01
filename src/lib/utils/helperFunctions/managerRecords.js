@@ -2412,6 +2412,7 @@ export const getManagerRecords = async (refresh = false) => {
 
 	const managerRecordsData = {
 		playerPositionRecords: playerPositionRecords.managers,
+		leaguePlayerRecords: playerPositionRecords.league,
 		managerRecordArrays: recordArrays.managers,
 		playerBook: masterRecordBook.players.managers,
 		headToHeadRecords,

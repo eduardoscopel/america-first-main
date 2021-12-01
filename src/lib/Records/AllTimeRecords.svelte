@@ -70,19 +70,22 @@
     let allTimeWeekWorsts = leagueRecordArrays.regularSeason.managerBests.week_Worst;
 
     let headToHeadRecords = managerRecords.headToHeadRecords.regularSeason.alltime;
+    let leaguePlayerRecords = managerRecords.leaguePlayerRecords.alltime.regularSeason;
 
     let displayStats;
     let selection = 'regular';
+    let displayPositionRecord = 'ALL';
     let displayObject = {};
-    const changeSelection = (selection) => {
+    const changeSelection = (selection, newDisplayPosition) => {
+        displayPositionRecord = newDisplayPosition;
         displayStats = selection;
         displayObject[selection] = {};
-        setSelected(displayStats);
+        setSelected(displayStats, displayPositionRecord);
     }
 
-    $: changeSelection(selection);
+    $: changeSelection(selection, displayPositionRecord);
 
-    const setSelected = (displayStats) => {        
+    const setSelected = (displayStats, displayPositionRecord) => {        
         if(displayStats == 'regular') {
             leagueWeekRecords = leagueRecordArrays.regularSeason.week_Top;
             leagueWeekLows = leagueRecordArrays.regularSeason.week_Low;
@@ -93,18 +96,25 @@
             allTimeSeasonBests = leagueRecordArrays.regularSeason.managerBests.period_Best;
             allTimeWeekBests = leagueRecordArrays.regularSeason.managerBests.week_Best;
             allTimeWeekWorsts = leagueRecordArrays.regularSeason.managerBests.week_Worst;
-            playerATSeasonTOPS = leagueRecordArrays.regularSeason.players.period_Top;
             playerATSeasonBests = leagueRecordArrays.regularSeason.players.period_Best;
             playerATWeekBests = leagueRecordArrays.regularSeason.players.week_Best;
             playerATWeekMissedBests = leagueRecordArrays.regularSeason.players.week_MissedBest;
-            playerATWeekTOPS = leagueRecordArrays.regularSeason.players.week_Top;
-            playerATWeekMissedTOPS = leagueRecordArrays.regularSeason.players.week_MissedTop;
             allTimeBiggestBlowouts = leagueRecordArrays.regularSeason.biggestBlowouts;
             allTimeClosestMatchups = leagueRecordArrays.regularSeason.narrowestVictories;
             winPercentages = leagueRecordArrays.regularSeason.managerBests.winRecords;
             fptsHistories = leagueRecordArrays.regularSeason.managerBests.cumulativePoints;
             medianRecords = leagueRecordArrays.regularSeason.managerBests.medianRecords;
             headToHeadRecords = managerRecords.headToHeadRecords.regularSeason.alltime;
+            leaguePlayerRecords = managerRecords.leaguePlayerRecords.alltime.regularSeason;
+
+            playerATWeekMissedTOPS = leagueRecordArrays.regularSeason.players.week_MissedTop;
+            if(displayPositionRecord == 'ALL') {
+                playerATWeekTOPS = leagueRecordArrays.regularSeason.players.week_Top;
+                playerATSeasonTOPS = leagueRecordArrays.regularSeason.players.period_Top;
+            } else {
+                playerATWeekTOPS = managerRecords.leaguePlayerRecords.alltime.regularSeason[displayPositionRecord].week_Top;
+                playerATSeasonTOPS = managerRecords.leaguePlayerRecords.alltime.regularSeason[displayPositionRecord].period_Top;
+            }
         } else if(displayStats == 'playoffs') {
             leagueWeekRecords = leagueRecordArrays.playoffs.week_Top;
             leagueWeekLows = leagueRecordArrays.playoffs.week_Low;
@@ -115,18 +125,25 @@
             allTimeSeasonBests = leagueRecordArrays.playoffs.managerBests.period_Best;
             allTimeWeekBests = leagueRecordArrays.playoffs.managerBests.week_Best;
             allTimeWeekWorsts = leagueRecordArrays.playoffs.managerBests.week_Worst;
-            playerATSeasonTOPS = leagueRecordArrays.playoffs.players.period_Top;
             playerATSeasonBests = leagueRecordArrays.playoffs.players.period_Best;
             playerATWeekBests = leagueRecordArrays.playoffs.players.week_Best;
             playerATWeekMissedBests = leagueRecordArrays.playoffs.players.week_MissedBest;
-            playerATWeekTOPS = leagueRecordArrays.playoffs.players.week_Top;
-            playerATWeekMissedTOPS = leagueRecordArrays.playoffs.players.week_MissedTop;
             allTimeBiggestBlowouts = leagueRecordArrays.playoffs.biggestBlowouts;
             allTimeClosestMatchups = leagueRecordArrays.playoffs.narrowestVictories;
             winPercentages = leagueRecordArrays.playoffs.managerBests.winRecords;
             fptsHistories = leagueRecordArrays.playoffs.managerBests.cumulativePoints;
             medianRecords = leagueRecordArrays.playoffs.managerBests.medianRecords;
             headToHeadRecords = managerRecords.headToHeadRecords.playoffs.alltime;
+            leaguePlayerRecords = managerRecords.leaguePlayerRecords.alltime.playoffs;
+
+            playerATWeekMissedTOPS = leagueRecordArrays.playoffs.players.week_MissedTop;
+            if(displayPositionRecord == 'ALL') {
+                playerATWeekTOPS = leagueRecordArrays.playoffs.players.week_Top;
+                playerATSeasonTOPS = leagueRecordArrays.playoffs.players.period_Top;
+            } else {
+                playerATWeekTOPS = managerRecords.leaguePlayerRecords.alltime.playoffs[displayPositionRecord].week_Top;
+                playerATSeasonTOPS = managerRecords.leaguePlayerRecords.alltime.playoffs[displayPositionRecord].period_Top;
+            }
         } else if(displayStats == 'combined') {
             leagueWeekRecords = leagueRecordArrays.combined.week_Top;
             leagueWeekLows = leagueRecordArrays.combined.week_Low; 
@@ -137,18 +154,25 @@
             allTimeSeasonBests = leagueRecordArrays.combined.managerBests.period_Best; 
             allTimeWeekBests = leagueRecordArrays.combined.managerBests.week_Best;
             allTimeWeekWorsts = leagueRecordArrays.combined.managerBests.week_Worst;
-            playerATSeasonTOPS = leagueRecordArrays.combined.players.period_Top;
             playerATSeasonBests = leagueRecordArrays.combined.players.period_Best;
             playerATWeekBests = leagueRecordArrays.combined.players.week_Best;
             playerATWeekMissedBests = leagueRecordArrays.combined.players.week_MissedBest;
-            playerATWeekTOPS = leagueRecordArrays.combined.players.week_Top;
-            playerATWeekMissedTOPS = leagueRecordArrays.combined.players.week_MissedTop;
             allTimeBiggestBlowouts = leagueRecordArrays.combined.biggestBlowouts;
             allTimeClosestMatchups = leagueRecordArrays.combined.narrowestVictories;
             winPercentages = leagueRecordArrays.combined.managerBests.winRecords;
             fptsHistories = leagueRecordArrays.combined.managerBests.cumulativePoints;
             medianRecords = leagueRecordArrays.combined.managerBests.medianRecords;
             headToHeadRecords = managerRecords.headToHeadRecords.combined.alltime;
+            leaguePlayerRecords = managerRecords.leaguePlayerRecords.alltime.combined;
+
+            playerATWeekMissedTOPS = leagueRecordArrays.combined.players.week_MissedTop;
+            if(displayPositionRecord == 'ALL') {
+                playerATWeekTOPS = leagueRecordArrays.combined.players.week_Top;
+                playerATSeasonTOPS = leagueRecordArrays.combined.players.period_Top;
+            } else {
+                playerATWeekTOPS = managerRecords.leaguePlayerRecords.alltime.combined[displayPositionRecord].week_Top;
+                playerATSeasonTOPS = managerRecords.leaguePlayerRecords.alltime.combined[displayPositionRecord].period_Top;
+            }
         }
         displayObject[displayStats] = {
             lineupIQs,
@@ -178,7 +202,7 @@
         }
     }
 
-    $: setSelected(displayStats);
+    $: setSelected(displayStats, displayPositionRecord);
 
 </script>
 
@@ -232,6 +256,7 @@
     {fptsHistories}
     {medianRecords}
     {headToHeadRecords}
+    {leaguePlayerRecords}
     {lineupIQs}
     {tradesData}
     {waiversData}
@@ -239,4 +264,5 @@
     allTime={true}
     regular={selection == 'regular'}
     bind:selection={selection}
+    bind:displayPositionRecord={displayPositionRecord}
 />
