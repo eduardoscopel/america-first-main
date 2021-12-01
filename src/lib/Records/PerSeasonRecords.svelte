@@ -3,7 +3,7 @@
   	import RecordsAndRankings from './RecordsAndRankings.svelte';
     import { Icon } from '@smui/tab';
 
-    export let leagueRosterRecords, seasonWeekRecords, allManagers, currentYear, lastYear, transactionTotals;
+    export let leagueRosterRecords, seasonWeekRecords, allManagers, currentYear, lastYear, transactionTotals, managerRecords;
 
     const yearsObj = {};
     let years = [];
@@ -149,7 +149,7 @@
     $: yearArrays = changeSelection(selection, displayYear);
 
     const setSelected = (displayStats, displayYear) => {
-        let waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, seasonLongLows, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekTOPS, playerWeekBests, playerWeekMissedBests, playerWeekMissedTOPS;
+        let waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, seasonLongLows, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekTOPS, playerWeekBests, playerWeekMissedBests, playerWeekMissedTOPS, headToHeadRecords;
 
         let key = displayYear;
         if(displayStats == 'regular') {
@@ -183,6 +183,8 @@
             playerWeekMissedBests = arraysObj[key].regularSeason.players.week_MissedBest;
             playerWeekTOPS = arraysObj[key].regularSeason.players.week_Top;
             playerWeekMissedTOPS = arraysObj[key].regularSeason.players.week_MissedTop;
+
+            headToHeadRecords = managerRecords.headToHeadRecords.regularSeason.years[key];
             
         } else if(displayStats == 'playoffs') {
             showTies = yearsObj[key].showTies;
@@ -215,6 +217,8 @@
             playerWeekMissedBests = arraysObj[key].playoffs.players.week_MissedBest;
             playerWeekTOPS = arraysObj[key].playoffs.players.week_Top;
             playerWeekMissedTOPS = arraysObj[key].playoffs.players.week_MissedTop;
+
+            headToHeadRecords = managerRecords.headToHeadRecords.playoffs.years[key];
         } else if(displayStats == 'combined') {
 
             showTies = yearsObj[key].showTies;
@@ -247,6 +251,8 @@
             playerWeekMissedBests = arraysObj[key].combined.players.week_MissedBest;
             playerWeekTOPS = arraysObj[key].combined.players.week_Top;
             playerWeekMissedTOPS = arraysObj[key].combined.players.week_MissedTop;
+
+            headToHeadRecords = managerRecords.headToHeadRecords.combined.years[key];
         }
 
         displayObject[displayStats] = {
@@ -273,9 +279,10 @@
             medianRecords,
             tradesData,
             waiversData,
+            headToHeadRecords,
         }
 
-        return {waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, seasonLongLows, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekTOPS, playerWeekBests, playerWeekMissedBests, playerWeekMissedTOPS};
+        return {waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, seasonLongLows, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekTOPS, playerWeekBests, playerWeekMissedBests, playerWeekMissedTOPS, headToHeadRecords};
     }
 
 </script>
@@ -358,6 +365,7 @@
         playerWeekBests = {yearArrays.playerWeekBests}
         playerWeekMissedBests = {yearArrays.playerWeekMissedBests}
         playerWeekMissedTOPS = {yearArrays.playerWeekMissedTOPS}
+        headToHeadRecords = {yearArrays.headToHeadRecords}
         prefix={displayYear}
         {allManagers}
         regular={selection == 'regular'}

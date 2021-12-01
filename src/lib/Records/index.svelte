@@ -4,7 +4,7 @@
     import AllTimeRecords from './AllTimeRecords.svelte';
     import PerSeasonRecords from './PerSeasonRecords.svelte';
 
-    export let leagueRecords, totals, stale;
+    export let leagueRecords, totals, stale, managerRecords;
 
     let masterSelection = 'alltime';
     let displayType;
@@ -104,12 +104,12 @@
 
         {#if displayType == 'alltime'}
             {#if leagueWeekRecords.length}
-                <AllTimeRecords transactionTotals={totals} {leagueWeekRecords} {leagueRosterRecords} {allManagers} {leagueRecordArrays} />
+                <AllTimeRecords transactionTotals={totals} {leagueWeekRecords} {leagueRosterRecords} {allManagers} {leagueRecordArrays} {managerRecords} />
             {:else}
                 <p class="empty">No records <i>yet</i>...</p>
             {/if}
         {:else if displayType == 'yearly'}
-            <PerSeasonRecords transactionTotals={totals} {leagueRosterRecords} {seasonWeekRecords} {allManagers} {currentYear} {lastYear} />
+            <PerSeasonRecords transactionTotals={totals} {leagueRosterRecords} {seasonWeekRecords} {allManagers} {currentYear} {lastYear} {managerRecords} />
         {/if}
     </div>
 </div>

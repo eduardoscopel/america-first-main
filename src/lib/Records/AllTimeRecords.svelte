@@ -2,7 +2,7 @@
     import {round} from '$lib/utils/helper';
   	import RecordsAndRankings from './RecordsAndRankings.svelte'; 
 
-    export let leagueRosterRecords, allManagers, transactionTotals, leagueWeekRecords, leagueRecordArrays;
+    export let leagueRosterRecords, allManagers, transactionTotals, leagueWeekRecords, leagueRecordArrays, managerRecords;
 
     let lineupIQs = [];
     const tradesData = [];
@@ -69,6 +69,8 @@
     let allTimeWeekBests = leagueRecordArrays.regularSeason.managerBests.week_Best;
     let allTimeWeekWorsts = leagueRecordArrays.regularSeason.managerBests.week_Worst;
 
+    let headToHeadRecords = managerRecords.headToHeadRecords.regularSeason.alltime;
+
     let displayStats;
     let selection = 'regular';
     let displayObject = {};
@@ -102,6 +104,7 @@
             winPercentages = leagueRecordArrays.regularSeason.managerBests.winRecords;
             fptsHistories = leagueRecordArrays.regularSeason.managerBests.cumulativePoints;
             medianRecords = leagueRecordArrays.regularSeason.managerBests.medianRecords;
+            headToHeadRecords = managerRecords.headToHeadRecords.regularSeason.alltime;
         } else if(displayStats == 'playoffs') {
             leagueWeekRecords = leagueRecordArrays.playoffs.week_Top;
             leagueWeekLows = leagueRecordArrays.playoffs.week_Low;
@@ -123,6 +126,7 @@
             winPercentages = leagueRecordArrays.playoffs.managerBests.winRecords;
             fptsHistories = leagueRecordArrays.playoffs.managerBests.cumulativePoints;
             medianRecords = leagueRecordArrays.playoffs.managerBests.medianRecords;
+            headToHeadRecords = managerRecords.headToHeadRecords.playoffs.alltime;
         } else if(displayStats == 'combined') {
             leagueWeekRecords = leagueRecordArrays.combined.week_Top;
             leagueWeekLows = leagueRecordArrays.combined.week_Low; 
@@ -144,6 +148,7 @@
             winPercentages = leagueRecordArrays.combined.managerBests.winRecords;
             fptsHistories = leagueRecordArrays.combined.managerBests.cumulativePoints;
             medianRecords = leagueRecordArrays.combined.managerBests.medianRecords;
+            headToHeadRecords = managerRecords.headToHeadRecords.combined.alltime;
         }
         displayObject[displayStats] = {
             lineupIQs,
@@ -169,6 +174,7 @@
             medianRecords,
             tradesData,
             waiversData,
+            headToHeadRecords,
         }
     }
 
@@ -225,6 +231,7 @@
     {winPercentages}
     {fptsHistories}
     {medianRecords}
+    {headToHeadRecords}
     {lineupIQs}
     {tradesData}
     {waiversData}

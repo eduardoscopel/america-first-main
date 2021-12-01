@@ -607,9 +607,24 @@ export const getManagerRecords = async (refresh = false) => {
 							matchDifferential,
 							week: opponent.week,
 							year,
+							matchupInfo: {
+								info: POmatchupWeek.find(m => m.roster_id == opponent.rosterID),
+								positions: positions,
+								starters: [],
+							},
 						}
 
-						if(opponent == home) {
+						if(home.fpts == away.fpts) {
+							comboEntry.matchTie = true;
+							comboEntry.fptsAgainst = away.fpts;
+							if(opponent.recordManID == home.recordManID) {
+								comboEntry.againstManager = away.manager;
+								comboEntry.againstRecordManID = away.recordManID;
+							} else {
+								comboEntry.againstManager = home.manager;
+								comboEntry.againstRecordManID = home.recordManID;
+							}
+						} else if(opponent == home) {
 							comboEntry.matchWin = true;
 							comboEntry.fptsAgainst = away.fpts;
 							comboEntry.againstManager = away.manager;
@@ -620,39 +635,7 @@ export const getManagerRecords = async (refresh = false) => {
 							comboEntry.fptsAgainst = home.fpts;
 							comboEntry.againstManager = home.manager;
 							comboEntry.againstRecordManID = home.recordManID;
-						} else if(home.fpts == away.fpts) {
-							comboEntry.matchTie = true;
-							comboEntry.fptsAgainst = away.fpts;
-							if(opponent.recordManID == home.recordManID) {
-								comboEntry.againstManager = away.manager;
-								comboEntry.againstRecordManID = away.recordManID;
-							} else {
-								comboEntry.againstManager = home.manager;
-								comboEntry.againstRecordManID = home.recordManID;
-							}
 						}
-
-						masterRecordBook.league.playoffs.alltime.push(comboEntry);
-						masterRecordBook.league.combined.alltime.push(comboEntry);
-						if(!masterRecordBook.managers.playoffs.alltime[opponent.recordManID]) {
-							masterRecordBook.managers.playoffs.alltime[opponent.recordManID] = [];
-						}
-						masterRecordBook.managers.playoffs.alltime[opponent.recordManID].push(comboEntry);
-						if(!masterRecordBook.managers.combined.alltime[opponent.recordManID]) {
-							masterRecordBook.managers.combined.alltime[opponent.recordManID] = [];
-						}
-						masterRecordBook.managers.combined.alltime[opponent.recordManID].push(comboEntry);
-
-						masterRecordBook.league.playoffs.years[year].push(comboEntry);
-						masterRecordBook.league.combined.years[year].push(comboEntry);
-						if(!masterRecordBook.managers.playoffs.years[year][opponent.recordManID]) {
-							masterRecordBook.managers.playoffs.years[year][opponent.recordManID] = [];
-						}
-						masterRecordBook.managers.playoffs.years[year][opponent.recordManID].push(comboEntry);
-						if(!masterRecordBook.managers.combined.years[year][opponent.recordManID]) {
-							masterRecordBook.managers.combined.years[year][opponent.recordManID] = [];
-						}
-						masterRecordBook.managers.combined.years[year][opponent.recordManID].push(comboEntry);
 
 						const starters = opponent.starters;
 						const startersPTS = opponent.starters_points.sort((a, b) => b - a);
@@ -732,6 +715,11 @@ export const getManagerRecords = async (refresh = false) => {
 								} 
 							}
 
+							// add playerEntry to comboEntry
+							if(benched == false) { 
+								comboEntry.matchupInfo.starters[starters.indexOf(playerID)] = playerEntry;
+							}
+
 							// add player arrays to ALLTIME
 
 							masterRecordBook.players.league.playoffs.alltime.push(playerEntry);
@@ -758,6 +746,28 @@ export const getManagerRecords = async (refresh = false) => {
 							}
 							masterRecordBook.players.managers.combined.years[year][opponent.recordManID].push(playerEntry);
 						}
+
+						masterRecordBook.league.playoffs.alltime.push(comboEntry);
+						masterRecordBook.league.combined.alltime.push(comboEntry);
+						if(!masterRecordBook.managers.playoffs.alltime[opponent.recordManID]) {
+							masterRecordBook.managers.playoffs.alltime[opponent.recordManID] = [];
+						}
+						masterRecordBook.managers.playoffs.alltime[opponent.recordManID].push(comboEntry);
+						if(!masterRecordBook.managers.combined.alltime[opponent.recordManID]) {
+							masterRecordBook.managers.combined.alltime[opponent.recordManID] = [];
+						}
+						masterRecordBook.managers.combined.alltime[opponent.recordManID].push(comboEntry);
+
+						masterRecordBook.league.playoffs.years[year].push(comboEntry);
+						masterRecordBook.league.combined.years[year].push(comboEntry);
+						if(!masterRecordBook.managers.playoffs.years[year][opponent.recordManID]) {
+							masterRecordBook.managers.playoffs.years[year][opponent.recordManID] = [];
+						}
+						masterRecordBook.managers.playoffs.years[year][opponent.recordManID].push(comboEntry);
+						if(!masterRecordBook.managers.combined.years[year][opponent.recordManID]) {
+							masterRecordBook.managers.combined.years[year][opponent.recordManID] = [];
+						}
+						masterRecordBook.managers.combined.years[year][opponent.recordManID].push(comboEntry);
 					}
 				} else if(playoffCase == 3 ||														// Relevant Match IDs: 1, 2
 				   		  playoffCase == 9 ||
@@ -806,9 +816,24 @@ export const getManagerRecords = async (refresh = false) => {
 								matchDifferential,
 								week: opponent.week,
 								year,
+								matchupInfo: {
+									info: POmatchupWeek.find(m => m.roster_id == opponent.rosterID),
+									positions: positions,
+									starters: [],
+								},
 							}
 
-							if(opponent == home) {
+							if(home.fpts == away.fpts) {
+								comboEntry.matchTie = true;
+								comboEntry.fptsAgainst = away.fpts;
+								if(opponent.recordManID == home.recordManID) {
+									comboEntry.againstManager = away.manager;
+									comboEntry.againstRecordManID = away.recordManID;
+								} else {
+									comboEntry.againstManager = home.manager;
+									comboEntry.againstRecordManID = home.recordManID;
+								}
+							} else if(opponent == home) {
 								comboEntry.matchWin = true;
 								comboEntry.fptsAgainst = away.fpts;
 								comboEntry.againstManager = away.manager;
@@ -819,39 +844,7 @@ export const getManagerRecords = async (refresh = false) => {
 								comboEntry.fptsAgainst = home.fpts;
 								comboEntry.againstManager = home.manager;
 								comboEntry.againstRecordManID = home.recordManID;
-							} else if(home.fpts == away.fpts) {
-								comboEntry.matchTie = true;
-								comboEntry.fptsAgainst = away.fpts;
-								if(opponent.recordManID == home.recordManID) {
-									comboEntry.againstManager = away.manager;
-									comboEntry.againstRecordManID = away.recordManID;
-								} else {
-									comboEntry.againstManager = home.manager;
-									comboEntry.againstRecordManID = home.recordManID;
-								}
 							}
-							
-							masterRecordBook.league.playoffs.alltime.push(comboEntry);
-							masterRecordBook.league.combined.alltime.push(comboEntry);
-							if(!masterRecordBook.managers.playoffs.alltime[opponent.recordManID]) {
-								masterRecordBook.managers.playoffs.alltime[opponent.recordManID] = [];
-							}
-							masterRecordBook.managers.playoffs.alltime[opponent.recordManID].push(comboEntry);
-							if(!masterRecordBook.managers.combined.alltime[opponent.recordManID]) {
-								masterRecordBook.managers.combined.alltime[opponent.recordManID] = [];
-							}
-							masterRecordBook.managers.combined.alltime[opponent.recordManID].push(comboEntry);
-	
-							masterRecordBook.league.playoffs.years[year].push(comboEntry);
-							masterRecordBook.league.combined.years[year].push(comboEntry);
-							if(!masterRecordBook.managers.playoffs.years[year][opponent.recordManID]) {
-								masterRecordBook.managers.playoffs.years[year][opponent.recordManID] = [];
-							}
-							masterRecordBook.managers.playoffs.years[year][opponent.recordManID].push(comboEntry);
-							if(!masterRecordBook.managers.combined.years[year][opponent.recordManID]) {
-								masterRecordBook.managers.combined.years[year][opponent.recordManID] = [];
-							}
-							masterRecordBook.managers.combined.years[year][opponent.recordManID].push(comboEntry);
 
 							const starters = opponent.starters;
 							const startersPTS = opponent.starters_points.sort((a, b) => b - a);
@@ -930,6 +923,12 @@ export const getManagerRecords = async (refresh = false) => {
 										playerEntry.weekAcquired = 0;
 									} 
 								}	
+
+								// add playerEntry to comboEntry
+								if(benched == false) { 
+									comboEntry.matchupInfo.starters[starters.indexOf(playerID)] = playerEntry;
+								}
+
 								// add player arrays to ALLTIME
 
 								masterRecordBook.players.league.playoffs.alltime.push(playerEntry);
@@ -956,6 +955,28 @@ export const getManagerRecords = async (refresh = false) => {
 								}
 								masterRecordBook.players.managers.combined.years[year][opponent.recordManID].push(playerEntry);
 							}
+
+							masterRecordBook.league.playoffs.alltime.push(comboEntry);
+							masterRecordBook.league.combined.alltime.push(comboEntry);
+							if(!masterRecordBook.managers.playoffs.alltime[opponent.recordManID]) {
+								masterRecordBook.managers.playoffs.alltime[opponent.recordManID] = [];
+							}
+							masterRecordBook.managers.playoffs.alltime[opponent.recordManID].push(comboEntry);
+							if(!masterRecordBook.managers.combined.alltime[opponent.recordManID]) {
+								masterRecordBook.managers.combined.alltime[opponent.recordManID] = [];
+							}
+							masterRecordBook.managers.combined.alltime[opponent.recordManID].push(comboEntry);
+	
+							masterRecordBook.league.playoffs.years[year].push(comboEntry);
+							masterRecordBook.league.combined.years[year].push(comboEntry);
+							if(!masterRecordBook.managers.playoffs.years[year][opponent.recordManID]) {
+								masterRecordBook.managers.playoffs.years[year][opponent.recordManID] = [];
+							}
+							masterRecordBook.managers.playoffs.years[year][opponent.recordManID].push(comboEntry);
+							if(!masterRecordBook.managers.combined.years[year][opponent.recordManID]) {
+								masterRecordBook.managers.combined.years[year][opponent.recordManID] = [];
+							}
+							masterRecordBook.managers.combined.years[year][opponent.recordManID].push(comboEntry);
 						}
 					}
 				} else if(playoffCase == 7 && 2 < POround < 5 ||									// Relevant Match IDs: 1, 2, 3
@@ -1000,9 +1021,24 @@ export const getManagerRecords = async (refresh = false) => {
 								matchDifferential,
 								week: opponent.week,
 								year,
+								matchupInfo: {
+									info: POmatchupWeek.find(m => m.roster_id == opponent.rosterID),
+									positions: positions,
+									starters: [],
+								},
 							}
 
-							if(opponent == home) {
+							if(home.fpts == away.fpts) {
+								comboEntry.matchTie = true;
+								comboEntry.fptsAgainst = away.fpts;
+								if(opponent.recordManID == home.recordManID) {
+									comboEntry.againstManager = away.manager;
+									comboEntry.againstRecordManID = away.recordManID;
+								} else {
+									comboEntry.againstManager = home.manager;
+									comboEntry.againstRecordManID = home.recordManID;
+								}
+							} else if(opponent == home) {
 								comboEntry.matchWin = true;
 								comboEntry.fptsAgainst = away.fpts;
 								comboEntry.againstManager = away.manager;
@@ -1013,39 +1049,7 @@ export const getManagerRecords = async (refresh = false) => {
 								comboEntry.fptsAgainst = home.fpts;
 								comboEntry.againstManager = home.manager;
 								comboEntry.againstRecordManID = home.recordManID;
-							} else if(home.fpts == away.fpts) {
-								comboEntry.matchTie = true;
-								comboEntry.fptsAgainst = away.fpts;
-								if(opponent.recordManID == home.recordManID) {
-									comboEntry.againstManager = away.manager;
-									comboEntry.againstRecordManID = away.recordManID;
-								} else {
-									comboEntry.againstManager = home.manager;
-									comboEntry.againstRecordManID = home.recordManID;
-								}
-							}
-
-							masterRecordBook.league.playoffs.alltime.push(comboEntry);
-							masterRecordBook.league.combined.alltime.push(comboEntry);
-							if(!masterRecordBook.managers.playoffs.alltime[opponent.recordManID]) {
-								masterRecordBook.managers.playoffs.alltime[opponent.recordManID] = [];
-							}
-							masterRecordBook.managers.playoffs.alltime[opponent.recordManID].push(comboEntry);
-							if(!masterRecordBook.managers.combined.alltime[opponent.recordManID]) {
-								masterRecordBook.managers.combined.alltime[opponent.recordManID] = [];
-							}
-							masterRecordBook.managers.combined.alltime[opponent.recordManID].push(comboEntry);
-	
-							masterRecordBook.league.playoffs.years[year].push(comboEntry);
-							masterRecordBook.league.combined.years[year].push(comboEntry);
-							if(!masterRecordBook.managers.playoffs.years[year][opponent.recordManID]) {
-								masterRecordBook.managers.playoffs.years[year][opponent.recordManID] = [];
-							}
-							masterRecordBook.managers.playoffs.years[year][opponent.recordManID].push(comboEntry);
-							if(!masterRecordBook.managers.combined.years[year][opponent.recordManID]) {
-								masterRecordBook.managers.combined.years[year][opponent.recordManID] = [];
-							}
-							masterRecordBook.managers.combined.years[year][opponent.recordManID].push(comboEntry);
+							} 
 							
 							const starters = opponent.starters;
 							const startersPTS = opponent.starters_points.sort((a, b) => b - a);
@@ -1124,6 +1128,11 @@ export const getManagerRecords = async (refresh = false) => {
 										playerEntry.weekAcquired = 0;
 									} 
 								}
+
+								// add playerEntry to comboEntry
+								if(benched == false) { 
+									comboEntry.matchupInfo.starters[starters.indexOf(playerID)] = playerEntry;
+								}
 	
 								// add player arrays to ALLTIME
 
@@ -1151,6 +1160,28 @@ export const getManagerRecords = async (refresh = false) => {
 								}
 								masterRecordBook.players.managers.combined.years[year][opponent.recordManID].push(playerEntry);
 							}
+
+							masterRecordBook.league.playoffs.alltime.push(comboEntry);
+							masterRecordBook.league.combined.alltime.push(comboEntry);
+							if(!masterRecordBook.managers.playoffs.alltime[opponent.recordManID]) {
+								masterRecordBook.managers.playoffs.alltime[opponent.recordManID] = [];
+							}
+							masterRecordBook.managers.playoffs.alltime[opponent.recordManID].push(comboEntry);
+							if(!masterRecordBook.managers.combined.alltime[opponent.recordManID]) {
+								masterRecordBook.managers.combined.alltime[opponent.recordManID] = [];
+							}
+							masterRecordBook.managers.combined.alltime[opponent.recordManID].push(comboEntry);
+	
+							masterRecordBook.league.playoffs.years[year].push(comboEntry);
+							masterRecordBook.league.combined.years[year].push(comboEntry);
+							if(!masterRecordBook.managers.playoffs.years[year][opponent.recordManID]) {
+								masterRecordBook.managers.playoffs.years[year][opponent.recordManID] = [];
+							}
+							masterRecordBook.managers.playoffs.years[year][opponent.recordManID].push(comboEntry);
+							if(!masterRecordBook.managers.combined.years[year][opponent.recordManID]) {
+								masterRecordBook.managers.combined.years[year][opponent.recordManID] = [];
+							}
+							masterRecordBook.managers.combined.years[year][opponent.recordManID].push(comboEntry);
 						}
 					}
 				} else if(playoffCase == 8 ||														// Relevant Match IDs: 1, 2, 3, 4
@@ -1195,9 +1226,24 @@ export const getManagerRecords = async (refresh = false) => {
 								matchDifferential,
 								week: opponent.week,
 								year,
+								matchupInfo: {
+									info: POmatchupWeek.find(m => m.roster_id == opponent.rosterID),
+									positions: positions,
+									starters: [],
+								},
 							}
 
-							if(opponent == home) {
+							if(home.fpts == away.fpts) {
+								comboEntry.matchTie = true;
+								comboEntry.fptsAgainst = away.fpts;
+								if(opponent.recordManID == home.recordManID) {
+									comboEntry.againstManager = away.manager;
+									comboEntry.againstRecordManID = away.recordManID;
+								} else {
+									comboEntry.againstManager = home.manager;
+									comboEntry.againstRecordManID = home.recordManID;
+								}
+							} else if(opponent == home) {
 								comboEntry.matchWin = true;
 								comboEntry.fptsAgainst = away.fpts;
 								comboEntry.againstManager = away.manager;
@@ -1208,39 +1254,7 @@ export const getManagerRecords = async (refresh = false) => {
 								comboEntry.fptsAgainst = home.fpts;
 								comboEntry.againstManager = home.manager;
 								comboEntry.againstRecordManID = home.recordManID;
-							} else if(home.fpts == away.fpts) {
-								comboEntry.matchTie = true;
-								comboEntry.fptsAgainst = away.fpts;
-								if(opponent.recordManID == home.recordManID) {
-									comboEntry.againstManager = away.manager;
-									comboEntry.againstRecordManID = away.recordManID;
-								} else {
-									comboEntry.againstManager = home.manager;
-									comboEntry.againstRecordManID = home.recordManID;
-								}
-							}
-
-							masterRecordBook.league.playoffs.alltime.push(comboEntry);
-							masterRecordBook.league.combined.alltime.push(comboEntry);
-							if(!masterRecordBook.managers.playoffs.alltime[opponent.recordManID]) {
-								masterRecordBook.managers.playoffs.alltime[opponent.recordManID] = [];
-							}
-							masterRecordBook.managers.playoffs.alltime[opponent.recordManID].push(comboEntry);
-							if(!masterRecordBook.managers.combined.alltime[opponent.recordManID]) {
-								masterRecordBook.managers.combined.alltime[opponent.recordManID] = [];
-							}
-							masterRecordBook.managers.combined.alltime[opponent.recordManID].push(comboEntry);
-	
-							masterRecordBook.league.playoffs.years[year].push(comboEntry);
-							masterRecordBook.league.combined.years[year].push(comboEntry);
-							if(!masterRecordBook.managers.playoffs.years[year][opponent.recordManID]) {
-								masterRecordBook.managers.playoffs.years[year][opponent.recordManID] = [];
-							}
-							masterRecordBook.managers.playoffs.years[year][opponent.recordManID].push(comboEntry);
-							if(!masterRecordBook.managers.combined.years[year][opponent.recordManID]) {
-								masterRecordBook.managers.combined.years[year][opponent.recordManID] = [];
-							}
-							masterRecordBook.managers.combined.years[year][opponent.recordManID].push(comboEntry);
+							} 
 
 							const starters = opponent.starters;
 							const startersPTS = opponent.starters_points.sort((a, b) => b - a);
@@ -1320,6 +1334,11 @@ export const getManagerRecords = async (refresh = false) => {
 									} 
 								}
 	
+								// add playerEntry to comboEntry
+								if(benched == false) { 
+									comboEntry.matchupInfo.starters[starters.indexOf(playerID)] = playerEntry;
+								}
+
 								// add player arrays to ALLTIME
 
 								masterRecordBook.players.league.playoffs.alltime.push(playerEntry);
@@ -1346,6 +1365,28 @@ export const getManagerRecords = async (refresh = false) => {
 								}
 								masterRecordBook.players.managers.combined.years[year][opponent.recordManID].push(playerEntry);
 							}
+
+							masterRecordBook.league.playoffs.alltime.push(comboEntry);
+							masterRecordBook.league.combined.alltime.push(comboEntry);
+							if(!masterRecordBook.managers.playoffs.alltime[opponent.recordManID]) {
+								masterRecordBook.managers.playoffs.alltime[opponent.recordManID] = [];
+							}
+							masterRecordBook.managers.playoffs.alltime[opponent.recordManID].push(comboEntry);
+							if(!masterRecordBook.managers.combined.alltime[opponent.recordManID]) {
+								masterRecordBook.managers.combined.alltime[opponent.recordManID] = [];
+							}
+							masterRecordBook.managers.combined.alltime[opponent.recordManID].push(comboEntry);
+	
+							masterRecordBook.league.playoffs.years[year].push(comboEntry);
+							masterRecordBook.league.combined.years[year].push(comboEntry);
+							if(!masterRecordBook.managers.playoffs.years[year][opponent.recordManID]) {
+								masterRecordBook.managers.playoffs.years[year][opponent.recordManID] = [];
+							}
+							masterRecordBook.managers.playoffs.years[year][opponent.recordManID].push(comboEntry);
+							if(!masterRecordBook.managers.combined.years[year][opponent.recordManID]) {
+								masterRecordBook.managers.combined.years[year][opponent.recordManID] = [];
+							}
+							masterRecordBook.managers.combined.years[year][opponent.recordManID].push(comboEntry);
 						}
 					}
 				}
@@ -1410,29 +1451,12 @@ export const getManagerRecords = async (refresh = false) => {
 					matchDifferential: 0,
 					week: startWeek,
 					year,
+					matchupInfo: {
+						info: matchup,
+						positions: positions,
+						starters: [],
+					},
 				}
-
-				masterRecordBook.league.regularSeason.alltime.push(comboEntry);
-				masterRecordBook.league.combined.alltime.push(comboEntry);				
-				if(!masterRecordBook.managers.regularSeason.alltime[recordManID]) {
-					masterRecordBook.managers.regularSeason.alltime[recordManID] = [];
-				}
-				masterRecordBook.managers.regularSeason.alltime[recordManID].push(comboEntry);
-				if(!masterRecordBook.managers.combined.alltime[recordManID]) {
-					masterRecordBook.managers.combined.alltime[recordManID] = [];
-				}
-				masterRecordBook.managers.combined.alltime[recordManID].push(comboEntry);
-
-				masterRecordBook.league.regularSeason.years[year].push(comboEntry);
-				masterRecordBook.league.combined.years[year].push(comboEntry);
-				if(!masterRecordBook.managers.regularSeason.years[year][recordManID]) {
-					masterRecordBook.managers.regularSeason.years[year][recordManID] = [];
-				}
-				masterRecordBook.managers.regularSeason.years[year][recordManID].push(comboEntry);
-				if(!masterRecordBook.managers.combined.years[year][recordManID]) {
-					masterRecordBook.managers.combined.years[year][recordManID] = [];
-				}
-				masterRecordBook.managers.combined.years[year][recordManID].push(comboEntry);
 
 				const starters = matchup.starters;
 				const startersPTS = matchup.starters_points.sort((a, b) => b - a);
@@ -1512,6 +1536,11 @@ export const getManagerRecords = async (refresh = false) => {
 						} 
 					}
 
+					// add playerEntry to comboEntry if starter
+					if(benched == false) { 
+						comboEntry.matchupInfo.starters[starters.indexOf(playerID)] = playerEntry;
+					}
+
 					// add player arrays to ALLTIME
 
 					masterRecordBook.players.league.regularSeason.alltime.push(playerEntry);
@@ -1539,6 +1568,28 @@ export const getManagerRecords = async (refresh = false) => {
 					masterRecordBook.players.managers.combined.years[year][recordManID].push(playerEntry);
 
 				}
+
+				masterRecordBook.league.regularSeason.alltime.push(comboEntry);
+				masterRecordBook.league.combined.alltime.push(comboEntry);				
+				if(!masterRecordBook.managers.regularSeason.alltime[recordManID]) {
+					masterRecordBook.managers.regularSeason.alltime[recordManID] = [];
+				}
+				masterRecordBook.managers.regularSeason.alltime[recordManID].push(comboEntry);
+				if(!masterRecordBook.managers.combined.alltime[recordManID]) {
+					masterRecordBook.managers.combined.alltime[recordManID] = [];
+				}
+				masterRecordBook.managers.combined.alltime[recordManID].push(comboEntry);
+
+				masterRecordBook.league.regularSeason.years[year].push(comboEntry);
+				masterRecordBook.league.combined.years[year].push(comboEntry);
+				if(!masterRecordBook.managers.regularSeason.years[year][recordManID]) {
+					masterRecordBook.managers.regularSeason.years[year][recordManID] = [];
+				}
+				masterRecordBook.managers.regularSeason.years[year][recordManID].push(comboEntry);
+				if(!masterRecordBook.managers.combined.years[year][recordManID]) {
+					masterRecordBook.managers.combined.years[year][recordManID] = [];
+				}
+				masterRecordBook.managers.combined.years[year][recordManID].push(comboEntry);
 				
 			}
 			startWeek--;
@@ -1666,6 +1717,7 @@ export const getManagerRecords = async (refresh = false) => {
 								epeWins: 0,
 								epeTies: 0,
 								epeLosses: 0,
+								matchups: [],
 							}
 						}
 					}
@@ -1690,6 +1742,7 @@ export const getManagerRecords = async (refresh = false) => {
 									epeWins: 0,
 									epeTies: 0,
 									epeLosses: 0,
+									matchups: [],
 								}
 							}
 						}
@@ -1723,6 +1776,9 @@ export const getManagerRecords = async (refresh = false) => {
 							headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].fpts += recordMan[i].fpts;
 							headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].fptsAgainst += recordMan[i].fptsAgainst;
 							headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].fptsAgainst += recordMan[i].fptsAgainst;
+
+							headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].matchups.push(recordMan[i]);
+							headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].matchups.push(recordMan[i]);
 
 							fptsTotal += recordMan[i].fpts;
 							fptsAgainstTotal += recordMan[i].fptsAgainst;
@@ -1802,6 +1858,13 @@ export const getManagerRecords = async (refresh = false) => {
 							headToHeadRecords[recordType].years[year][recordManID][opponent].epePerc = (headToHeadRecords[recordType].years[year][recordManID][opponent].epeWins + headToHeadRecords[recordType].years[year][recordManID][opponent].epeTies / 2) / (headToHeadRecords[recordType].years[year][recordManID][opponent].epeWins + headToHeadRecords[recordType].years[year][recordManID][opponent].epeTies + headToHeadRecords[recordType].years[year][recordManID][opponent].epeLosses) * 100;
 							headToHeadRecords[recordType].years[year][recordManID][opponent].fptspg = headToHeadRecords[recordType].years[year][recordManID][opponent].fpts / (headToHeadRecords[recordType].years[year][recordManID][opponent].wins + headToHeadRecords[recordType].years[year][recordManID][opponent].ties + headToHeadRecords[recordType].years[year][recordManID][opponent].losses);
 							headToHeadRecords[recordType].years[year][recordManID][opponent].fptsAgainstPg = headToHeadRecords[recordType].years[year][recordManID][opponent].fptsAgainst / (headToHeadRecords[recordType].years[year][recordManID][opponent].wins + headToHeadRecords[recordType].years[year][recordManID][opponent].ties + headToHeadRecords[recordType].years[year][recordManID][opponent].losses);
+
+							headToHeadRecords[recordType].years[year][recordManID][opponent].highScore = headToHeadRecords[recordType].years[year][recordManID][opponent].matchups.slice().sort((a, b) => b.fpts - a.fpts)[0];
+							headToHeadRecords[recordType].years[year][recordManID][opponent].lowScore = headToHeadRecords[recordType].years[year][recordManID][opponent].matchups.slice().sort((a, b) => a.fpts - b.fpts)[0];
+							headToHeadRecords[recordType].years[year][recordManID][opponent].bestBlowout = headToHeadRecords[recordType].years[year][recordManID][opponent].matchups.indexOf(headToHeadRecords[recordType].years[year][recordManID][opponent].matchups.slice().sort((a, b) => b.matchDifferential - a.matchDifferential)[0]);
+							headToHeadRecords[recordType].years[year][recordManID][opponent].worstBlowout = headToHeadRecords[recordType].years[year][recordManID][opponent].matchups.indexOf(headToHeadRecords[recordType].years[year][recordManID][opponent].matchups.slice().sort((a, b) => a.matchDifferential - b.matchDifferential)[0]);
+							headToHeadRecords[recordType].years[year][recordManID][opponent].bestNailbiter = headToHeadRecords[recordType].years[year][recordManID][opponent].matchups.indexOf(headToHeadRecords[recordType].years[year][recordManID][opponent].matchups.slice().filter(m => m.matchDifferential >= 0).sort((a, b) => a.matchDifferential - b.matchDifferential)[0]);
+							headToHeadRecords[recordType].years[year][recordManID][opponent].worstNailbiter = headToHeadRecords[recordType].years[year][recordManID][opponent].matchups.indexOf(headToHeadRecords[recordType].years[year][recordManID][opponent].matchups.slice().filter(m => m.matchDifferential <= 0).sort((a, b) => b.matchDifferential - a.matchDifferential)[0]);
 						}
 
 						const totalPPG = fptsTotal / recordMan.length; 
@@ -2165,6 +2228,13 @@ export const getManagerRecords = async (refresh = false) => {
 					headToHeadRecords[recordType].alltime[recordManID][opponent].epePerc = (headToHeadRecords[recordType].alltime[recordManID][opponent].epeWins + headToHeadRecords[recordType].alltime[recordManID][opponent].epeTies / 2) / (headToHeadRecords[recordType].alltime[recordManID][opponent].epeWins + headToHeadRecords[recordType].alltime[recordManID][opponent].epeTies + headToHeadRecords[recordType].alltime[recordManID][opponent].epeLosses) * 100;
 					headToHeadRecords[recordType].alltime[recordManID][opponent].fptspg = headToHeadRecords[recordType].alltime[recordManID][opponent].fpts / (headToHeadRecords[recordType].alltime[recordManID][opponent].wins + headToHeadRecords[recordType].alltime[recordManID][opponent].ties + headToHeadRecords[recordType].alltime[recordManID][opponent].losses);
 					headToHeadRecords[recordType].alltime[recordManID][opponent].fptsAgainstPg = headToHeadRecords[recordType].alltime[recordManID][opponent].fptsAgainst / (headToHeadRecords[recordType].alltime[recordManID][opponent].wins + headToHeadRecords[recordType].alltime[recordManID][opponent].ties + headToHeadRecords[recordType].alltime[recordManID][opponent].losses);
+
+					headToHeadRecords[recordType].alltime[recordManID][opponent].highScore = headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.indexOf(headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.slice().sort((a, b) => b.fpts - a.fpts)[0]);
+					headToHeadRecords[recordType].alltime[recordManID][opponent].lowScore = headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.indexOf(headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.slice().sort((a, b) => a.fpts - b.fpts)[0]);
+					headToHeadRecords[recordType].alltime[recordManID][opponent].bestBlowout = headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.indexOf(headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.slice().sort((a, b) => b.matchDifferential - a.matchDifferential)[0]);
+					headToHeadRecords[recordType].alltime[recordManID][opponent].worstBlowout = headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.indexOf(headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.slice().sort((a, b) => a.matchDifferential - b.matchDifferential)[0]);
+					headToHeadRecords[recordType].alltime[recordManID][opponent].bestNailbiter = headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.indexOf(headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.slice().filter(m => m.matchDifferential >= 0).sort((a, b) => a.matchDifferential - b.matchDifferential)[0]);
+					headToHeadRecords[recordType].alltime[recordManID][opponent].worstNailbiter = headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.indexOf(headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.slice().filter(m => m.matchDifferential <= 0).sort((a, b) => b.matchDifferential - a.matchDifferential)[0]);
 				}
 				
 				let fptsTotal = 0;

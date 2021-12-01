@@ -12,7 +12,7 @@
     import PlayerTable from './PlayerTable.svelte';
     import PancakeTable from './PancakeTable.svelte';
 
-    export let manager, managers, rostersData, users, rosterPositions, transactions, currentManagers, awards, records;
+    export let manager, managers, rostersData, users, rosterPositions, transactions, currentManagers, awards, records, managerRecords;
 
     let showRoster = new Boolean (true);
     let viewManager = managers[manager];
@@ -926,7 +926,7 @@
         {:else}
         {/if} -->
 
-        <PlayerTable {recordManID} {firstYear} {currentYear} />
+        <PlayerTable {recordManID} {firstYear} {currentYear} {managerRecords} />
     </div>
 
     <!-- UNDER CONSTRUCTION: dynamic tree map of fantasy points by NFL team -->

@@ -7,6 +7,7 @@
         getLeagueTransactions,
         getAwards,
         getLeagueRecords,
+        getManagerRecords,
         managers as managersObj,
         leagueID,
     } from '$lib/utils/helper';
@@ -20,6 +21,7 @@
             getLeagueTransactions(),
             getAwards(),
             getLeagueRecords(),
+            getManagerRecords(),
         );
 
         const manager = page.query.get('manager');
@@ -64,8 +66,8 @@
             <p>Retrieving managers...</p>
             <LinearProgress indeterminate />
         </div>
-    {:then [rostersData, users, leagueData, transactionsData, awards, records]}
-        <Managers {managers} {manager} {rostersData} {users} {leagueData} {transactionsData} {awards} {records} /> <!-- displays managers -->
+    {:then [rostersData, users, leagueData, transactionsData, awards, records, managerRecords]}
+        <Managers {managers} {manager} {rostersData} {users} {leagueData} {transactionsData} {awards} {records} {managerRecords} /> <!-- displays managers -->
     {:catch error}
         <!-- promise was rejected -->
         <p>Something went wrong: {error.message}</p>

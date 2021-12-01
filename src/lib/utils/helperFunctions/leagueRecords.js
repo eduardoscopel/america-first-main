@@ -614,9 +614,20 @@ export const getLeagueRecords = async (refresh = false) => {
 							matchDifferential,
 							week: opponent.week,
 							year,
+							matchupInfo: opponent,
 						}
 
-						if(opponent == home) {
+						if(home.fpts == away.fpts) {
+							comboEntry.matchTie = true;
+							comboEntry.fptsAgainst = away.fpts;
+							if(opponent.recordManID == home.recordManID) {
+								comboEntry.againstManager = away.manager;
+								comboEntry.againstRecordManID = away.recordManID;
+							} else {
+								comboEntry.againstManager = home.manager;
+								comboEntry.againstRecordManID = home.recordManID;
+							}
+						} else if(opponent == home) {
 							comboEntry.matchWin = true;
 							comboEntry.fptsAgainst = away.fpts;
 							comboEntry.againstManager = away.manager;
@@ -627,16 +638,6 @@ export const getLeagueRecords = async (refresh = false) => {
 							comboEntry.fptsAgainst = home.fpts;
 							comboEntry.againstManager = home.manager;
 							comboEntry.againstRecordManID = home.recordManID;
-						} else if(home.fpts == away.fpts) {
-							comboEntry.matchTie = true;
-							comboEntry.fptsAgainst = away.fpts;
-							if(opponent.recordManID == home.recordManID) {
-								comboEntry.againstManager = away.manager;
-								comboEntry.againstRecordManID = away.recordManID;
-							} else {
-								comboEntry.againstManager = home.manager;
-								comboEntry.againstRecordManID = home.recordManID;
-							}
 						}
 
 						masterRecordBook.league.playoffs.alltime.push(comboEntry);
@@ -812,9 +813,20 @@ export const getLeagueRecords = async (refresh = false) => {
 								matchDifferential,
 								week: opponent.week,
 								year,
+								matchupInfo: opponent,
 							}
 
-							if(opponent == home) {
+							if(home.fpts == away.fpts) {
+								comboEntry.matchTie = true;
+								comboEntry.fptsAgainst = away.fpts;
+								if(opponent.recordManID == home.recordManID) {
+									comboEntry.againstManager = away.manager;
+									comboEntry.againstRecordManID = away.recordManID;
+								} else {
+									comboEntry.againstManager = home.manager;
+									comboEntry.againstRecordManID = home.recordManID;
+								}
+							} else if(opponent == home) {
 								comboEntry.matchWin = true;
 								comboEntry.fptsAgainst = away.fpts;
 								comboEntry.againstManager = away.manager;
@@ -825,16 +837,6 @@ export const getLeagueRecords = async (refresh = false) => {
 								comboEntry.fptsAgainst = home.fpts;
 								comboEntry.againstManager = home.manager;
 								comboEntry.againstRecordManID = home.recordManID;
-							} else if(home.fpts == away.fpts) {
-								comboEntry.matchTie = true;
-								comboEntry.fptsAgainst = away.fpts;
-								if(opponent.recordManID == home.recordManID) {
-									comboEntry.againstManager = away.manager;
-									comboEntry.againstRecordManID = away.recordManID;
-								} else {
-									comboEntry.againstManager = home.manager;
-									comboEntry.againstRecordManID = home.recordManID;
-								}
 							}
 							
 							masterRecordBook.league.playoffs.alltime.push(comboEntry);
@@ -1006,9 +1008,20 @@ export const getLeagueRecords = async (refresh = false) => {
 								matchDifferential,
 								week: opponent.week,
 								year,
+								matchupInfo: opponent,
 							}
 
-							if(opponent == home) {
+							if(home.fpts == away.fpts) {
+								comboEntry.matchTie = true;
+								comboEntry.fptsAgainst = away.fpts;
+								if(opponent.recordManID == home.recordManID) {
+									comboEntry.againstManager = away.manager;
+									comboEntry.againstRecordManID = away.recordManID;
+								} else {
+									comboEntry.againstManager = home.manager;
+									comboEntry.againstRecordManID = home.recordManID;
+								}
+							} else if(opponent == home) {
 								comboEntry.matchWin = true;
 								comboEntry.fptsAgainst = away.fpts;
 								comboEntry.againstManager = away.manager;
@@ -1019,16 +1032,6 @@ export const getLeagueRecords = async (refresh = false) => {
 								comboEntry.fptsAgainst = home.fpts;
 								comboEntry.againstManager = home.manager;
 								comboEntry.againstRecordManID = home.recordManID;
-							} else if(home.fpts == away.fpts) {
-								comboEntry.matchTie = true;
-								comboEntry.fptsAgainst = away.fpts;
-								if(opponent.recordManID == home.recordManID) {
-									comboEntry.againstManager = away.manager;
-									comboEntry.againstRecordManID = away.recordManID;
-								} else {
-									comboEntry.againstManager = home.manager;
-									comboEntry.againstRecordManID = home.recordManID;
-								}
 							}
 
 							masterRecordBook.league.playoffs.alltime.push(comboEntry);
@@ -1200,9 +1203,20 @@ export const getLeagueRecords = async (refresh = false) => {
 								matchDifferential,
 								week: opponent.week,
 								year,
+								matchupInfo: opponent,
 							}
 
-							if(opponent == home) {
+							if(home.fpts == away.fpts) {
+								comboEntry.matchTie = true;
+								comboEntry.fptsAgainst = away.fpts;
+								if(opponent.recordManID == home.recordManID) {
+									comboEntry.againstManager = away.manager;
+									comboEntry.againstRecordManID = away.recordManID;
+								} else {
+									comboEntry.againstManager = home.manager;
+									comboEntry.againstRecordManID = home.recordManID;
+								}
+							} else if(opponent == home) {
 								comboEntry.matchWin = true;
 								comboEntry.fptsAgainst = away.fpts;
 								comboEntry.againstManager = away.manager;
@@ -1213,16 +1227,6 @@ export const getLeagueRecords = async (refresh = false) => {
 								comboEntry.fptsAgainst = home.fpts;
 								comboEntry.againstManager = home.manager;
 								comboEntry.againstRecordManID = home.recordManID;
-							} else if(home.fpts == away.fpts) {
-								comboEntry.matchTie = true;
-								comboEntry.fptsAgainst = away.fpts;
-								if(opponent.recordManID == home.recordManID) {
-									comboEntry.againstManager = away.manager;
-									comboEntry.againstRecordManID = away.recordManID;
-								} else {
-									comboEntry.againstManager = home.manager;
-									comboEntry.againstRecordManID = home.recordManID;
-								}
 							}
 
 							masterRecordBook.league.playoffs.alltime.push(comboEntry);
@@ -1413,6 +1417,7 @@ export const getLeagueRecords = async (refresh = false) => {
 					matchDifferential: 0,
 					week: startWeek,
 					year,
+					matchupInfo: matchup,
 				}
 
 				masterRecordBook.league.regularSeason.alltime.push(comboEntry);
@@ -2487,7 +2492,7 @@ export const getLeagueRecords = async (refresh = false) => {
 		leagueRecordArrays: recordArrays.league.alltime,
 		allManagers,
 		currentYear,
-		lastYear
+		lastYear,
 	};
 
 	// update localStorage

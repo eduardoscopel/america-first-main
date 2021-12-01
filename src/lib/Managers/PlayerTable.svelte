@@ -2,12 +2,12 @@
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table'; 
     import Button, { Group, Label } from '@smui/button';
     import { Icon } from '@smui/tab';
-    import { generateGraph, gotoManager, round } from '$lib/utils/helper';
+    import { gotoManager, round } from '$lib/utils/helper';
     import { getManagerRecords } from '$lib/utils/helper';
     import { managerrecords } from '$lib/stores';
 
 
-    export let recordManID, firstYear, currentYear;
+    export let recordManID, firstYear, currentYear, managerRecords;
 
     let showEmpty = new Boolean (false);
     let emptyMessage;
@@ -25,7 +25,6 @@
         period_Top: {},
     };
 
-    let managerRecords;
     const positionsArray = [];
 
     const refreshRecords = async () => {
