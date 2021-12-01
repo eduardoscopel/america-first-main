@@ -206,24 +206,41 @@
 <div class="matchContainer">
     <div class="rosterWrap">
         {#each home.starters as starter}
-            <div class="rosterRow" style="justify-content: flex-start;">
-                <div class="avatarHolder" style="{starter.playerInfo.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 1% 0 0;" : "margin: 0 1% 0 0;"} right: 1%;"> 
-                    <img class="rosterAvatar" src="{starter.playerAvatar}" alt="" style="z-index: 2;">
-                </div>
-                <div class="rosterPlayerInfo" style="{starter.playerInfo.pos == 'DEF' ? "margin: 0 2% 0 0;" : null}" >
-                    {#if starter.playerInfo.pos == 'DEF'}
-                        <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 7% 0 0;">{starter.playerInfo.ln} D/ST</div>
-                    {:else}
-                        <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 3% 0 0;">{starter.playerInfo.fn.slice(0, 1)}. {starter.playerInfo.ln}</div>
-                    {/if}
-                    <div class="rosterPlayer" style="justify-content: flex-end; {starter.playerInfo.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">
-                        <!-- {#if yearSelection == currentYear}
-                            <div style="display: inline-flex; color: var(--g555); {yearSelection != currentYear ? "justify-content: flex-end;" : "justify-content: space-between;"}">({round(starter.projection)})</div>
-                        {/if} -->
-                        <div style="display: inline-flex; font-weight: 600; {starter.playerInfo.pos == 'DEF' ? "margin: 0 2% 0 0;" : "margin: 0 5% 0 0;"}">{round(starter.playerPoints)}</div>
+            {#if starter}
+                <div class="rosterRow" style="justify-content: flex-start;">
+                    <div class="avatarHolder" style="{starter?.playerInfo.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 1% 0 0;" : "margin: 0 1% 0 0;"} right: 1%;"> 
+                        <img class="rosterAvatar" src="{starter?.playerAvatar}" alt="" style="z-index: 2;">
+                    </div>
+                    <div class="rosterPlayerInfo" style="{starter?.playerInfo.pos == 'DEF' ? "margin: 0 2% 0 0;" : null}" >
+                        {#if starter?.playerInfo.pos == 'DEF'}
+                            <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 7% 0 0;">{starter?.playerInfo.ln} D/ST</div>
+                        {:else}
+                            <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 3% 0 0;">{starter?.playerInfo.fn.slice(0, 1)}. {starter?.playerInfo.ln}</div>
+                        {/if}
+                        <div class="rosterPlayer" style="justify-content: flex-end; {starter?.playerInfo.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">
+                            <!-- {#if yearSelection == currentYear}
+                                <div style="display: inline-flex; color: var(--g555); {yearSelection != currentYear ? "justify-content: flex-end;" : "justify-content: space-between;"}">({round(starter.projection)})</div>
+                            {/if} -->
+                            <div style="display: inline-flex; font-weight: 600; {starter?.playerInfo.pos == 'DEF' ? "margin: 0 2% 0 0;" : "margin: 0 5% 0 0;"}">{round(starter?.playerPoints)}</div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            {:else}
+                <div class="rosterRow" style="justify-content: flex-start;">
+                    <div class="avatarHolder" style="right: 1%;"> 
+                        <img class="rosterAvatar" src="" alt="" style="z-index: 2;">
+                    </div>
+                    <div class="rosterPlayerInfo" >
+                        <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 3% 0 0; font-style: italic;">Empty</div>
+                        <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 3% 0 0;">
+                            <!-- {#if yearSelection == currentYear}
+                                <div style="display: inline-flex; color: var(--g555); {yearSelection != currentYear ? "justify-content: flex-end;" : "justify-content: space-between;"}">({round(starter.projection)})</div>
+                            {/if} -->
+                            <div style="display: inline-flex; font-weight: 600; margin: 0 5% 0 0;">0.00</div>
+                        </div>
+                    </div>
+                </div>
+            {/if}
         {/each}
     </div>
     <div class="positionsWrap">
@@ -236,24 +253,41 @@
     </div>
     <div class="rosterWrap">
         {#each away.starters as starter}
-            <div class="rosterRow" style="justify-content: flex-end;">
-                <div class="rosterPlayerInfo">
-                    {#if starter.pos == 'DEF'}
-                        <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 7%;">{starter.playerInfo.ln} D/ST</div>
-                    {:else}
-                        <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 3%;">{starter.playerInfo.fn.slice(0, 1)}. {starter.playerInfo.ln}</div>
-                    {/if}
-                    <div class="rosterPlayer" style="justify-content: flex-start; {starter.playerInfo.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">
-                        <div style="display: inline-flex; font-weight: 600; {starter.playerInfo.pos == 'DEF' ? "margin: 0 0 0 -2%;" : "margin: 0 0 0 2%;"}">{round(starter.playerPoints)}</div>  
-                        <!-- {#if yearSelection == currentYear}
-                            <div style="display: inline-flex; color: var(--g555); justify-content: flex-start;">({round(starter.projection)})</div>
-                        {/if} -->
+            {#if starter}
+                <div class="rosterRow" style="justify-content: flex-end;">
+                    <div class="rosterPlayerInfo">
+                        {#if starter.pos == 'DEF'}
+                            <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 7%;">{starter?.playerInfo.ln} D/ST</div>
+                        {:else}
+                            <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 3%;">{starter?.playerInfo.fn.slice(0, 1)}. {starter?.playerInfo.ln}</div>
+                        {/if}
+                        <div class="rosterPlayer" style="justify-content: flex-start; {starter?.playerInfo.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">
+                            <div style="display: inline-flex; font-weight: 600; {starter?.playerInfo.pos == 'DEF' ? "margin: 0 0 0 -2%;" : "margin: 0 0 0 2%;"}">{round(starter?.playerPoints)}</div>  
+                            <!-- {#if yearSelection == currentYear}
+                                <div style="display: inline-flex; color: var(--g555); justify-content: flex-start;">({round(starter.projection)})</div>
+                            {/if} -->
+                        </div>
+                    </div>                                
+                    <div class="avatarHolder" style="{starter?.playerInfo.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 0 0 5%;" : "margin: 0 0 0 2%;"} left: 1%; border-radius: 0 1em 1em 0;">
+                        <img class="rosterAvatar" src="{starter?.playerAvatar}" alt="" />
                     </div>
-                </div>                                
-                <div class="avatarHolder" style="{starter.playerInfo.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 0 0 5%;" : "margin: 0 0 0 2%;"} left: 1%; border-radius: 0 1em 1em 0;">
-                    <img class="rosterAvatar" src="{starter.playerAvatar}" alt="" />
                 </div>
-            </div>
+            {:else}
+                <div class="rosterRow" style="justify-content: flex-end;">
+                    <div class="rosterPlayerInfo">
+                        <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 3%; font-style: italic;">Empty</div>
+                        <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 0 0 3%;">
+                            <div style="display: inline-flex; font-weight: 600; margin: 0 0 0 2%;">0.00</div>  
+                            <!-- {#if yearSelection == currentYear}
+                                <div style="display: inline-flex; color: var(--g555); justify-content: flex-start;">({round(starter.projection)})</div>
+                            {/if} -->
+                        </div>
+                    </div>                                
+                    <div class="avatarHolder" style="margin: 0 0 0 2%; left: 1%; border-radius: 0 1em 1em 0;">
+                        <img class="rosterAvatar" src="" alt="" />
+                    </div>
+                </div>
+            {/if}
         {/each}
     </div>
 </div>

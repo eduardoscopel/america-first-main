@@ -7,7 +7,6 @@ import { waitForAll } from './multiPromise';
 import { get } from 'svelte/store';
 import { managerrecords } from '$lib/stores';
 import { loadPlayers, getPreviousDrafts } from '$lib/utils/helper';
-import { null_to_empty } from 'svelte/internal';
 
 export const getManagerRecords = async (refresh = false) => {
 	if(get(managerrecords).managerRecordArrays) {
@@ -1706,6 +1705,7 @@ export const getManagerRecords = async (refresh = false) => {
 					for(const otherManager in allManagers) {
 						if(otherManager != recordManID  && !headToHeadRecords[recordType].alltime[recordManID][otherManager]) {
 							headToHeadRecords[recordType].alltime[recordManID][otherManager] = {
+								manager: allManagers[recordManID],
 								wins: 0,
 								ties: 0,
 								losses: 0,
@@ -1731,6 +1731,7 @@ export const getManagerRecords = async (refresh = false) => {
 						for(const otherManager in typeRecord.years[year]) {
 							if(otherManager != recordManID) {
 								headToHeadRecords[recordType].years[year][recordManID][otherManager] = {
+									manager: allManagers[recordManID],
 									wins: 0,
 									ties: 0,
 									losses: 0,

@@ -5,6 +5,7 @@
     import { gotoManager, round } from '$lib/utils/helper';
     import { getManagerRecords } from '$lib/utils/helper';
     import { managerrecords } from '$lib/stores';
+    import LeagueMatchup from '$lib/Records/LeagueMatchup.svelte';
 
 
     export let recordManID, firstYear, currentYear, managerRecords;
@@ -17,7 +18,7 @@
     let masterPrefix;
     let selectedYear = currentYear;
 
-    let weekBests, weekWorsts, periodBests, periodWorsts, blowoutBests, blowoutWorsts, narrowBests, narrowWorsts, playerWeekBests, playerWeekMissedBests, playerPeriodBests, headToHeads;
+    let weekBests, weekWorsts, periodBests, periodWorsts, blowoutBests, blowoutWorsts, narrowBests, narrowWorsts, playerWeekBests, playerWeekMissedBests, playerPeriodBests, headToHeads, headToHeadRecords;
     let headShowTies = false;
     let headShowTiesEPE = false;
     const positionRecords = {
@@ -26,6 +27,11 @@
     };
 
     const positionsArray = [];
+
+    let managerChoicesLeft = [];
+    let managerChoicesRight = [];
+
+    let displayManagerLeft;
 
     const refreshRecords = async () => {
         const newRecords = await getManagerRecords(managerrecords);
@@ -41,6 +47,35 @@
                 positionRecords.period_Top[position] = [];
             }
         }
+
+        displayManagerLeft = {
+            info: managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][recordManID - 1]?.manager || managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][recordManID + 1].manager,
+            recordManID,
+            wins: 0,
+            ties: 0,
+            winPerc: 0,
+            epeWins: 0,
+            epeTies: 0,
+            epePerc: 0,
+            fpts: 0,
+            fptspg: 0,
+            matchups: [],
+            specialMatchups: {
+                highScore: null,
+                lowScore: null,
+                bestBlowout: null,
+                worstBlowout: null,
+                bestNailbiter: null,
+                worstNailbiter: null,
+            },
+        }
+
+        managerChoicesLeft = [];
+        managerChoicesLeft.push({
+            info: managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][recordManID - 1]?.manager || managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][recordManID + 1].manager,
+            recordManID,
+        })
+
 
         if(displayStats == 'regular') {
             setRegularTable(managerRecords, displayType, displayYear);
@@ -80,6 +115,8 @@
                 positionRecords.period_Top[position] = managerRecords.playerPositionRecords.alltime.regularSeason[recordManID][position].period_Top;
             }
 
+            headToHeadRecords = managerRecords.headToHeadRecords.regularSeason.alltime;
+
             for(const opponent in managerRecords.headToHeadRecords.regularSeason.alltime[recordManID]) {
                 if(managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][opponent].winPerc >= 0) {
                     headToHeads.push(managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][opponent]);
@@ -112,6 +149,8 @@
                 positionRecords.week_Top[position] = managerRecords.playerPositionRecords.years[displayYear].regularSeason[recordManID][position].week_Top;
                 positionRecords.period_Top[position] = managerRecords.playerPositionRecords.years[displayYear].regularSeason[recordManID][position].period_Top;
             }
+
+            headToHeadRecords = managerRecords.headToHeadRecords.regularSeason.years[displayYear];
 
             for(const opponent in managerRecords.headToHeadRecords.regularSeason.years[displayYear][recordManID]) {
                 if(managerRecords.headToHeadRecords.regularSeason.years[displayYear][recordManID][opponent].winPerc >= 0) {
@@ -155,6 +194,8 @@
                 positionRecords.period_Top[position] = managerRecords.playerPositionRecords.alltime.playoffs[recordManID][position].period_Top;
             }
 
+            headToHeadRecords = managerRecords.headToHeadRecords.playoffs.alltime;
+
             for(const opponent in managerRecords.headToHeadRecords.playoffs.alltime[recordManID]) {
                 if(managerRecords.headToHeadRecords.playoffs.alltime[recordManID][opponent].winPerc >= 0) {
                     headToHeads.push(managerRecords.headToHeadRecords.playoffs.alltime[recordManID][opponent]);
@@ -187,6 +228,8 @@
                 positionRecords.week_Top[position] = managerRecords.playerPositionRecords.years[displayYear].playoffs[recordManID][position].week_Top;
                 positionRecords.period_Top[position] = managerRecords.playerPositionRecords.years[displayYear].playoffs[recordManID][position].period_Top;
             }
+
+            headToHeadRecords = managerRecords.headToHeadRecords.playoffs.years[displayYear];
 
             for(const opponent in managerRecords.headToHeadRecords.playoffs.years[displayYear][recordManID]) {
                 if(managerRecords.headToHeadRecords.playoffs.years[displayYear][recordManID][opponent].winPerc >= 0) {
@@ -240,6 +283,8 @@
                 positionRecords.period_Top[position] = managerRecords.playerPositionRecords.alltime.combined[recordManID][position].period_Top;
             }
 
+            headToHeadRecords = managerRecords.headToHeadRecords.combined.alltime;
+
             for(const opponent in managerRecords.headToHeadRecords.combined.alltime[recordManID]) {
                 if(managerRecords.headToHeadRecords.combined.alltime[recordManID][opponent].winPerc >= 0) {
                     headToHeads.push(managerRecords.headToHeadRecords.combined.alltime[recordManID][opponent]);
@@ -272,7 +317,9 @@
                 positionRecords.period_Top[position] = managerRecords.playerPositionRecords.years[displayYear].combined[recordManID][position].period_Top;
             }
 
-            for(const opponent in managerRecords.headToHeadRecords.comined.years[displayYear][recordManID]) {
+            headToHeadRecords = managerRecords.headToHeadRecords.combined.years[displayYear];
+
+            for(const opponent in managerRecords.headToHeadRecords.combined.years[displayYear][recordManID]) {
                 if(managerRecords.headToHeadRecords.combined.years[displayYear][recordManID][opponent].winPerc >= 0) {
                     headToHeads.push(managerRecords.headToHeadRecords.combined.years[displayYear][recordManID][opponent]);
                 }
@@ -307,6 +354,119 @@
         refreshRecords(displayYear);
     }
     $: changeYear(selectedYear);
+
+    let allManagerChoices = [];
+    let allMatchups = [];
+    let selectedMatchup;
+
+    let displayManagerRight;
+ 
+    const getHead = (headToHeadRecords) => {
+        allManagerChoices = [];
+        for(const manager in headToHeadRecords) {
+            if(manager != recordManID && headToHeadRecords[manager][recordManID].epeWins + headToHeadRecords[manager][recordManID].epeTies + headToHeadRecords[manager][recordManID].epeLosses > 0) {
+                allManagerChoices.push({
+                    info: headToHeadRecords[manager][recordManID].manager,
+                    recordManID: manager,
+                });
+            }
+        }
+        managerChoicesRight = allManagerChoices;
+        displayManagerRight = null;
+        allMatchups = [];
+        selectedMatchup = null;
+
+        return allManagerChoices;
+    }
+    $: getHead(headToHeadRecords);
+
+    managerChoicesRight = getHead(headToHeadRecords);
+
+    let headToHeadShowTies = {
+        regular: false,
+        epe: false,
+    }
+
+    const changeManager = (newManagerRight, headToHeadRecords) => {
+
+        if(newManagerRight) {
+            displayManagerLeft.wins = headToHeadRecords[recordManID][newManagerRight].wins;
+            displayManagerLeft.ties = headToHeadRecords[recordManID][newManagerRight].ties;
+            displayManagerLeft.fpts = headToHeadRecords[recordManID][newManagerRight].fpts;
+            displayManagerLeft.fptspg = headToHeadRecords[recordManID][newManagerRight].fptspg;
+            displayManagerLeft.epeWins = headToHeadRecords[recordManID][newManagerRight].epeWins;
+            displayManagerLeft.epeTies = headToHeadRecords[recordManID][newManagerRight].epeTies;
+            displayManagerLeft.winPerc = headToHeadRecords[recordManID][newManagerRight].winPerc;
+            displayManagerLeft.epePerc = headToHeadRecords[recordManID][newManagerRight].epePerc;
+
+            displayManagerLeft.matchups = headToHeadRecords[recordManID][newManagerRight].matchups;
+
+            displayManagerLeft.specialMatchups.highScore = headToHeadRecords[recordManID][newManagerRight].highScore;
+            displayManagerLeft.specialMatchups.lowScore = headToHeadRecords[recordManID][newManagerRight].lowScore;
+            displayManagerLeft.specialMatchups.bestBlowout = headToHeadRecords[recordManID][newManagerRight].bestBlowout;
+            displayManagerLeft.specialMatchups.worstBlowout = headToHeadRecords[recordManID][newManagerRight].worstBlowout;
+            displayManagerLeft.specialMatchups.bestNailbiter = headToHeadRecords[recordManID][newManagerRight].bestNailbiter;
+            displayManagerLeft.specialMatchups.worstNailbiter = headToHeadRecords[recordManID][newManagerRight].worstNailbiter;
+
+            if(displayManagerLeft.ties > 0) {
+                headToHeadShowTies.regular = true;
+            }
+            if(displayManagerLeft.epeTies > 0) {
+                headToHeadShowTies.epe = true;
+            }
+        
+            displayManagerRight = {
+                info: headToHeadRecords[newManagerRight][recordManID].manager,
+                recordManID: newManagerRight,
+                wins: headToHeadRecords[newManagerRight][recordManID].wins,
+                ties: headToHeadRecords[newManagerRight][recordManID].ties,
+                winPerc: headToHeadRecords[newManagerRight][recordManID].winPerc,
+                epeWins: headToHeadRecords[newManagerRight][recordManID].epeWins,
+                epeTies: headToHeadRecords[newManagerRight][recordManID].epeTies,
+                epePerc: headToHeadRecords[newManagerRight][recordManID].epePerc,
+                fpts: headToHeadRecords[newManagerRight][recordManID].fpts,
+                fptspg: headToHeadRecords[newManagerRight][recordManID].fptspg,
+                matchups: headToHeadRecords[newManagerRight][recordManID].matchups,
+                specialMatchups: {
+                    highScore: headToHeadRecords[newManagerRight][recordManID].highScore,
+                    lowScore: headToHeadRecords[newManagerRight][recordManID].lowScore,
+                    bestBlowout: headToHeadRecords[newManagerRight][recordManID].bestBlowout,
+                    worstBlowout: headToHeadRecords[newManagerRight][recordManID].worstBlowout,
+                    bestNailbiter: headToHeadRecords[newManagerRight][recordManID].bestNailbiter,
+                    worstNailbiter: headToHeadRecords[newManagerRight][recordManID].worstNailbiter,
+                },
+            }
+
+            selectedMatchup = 0;
+                
+            
+        
+            allMatchups = [];
+            for(const matchup in displayManagerLeft.matchups) {
+                allMatchups.push({
+                    home: displayManagerLeft.matchups[matchup].matchupInfo,
+                    away: displayManagerRight.matchups[matchup].matchupInfo,
+                })
+            }
+            displayMatchup = {
+                home: displayManagerLeft.matchups[selectedMatchup],
+                away: displayManagerRight.matchups[selectedMatchup],
+            }
+        }
+        
+    }
+
+    let displayMatchup;
+    const changeMatchup = (newMatchup) => {
+        if(displayManagerLeft && displayManagerRight) {
+            displayMatchup = {
+                home: displayManagerLeft.matchups[newMatchup],
+                away: displayManagerRight.matchups[newMatchup],
+            }
+            selectedMatchup = newMatchup;
+        }
+    }
+    $: changeMatchup(selectedMatchup);
 
     let displayWeekRecord = 'best';
     const changeWeekRecord = (weekType) => {
@@ -408,13 +568,6 @@
         line-height: 1.1em;
     }
 
-    .fullFlex {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-around;
-        margin: 1em auto 5em;
-    }
-
     .buttonHolder {
         text-align: center;
         margin: 2em 0;
@@ -426,10 +579,6 @@
         line-height: 1.2em;
     }
 
-    h2 {
-        text-align: center;
-    }
-
     .yearText {
         flex-grow: 1;
         text-align: center;
@@ -439,14 +588,6 @@
 
     .center {
         text-align: center;
-    }
-
-    .yearContainer {
-        display: flex;
-        width: 95%;
-        max-width: 600px;
-        margin: 0 auto;
-        align-items: center;
     }
 
     :global(.changeYear) {
@@ -610,6 +751,164 @@
         font-size: 2.25em;
         font-weight: 450;
         color: var(--gcPlayRowText);
+    }
+
+    .headToHeadWrap {
+        position: relative;
+        display: inline-flex;
+        flex-direction: row;
+        justify-content: center;
+        width: 79.5%;
+        height: 50em;
+        background-color: var(--gcBox);
+        padding: 0.25%;
+    }
+
+    .headToHeadChoices {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        width: 19.5%;
+        margin: 0.25%;
+        background-color: var(--gcComponent);
+        justify-content: space-evenly;
+    }
+
+    .headToHeadMain {
+        position: relative;
+        display: inline-flex;
+        width: 100%;
+        height: 20%;
+        background-color: var(--gcComponent);
+    }
+
+    .headToHeadRow {
+        position: relative;
+        display: inline-flex;
+        color: var(--gcPlayRowText);
+        width: 92%;
+        padding: 0 4%;
+        height: 2.5em;
+        align-items: center;
+    }
+
+    .headToHeadRow:hover {
+        cursor: pointer;
+        background-color: var(--gcSelect);
+        border: 0.1em solid var(--g111);
+        height: 2.3em;
+        width: 90%;
+    }
+
+    .managerAvatar {
+        display: inline-flex;
+        flex-direction: row;
+        position: relative;
+        border: 0.25px solid #777; 
+        border-radius: 50%; 
+        height: 90%; 
+        width: auto;
+        margin: 0 2%;
+    }
+
+    .managerName {
+        display: inline-flex;
+        position: relative;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .managerProfile {
+        display: inline-flex;
+        position: relative;
+        height: 40%;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .headToHeadSummaryWrap {
+        display: inline-flex;
+        position: relative;
+        height: 60%;
+        width: 100%;
+    }
+
+    .headToHeadSummaryText {
+        display: inline-flex;
+        position: relative;
+        width: 100%;
+    }
+
+    .matchupHolder {
+        display: inline-flex;
+        position: relative;
+        background-color: var(--gcComponent);
+        width: 100%;
+        height: 100%;
+        flex-wrap: nowrap;
+		transition: margin-left 0.8s;
+    }
+
+    .matchupWrap {
+        display: block;
+        width: 100%;
+        height: 73%;
+        overflow-x: hidden;
+    }
+
+    .matchupSwitcher {
+        display: inline-flex;
+        position: relative;
+        background-color: var(--gcComponent);
+        width: 100%;
+        height: 5%;
+        padding: 1% 0;
+        border-top: 0.1em dashed var(--gcBox);
+        align-items: center;
+        justify-content: space-between;
+        color: var(--gcPlayRowText);
+        font-size: 1.4em;
+    }
+
+    .headToHeadHeadingText {
+        display: inline-flex;
+        position: relative;
+        font-size: 1em;
+        font-weight: 450;
+        width: 50%;
+        color: var(--gcPlayRowText);
+        justify-content: center;
+    }
+
+    :global(.changeMatchup) {
+        display: inline-flex;
+        position: relative;
+        justify-content: center;
+        font-size: 2.5em;
+        cursor: pointer;
+        color: #888;
+        width: 25%;
+    }
+
+    :global(.changeMatchup:hover) {
+        color: #00316b;
+    }
+
+    .headToHeadSpacer {
+        width: 25%;
+    }
+
+    .matchup {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        border-radius: 1em;
+        background-color: var(--gcComponent);
+        align-self: center;
+        /* box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 30%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 4px 3px var(--gcScoreShadow); */
     }
 
 </style>
@@ -1390,6 +1689,128 @@
                             </Body>
                         </DataTable>
                     {/if}
+                    <div class="headToHeadWrap">
+                        <div class="headToHeadChoices">
+                            {#each managerChoicesLeft as manager}
+                                <div class="headToHeadRow">{manager.info.realname}</div>
+                                {#if masterSelection == 'yearly'}
+                                    <div class="fantasyTeamName">({manager.info.name})</div>
+                                {/if}
+                            {/each}
+                        </div>
+                        <div class="columnWrap" style="width: 58%;">
+                            <div class="headToHeadMain">
+                                <div class="columnWrap" style="border-right: 0.1em dashed var(--gcBox); border-bottom: 0.1em dashed var(--gcBox);">
+                                    {#if displayManagerLeft}
+                                        <div class="managerProfile">
+                                            <img class="managerAvatar" src="{displayManagerLeft.info.avatar}" alt="">
+                                            <div class="managerName">
+                                                {displayManagerLeft.info.realname}
+                                                {#if masterSelection == 'yearly'}
+                                                    <div class="fantasyTeamName" style="display: inline-flex; position: relative;" >({displayManagerLeft.info.name})</div>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                        <div class="headToHeadSummaryWrap">
+                                            <div class="columnWrap">
+                                                <div class="headToHeadSummaryText">Wins:</div>
+                                                {#if headToHeadShowTies.regular == true}
+                                                    <div class="headToHeadSummaryText">Ties:</div>
+                                                {/if}
+                                                <div class="headToHeadSummaryText">EPE Wins:</div>
+                                                {#if headToHeadShowTies.epe == true}
+                                                    <div class="headToHeadSummaryText">EPE Ties:</div>
+                                                {/if}
+                                                <div class="headToHeadSummaryText">Points:</div>
+                                            </div>
+                                            <div class="columnWrap">
+                                                <div class="headToHeadSummaryText">{displayManagerLeft.wins}</div>
+                                                {#if headToHeadShowTies.regular == true}
+                                                    <div class="headToHeadSummaryText">{displayManagerLeft.ties}</div>
+                                                {/if}
+                                                <div class="headToHeadSummaryText">{displayManagerLeft.epeWins}</div>
+                                                {#if headToHeadShowTies.epe == true}
+                                                    <div class="headToHeadSummaryText">{displayManagerLeft.epeTies}</div>
+                                                {/if}
+                                                <div class="headToHeadSummaryText">{round(displayManagerLeft.fpts)} ({round(displayManagerLeft.fptspg)})</div>
+                                            </div>
+                                        </div>
+                                    {/if}
+                                </div>
+                                <div class="columnWrap" style="border-left: 0.1em dashed var(--gcBox); border-bottom: 0.1em dashed var(--gcBox);">
+                                    {#if displayManagerRight}
+                                        <div class="managerProfile">
+                                            <img class="managerAvatar" src="{displayManagerRight.info.avatar}" alt="">
+                                            <div class="managerName">
+                                                {displayManagerRight.info.realname}
+                                                {#if masterSelection == 'yearly'}
+                                                    <div class="fantasyTeamName">({displayManagerRight.info.name})</div>
+                                                {/if}
+                                            </div>
+                                        </div>
+                                        <div class="headToHeadSummaryWrap">
+                                            <div class="columnWrap">
+                                                <div class="headToHeadSummaryText">Wins:</div>
+                                                {#if headToHeadShowTies.regular == true}
+                                                    <div class="headToHeadSummaryText">Ties:</div>
+                                                {/if}
+                                                <div class="headToHeadSummaryText">EPE Wins:</div>
+                                                {#if headToHeadShowTies.epe == true}
+                                                    <div class="headToHeadSummaryText">EPE Ties:</div>
+                                                {/if}
+                                                <div class="headToHeadSummaryText">Points:</div>
+                                            </div>
+                                            <div class="columnWrap">
+                                                <div class="headToHeadSummaryText">{displayManagerRight.wins}</div>
+                                                {#if headToHeadShowTies.regular == true}
+                                                    <div class="headToHeadSummaryText">{displayManagerRight.ties}</div>
+                                                {/if}
+                                                <div class="headToHeadSummaryText">{displayManagerRight.epeWins}</div>
+                                                {#if headToHeadShowTies.epe == true}
+                                                    <div class="headToHeadSummaryText">{displayManagerRight.epeTies}</div>
+                                                {/if}
+                                                <div class="headToHeadSummaryText">{round(displayManagerRight.fpts)} ({round(displayManagerRight.fptspg)})</div>
+                                            </div>
+                                        </div>
+                                    {/if}
+                                </div>
+                            </div>
+                            <div class="matchupSwitcher">
+                                {#if displayManagerLeft && displayManagerRight && allMatchups.length > 0}
+                                    {#if selectedMatchup > 0}
+                                        <Icon class="material-icons changeMatchup" on:click={() => changeMatchup(selectedMatchup - 1)}>chevron_left</Icon>
+                                    {:else}
+                                        <span class="headToHeadSpacer" />
+                                    {/if}  
+                                    <div class="headToHeadHeadingText">{displayMatchup.home.year} - Week {displayMatchup.home.week}</div>
+                                    {#if selectedMatchup < allMatchups.length - 1}
+                                        <Icon class="material-icons changeMatchup" on:click={() => changeMatchup(selectedMatchup + 1)}>chevron_right</Icon>
+                                    {:else}
+                                        <span class="headToHeadSpacer" />
+                                    {/if}  
+                                {/if}
+                            </div>
+                            <div class="matchupWrap">
+                                {#if displayManagerLeft && displayManagerRight}
+                                    <div class="matchupHolder" style="margin-left: -{100 * selectedMatchup}%; width: {100 * allMatchups.length}%">
+                                        {#each allMatchups as {home, away}}
+                                            <div class="matchup">
+                                                <LeagueMatchup {home} {away} />
+                                            </div>
+                                        {/each}
+                                    </div>
+                                {/if}
+                            </div>
+                        </div>
+                        <div class="headToHeadChoices">
+                            {#each managerChoicesRight as manager}
+                                <div class="headToHeadRow" on:click={() => changeManager(manager.recordManID, headToHeadRecords)} style="justify-content: flex-end; {displayManagerRight && displayManagerRight.info.realname == manager.info.realname ? "background-color: var(--gcSelect); border: 0.1em solid var(--g111);" : null}">{manager.info.realname}</div>
+                                {#if masterSelection == 'yearly'}
+                                    <div class="fantasyTeamName" style="display: inline-flex; position: relative; justify-content: flex-end;" >({manager.info.name})</div>
+                                {/if}
+                            {/each}
+                        </div>
+                    </div>     
                 {:else}
                     <div class="showEmpty">{emptyMessage}</div>
                 {/if}   
