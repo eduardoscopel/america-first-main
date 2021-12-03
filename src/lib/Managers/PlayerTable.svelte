@@ -1481,7 +1481,7 @@
                                     </Row>
                                     <Row>
                                         <Cell class="header rank"></Cell>
-                                        <div class="playerAvatar playerInfo" style="background-color: var(--gcMain);" />
+                                        <Cell class="header rank" style="background-color: var(--gcMain);" />
                                         <Cell class="header">Player</Cell>
                                         {#if displayPositionRecord == 'ALL'}
                                             <Cell class="header">POS</Cell>
@@ -1498,7 +1498,7 @@
                                     {#each playerWeekBests as playerWeekBest, ix}
                                         <Row>
                                             <Cell class="rank">{ix + 1}</Cell>
-                                            <div class="playerAvatar playerInfo" style="{playerWeekBest.avatar}; background-color: var(--gcSelect);" />
+                                            <Cell class="playerAvatar playerInfo" style="{playerWeekBest.avatar}; background-color: var(--gcSelect); vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                             <Cell class="left">{playerWeekBest.playerInfo.fn} {playerWeekBest.playerInfo.ln}</Cell>
                                             {#if displayPositionRecord == 'ALL'}
                                                 <Cell class="center">{playerWeekBest.playerInfo.pos}</Cell>
@@ -1528,7 +1528,7 @@
                                     </Row>
                                     <Row>
                                         <Cell class="header rank"></Cell>
-                                        <div class="playerAvatar playerInfo"  style="background-color: var(--gcMain);" />
+                                        <Cell class="header rank"  style="background-color: var(--gcMain);" />
                                         <Cell class="header">Player</Cell>
                                         {#if displayPositionRecord == 'ALL'}
                                             <Cell class="header">POS</Cell>
@@ -1548,7 +1548,7 @@
                                     {#each playerPeriodBests as playerPeriodBest, ix}
                                         <Row>
                                             <Cell class="rank">{ix + 1}</Cell>
-                                            <div class="playerAvatar playerInfo" style="{playerPeriodBest.avatar}; background-color: var(--gcSelect);" />
+                                            <Cell class="playerAvatar playerInfo" style="{playerPeriodBest.avatar}; background-color: var(--gcSelect); vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                             <Cell class="left">{playerPeriodBest.playerInfo.fn} {playerPeriodBest.playerInfo.ln}</Cell>
                                             {#if displayPositionRecord == 'ALL'}
                                                 <Cell class="center">{playerPeriodBest.playerInfo.pos}</Cell>
@@ -1581,7 +1581,7 @@
                                     </Row>
                                     <Row>
                                         <Cell class="header rank"></Cell>
-                                        <div class="playerAvatar playerInfo"  style="background-color: var(--gcMain);" /> 
+                                        <Cell class="header rank"  style="background-color: var(--gcMain);" /> 
                                         <Cell class="header">Player</Cell>
                                         {#if displayPositionRecord == 'ALL'}
                                             <Cell class="header">POS</Cell>
@@ -1598,7 +1598,7 @@
                                     {#each playerWeekMissedBests as playerWeekMissedBest, ix}
                                         <Row>
                                             <Cell class="rank">{ix + 1}</Cell>
-                                            <div class="playerAvatar playerInfo" style="{playerWeekMissedBest.avatar}; background-color: var(--gcSelect);" />
+                                            <Cell class="playerAvatar playerInfo" style="{playerWeekMissedBest.avatar}; background-color: var(--gcSelect); vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                             <Cell class="left">{playerWeekMissedBest.playerInfo.fn} {playerWeekMissedBest.playerInfo.ln}</Cell>
                                             {#if displayPositionRecord == 'ALL'}
                                                 <Cell class="center">{playerWeekMissedBest.playerInfo.pos}</Cell>

@@ -73,7 +73,7 @@
         flex-direction: column;
         align-items: center;
         align-content: center;
-        background-color: var(--f3f3f3);
+        background-color: var(--gcComponent);
         border-radius: 50px;
     }
 

@@ -670,15 +670,69 @@
         text-align: center;
     }
 
+    /* recordTable styling */
+
     :global(.recordTable) {
         box-shadow: 0px 3px 3px -2px var(--boxShadowOne), 0px 3px 4px 0px var(--boxShadowTwo), 0px 1px 8px 0px var(--boxShadowThree);
         margin: 2em;
+        background-color: var(--gcComponent);
     }
+
+    :global(.recordTable th) {
+        background-color: var(--gcMain);
+        text-align: center;
+        color: var(--gcBannerText);
+    }
+
+    :global(.recordTable td) {
+        background-color: var(--gcSelect);
+        color: var(--gcPlayRowText);
+        font-weight: 400;
+    }
+
+    :global(.recordTable thead tr) {
+        background-color: var(--gcMain);
+    }
+
+    :global(.recordTable tbody tr) {
+        background-color: var(--gcSelect);
+    }
+
+    :global(.recordTable table) {
+        background-color: var(--gcBox);
+    }
+
+    /* rankingTable styling */
 
     :global(.rankingTable) {
         display: table;
         box-shadow: 0px 3px 3px -2px var(--boxShadowOne), 0px 3px 4px 0px var(--boxShadowTwo), 0px 1px 8px 0px var(--boxShadowThree);
         margin: 2em auto 0.5em;
+        background-color: var(--gcComponent);
+    }
+
+    :global(.rankingTable th) {
+        background-color: var(--gcMain);
+        text-align: center;
+        color: var(--gcBannerText);
+    }
+
+    :global(.rankingTable td) {
+        background-color: var(--gcSelect);
+        color: var(--gcPlayRowText);
+        font-weight: 400;
+    }
+
+    :global(.rankingTable thead tr) {
+        background-color: var(--gcMain);
+    }
+
+    :global(.rankingTable tbody tr) {
+        background-color: var(--gcSelect);
+    }
+
+    :global(.rankingTable table) {
+        background-color: var(--gcBox);
     }
 
     .playerAvatar {
@@ -706,11 +760,6 @@
         font-size: 0.7em;
         color: #888;
         line-height: 1.2em;
-    }
-
-    h4 {
-        text-align: center;
-        margin: 2em 0 1em;
     }
 
     .fantasyTeamName {
@@ -894,7 +943,7 @@
     .headerLabel {
         position: relative;
         display: inline-flex;
-        color: var(--g111);
+        color: var(--gcPlayRowText);
         font-weight: 420;
         font-size: 2em;
         justify-content: center;
@@ -1462,7 +1511,7 @@
                         </Row>
                         <Row>
                             <Cell class="header rank"></Cell>
-                            <div class="playerAvatar playerInfo" />
+                            <Cell class="header rank" />
                             <Cell class="header">Player</Cell>
                             {#if displayPositionRecord == 'ALL'}
                                 <Cell class="header">POS</Cell>
@@ -1480,7 +1529,7 @@
                         {#each playerWeekTOPS as playerATWeekTOP, ix}
                             <Row>
                                 <Cell class="rank">{ix + 1}</Cell>
-                                <div class="playerAvatar playerInfo" style="{playerATWeekTOP.avatar}" />
+                                <Cell class="playerAvatar playerInfo" style="{playerATWeekTOP.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATWeekTOP.playerInfo.fn} {playerATWeekTOP.playerInfo.ln}</Cell>
                                 {#if displayPositionRecord == 'ALL'}
                                     <Cell class="center">{playerATWeekTOP.playerInfo.pos}</Cell>
@@ -1516,7 +1565,7 @@
                         </Row>
                         <Row>
                             <Cell class="header rank"></Cell>
-                            <div class="playerAvatar playerInfo" />
+                            <Cell class="header rank" />
                             <Cell class="header">Player</Cell>
                             {#if displayPositionRecord == 'ALL'}
                                 <Cell class="header">POS</Cell>
@@ -1537,7 +1586,7 @@
                         {#each playerSeasonTOPS as playerATSeasonTOP, ix}
                             <Row>
                                 <Cell class="rank">{ix + 1}</Cell>
-                                <div class="playerAvatar playerInfo" style="{playerATSeasonTOP.avatar}" />
+                                <Cell class="playerAvatar playerInfo" style="{playerATSeasonTOP.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATSeasonTOP.playerInfo.fn} {playerATSeasonTOP.playerInfo.ln}</Cell>
                                 {#if displayPositionRecord == 'ALL'}
                                     <Cell class="center">{playerATSeasonTOP.playerInfo.pos}</Cell>
@@ -1576,7 +1625,7 @@
                         </Row>
                         <Row>
                             <Cell class="header rank"></Cell>
-                            <div class="playerAvatar playerInfo" /> 
+                            <Cell class="header rank" /> 
                             <Cell class="header">Player</Cell>
                             {#if displayPositionRecord == 'ALL'}
                                 <Cell class="header">POS</Cell>
@@ -1594,7 +1643,7 @@
                         {#each playerWeekMissedTOPS as playerATWeekMissedTOP, ix}
                             <Row>
                                 <Cell class="rank">{ix + 1}</Cell>
-                                <div class="playerAvatar playerInfo" style="{playerATWeekMissedTOP.avatar}" />
+                                <Cell class="playerAvatar playerInfo" style="{playerATWeekMissedTOP.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATWeekMissedTOP.playerInfo.fn} {playerATWeekMissedTOP.playerInfo.ln}</Cell>
                                 {#if displayPositionRecord == 'ALL'}
                                     <Cell class="center">{playerATWeekMissedTOP.playerInfo.pos}</Cell>
@@ -2059,7 +2108,7 @@
                 <DataTable class="rankingTable">
                     <Head>
                         <Row>
-                            <Cell class="header" colspan=11>
+                            <Cell class="header" colspan=12>
                                 <p>
                                     Personal Best Season-Long Scores – Players<br>
                                     {prefix} – {recordPrefix} 
@@ -2068,7 +2117,7 @@
                         </Row>
                         <Row>
                             <Cell class="header rank"></Cell>
-                            <div class="playerAvatar playerInfo" />
+                            <Cell class="header rank" />
                             <Cell class="header">Player</Cell>
                             <Cell class="header">POS</Cell>
                             <Cell class="header">NFL Team</Cell>
@@ -2087,7 +2136,7 @@
                         {#each playerSeasonBests as playerATSeasonBest, ix}
                             <Row>
                                 <Cell class="rank">{ix + 1}</Cell>
-                                <div class="playerAvatar playerInfo" style="{playerATSeasonBest.avatar}" />
+                                <Cell class="playerAvatar playerInfo" style="{playerATSeasonBest.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATSeasonBest.playerInfo.fn} {playerATSeasonBest.playerInfo.ln}</Cell>
                                 <Cell class="center">{playerATSeasonBest.playerInfo.pos}</Cell>
                                 <Cell class="center">{playerATSeasonBest.playerInfo.t}</Cell>
@@ -2117,7 +2166,7 @@
                 <DataTable class="rankingTable">
                     <Head>
                         <Row>
-                            <Cell class="header" colspan=8>
+                            <Cell class="header" colspan=9>
                                 <p>
                                     Personal Best Week Scores – Players<br>
                                     {prefix} – {recordPrefix} 
@@ -2126,7 +2175,7 @@
                         </Row>
                         <Row>
                             <Cell class="header rank"></Cell>
-                            <div class="playerAvatar playerInfo" />
+                            <Cell class="header rank" />
                             <Cell class="header">Player</Cell>
                             <Cell class="header">POS</Cell>
                             <Cell class="header">NFL Team</Cell>
@@ -2142,7 +2191,7 @@
                         {#each playerWeekBests as playerATWeekBest, ix}
                             <Row>
                                 <Cell class="rank">{ix + 1}</Cell>
-                                <div class="playerAvatar playerInfo" style="{playerATWeekBest.avatar}" />
+                                <Cell class="playerAvatar playerInfo" style="{playerATWeekBest.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATWeekBest.playerInfo.fn} {playerATWeekBest.playerInfo.ln}</Cell>
                                 <Cell class="center">{playerATWeekBest.playerInfo.pos}</Cell>
                                 <Cell class="center">{playerATWeekBest.playerInfo.t}</Cell>
@@ -2169,7 +2218,7 @@
                 <DataTable class="rankingTable">
                     <Head>
                         <Row>
-                            <Cell class="header" colspan=8>
+                            <Cell class="header" colspan=9>
                                 <p>
                                     Personal Biggest Benchwarmers – Players<br>
                                     {prefix} – {recordPrefix} 
@@ -2178,7 +2227,7 @@
                         </Row>
                         <Row>
                             <Cell class="header rank"></Cell>
-                            <div class="playerAvatar playerInfo" />
+                            <Cell class="header rank" />
                             <Cell class="header">Player</Cell>
                             <Cell class="header">POS</Cell>
                             <Cell class="header">NFL Team</Cell>
@@ -2194,7 +2243,7 @@
                         {#each playerWeekMissedBests as playerATWeekMissedBest, ix}
                             <Row>
                                 <Cell class="rank">{ix + 1}</Cell>
-                                <div class="playerAvatar playerInfo" style="{playerATWeekMissedBest.avatar}" />
+                                <Cell class="playerAvatar playerInfo" style="{playerATWeekMissedBest.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATWeekMissedBest.playerInfo.fn} {playerATWeekMissedBest.playerInfo.ln}</Cell>
                                 <Cell class="center">{playerATWeekMissedBest.playerInfo.pos}</Cell>
                                 <Cell class="center">{playerATWeekMissedBest.playerInfo.t}</Cell>
