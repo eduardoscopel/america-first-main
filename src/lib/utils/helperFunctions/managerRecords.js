@@ -2067,6 +2067,7 @@ export const getManagerRecords = async (refresh = false) => {
 				playerPositionRecords.league.years[year][recordPeriod][position] = {
 					week_Top: masterRecordBook.players.league[recordPeriod].years[year].slice().filter(p => p.playerInfo.pos == position && p.benched == false).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
 					period_Top: masterRecordBook.players.league.totals.years[year][recordPeriod].slice().filter(p => p.playerInfo.pos == position).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
+					week_MissedTop: masterRecordBook.players.league[recordPeriod].years[year].slice().filter(p => p.playerInfo.pos == position && p.benched == true).sort((a, b) => b.benchPoints - a.benchPoints).slice(0, 10),
 				}
 				for(const recordManID in masterRecordBook.managers.totals.years[year]) {
 					if(!playerPositionRecords.managers.years[year][recordPeriod][recordManID]) {
@@ -2075,6 +2076,7 @@ export const getManagerRecords = async (refresh = false) => {
 					playerPositionRecords.managers.years[year][recordPeriod][recordManID][position] = {
 						week_Top: masterRecordBook.players.league[recordPeriod].years[year].slice().filter(p => p.playerInfo.pos == position && p.benched == false && p.recordManID == recordManID).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
 						period_Top: masterRecordBook.players.league.totals.years[year][recordPeriod].slice().filter(p => p.playerInfo.pos == position && p.recordManID == recordManID).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
+						week_MissedTop: masterRecordBook.players.league[recordPeriod].years[year].slice().filter(p => p.playerInfo.pos == position && p.benched == true && p.recordManID == recordManID).sort((a, b) => b.benchPoints - a.benchPoints).slice(0, 10),
 					}
 					if(!playerPositionRecords.league.years[year][recordPeriod].managerBests[position]) {
 						playerPositionRecords.league.years[year][recordPeriod].managerBests[position] = {
@@ -2311,6 +2313,7 @@ export const getManagerRecords = async (refresh = false) => {
 			playerPositionRecords.league.alltime[recordPeriod][position] = {
 				week_Top: masterRecordBook.players.league[recordPeriod].alltime.slice().filter(p => p.playerInfo.pos == position && p.benched == false).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
 				period_Top: masterRecordBook.players.league.totals.alltime[recordPeriod].slice().filter(p => p.playerInfo.pos == position).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
+				week_MissedTop: masterRecordBook.players.league[recordPeriod].alltime.slice().filter(p => p.playerInfo.pos == position && p.benched == true).sort((a, b) => b.benchPoints - a.benchPoints).slice(0, 10),
 			}
 			for(const recordManID in masterRecordBook.managers.totals.alltime) {
 				if(!playerPositionRecords.managers.alltime[recordPeriod][recordManID]) {
@@ -2319,6 +2322,7 @@ export const getManagerRecords = async (refresh = false) => {
 				playerPositionRecords.managers.alltime[recordPeriod][recordManID][position] = {
 					week_Top: masterRecordBook.players.league[recordPeriod].alltime.slice().filter(p => p.playerInfo.pos == position && p.benched == false && p.recordManID == recordManID).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
 					period_Top: masterRecordBook.players.league.totals.alltime[recordPeriod].slice().filter(p => p.playerInfo.pos == position && p.recordManID == recordManID).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
+					week_MissedTop: masterRecordBook.players.league[recordPeriod].alltime.slice().filter(p => p.playerInfo.pos == position && p.benched == true && p.recordManID == recordManID).sort((a, b) => b.benchPoints - a.benchPoints).slice(0, 10),
 				}
 				if(!playerPositionRecords.league.alltime[recordPeriod].managerBests[position]) {
 					playerPositionRecords.league.alltime[recordPeriod].managerBests[position] = {

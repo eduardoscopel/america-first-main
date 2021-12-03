@@ -107,13 +107,14 @@
             headToHeadRecords = managerRecords.headToHeadRecords.regularSeason.alltime;
             leaguePlayerRecords = managerRecords.leaguePlayerRecords.alltime.regularSeason;
 
-            playerATWeekMissedTOPS = leagueRecordArrays.regularSeason.players.week_MissedTop;
             if(displayPositionRecord == 'ALL') {
                 playerATWeekTOPS = leagueRecordArrays.regularSeason.players.week_Top;
                 playerATSeasonTOPS = leagueRecordArrays.regularSeason.players.period_Top;
+                playerATWeekMissedTOPS = leagueRecordArrays.regularSeason.players.week_MissedTop;
             } else {
                 playerATWeekTOPS = managerRecords.leaguePlayerRecords.alltime.regularSeason[displayPositionRecord].week_Top;
                 playerATSeasonTOPS = managerRecords.leaguePlayerRecords.alltime.regularSeason[displayPositionRecord].period_Top;
+                playerATWeekMissedTOPS = managerRecords.leaguePlayerRecords.alltime.regularSeason[displayPositionRecord].week_MissedTop;
             }
         } else if(displayStats == 'playoffs') {
             leagueWeekRecords = leagueRecordArrays.playoffs.week_Top;
@@ -136,13 +137,14 @@
             headToHeadRecords = managerRecords.headToHeadRecords.playoffs.alltime;
             leaguePlayerRecords = managerRecords.leaguePlayerRecords.alltime.playoffs;
 
-            playerATWeekMissedTOPS = leagueRecordArrays.playoffs.players.week_MissedTop;
             if(displayPositionRecord == 'ALL') {
                 playerATWeekTOPS = leagueRecordArrays.playoffs.players.week_Top;
                 playerATSeasonTOPS = leagueRecordArrays.playoffs.players.period_Top;
+                playerATWeekMissedTOPS = leagueRecordArrays.playoffs.players.week_MissedTop;
             } else {
                 playerATWeekTOPS = managerRecords.leaguePlayerRecords.alltime.playoffs[displayPositionRecord].week_Top;
                 playerATSeasonTOPS = managerRecords.leaguePlayerRecords.alltime.playoffs[displayPositionRecord].period_Top;
+                playerATWeekMissedTOPS = managerRecords.leaguePlayerRecords.alltime.playoffs[displayPositionRecord].week_MissedTop;
             }
         } else if(displayStats == 'combined') {
             leagueWeekRecords = leagueRecordArrays.combined.week_Top;
@@ -165,13 +167,14 @@
             headToHeadRecords = managerRecords.headToHeadRecords.combined.alltime;
             leaguePlayerRecords = managerRecords.leaguePlayerRecords.alltime.combined;
 
-            playerATWeekMissedTOPS = leagueRecordArrays.combined.players.week_MissedTop;
             if(displayPositionRecord == 'ALL') {
                 playerATWeekTOPS = leagueRecordArrays.combined.players.week_Top;
                 playerATSeasonTOPS = leagueRecordArrays.combined.players.period_Top;
+                playerATWeekMissedTOPS = leagueRecordArrays.combined.players.week_MissedTop;
             } else {
                 playerATWeekTOPS = managerRecords.leaguePlayerRecords.alltime.combined[displayPositionRecord].week_Top;
                 playerATSeasonTOPS = managerRecords.leaguePlayerRecords.alltime.combined[displayPositionRecord].period_Top;
+                playerATWeekMissedTOPS = managerRecords.leaguePlayerRecords.alltime.combined[displayPositionRecord].week_MissedTop;
             }
         }
         displayObject[displayStats] = {

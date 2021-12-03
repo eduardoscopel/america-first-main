@@ -93,7 +93,6 @@
             blowoutWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].blowout_Worst;
             narrowBests = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].narrow_Best;
             narrowWorsts = managerRecords.managerRecordArrays.alltime.regularSeason[recordManID].narrow_Worst;
-            playerWeekMissedBests = managerRecords.managerRecordArrays.alltime.regularSeason.players[recordManID].week_MissedBest;
 
             headToHeadRecords = managerRecords.headToHeadRecords.regularSeason.alltime;
             managerPlayerRecords = managerRecords.playerPositionRecords.alltime.regularSeason[recordManID];
@@ -101,9 +100,11 @@
             if(displayPositionRecord == 'ALL') {
                 playerWeekBests = managerRecords.managerRecordArrays.alltime.regularSeason.players[recordManID].week_Best;
                 playerPeriodBests = managerRecords.managerRecordArrays.alltime.regularSeason.players[recordManID].period_Best;
+                playerWeekMissedBests = managerRecords.managerRecordArrays.alltime.regularSeason.players[recordManID].week_MissedBest;
             } else {
                 playerWeekBests = managerRecords.playerPositionRecords.alltime.regularSeason[recordManID][displayPositionRecord].week_Top;
                 playerPeriodBests = managerRecords.playerPositionRecords.alltime.regularSeason[recordManID][displayPositionRecord].period_Top;
+                playerWeekMissedBests = managerRecords.playerPositionRecords.alltime.regularSeason[recordManID][displayPositionRecord].week_MissedTop;
             }
 
             for(const opponent in managerRecords.headToHeadRecords.regularSeason.alltime[recordManID]) {
@@ -130,16 +131,17 @@
             blowoutWorsts = managerRecords.managerRecordArrays.years[displayYear].regularSeason[recordManID].blowout_Worst;
             narrowBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason[recordManID].narrow_Best;
             narrowWorsts = managerRecords.managerRecordArrays.years[displayYear].regularSeason[recordManID].narrow_Worst;
-            playerWeekMissedBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason.players[recordManID].week_MissedBest;
 
             managerPlayerRecords = managerRecords.playerPositionRecords.years[displayYear].regularSeason[recordManID];
 
             if(displayPositionRecord == 'ALL') {
                 playerWeekBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason.players[recordManID].week_Best;
                 playerPeriodBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason.players[recordManID].period_Best;
+                playerWeekMissedBests = managerRecords.managerRecordArrays.years[displayYear].regularSeason.players[recordManID].week_MissedBest;
             } else {
                 playerWeekBests = managerRecords.playerPositionRecords.years[displayYear].regularSeason[recordManID][displayPositionRecord].week_Top;
                 playerPeriodBests = managerRecords.playerPositionRecords.years[displayYear].regularSeason[recordManID][displayPositionRecord].period_Top;
+                playerWeekMissedBests = managerRecords.playerPositionRecords.years[displayYear].regularSeason[recordManID][displayPositionRecord].week_MissedTop;
             }
 
             headToHeadRecords = managerRecords.headToHeadRecords.regularSeason.years[displayYear];
@@ -177,16 +179,17 @@
             blowoutWorsts = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].blowout_Worst;
             narrowBests = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].narrow_Best;
             narrowWorsts = managerRecords.managerRecordArrays.alltime.playoffs[recordManID].narrow_Worst;  
-            playerWeekMissedBests = managerRecords.managerRecordArrays.alltime.playoffs.players[recordManID].week_MissedBest;
 
             managerPlayerRecords = managerRecords.playerPositionRecords.alltime.playoffs[recordManID];
 
             if(displayPositionRecord == 'ALL') {
                 playerWeekBests = managerRecords.managerRecordArrays.alltime.playoffs.players[recordManID].week_Best;
                 playerPeriodBests = managerRecords.managerRecordArrays.alltime.playoffs.players[recordManID].period_Best;
+                playerWeekMissedBests = managerRecords.managerRecordArrays.alltime.playoffs.players[recordManID].week_MissedBest;
             } else {
                 playerWeekBests = managerRecords.playerPositionRecords.alltime.playoffs[recordManID][displayPositionRecord].week_Top;
                 playerPeriodBests = managerRecords.playerPositionRecords.alltime.playoffs[recordManID][displayPositionRecord].period_Top;
+                playerWeekMissedBests = managerRecords.playerPositionRecords.alltime.playoffs[recordManID][displayPositionRecord].week_MissedTop;
             }
 
             headToHeadRecords = managerRecords.headToHeadRecords.playoffs.alltime;
@@ -215,16 +218,17 @@
             blowoutWorsts = managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID].blowout_Worst;
             narrowBests = managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID].narrow_Best;
             narrowWorsts = managerRecords.managerRecordArrays.years[displayYear].playoffs[recordManID].narrow_Worst;
-            playerWeekMissedBests = managerRecords.managerRecordArrays.years[displayYear].playoffs.players[recordManID].week_MissedBest;
 
             managerPlayerRecords = managerRecords.playerPositionRecords.years[displayYear].playoffs[recordManID];
 
             if(displayPositionRecord == 'ALL') {
                 playerWeekBests = managerRecords.managerRecordArrays.years[displayYear].playoffs.players[recordManID].week_Best;
                 playerPeriodBests = managerRecords.managerRecordArrays.years[displayYear].playoffs.players[recordManID].period_Best;
+                playerWeekMissedBests = managerRecords.managerRecordArrays.years[displayYear].playoffs.players[recordManID].week_MissedBest;
             } else {
                 playerWeekBests = managerRecords.playerPositionRecords.years[displayYear].playoffs[recordManID][displayPositionRecord].week_Top;
                 playerPeriodBests = managerRecords.playerPositionRecords.years[displayYear].playoffs[recordManID][displayPositionRecord].period_Top;
+                playerWeekMissedBests = managerRecords.playerPositionRecords.years[displayYear].playoffs[recordManID][displayPositionRecord].week_MissedTop;
             }
 
             headToHeadRecords = managerRecords.headToHeadRecords.playoffs.years[displayYear];
@@ -272,16 +276,17 @@
             blowoutWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].blowout_Worst;
             narrowBests = managerRecords.managerRecordArrays.alltime.combined[recordManID].narrow_Best;
             narrowWorsts = managerRecords.managerRecordArrays.alltime.combined[recordManID].narrow_Worst;
-            playerWeekMissedBests = managerRecords.managerRecordArrays.alltime.combined.players[recordManID].week_MissedBest;
 
             managerPlayerRecords = managerRecords.playerPositionRecords.alltime.combined[recordManID];
 
             if(displayPositionRecord == 'ALL') {
                 playerWeekBests = managerRecords.managerRecordArrays.alltime.combined.players[recordManID].week_Best;
                 playerPeriodBests = managerRecords.managerRecordArrays.alltime.combined.players[recordManID].period_Best;
+                playerWeekMissedBests = managerRecords.managerRecordArrays.alltime.combined.players[recordManID].week_MissedBest;
             } else {
                 playerWeekBests = managerRecords.playerPositionRecords.alltime.combined[recordManID][displayPositionRecord].week_Top;
                 playerPeriodBests = managerRecords.playerPositionRecords.alltime.combined[recordManID][displayPositionRecord].period_Top;
+                playerWeekMissedBests = managerRecords.playerPositionRecords.alltime.combined[recordManID][displayPositionRecord].week_MissedTop;
             }
 
             headToHeadRecords = managerRecords.headToHeadRecords.combined.alltime;
@@ -309,16 +314,17 @@
             blowoutWorsts = managerRecords.managerRecordArrays.years[displayYear].combined[recordManID].blowout_Worst;
             narrowBests = managerRecords.managerRecordArrays.years[displayYear].combined[recordManID].narrow_Best;
             narrowWorsts = managerRecords.managerRecordArrays.years[displayYear].combined[recordManID].narrow_Worst;
-            playerWeekMissedBests = managerRecords.managerRecordArrays.years[displayYear].combined.players[recordManID].week_MissedBest;
 
             managerPlayerRecords = managerRecords.playerPositionRecords.years[displayYear].combined[recordManID];
 
             if(displayPositionRecord == 'ALL') {
                 playerWeekBests = managerRecords.managerRecordArrays.years[displayYear].combined.players[recordManID].week_Best;
                 playerPeriodBests = managerRecords.managerRecordArrays.years[displayYear].combined.players[recordManID].period_Best;
+                playerWeekMissedBests = managerRecords.managerRecordArrays.years[displayYear].combined.players[recordManID].week_MissedBest;
             } else {
                 playerWeekBests = managerRecords.playerPositionRecords.years[displayYear].combined[recordManID][displayPositionRecord].week_Top;
                 playerPeriodBests = managerRecords.playerPositionRecords.years[displayYear].combined[recordManID][displayPositionRecord].period_Top;
+                playerWeekMissedBests = managerRecords.playerPositionRecords.years[displayYear].combined[recordManID][displayPositionRecord].week_MissedTop;
             }
 
             headToHeadRecords = managerRecords.headToHeadRecords.combined.years[displayYear];
@@ -557,6 +563,36 @@
         margin: 2em;
     }
 
+    :global(.playerTable) {
+        box-shadow: 0px 3px 3px -2px var(--boxShadowOne), 0px 3px 4px 0px var(--boxShadowTwo), 0px 1px 8px 0px var(--boxShadowThree);
+        margin: 2em;
+        background-color: var(--gcComponent);
+    }
+
+    :global(.playerTable th) {
+        background-color: var(--gcMain);
+        text-align: center;
+        color: var(--gcBannerText);
+    }
+
+    :global(.playerTable td) {
+        background-color: var(--gcSelect);
+        color: var(--gcPlayRowText);
+        font-weight: 400;
+    }
+
+    :global(.playerTable thead tr) {
+        background-color: var(--gcMain);
+    }
+
+    :global(.playerTable tbody tr) {
+        background-color: var(--gcSelect);
+    }
+
+    :global(.playerTable table) {
+        background-color: var(--gcBox);
+    }
+
     .playerAvatar {
 		vertical-align: middle;
 		height: 45px;
@@ -654,6 +690,14 @@
             font-size: 0.8em;
             padding: 1px 12px;
         }
+        :global(.playerTable th) {
+            font-size: 0.8em;
+            padding: 1px 5px;
+        }
+        :global(.playerTable td) {
+            font-size: 0.8em;
+            padding: 1px 12px;
+        }
     }
 
     @media (max-width: 435px) {
@@ -674,6 +718,14 @@
             font-size: 0.6em;
             padding: 1px 12px;
         }
+        :global(.playerTable th) {
+            font-size: 0.6em;
+            padding: 1px 5px;
+        }
+        :global(.playerTable td) {
+            font-size: 0.6em;
+            padding: 1px 12px;
+        }
     }
 
     @media (max-width: 330px) {
@@ -682,6 +734,14 @@
             padding: 1px 5px;
         }
         :global(.recordTable td) {
+            font-size: 0.5em;
+            padding: 1px 8px;
+        }
+        :global(.playerTable th) {
+            font-size: 0.5em;
+            padding: 1px 5px;
+        }
+        :global(.playerTable td) {
             font-size: 0.5em;
             padding: 1px 8px;
         }
@@ -989,7 +1049,7 @@
                 {#if showEmpty == false}
                     {#if displayWeekRecord == 'best'}
                         {#if weekBests && weekBests.length}
-                            <DataTable class="recordTable" style="width: 450px;">
+                            <DataTable class="playerTable" style="width: 450px;">
                                 <Head>
                                     <Row>
                                         <Cell class="header" colspan=4>
@@ -1024,7 +1084,7 @@
                         {/if}
                     {:else if displayWeekRecord == 'worst'}
                         {#if weekWorsts && weekWorsts.length}
-                            <DataTable class="recordTable" style="width: 450px;">
+                            <DataTable class="playerTable" style="width: 450px;">
                                 <Head>
                                     <Row>
                                         <Cell class="header" colspan=4>
@@ -1077,7 +1137,7 @@
                     {#if showEmpty == false}
                         {#if displaySeasonRecord == 'best'}
                             {#if periodBests && periodBests.length}
-                                <DataTable class="recordTable" style="width: 450px;">
+                                <DataTable class="playerTable" style="width: 450px;">
                                     <Head>
                                         <Row>
                                             <Cell class="header" colspan=4>
@@ -1112,7 +1172,7 @@
                             {/if}
                         {:else if displaySeasonRecord == 'worst'}
                             {#if periodWorsts && periodWorsts.length}
-                                <DataTable class="recordTable" style="width: 450px;">
+                                <DataTable class="playerTable" style="width: 450px;">
                                     <Head>
                                         <Row>
                                             <Cell class="header" colspan=4>
@@ -1171,7 +1231,7 @@
                 {#if showEmpty == false}
                     {#if displayBlowoutRecord == 'won'}
                         {#if blowoutBests && blowoutBests.length}
-                            <DataTable class="recordTable" style="width: 550px;">
+                            <DataTable class="playerTable" style="width: 550px;">
                                 <Head>
                                     <Row>
                                         <Cell class="header" colspan=7>
@@ -1217,7 +1277,7 @@
                         {/if}
                     {:else if displayBlowoutRecord == 'lost'}
                         {#if blowoutWorsts && blowoutWorsts.length}
-                            <DataTable class="recordTable" style="width: 550px;">
+                            <DataTable class="playerTable" style="width: 550px;">
                                 <Head>
                                     <Row>
                                         <Cell class="header" colspan=7>
@@ -1280,7 +1340,7 @@
                 {#if showEmpty == false}
                     {#if displayNailbiterRecord == 'won'}
                         {#if narrowBests && narrowBests.length}
-                            <DataTable class="recordTable" style="width: 550px;">
+                            <DataTable class="playerTable" style="width: 550px;">
                                 <Head>
                                     <Row>
                                         <Cell class="header" colspan=7>
@@ -1326,7 +1386,7 @@
                         {/if}
                     {:else if displayNailbiterRecord == 'lost'}
                         {#if narrowWorsts && narrowWorsts.length}
-                            <DataTable class="recordTable" style="width: 550px;">
+                            <DataTable class="playerTable" style="width: 550px;">
                                 <Head>
                                     <Row>
                                         <Cell class="header" colspan=7>
@@ -1409,7 +1469,7 @@
                 {#if showEmpty == false}
                     {#if displayPlayerRecord == 'week'}
                         {#if playerWeekBests && playerWeekBests.length}
-                            <DataTable class="recordTable">
+                            <DataTable class="playerTable">
                                 <Head>
                                     <Row>
                                         <Cell class="header" colspan=8>
@@ -1421,7 +1481,7 @@
                                     </Row>
                                     <Row>
                                         <Cell class="header rank"></Cell>
-                                        <div class="playerAvatar playerInfo" />
+                                        <div class="playerAvatar playerInfo" style="background-color: var(--gcMain);" />
                                         <Cell class="header">Player</Cell>
                                         {#if displayPositionRecord == 'ALL'}
                                             <Cell class="header">POS</Cell>
@@ -1438,7 +1498,7 @@
                                     {#each playerWeekBests as playerWeekBest, ix}
                                         <Row>
                                             <Cell class="rank">{ix + 1}</Cell>
-                                            <div class="playerAvatar playerInfo" style="{playerWeekBest.avatar}" />
+                                            <div class="playerAvatar playerInfo" style="{playerWeekBest.avatar}; background-color: var(--gcSelect);" />
                                             <Cell class="left">{playerWeekBest.playerInfo.fn} {playerWeekBest.playerInfo.ln}</Cell>
                                             {#if displayPositionRecord == 'ALL'}
                                                 <Cell class="center">{playerWeekBest.playerInfo.pos}</Cell>
@@ -1456,7 +1516,7 @@
                         {/if}
                     {:else if displayPlayerRecord == 'season'}
                         {#if playerPeriodBests && playerPeriodBests.length}
-                            <DataTable class="recordTable">
+                            <DataTable class="playerTable">
                                 <Head>
                                     <Row>
                                         <Cell class="header" colspan=11>
@@ -1468,7 +1528,7 @@
                                     </Row>
                                     <Row>
                                         <Cell class="header rank"></Cell>
-                                        <div class="playerAvatar playerInfo" />
+                                        <div class="playerAvatar playerInfo"  style="background-color: var(--gcMain);" />
                                         <Cell class="header">Player</Cell>
                                         {#if displayPositionRecord == 'ALL'}
                                             <Cell class="header">POS</Cell>
@@ -1488,7 +1548,7 @@
                                     {#each playerPeriodBests as playerPeriodBest, ix}
                                         <Row>
                                             <Cell class="rank">{ix + 1}</Cell>
-                                            <div class="playerAvatar playerInfo" style="{playerPeriodBest.avatar}" />
+                                            <div class="playerAvatar playerInfo" style="{playerPeriodBest.avatar}; background-color: var(--gcSelect);" />
                                             <Cell class="left">{playerPeriodBest.playerInfo.fn} {playerPeriodBest.playerInfo.ln}</Cell>
                                             {#if displayPositionRecord == 'ALL'}
                                                 <Cell class="center">{playerPeriodBest.playerInfo.pos}</Cell>
@@ -1509,7 +1569,7 @@
                         {/if}
                     {:else if displayPlayerRecord == 'bench'}
                         {#if playerWeekMissedBests && playerWeekMissedBests.length}
-                            <DataTable class="recordTable">
+                            <DataTable class="playerTable">
                                 <Head>
                                     <Row>
                                         <Cell class="header" colspan=8>
@@ -1521,9 +1581,11 @@
                                     </Row>
                                     <Row>
                                         <Cell class="header rank"></Cell>
-                                        <div class="playerAvatar playerInfo" /> 
+                                        <div class="playerAvatar playerInfo"  style="background-color: var(--gcMain);" /> 
                                         <Cell class="header">Player</Cell>
-                                        <Cell class="header">POS</Cell>
+                                        {#if displayPositionRecord == 'ALL'}
+                                            <Cell class="header">POS</Cell>
+                                        {/if}
                                         <Cell class="header">NFL Team</Cell>
                                         {#if masterSelection == 'alltime'}
                                             <Cell class="header">Year</Cell>
@@ -1536,9 +1598,11 @@
                                     {#each playerWeekMissedBests as playerWeekMissedBest, ix}
                                         <Row>
                                             <Cell class="rank">{ix + 1}</Cell>
-                                            <div class="playerAvatar playerInfo" style="{playerWeekMissedBest.avatar}" />
+                                            <div class="playerAvatar playerInfo" style="{playerWeekMissedBest.avatar}; background-color: var(--gcSelect);" />
                                             <Cell class="left">{playerWeekMissedBest.playerInfo.fn} {playerWeekMissedBest.playerInfo.ln}</Cell>
-                                            <Cell class="center">{playerWeekMissedBest.playerInfo.pos}</Cell>
+                                            {#if displayPositionRecord == 'ALL'}
+                                                <Cell class="center">{playerWeekMissedBest.playerInfo.pos}</Cell>
+                                            {/if}
                                             <Cell class="center">{playerWeekMissedBest.playerInfo.t}</Cell>
                                             {#if masterSelection == 'alltime'}
                                                 <Cell class="center">{playerWeekMissedBest.year}</Cell>
@@ -1563,7 +1627,7 @@
             <div class="columnWrap" style="width: 98%;">
                 {#if showEmpty == false}
                     {#if headToHeads && headToHeads.length}
-                        <DataTable class="recordTable">
+                        <DataTable class="playerTable">
                             <Head>
                                 <Row>
                                     <Cell class="header" colspan=13>

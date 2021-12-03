@@ -178,6 +178,7 @@
         justify-content: center;
         color: var(--g111);
         top: 1.25em;
+        left: 0.5em;
     }
 
     .gameStatusWrapper {
@@ -214,17 +215,17 @@
     <div class="scoresBlock" on:click={() => changeGameSelection(gameID)} style="{showGameBox == true && gameSelection == gameID ? "background-color: var(--gcSelect)" : null}">
         <div class="teamsBlock">
             <img class="teamLogo" src="https://sleepercdn.com/images/team_logos/nfl/{home.sleeperID.toLowerCase()}.png" alt="{home.sleeperID}"/>
-            <div class="teamAbbrev">{home.sleeperID}</div>
+            <div class="teamAbbrev" style="{isComplete ? home.score < away.score ? "opacity: 0.5;" : "font-weight: 700;" : null}">{home.sleeperID}</div>
             <div class="teamScoreContainer">
-                <div class="teamScore">{home.score}</div>
+                <div class="teamScore" style="{isComplete ? home.score < away.score ? "opacity: 0.5;" : "font-weight: 700;" : null}">{home.score}</div>
             </div>
         </div>
         <br>
         <div class="teamsBlock">
             <img class="teamLogo" src="https://sleepercdn.com/images/team_logos/nfl/{away.sleeperID.toLowerCase()}.png" alt="{away.sleeperID}"/>
-            <div class="teamAbbrev">{away.sleeperID}</div>
+            <div class="teamAbbrev" style="{isComplete ? home.score > away.score ? "opacity: 0.5;" : "font-weight: 700;" : null}">{away.sleeperID}</div>
             <div class="teamScoreContainer">
-                <div class="teamScore">{away.score}</div>
+                <div class="teamScore" style="{isComplete ? home.score > away.score ? "opacity: 0.5;" : "font-weight: 700;" : null}">{away.score}</div>
             </div>
         </div>
         <div class="gameStatusWrapper">

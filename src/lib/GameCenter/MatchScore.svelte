@@ -65,7 +65,7 @@
     .teamScoreContainer {
         display: inline-flex;
         position: absolute;
-        left: 7.7em;
+        left: 7.9em;
         width: 2em;
         align-items: center;
         justify-content: center;
@@ -89,6 +89,7 @@
         justify-content: center;
         color: var(--g111);
         top: 1.25em;
+        left: 0.5em;
     }
 
     .gameStatusWrapper {
@@ -126,17 +127,17 @@
     <div class="scoresBlock" on:click={() => changeMatchSelection(matchID)} style="{showMatchBox == true && matchSelection == matchID ? "background-color: var(--gcSelect)" : null}">
         <div class="teamsBlock">
             <img class="teamLogo" src="{home.matchInfo.manager.avatar}" alt="{home.matchInfo.manager.abbreviation}"/>
-            <div class="teamAbbrev">{home.matchInfo.manager.abbreviation}</div>
+            <div class="teamAbbrev" style="{isComplete ? home.fpts < away.fpts ? "opacity: 0.5;" : "font-weight: 700;" : null}">{home.matchInfo.manager.abbreviation}</div>
             <div class="teamScoreContainer">
-                <div class="teamScore">{home.fpts}</div>
+                <div class="teamScore" style="{isComplete ? home.fpts < away.fpts ? "opacity: 0.5;" : "font-weight: 700;" : null}">{home.fpts}</div>
             </div>
         </div>
         <br>
         <div class="teamsBlock">
             <img class="teamLogo" src="{away.matchInfo.manager.avatar}" alt="{away.matchInfo.manager.abbreviation}"/>
-            <div class="teamAbbrev">{away.matchInfo.manager.abbreviation}</div>
+            <div class="teamAbbrev" style="{isComplete ? home.fpts > away.fpts ? "opacity: 0.5;" : "font-weight: 700;" : null}">{away.matchInfo.manager.abbreviation}</div>
             <div class="teamScoreContainer">
-                <div class="teamScore">{away.fpts}</div>
+                <div class="teamScore" style="{isComplete ? home.fpts > away.fpts ? "opacity: 0.5;" : "font-weight: 700;" : null}">{away.fpts}</div>
             </div>
         </div>
         <div class="gameStatusWrapper">

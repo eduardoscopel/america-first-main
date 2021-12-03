@@ -1578,12 +1578,14 @@
                             <Cell class="header rank"></Cell>
                             <div class="playerAvatar playerInfo" /> 
                             <Cell class="header">Player</Cell>
-                            <Cell class="header">POS</Cell>
+                            {#if displayPositionRecord == 'ALL'}
+                                <Cell class="header">POS</Cell>
+                            {/if}
                             <Cell class="header">NFL Team</Cell>
                             <Cell class="header">Manager</Cell>
-                                {#if allTime}
-                                    <Cell class="header">Year</Cell>
-                                {/if}
+                            {#if allTime}
+                                <Cell class="header">Year</Cell>
+                            {/if}
                             <Cell class="header">Week</Cell>
                             <Cell class="header">PF</Cell>
                         </Row>
@@ -1594,7 +1596,9 @@
                                 <Cell class="rank">{ix + 1}</Cell>
                                 <div class="playerAvatar playerInfo" style="{playerATWeekMissedTOP.avatar}" />
                                 <Cell class="left">{playerATWeekMissedTOP.playerInfo.fn} {playerATWeekMissedTOP.playerInfo.ln}</Cell>
-                                <Cell class="center">{playerATWeekMissedTOP.playerInfo.pos}</Cell>
+                                {#if displayPositionRecord == 'ALL'}
+                                    <Cell class="center">{playerATWeekMissedTOP.playerInfo.pos}</Cell>
+                                {/if}
                                 <Cell class="center">{playerATWeekMissedTOP.playerInfo.t}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATWeekMissedTOP.recordManID)}>
                                     {playerATWeekMissedTOP.manager.realname}
@@ -1602,9 +1606,9 @@
                                         <div class="fantasyTeamName">({playerATWeekMissedTOP.manager.name})</div>
                                     {/if}
                                 </Cell>
-                                    {#if allTime}
-                                        <Cell class="center">{playerATWeekMissedTOP.year}</Cell>
-                                    {/if}
+                                {#if allTime}
+                                    <Cell class="center">{playerATWeekMissedTOP.year}</Cell>
+                                {/if}
                                 <Cell class="center">{playerATWeekMissedTOP.week}</Cell>
                                 <Cell class="center">{round(playerATWeekMissedTOP.benchPoints)}</Cell>
                             </Row>
