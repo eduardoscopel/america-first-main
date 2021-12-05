@@ -1519,7 +1519,7 @@
                                             {#if displayPositionRecord == 'ALL'}
                                                 <Cell class="center">{playerWeekBest.playerInfo.pos}</Cell>
                                             {/if}
-                                            <Cell class="center">{playerWeekBest.playerInfo.pos == 'DEF' ? playerWeekBest.playerID : playerWeekBest.nflInfo.espn.t[playerWeekBest.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerWeekBest.nflInfo.espn.t[playerWeekBest.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerWeekBest.nflInfo.espn.t[playerWeekBest.year].find(w => w.week >= playerWeekBest.week).team).sleeperID}</Cell>
+                                            <Cell class="center">{playerWeekBest.playerInfo.pos == 'DEF' ? playerWeekBest.playerID : playerWeekBest.nflInfo.espn.t[playerWeekBest.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerWeekBest.nflInfo.espn.t[playerWeekBest.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerWeekBest.nflInfo.espn.t[playerWeekBest.year].find(w => w.firstWeek <= playerWeekBest.week && w.lastWeek >= playerWeekBest.week).team).sleeperID}</Cell>
                                             {#if masterSelection == 'alltime'}
                                                 <Cell class="center">{playerWeekBest.year}</Cell>
                                             {/if}
@@ -1569,7 +1569,7 @@
                                             {#if displayPositionRecord == 'ALL'}
                                                 <Cell class="center">{playerPeriodBest.playerInfo.pos}</Cell>
                                             {/if}
-                                            <Cell class="center">{playerPeriodBest.playerInfo.pos == 'DEF' ? playerPeriodBest.playerID : playerPeriodBest.nflInfo.espn.t[playerPeriodBest.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerPeriodBest.nflInfo.espn.t[playerPeriodBest.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerPeriodBest.nflInfo.espn.t[playerPeriodBest.year].find(w => w.week == 100).team).sleeperID}</Cell>
+                                            <Cell class="center">{playerPeriodBest.playerInfo.pos == 'DEF' ? playerPeriodBest.playerID : playerPeriodBest.nflInfo.espn.t[playerPeriodBest.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerPeriodBest.nflInfo.espn.t[playerPeriodBest.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerPeriodBest.nflInfo.espn.t[playerPeriodBest.year].find(w => w.lastWeek == 100).team).sleeperID}</Cell>
                                             {#if masterSelection == 'alltime'}
                                                 <Cell class="center">{playerPeriodBest.year}</Cell>
                                             {/if}
@@ -1619,7 +1619,7 @@
                                             {#if displayPositionRecord == 'ALL'}
                                                 <Cell class="center">{playerWeekMissedBest.playerInfo.pos}</Cell>
                                             {/if}
-                                            <Cell class="center">{playerWeekMissedBest.playerInfo.pos == 'DEF' ? playerWeekMissedBest.playerID : playerWeekMissedBest.nflInfo.espn.t[playerWeekMissedBest.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerWeekMissedBest.nflInfo.espn.t[playerWeekMissedBest.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerWeekMissedBest.nflInfo.espn.t[playerWeekMissedBest.year].find(w => w.week >= playerWeekMissedBest.week).team).sleeperID}</Cell>
+                                            <Cell class="center">{playerWeekMissedBest.playerInfo.pos == 'DEF' ? playerWeekMissedBest.playerID : playerWeekMissedBest.nflInfo.espn.t[playerWeekMissedBest.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerWeekMissedBest.nflInfo.espn.t[playerWeekMissedBest.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerWeekMissedBest.nflInfo.espn.t[playerWeekMissedBest.year].find(w => w.firstWeek <= playerWeekMissedBest.week && w.lastWeek >= playerWeekMissedBest.week).team).sleeperID}</Cell>
                                             {#if masterSelection == 'alltime'}
                                                 <Cell class="center">{playerWeekMissedBest.year}</Cell>
                                             {/if}

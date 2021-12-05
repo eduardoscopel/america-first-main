@@ -1534,7 +1534,7 @@
                                 {#if displayPositionRecord == 'ALL'}
                                     <Cell class="center">{playerATWeekTOP.playerInfo.pos}</Cell>
                                 {/if}
-                                <Cell class="center">{playerATWeekTOP.playerInfo.pos == 'DEF' ? playerATWeekTOP.playerID : playerATWeekTOP.nflInfo.espn.t[playerATWeekTOP.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerATWeekTOP.nflInfo.espn.t[playerATWeekTOP.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerATWeekTOP.nflInfo.espn.t[playerATWeekTOP.year].find(w => w.week >= playerATWeekTOP.week).team).sleeperID}</Cell>
+                                <Cell class="center">{playerATWeekTOP.playerInfo.pos == 'DEF' ? playerATWeekTOP.playerID : playerATWeekTOP.nflInfo.espn.t[playerATWeekTOP.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerATWeekTOP.nflInfo.espn.t[playerATWeekTOP.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerATWeekTOP.nflInfo.espn.t[playerATWeekTOP.year].find(w => w.firstWeek <= playerATWeekTOP.week && w.lastWeek >= playerATWeekTOP.week).team).sleeperID}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATWeekTOP.recordManID)}>
                                     {playerATWeekTOP.manager.realname}
                                     {#if !allTime}
@@ -1591,7 +1591,7 @@
                                 {#if displayPositionRecord == 'ALL'}
                                     <Cell class="center">{playerATSeasonTOP.playerInfo.pos}</Cell>
                                 {/if}
-                                <Cell class="center">{playerATSeasonTOP.playerInfo.pos == 'DEF' ? playerATSeasonTOP.playerID : playerATSeasonTOP.nflInfo.espn.t[playerATSeasonTOP.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerATSeasonTOP.nflInfo.espn.t[playerATSeasonTOP.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerATSeasonTOP.nflInfo.espn.t[playerATSeasonTOP.year].find(w => w.week == 100).team).sleeperID}</Cell>
+                                <Cell class="center">{playerATSeasonTOP.playerInfo.pos == 'DEF' ? playerATSeasonTOP.playerID : playerATSeasonTOP.nflInfo.espn.t[playerATSeasonTOP.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerATSeasonTOP.nflInfo.espn.t[playerATSeasonTOP.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerATSeasonTOP.nflInfo.espn.t[playerATSeasonTOP.year].find(w => w.lastWeek == 100).team).sleeperID}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATSeasonTOP.recordManID)}>
                                     {playerATSeasonTOP.manager.realname}
                                     {#if !allTime}
@@ -1648,7 +1648,7 @@
                                 {#if displayPositionRecord == 'ALL'}
                                     <Cell class="center">{playerATWeekMissedTOP.playerInfo.pos}</Cell>
                                 {/if}
-                                <Cell class="center">{playerATWeekMissedTOP.playerInfo.pos == 'DEF' ? playerATWeekMissedTOP.playerID : playerATWeekMissedTOP.nflInfo.espn.t[playerATWeekMissedTOP.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerATWeekMissedTOP.nflInfo.espn.t[playerATWeekMissedTOP.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerATWeekMissedTOP.nflInfo.espn.t[playerATWeekMissedTOP.year].find(w => w.week >= playerATWeekMissedTOP.week).team).sleeperID}</Cell>
+                                <Cell class="center">{playerATWeekMissedTOP.playerInfo.pos == 'DEF' ? playerATWeekMissedTOP.playerID : playerATWeekMissedTOP.nflInfo.espn.t[playerATWeekMissedTOP.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerATWeekMissedTOP.nflInfo.espn.t[playerATWeekMissedTOP.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerATWeekMissedTOP.nflInfo.espn.t[playerATWeekMissedTOP.year].find(w => w.firstWeek <= playerATWeekMissedTOP.week && w.lastWeek >= playerATWeekMissedTOP.week).team).sleeperID}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATWeekMissedTOP.recordManID)}>
                                     {playerATWeekMissedTOP.manager.realname}
                                     {#if !allTime}
@@ -2139,7 +2139,7 @@
                                 <Cell class="playerAvatar playerInfo" style="{playerATSeasonBest.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATSeasonBest.playerInfo.fn} {playerATSeasonBest.playerInfo.ln}</Cell>
                                 <Cell class="center">{playerATSeasonBest.playerInfo.pos}</Cell>
-                                <Cell class="center">{playerATSeasonBest.playerInfo.pos == 'DEF' ? playerATSeasonBest.playerID : playerATSeasonBest.nflInfo.espn.t[playerATSeasonBest.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerATSeasonBest.nflInfo.espn.t[playerATSeasonBest.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerATSeasonBest.nflInfo.espn.t[playerATSeasonBest.year].find(w => w.week == 100).team).sleeperID}</Cell>
+                                <Cell class="center">{playerATSeasonBest.playerInfo.pos == 'DEF' ? playerATSeasonBest.playerID : playerATSeasonBest.nflInfo.espn.t[playerATSeasonBest.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerATSeasonBest.nflInfo.espn.t[playerATSeasonBest.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerATSeasonBest.nflInfo.espn.t[playerATSeasonBest.year].find(w => w.lastWeek == 100).team).sleeperID}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATSeasonBest.recordManID)}>
                                     {playerATSeasonBest.manager.realname}
                                     {#if !allTime}
@@ -2194,7 +2194,7 @@
                                 <Cell class="playerAvatar playerInfo" style="{playerATWeekBest.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATWeekBest.playerInfo.fn} {playerATWeekBest.playerInfo.ln}</Cell>
                                 <Cell class="center">{playerATWeekBest.playerInfo.pos}</Cell>
-                                <Cell class="center">{playerATWeekBest.playerInfo.pos == 'DEF' ? playerATWeekBest.playerID : playerATWeekBest.nflInfo.espn.t[playerATWeekBest.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerATWeekBest.nflInfo.espn.t[playerATWeekBest.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerATWeekBest.nflInfo.espn.t[playerATWeekBest.year].find(w => w.week >= playerATWeekBest.week).team).sleeperID}</Cell>
+                                <Cell class="center">{playerATWeekBest.playerInfo.pos == 'DEF' ? playerATWeekBest.playerID : playerATWeekBest.nflInfo.espn.t[playerATWeekBest.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerATWeekBest.nflInfo.espn.t[playerATWeekBest.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerATWeekBest.nflInfo.espn.t[playerATWeekBest.year].find(w => w.firstWeek <= playerATWeekBest.week && w.lastWeek >= playerATWeekBest.week).team).sleeperID}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATWeekBest.recordManID)}>
                                     {playerATWeekBest.manager.realname}
                                     {#if !allTime}
@@ -2246,7 +2246,7 @@
                                 <Cell class="playerAvatar playerInfo" style="{playerATWeekMissedBest.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATWeekMissedBest.playerInfo.fn} {playerATWeekMissedBest.playerInfo.ln}</Cell>
                                 <Cell class="center">{playerATWeekMissedBest.playerInfo.pos}</Cell>
-                                <Cell class="center">{playerATWeekMissedBest.playerInfo.pos == 'DEF' ? playerATWeekMissedBest.playerID : playerATWeekMissedBest.nflInfo.espn.t[playerATWeekMissedBest.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerATWeekMissedBest.nflInfo.espn.t[playerATWeekMissedBest.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerATWeekMissedBest.nflInfo.espn.t[playerATWeekMissedBest.year].find(w => w.week >= playerATWeekMissedBest.week).team).sleeperID}</Cell>
+                                <Cell class="center">{playerATWeekMissedBest.playerInfo.pos == 'DEF' ? playerATWeekMissedBest.playerID : playerATWeekMissedBest.nflInfo.espn.t[playerATWeekMissedBest.year].length == 1 ? nflTeams.find(t => t.espnAbbreviation == playerATWeekMissedBest.nflInfo.espn.t[playerATWeekMissedBest.year][0]).sleeperID : nflTeams.find(t => t.espnAbbreviation == playerATWeekMissedBest.nflInfo.espn.t[playerATWeekMissedBest.year].find(w => w.firstWeek <= playerATWeekMissedBest.week && w.lastWeek >= playerATWeekMissedBest.week).team).sleeperID}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATWeekMissedBest.recordManID)}>
                                     {playerATWeekMissedBest.manager.realname}
                                     {#if !allTime}
