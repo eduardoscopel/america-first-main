@@ -166,7 +166,7 @@
                         } else if(playersInfo.players[managerWeek.starters[i]].pos != 'DEF' && !positionLeaders[nflPlayerInfo[managerWeek.starters[i]].sleeper.pos]) {
                             positionLeaders[nflPlayerInfo[managerWeek.starters[i]].sleeper.pos] = []; 
                         }
-                        const team = playersInfo.players[managerWeek.starters[i]].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == managerWeek.starters[i]).espnAbbreviation : nflPlayerInfo[managerWeek.starters[i]].espn.t[yearSelection][0];
+                        const team = playersInfo.players[managerWeek.starters[i]].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == managerWeek.starters[i]).espnAbbreviation : nflPlayerInfo[managerWeek.starters[i]].espn.t[yearSelection].length == 1 ? nflPlayerInfo[managerWeek.starters[i]].espn.t[yearSelection][0] : nflPlayerInfo[managerWeek.starters[i]].espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team;
                         const entry = {
                             playerID: managerWeek.starters[i],
                             pos: playersInfo.players[managerWeek.starters[i]].pos == 'DEF' ? 'DEF' : nflPlayerInfo[managerWeek.starters[i]].sleeper.pos,

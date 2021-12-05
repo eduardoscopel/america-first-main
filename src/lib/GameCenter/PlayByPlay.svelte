@@ -35,7 +35,11 @@
                 espnID = teamLink.slice(85, teamLink.indexOf('?'));
             } else if(linkType == 'participants') {
                 let espnPlayerID = teamLink.slice(85, teamLink.indexOf('?'));
-                espnID = nflTeams.find(t => t.espnAbbreviation == allPlayersArray.find(n => n.espn.id == espnPlayerID).espn.t[yearSelection][0]).espnAbbreviation;
+                if(allPlayersArray.find(n => n.espn.id == espnPlayerID).espn.t[yearSelection].length == 1) {
+                    espnID = nflTeams.find(t => t.espnAbbreviation == allPlayersArray.find(n => n.espn.id == espnPlayerID).espn.t[yearSelection][0]).espnAbbreviation
+                } else {
+                    espnID = nflTeams.find(t => t.espnAbbreviation == allPlayersArray.find(n => n.espn.id == espnPlayerID).espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team).espnAbbreviation;
+                }
             }
             return espnID;
         }
@@ -3176,7 +3180,7 @@
                 for(const starter of starters) {
                     if(starter != '0') {
                         const starterInfo = nflPlayerInfo[starter];
-                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
+                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection].length == 1 ? starterInfo.espn.t[yearSelection][0] : starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team;
                         const starterEntry = {
                             playerID: starter,
                             rosterSpot: positions[starters.indexOf(starter)],
@@ -3426,7 +3430,7 @@
                                     let sleeperMatch;
                                     linkType = 'participants';
                                     let playerTeam = parseEspnTeamID(play.participants[playerKey].athlete.$ref, linkType);
-                                    
+
                                     for(const recordManID in relevancyKey.starters) {
                                         if(relevancyKey.starters[recordManID].find(s => s.playerID == allPlayersArray.find(p => p.espn.id == espnPlayerID).sleeper.id)) {
                                             sleeperMatch = relevancyKey.starters[recordManID].find(s => s.playerID == allPlayersArray.find(p => p.espn.id == espnPlayerID).sleeper.id);
@@ -3650,7 +3654,7 @@
                             fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).fn : starterInfo.sleeper.fn,
                             ln: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : starterInfo.sleeper.ln,
                             pos: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : starterInfo.sleeper.pos,
-                            t: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection][0],
+                            t: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection].length == 1 ? starterInfo.espn.t[yearSelection][0] : starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team,
                             avatar: playersInfo.players[starter].pos == 'DEF' ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                         }
                         startersArray.push(starterEntry);

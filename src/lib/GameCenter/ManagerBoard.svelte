@@ -19,7 +19,7 @@
             if(yearSelection == currentYear && weekSelection == week) {
                 for(let i = 0; i < matchTeams.length; i++) {
                     for(const starter of matchTeams[i].starters) {
-                        if(starter == '0' || !playersInfo.players[starter].wi[week] || playersInfo.players[starter].wi[week].o == null || completeGames.includes(starter) || (playersInfo.players[starter].pos != 'DEF' && completeGames.includes(nflTeams.find(t => t.espnAbbreviation == nflPlayerInfo[starter].espn.t[yearSelection][0]).sleeperID))) {
+                        if(starter == '0' || !playersInfo.players[starter].wi[week] || playersInfo.players[starter].wi[week].o == null || completeGames.includes(starter) || (playersInfo.players[starter].pos != 'DEF' && nflPlayerInfo[starter].espn.t[yearSelection].length == 1 && completeGames.includes(nflTeams.find(t => t.espnAbbreviation == nflPlayerInfo[starter].espn.t[yearSelection][0]).sleeperID)) || (playersInfo.players[starter].pos != 'DEF' && nflPlayerInfo[starter].espn.t[yearSelection].length > 1 && completeGames.includes(nflTeams.find(t => t.espnAbbreviation == nflPlayerInfo[starter].espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team).sleeperID))) {
                             toPlay[i] --;
                         }
                     }
