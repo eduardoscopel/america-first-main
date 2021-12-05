@@ -1,7 +1,7 @@
 <script>
     import Button, { Group, Label } from '@smui/button';
     import BarChart from '../BarChart.svelte'
-    import { generateGraph, gotoManager, round, managers } from '$lib/utils/helper';
+    import { generateGraph, gotoManager, round, managers, nflTeams } from '$lib/utils/helper';
     import { Icon } from '@smui/tab';
     import LeagueMatchup from './LeagueMatchup.svelte';
 
@@ -1534,7 +1534,7 @@
                                 {#if displayPositionRecord == 'ALL'}
                                     <Cell class="center">{playerATWeekTOP.playerInfo.pos}</Cell>
                                 {/if}
-                                <Cell class="center">{playerATWeekTOP.playerInfo.t}</Cell>
+                                <Cell class="center">{playerATWeekTOP.playerInfo.pos == 'DEF' ? playerATWeekTOP.playerID : nflTeams.find(t => t.espnAbbreviation == playerATWeekTOP.nflInfo.espn.t[playerATWeekTOP.year][0]).sleeperID}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATWeekTOP.recordManID)}>
                                     {playerATWeekTOP.manager.realname}
                                     {#if !allTime}
@@ -1591,7 +1591,7 @@
                                 {#if displayPositionRecord == 'ALL'}
                                     <Cell class="center">{playerATSeasonTOP.playerInfo.pos}</Cell>
                                 {/if}
-                                <Cell class="center">{playerATSeasonTOP.playerInfo.t}</Cell>
+                                <Cell class="center">{playerATSeasonTOP.playerInfo.pos == 'DEF' ? playerATSeasonTOP.playerID : nflTeams.find(t => t.espnAbbreviation == playerATSeasonTOP.nflInfo.espn.t[playerATSeasonTOP.year][0]).sleeperID}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATSeasonTOP.recordManID)}>
                                     {playerATSeasonTOP.manager.realname}
                                     {#if !allTime}
@@ -1648,7 +1648,7 @@
                                 {#if displayPositionRecord == 'ALL'}
                                     <Cell class="center">{playerATWeekMissedTOP.playerInfo.pos}</Cell>
                                 {/if}
-                                <Cell class="center">{playerATWeekMissedTOP.playerInfo.t}</Cell>
+                                <Cell class="center">{playerATWeekMissedTOP.playerInfo.pos == 'DEF' ? playerATWeekMissedTOP.playerID : nflTeams.find(t => t.espnAbbreviation == playerATWeekMissedTOP.nflInfo.espn.t[playerATWeekMissedTOP.year][0]).sleeperID}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATWeekMissedTOP.recordManID)}>
                                     {playerATWeekMissedTOP.manager.realname}
                                     {#if !allTime}
@@ -2139,7 +2139,7 @@
                                 <Cell class="playerAvatar playerInfo" style="{playerATSeasonBest.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATSeasonBest.playerInfo.fn} {playerATSeasonBest.playerInfo.ln}</Cell>
                                 <Cell class="center">{playerATSeasonBest.playerInfo.pos}</Cell>
-                                <Cell class="center">{playerATSeasonBest.playerInfo.t}</Cell>
+                                <Cell class="center">{playerATSeasonBest.playerInfo.pos == 'DEF' ? playerATSeasonBest.playerID : nflTeams.find(t => t.espnAbbreviation == playerATSeasonBest.nflInfo.espn.t[playerATSeasonBest.year][0]).sleeperID}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATSeasonBest.recordManID)}>
                                     {playerATSeasonBest.manager.realname}
                                     {#if !allTime}
@@ -2194,7 +2194,7 @@
                                 <Cell class="playerAvatar playerInfo" style="{playerATWeekBest.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATWeekBest.playerInfo.fn} {playerATWeekBest.playerInfo.ln}</Cell>
                                 <Cell class="center">{playerATWeekBest.playerInfo.pos}</Cell>
-                                <Cell class="center">{playerATWeekBest.playerInfo.t}</Cell>
+                                <Cell class="center">{playerATWeekBest.playerInfo.pos == 'DEF' ? playerATWeekBest.playerID : nflTeams.find(t => t.espnAbbreviation == playerATWeekBest.nflInfo.espn.t[playerATWeekBest.year][0]).sleeperID}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATWeekBest.recordManID)}>
                                     {playerATWeekBest.manager.realname}
                                     {#if !allTime}
@@ -2246,7 +2246,7 @@
                                 <Cell class="playerAvatar playerInfo" style="{playerATWeekMissedBest.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATWeekMissedBest.playerInfo.fn} {playerATWeekMissedBest.playerInfo.ln}</Cell>
                                 <Cell class="center">{playerATWeekMissedBest.playerInfo.pos}</Cell>
-                                <Cell class="center">{playerATWeekMissedBest.playerInfo.t}</Cell>
+                                <Cell class="center">{playerATWeekMissedBest.playerInfo.pos == 'DEF' ? playerATWeekMissedBest.playerID : nflTeams.find(t => t.espnAbbreviation == playerATWeekMissedBest.nflInfo.espn.t[playerATWeekMissedBest.year][0]).sleeperID}</Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATWeekMissedBest.recordManID)}>
                                     {playerATWeekMissedBest.manager.realname}
                                     {#if !allTime}
@@ -2307,10 +2307,12 @@
         <div class="headToHeadWrap">
             <div class="headToHeadChoices">
                 {#each managerChoicesLeft as manager}
-                    <div class="headToHeadRow" style="{displayManagerLeft && displayManagerLeft.info.realname == manager.info.realname ? "background-color: var(--gcSelect); border: 0.1em solid var(--g111);" : null}" on:click={() => changeManager(manager.recordManID, displayManagerRight?.recordManID, displayYear, selection)} >{manager.info.realname}</div>
-                    {#if !allTime}
-                        <div class="fantasyTeamName">({manager.info.name})</div>
-                    {/if}
+                    <div class="columnWrap" style="width: 98%; align-items: flex-start;">
+                        <div class="headToHeadRow" style="{displayManagerLeft && displayManagerLeft.info.realname == manager.info.realname ? "background-color: var(--gcSelect); border: 0.1em solid var(--g111);" : null}" on:click={() => changeManager(manager.recordManID, displayManagerRight?.recordManID, displayYear, selection)} >{manager.info.realname}</div>
+                        {#if !allTime}
+                            <div class="fantasyTeamName" style="padding: 0 4%;">({manager.info.name})</div>
+                        {/if}
+                    </div>
                 {/each}
             </div>
             <div class="columnWrap" style="width: 58%;">
@@ -2419,10 +2421,12 @@
             </div>
             <div class="headToHeadChoices">
                 {#each managerChoicesRight as manager}
-                    <div class="headToHeadRow" on:click={() => changeManager(displayManagerLeft?.recordManID, manager.recordManID, displayYear, selection)} style="justify-content: flex-end; {displayManagerRight && displayManagerRight.info.realname == manager.info.realname ? "background-color: var(--gcSelect); border: 0.1em solid var(--g111);" : null}">{manager.info.realname}</div>
-                    {#if !allTime}
-                        <div class="fantasyTeamName" style="display: inline-flex; position: relative; justify-content: flex-end;" >({manager.info.name})</div>
-                    {/if}
+                    <div class="columnWrap" style="width: 98%; align-items: flex-end;">
+                        <div class="headToHeadRow" on:click={() => changeManager(displayManagerLeft?.recordManID, manager.recordManID, displayYear, selection)} style="justify-content: flex-end; {displayManagerRight && displayManagerRight.info.realname == manager.info.realname ? "background-color: var(--gcSelect); border: 0.1em solid var(--g111);" : null}">{manager.info.realname}</div>
+                        {#if !allTime}
+                            <div class="fantasyTeamName" style="display: inline-flex; position: relative; justify-content: flex-end; padding: 0 4%;" >({manager.info.name})</div>
+                        {/if}
+                    </div>
                 {/each}
             </div>
         </div>

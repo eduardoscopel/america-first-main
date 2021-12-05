@@ -324,17 +324,25 @@
     }
 
     .yearText {
+        position: relative;
+        display: inline-flex;
         text-align: center;
+        justify-content: center;
         font-size: 2.25em;
         font-weight: 450;
+        width: 60%;
         color: var(--gcPlayRowText);
     }
 
     :global(.changeYear) {
+        position: relative;
+        display: inline-flex;
+        width: 20%;
         z-index: 1;
         font-size: 2.25em;
         cursor: pointer;
         color: #888;
+        justify-content: center;
     }
 
     :global(.changeYear:hover) {
@@ -342,7 +350,10 @@
     }
 
     .spacer {
-        width: 48px;
+        width: 20%;
+        position: relative;
+        display: inline-flex;
+        margin: 0 2.5%;
     }
 
 </style>

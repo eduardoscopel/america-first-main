@@ -127,17 +127,17 @@
     <div class="scoresBlock" on:click={() => changeMatchSelection(matchID)} style="{showMatchBox == true && matchSelection == matchID ? "background-color: var(--gcSelect)" : null}">
         <div class="teamsBlock">
             <img class="teamLogo" src="{home.matchInfo.manager.avatar}" alt="{home.matchInfo.manager.abbreviation}"/>
-            <div class="teamAbbrev" style="{isComplete ? home.fpts < away.fpts ? "opacity: 0.5;" : "font-weight: 700;" : null}">{home.matchInfo.manager.abbreviation}</div>
+            <div class="teamAbbrev" style="{isComplete == true ? home.fpts < away.fpts ? "opacity: 0.5;" : "font-weight: 700;" : null}">{home.matchInfo.manager.abbreviation}</div>
             <div class="teamScoreContainer">
-                <div class="teamScore" style="{isComplete ? home.fpts < away.fpts ? "opacity: 0.5;" : "font-weight: 700;" : null}">{home.fpts}</div>
+                <div class="teamScore" style="{isComplete == true ? home.fpts < away.fpts ? "opacity: 0.5;" : "font-weight: 700;" : null}">{home.fpts}</div>
             </div>
         </div>
         <br>
         <div class="teamsBlock">
             <img class="teamLogo" src="{away.matchInfo.manager.avatar}" alt="{away.matchInfo.manager.abbreviation}"/>
-            <div class="teamAbbrev" style="{isComplete ? home.fpts > away.fpts ? "opacity: 0.5;" : "font-weight: 700;" : null}">{away.matchInfo.manager.abbreviation}</div>
+            <div class="teamAbbrev" style="{isComplete == true ? home.fpts > away.fpts ? "opacity: 0.5;" : "font-weight: 700;" : null}">{away.matchInfo.manager.abbreviation}</div>
             <div class="teamScoreContainer">
-                <div class="teamScore" style="{isComplete ? home.fpts > away.fpts ? "opacity: 0.5;" : "font-weight: 700;" : null}">{away.fpts}</div>
+                <div class="teamScore" style="{isComplete == true ? home.fpts > away.fpts ? "opacity: 0.5;" : "font-weight: 700;" : null}">{away.fpts}</div>
             </div>
         </div>
         <div class="gameStatusWrapper">

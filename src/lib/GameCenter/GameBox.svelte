@@ -2,7 +2,7 @@
     import {round} from '$lib/utils/helper'; 
     import LinearProgress from '@smui/linear-progress';
 
-    export let nflTeams, nflMatchups, weekSelection, yearSelection, currentYear, yearLeagueData, playersInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, standingsData, matchSelection, managerSelection, fantasyProducts, gameSelection = nflMatchups[0][0].gameID, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo, newLoading;
+    export let nflTeams, nflMatchups, weekSelection, yearSelection, currentYear, yearLeagueData, playersInfo, nflPlayerInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, standingsData, matchSelection, managerSelection, fantasyProducts, gameSelection = nflMatchups[0][0].gameID, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo, newLoading;
     
     const positions = yearLeagueData.roster_positions.filter(p => p != 'BN');
     const nflPositions = [];
@@ -11,8 +11,8 @@
             nflPositions.push(positions[position]);
         }
     }
-    let freshGame = new Boolean (false);
-    let freshManager = new Boolean (false);
+    let freshGame = false;
+    let freshManager = false;
     let positionLB;
     let positionPlayFilter = [];
 
@@ -22,35 +22,36 @@
 
     let allStarters = {};
 
-    const getAllStarters = (fantasyStarters, playersInfo) => {
+    const getAllStarters = (fantasyStarters) => {
         allStarters = {};
         for(const recordManID in fantasyStarters) {
             const starters = fantasyStarters[recordManID].starters;
             allStarters[recordManID] = [];
             for(const starter of starters) {
-                const starterInfo = playersInfo.players[starter];
+                const starterInfo = nflPlayerInfo[starter];
                 if(starter != '0') {
+                    const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
                     const starterEntry = {
                         playerID: starter,
                         fpts: fantasyStarters[recordManID].startersPoints[starters.indexOf(starter)],
                         owner: managerInfo[recordManID],
                         recordManID,
-                        fn: starterInfo.fn,
-                        ln: starterInfo.ln,
-                        pos: starterInfo.pos,
-                        t: starterInfo.t,
-                        projection: yearSelection == currentYear ? starterInfo.wi[weekSelection]?.p : null,
-                        avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                        teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                        teamColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.color}6b` || `background-color: var(--boxShadowThree)`,
-                        teamAltColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
+                        fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).fn : starterInfo.sleeper.fn,
+                        ln: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : starterInfo.sleeper.ln,
+                        pos: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : starterInfo.sleeper.pos,
+                        t: team,
+                        projection: yearSelection == currentYear ? playersInfo.players[starter].wi[weekSelection]?.p : null,
+                        avatar: playersInfo.players[starter].pos == 'DEF' ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                        teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${nflTeams.find(t => t.espnAbbreviation == team).sleeperID.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                        teamColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).color}6b`,
+                        teamAltColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).alternateColor}52`,
                     }
                     allStarters[recordManID].push(starterEntry);
                 }
             }
         }
     }
-    $: getAllStarters(fantasyStarters, playersInfo);
+    $: getAllStarters(fantasyStarters);
 
     // create top 10 points-scorers arrays for each position
     let positionRankArrays = {};
@@ -129,22 +130,23 @@
                 }
                 for(const starter of match[opponent].starters) {
                     if(starter != '0') {
-                        const starterInfo = playersInfo.players[starter];
+                        const starterInfo = nflPlayerInfo[starter];
+                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
                         const starterEntry = {
                             playerID: starter,
                             fpts: match[opponent].points[match[opponent].starters.indexOf(starter)],
                             rosterSpot: positions[match[opponent].starters.indexOf(starter)],
                             owner: match[opponent].manager,
                             recordManID: match[opponent].recordManID,
-                            fn: starterInfo.fn,
-                            ln: starterInfo.ln,
-                            pos: starterInfo.pos,
-                            t: starterInfo.t,
-                            projection: yearSelection == currentYear ? Number.parseFloat(starterInfo.wi[weekSelection].p) : null,
-                            avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                            teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                            teamColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.color}6b` || `background-color: var(--boxShadowThree)`,
-                            teamAltColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
+                            fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).fn : starterInfo.sleeper.fn,
+                            ln: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : starterInfo.sleeper.ln,
+                            pos: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : starterInfo.sleeper.pos,
+                            t: team,
+                            projection: yearSelection == currentYear ? Number.parseFloat(playersInfo.players[starter].wi[weekSelection].p) : null,
+                            avatar: playersInfo.players[starter].pos == 'DEF' ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                            teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${nflTeams.find(t => t.espnAbbreviation == team).sleeperID.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                            teamColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).color}6b`,
+                            teamAltColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).alternateColor}52`,
                         }
 
                         if(yearSelection == currentYear) {
@@ -225,7 +227,7 @@
         positions: {},
         rowHeights: {},
     };
-    const findStarters = (game, showGameBox, fantasyStarters, playersInfo) => {
+    const findStarters = (game, showGameBox, fantasyStarters) => {
         if(showGameBox == true) {
             const gameStarters = {};
             for(const nflPosition of nflPositions){
@@ -255,30 +257,33 @@
             for(const recordManID in fantasyStarters) {
                 const starters = fantasyStarters[recordManID].starters;
                 for(const starter of starters) {
-                    const starterInfo = playersInfo.players[starter];
-                    if(starter != '0' && (starterInfo.t == game.home.sleeperID || starterInfo.t == game.away.sleeperID)) {
-                        const starterEntry = {
-                            playerID: starter,
-                            fpts: fantasyStarters[recordManID].startersPoints[starters.indexOf(starter)],
-                            rosterSpot: positions[starters.indexOf(starter)],
-                            owner: managerInfo[recordManID],
-                            recordManID,
-                            fn: starterInfo.fn,
-                            ln: starterInfo.ln,
-                            pos: starterInfo.pos,
-                            t: starterInfo.t,
-                            projection: yearSelection == currentYear ? starterInfo.wi[weekSelection].p : null,
-                            avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                            teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                            teamColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.color}6b` || `background-color: var(--boxShadowThree)`,
-                            teamAltColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
-                        }
-                        if(!gameStarters[recordManID]) {
-                            gameStarters[recordManID] = [];
-                        }
-                        gameStarters[recordManID].push(starterEntry);
-                        if(!positionGameStarters.positions[starterInfo.pos].includes(starterEntry)) {
-                            positionGameStarters.positions[starterInfo.pos].push(starterEntry);
+                    const starterInfo = nflPlayerInfo[starter];
+                    if(starter != '0') {
+                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
+                        if(nflTeams.find(t => t.espnAbbreviation == team).sleeperID == game.home.sleeperID || nflTeams.find(t => t.espnAbbreviation == team).sleeperID == game.away.sleeperID) {
+                            const starterEntry = {
+                                playerID: starter,
+                                fpts: fantasyStarters[recordManID].startersPoints[starters.indexOf(starter)],
+                                rosterSpot: positions[starters.indexOf(starter)],
+                                owner: managerInfo[recordManID],
+                                recordManID,
+                                fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).fn : starterInfo.sleeper.fn,
+                                ln: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : starterInfo.sleeper.ln,
+                                pos: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : starterInfo.sleeper.pos,
+                                t: team,
+                                projection: yearSelection == currentYear ? playersInfo.players[starter].wi[weekSelection].p : null,
+                                avatar: playersInfo.players[starter].pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                                teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${nflTeams.find(t => t.espnAbbreviation == team).sleeperID.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                                teamColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).color}6b`,
+                                teamAltColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).alternateColor}52`,
+                            }
+                            if(!gameStarters[recordManID]) {
+                                gameStarters[recordManID] = [];
+                            }
+                            gameStarters[recordManID].push(starterEntry);
+                            if(!positionGameStarters.positions[starterEntry.pos].includes(starterEntry)) {
+                                positionGameStarters.positions[starterEntry.pos].push(starterEntry);
+                            }
                         }
                     }
                 }
@@ -286,12 +291,12 @@
 
             if(positionGameStarters[gameSelection][game.home.sleeperID].starters.length == 0 && positionGameStarters.rowHeights[gameSelection].length == 0) {
                 for(const pos in positionGameStarters.positions) {
-                    positionGameStarters[gameSelection][game.home.sleeperID].starters.push(positionGameStarters.positions[pos].filter(s => s.t == game.home.sleeperID));
-                    positionGameStarters[gameSelection][game.away.sleeperID].starters.push(positionGameStarters.positions[pos].filter(s => s.t == game.away.sleeperID));
-                    if(positionGameStarters.positions[pos].filter(s => s.t == game.home.sleeperID).length >= positionGameStarters.positions[pos].filter(s => s.t == game.away.sleeperID).length) {
-                        positionGameStarters.rowHeights[gameSelection].push(positionGameStarters.positions[pos].filter(s => s.t == game.home.sleeperID).length);
+                    positionGameStarters[gameSelection][game.home.sleeperID].starters.push(positionGameStarters.positions[pos].filter(s => nflTeams.find(t => t.espnAbbreviation == s.t).sleeperID == game.home.sleeperID));
+                    positionGameStarters[gameSelection][game.away.sleeperID].starters.push(positionGameStarters.positions[pos].filter(s => nflTeams.find(t => t.espnAbbreviation == s.t).sleeperID == game.away.sleeperID));
+                    if(positionGameStarters.positions[pos].filter(s => nflTeams.find(t => t.espnAbbreviation == s.t).sleeperID == game.home.sleeperID).length >= positionGameStarters.positions[pos].filter(s => nflTeams.find(t => t.espnAbbreviation == s.t).sleeperID == game.away.sleeperID).length) {
+                        positionGameStarters.rowHeights[gameSelection].push(positionGameStarters.positions[pos].filter(s => nflTeams.find(t => t.espnAbbreviation == s.t).sleeperID == game.home.sleeperID).length);
                     } else {
-                        positionGameStarters.rowHeights[gameSelection].push(positionGameStarters.positions[pos].filter(s => s.t == game.away.sleeperID).length);
+                        positionGameStarters.rowHeights[gameSelection].push(positionGameStarters.positions[pos].filter(s => nflTeams.find(t => t.espnAbbreviation == s.t).sleeperID == game.away.sleeperID).length);
                     }
                 }
             }
@@ -313,7 +318,7 @@
             })
         }
     }
-    $: gameStarters = findStarters(game, showGameBox, fantasyStarters, playersInfo);
+    $: gameStarters = findStarters(game, showGameBox, fantasyStarters);
 
     export const changePlayer = (viewPlayerID) => {
         let newViewPlayer;
@@ -331,7 +336,7 @@
                         for(const row in leaderboardRows) {
                             if(row != 'length') {
                                 if(newViewPlayer.pos == 'DEF') {
-                                    if(leaderboardRows[row].textContent?.includes(playersInfo.players[viewPlayerID].ln)) {
+                                    if(leaderboardRows[row].textContent?.includes(nflTeams.find(t => t.sleeperID == viewPlayerID).ln)) {
                                         leaderboardRows[row].scrollIntoView({
                                             behavior: 'smooth',
                                             block: 'center',
@@ -339,7 +344,7 @@
                                         break;
                                     }
                                 } else {
-                                    if(leaderboardRows[row].textContent?.includes(`${playersInfo.players[viewPlayerID].fn} ${playersInfo.players[viewPlayerID].ln}`) && leaderboardRows[row].textContent.includes(`${newViewPlayerRank}`)) {
+                                    if(leaderboardRows[row].textContent?.includes(`${nflPlayerInfo[viewPlayerID].sleeper.fn} ${nflPlayerInfo[viewPlayerID].sleeper.ln}`) && leaderboardRows[row].textContent.includes(`${newViewPlayerRank}`)) {
                                         leaderboardRows[row].scrollIntoView({
                                             behavior: 'smooth',
                                             block: 'center',
@@ -361,7 +366,7 @@
                         for(const row in leaderboardRows) {
                             if(row != 'length') {
                                 if(newViewPlayer.pos == 'DEF') {
-                                    if(leaderboardRows[row].textContent?.includes(playersInfo.players[viewPlayerID].ln)) {
+                                    if(leaderboardRows[row].textContent?.includes(nflTeams.find(t => t.sleeperID == viewPlayerID).ln)) {
                                         leaderboardRows[row].scrollIntoView({
                                             behavior: 'smooth',
                                             block: 'center',
@@ -369,7 +374,7 @@
                                         break;
                                     }
                                 } else {
-                                    if(leaderboardRows[row].textContent?.includes(`${playersInfo.players[viewPlayerID].fn} ${playersInfo.players[viewPlayerID].ln}`) && leaderboardRows[row].textContent?.includes(`${newViewPlayerRank}`)) {
+                                    if(leaderboardRows[row].textContent?.includes(`${nflPlayerInfo[viewPlayerID].sleeper.fn} ${nflPlayerInfo[viewPlayerID].sleeper.ln}`) && leaderboardRows[row].textContent?.includes(`${newViewPlayerRank}`)) {
                                         leaderboardRows[row].scrollIntoView({
                                             behavior: 'smooth',
                                             block: 'center',
@@ -410,8 +415,8 @@
             displayStats.push(viewPlayerStats[viewPlayer.player.playerID]);
         // if game has started, show Fpts as 0.00
         } else if(viewPlayer.player != null && newFantasyProducts.fantasyProducts.length > 0 && !newFantasyProducts.runningTotals[viewPlayer.player.playerID] &&
-                (nflMatchups.find(m => m.some(m => m.sleeperID == viewPlayer.player.t))[0].status.type.state == 'in' 
-                || nflMatchups.find(m => m.some(m => m.sleeperID == viewPlayer.player.t))[0].status.type.state == 'post')) {
+                (nflMatchups.find(m => m.some(m => (m.team.espnAbbreviation == viewPlayer.player.t)))[0].status.type.state == 'in' 
+                || nflMatchups.find(m => m.some(m => m.team.espnAbbreviation == viewPlayer.player.t))[0].status.type.state == 'post')) {
                 viewPlayerStats[viewPlayer.player.playerID] = {
                     stats: [],
                     totalFpts: 0.00,

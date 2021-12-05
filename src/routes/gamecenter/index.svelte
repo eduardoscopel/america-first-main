@@ -1,5 +1,5 @@
 <script context="module">
-	import { getNflScoreboard, getYearMatchups, getLeagueStandings, loadPlayers, waitForAll } from '$lib/utils/helper';
+	import { getNflScoreboard, getYearMatchups, getLeagueStandings, loadPlayers, waitForAll, nflPlayerInfo } from '$lib/utils/helper';
 
     export async function load() {
         const scoreboardInfo = waitForAll(
@@ -11,6 +11,7 @@
 		return {
 			props: {
 				scoreboardInfo,
+				nflPlayerInfo,
 			}
 		};
 	}
@@ -45,7 +46,7 @@
 		</div>
 	{:then [nflWeek, matchupsInfo, standingsData, playersInfo]}
 		<!-- promise was fulfilled -->
-		<GameCenter {nflWeek} {matchupsInfo} {standingsData} {playersInfo} /> 
+		<GameCenter {nflWeek} {matchupsInfo} {standingsData} {playersInfo} {nflPlayerInfo} /> 
 	{:catch error}
 		<!-- promise was rejected -->
 		<p>Something went wrong: {error.message}</p>

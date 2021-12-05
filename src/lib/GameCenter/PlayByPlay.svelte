@@ -2,7 +2,7 @@
     import { getPlayByPlay, waitForAll, round, getGameDrives } from '$lib/utils/helper'; 
     import LinearProgress from '@smui/linear-progress';
 
-    export let newLoading, nflTeams, nflMatchups, yearLeagueData, fantasyStarters, managerInfo, weekMatchups, playersInfo, gameSelection, matchSelection, managerSelection, fantasyProducts, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo, weekSelection, yearSelection;
+    export let newLoading, nflTeams, nflMatchups, yearLeagueData, fantasyStarters, managerInfo, weekMatchups, playersInfo, nflPlayerInfo, gameSelection, matchSelection, managerSelection, fantasyProducts, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo, weekSelection, yearSelection;
 
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/situation?lang=en&region=us CURRENT DOWN
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/plays?lang=en&region=us PLAY BY PLAY
@@ -11,7 +11,10 @@
     // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2021/types/2/weeks ALL WEEKS
     // 4035687
     let startersArray = [];
-    let downloadData;
+    let allPlayersArray = [];
+    for(const key in nflPlayerInfo) {
+        allPlayersArray.push(nflPlayerInfo[key]);
+    }
 
     const loadPlayByPlay = async (gameSelection, matchSelection, startersArray, showGameBox, showMatchBox) => {
 
@@ -20,54 +23,26 @@
         const positions = yearLeagueData.roster_positions.filter(p => p != 'BN');
 
         // extracts Espn Team ID from API link
-        const parseEspnTeamID = async (teamLink, linkType) => {
-            let espnTeamID;
+        const parseEspnTeamID = (teamLink, linkType) => {
+            let espnID;
             if(linkType == 'play') {
                 if(teamLink.slice(82, 84)[1] != '?') {
-                    espnTeamID = teamLink.slice(82, 84);
+                    espnID = teamLink.slice(82, 84);
                 } else {
-                    espnTeamID = teamLink.slice(82, 83);
+                    espnID = teamLink.slice(82, 83);
                 }
-            } else if(linkType == 'participants' || linkType == 'info') {
-
-                const espnPlayerLink = 'https' + teamLink.slice(4); 
-                const playerPromises = [];
-                playerPromises.push(fetch(`${espnPlayerLink}`, {compress: true}));
-                const playersRes = await waitForAll(...playerPromises).catch((err) => { console.error(err); });
-        
-                const playerJsonPromises = [];
-                for(const playerRes of playersRes) {
-                    const data = playerRes.json();
-                    playerJsonPromises.push(data)
-                    if (!playerRes.ok) {
-                        throw new Error(data);
-                    }
-                }
-                const espnPlayerData = await waitForAll(...playerJsonPromises).catch((err) => { console.error(err); });
-                // which team is player on
-
-                if(espnPlayerData[0].team.$ref.slice(82, 84)[1] != '?') {
-                    espnTeamID = espnPlayerData[0].team.$ref.slice(82, 84);
-                } else {
-                    espnTeamID = espnPlayerData[0].team.$ref.slice(82, 83);
-                }
-
-                if(linkType == 'info') {
-                    const espnPlayerInfo = {
-                        fn: espnPlayerData[0].firstName,
-                        ln: espnPlayerData[0].lastName,
-                        pos: espnPlayerData[0].position.abbreviation,  
-                        t: espnTeamID
-                    }
-                    espnTeamID = espnPlayerInfo;
-                }
+            } else if(linkType == 'player') {
+                espnID = teamLink.slice(85, teamLink.indexOf('?'));
+            } else if(linkType == 'participants') {
+                let espnPlayerID = teamLink.slice(85, teamLink.indexOf('?'));
+                espnID = nflTeams.find(t => t.espnAbbreviation == allPlayersArray.find(n => n.espn.id == espnPlayerID).espn.t[yearSelection][0]).espnAbbreviation;
             }
-            return espnTeamID;
+            return espnID;
         }
 
         // determines whether play counts w.r.t. yards, penalties, etc.
         const checkNoPlay = (playType, playDescription) => {
-            let noPlay = new Boolean (false);
+            let noPlay = false;
             if(playType == 8 || playDescription.includes('No Play.') || playType == 2 || playType == 21 || playType == 65 || playType == 66 || playType == 70 || playType == 74 || playType == 75) {
                 noPlay = true;
             } else {
@@ -143,9 +118,7 @@
                         oppDef: home,
                     }
                 }
-            } else {
-                relevantEntry = null;
-            }
+            } 
             return relevantEntry;
         }
         // games with laterals: Lions-Steelers (2021-10), Bills-Jets (2021-10), Colts-Jets (2021-9), Dolphins-Texans (2021-9)
@@ -1377,7 +1350,7 @@
                     }
                 }
                 if(play.relevantDEF.length > 0) {                   // TEAM DEF/ST FPTS
-                    let sackRecorded = new Boolean (false);
+                    let sackRecorded = false;
                     for(const relevantKey in play.relevantDEF) {
                         const player = play.relevantDEF[relevantKey];
                         let fumblerTeam;
@@ -3202,29 +3175,30 @@
 
                 for(const starter of starters) {
                     if(starter != '0') {
-                        const starterInfo = playersInfo.players[starter];
+                        const starterInfo = nflPlayerInfo[starter];
+                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
                         const starterEntry = {
                             playerID: starter,
                             rosterSpot: positions[starters.indexOf(starter)],
                             fpts: match[opponent].points[starters.indexOf(starter)],
                             owner: match[opponent].manager,
                             recordManID: match[opponent].recordManID,
-                            fn: starterInfo.fn,
-                            ln: starterInfo.ln,
-                            pos: starterInfo.pos,
-                            t: starterInfo.t,
-                            avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                            teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${starterInfo.t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
-                            teamColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.color}6b` || `background-color: var(--boxShadowThree)`,
-                            teamAltColor: `background-color: #${nflTeams.find(n => n.sleeperID == starterInfo?.t || n.ln == starterInfo.ln)?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
+                            fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).fn : starterInfo.sleeper.fn,
+                            ln: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : starterInfo.sleeper.ln,
+                            pos: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : starterInfo.sleeper.pos,
+                            t: team,
+                            avatar: playersInfo.players[starter].pos == 'DEF' ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                            teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${nflTeams.find(t => t.espnAbbreviation == team).sleeperID.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                            teamColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).color}6b`,
+                            teamAltColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).alternateColor}52`,
                         }
 
                         relevancyKey.starters[match[opponent].recordManID].push(starterEntry);
                         relevancyKey.startersArray.push(starterEntry);
 
                         // get starters' game IDs
-                        if(nflMatchups.find(m => m.some(m => m.sleeperID == starterInfo.t))) {
-                            let nflGameID = nflMatchups.find(m => m.some(m => m.sleeperID == starterInfo.t))[0].gameID;
+                        if(nflMatchups.find(m => m.some(m => m.team == nflTeams.find(t => t.espnAbbreviation == team)))) {
+                            let nflGameID = nflMatchups.find(m => m.some(m => m.team == nflTeams.find(t => t.espnAbbreviation == team)))[0].gameID;
                             if(!relevancyKey.games.includes(nflGameID)) {
                                 relevancyKey.games.push(nflGameID);
                             }
@@ -3235,7 +3209,6 @@
             // process every relevant game's play by play for plays relevant to matchup
             for(const gameSelect in relevancyKey.games) {
                 let playByPlayData = await getPlayByPlay(relevancyKey.games[gameSelect], true).catch((err) => { console.error(err); });
-                downloadData = playByPlayData;
                 let fantasyRelevantPlaysForward = [];
                 let defYdsThreshBreakers = [];
 
@@ -3251,10 +3224,10 @@
                 let awayEspn = game[1].team.espnAbbreviation;
                 let awayDefense = null;
 
-                let gameStartersArray = relevancyKey.startersArray.filter(s => s.t == home || s.t == away);
+                // let gameStartersArray = relevancyKey.startersArray.filter(s => s.t == home || s.t == away);
             
-                let homeDefStarted = new Boolean (false);
-                let awayDefStarted = new Boolean (false);
+                let homeDefStarted = false;
+                let awayDefStarted = false;
                 let homeDefPtsAllowed = 0;
                 let awayDefPtsAllowed = 0;
                 let homeDefYdsAllowed = 0;
@@ -3263,13 +3236,13 @@
 
                 // check if either DEF is being started
                 for(const recordManID in relevancyKey.starters) {
-                    if(relevancyKey.starters[recordManID].filter(s => s.playerID == home).length > 0) {
+                    if(relevancyKey.starters[recordManID].find(s => s.playerID == home)) {
                         homeDefStarted = true;
-                        homeDefense = relevancyKey.starters[recordManID].filter(s => s.playerID == home)[0];
+                        homeDefense = relevancyKey.starters[recordManID].find(s => s.playerID == home);
                     } 
-                    if(relevancyKey.starters[recordManID].filter(s => s.playerID == away).length > 0) {
+                    if(relevancyKey.starters[recordManID].find(s => s.playerID == away)) {
                         awayDefStarted = true;
-                        awayDefense = relevancyKey.starters[recordManID].filter(s => s.playerID == away)[0];
+                        awayDefense = relevancyKey.starters[recordManID].find(s => s.playerID == away);
                     }
                 }
 
@@ -3282,17 +3255,16 @@
                         // start with first play on page
                         for(let k = 0; k < playsData.length; k++) {
                             let play = playsData[k];
-                            // find which team made the play (checking team of first play participant is most reliably correct way)
-                            let espnTeamID;
+                            // find which team made the play (checking team of first play participant is most/only reliably correct way)
+                            let playTeam;
                             let linkType;
                             if(play.participants && play.participants[0].athlete) {
                                 linkType = 'participants';
-                                espnTeamID = await parseEspnTeamID(play.participants[0].athlete.$ref, linkType);
+                                playTeam = parseEspnTeamID(play.participants[0].athlete.$ref, linkType);
                             } else {
                                 linkType = 'play';
-                                espnTeamID = await parseEspnTeamID(play.team.$ref, linkType);
+                                playTeam = parseEspnTeamID(play.team.$ref, linkType);
                             }
-                            let playTeam = nflTeams.find(n => n.espnID == espnTeamID).espnAbbreviation;
                             let oppTeam;
                             if(playTeam == homeEspn) {
                                 oppTeam = awayEspn;
@@ -3303,9 +3275,9 @@
                             let playType = play.type?.id || 0;
                             let noPlay = checkNoPlay(playType, play.alternativeText);
                             // flagging scoring plays & tracking DEF points allowed
-                            let scoringPlay = new Boolean (false);
-                            let scoreAgainstDEF = new Boolean (false);
-                            let scoreAgainstOppDEF = new Boolean (false);
+                            let scoringPlay = false;
+                            let scoreAgainstDEF = false;
+                            let scoreAgainstOppDEF = false;
                             let scoreValueAgainstDEF = 0;
                             let scoreValueAgainstOppDEF = 0;
                             let scoringType = null;
@@ -3406,9 +3378,9 @@
                                 teamStartPoss: play.start.team?.$ref || null,
                                 teamEndPoss: play?.end.team?.$ref || null,
                                 noPlay,
-                                penalty: new Boolean (false),
+                                penalty: false,
                                 penaltyInfo: null,
-                                injuredStarter: new Boolean (false),
+                                injuredStarter: false,
                                 injuryInfo: [],
                             }
                             // flagging injuries
@@ -3449,70 +3421,35 @@
                                     } 
 
                                     // which team is player on
-                                    const linkType = 'info';
-                                    let espnPlayerInfo = await parseEspnTeamID(play.participants[playerKey].athlete.$ref, linkType);
-                                    let playerTeam = nflTeams.find(n => n.espnID == espnPlayerInfo.t).espnAbbreviation;
-                                    let playerTeam_sleeper = nflTeams.find(n => n.espnID == espnPlayerInfo.t).sleeperID;
+                                    let linkType = 'player';
+                                    let espnPlayerID = parseEspnTeamID(play.participants[playerKey].athlete.$ref, linkType);
+                                    let sleeperMatch;
+                                    linkType = 'participants';
+                                    let playerTeam = parseEspnTeamID(play.participants[playerKey].athlete.$ref, linkType);
                                     
-                                    // Catching exceptions with different names
-                                    if(espnPlayerInfo.fn == 'William' && espnPlayerInfo.ln == 'Fuller V') {
-                                        espnPlayerInfo.fn == 'Will';
-                                        espnPlayerInfo.ln == 'Fuller';
-                                    } else if(espnPlayerInfo.fn == 'Jeff' && espnPlayerInfo.ln == 'Wilson Jr.') {
-                                        espnPlayerInfo.fn = 'Jeffery';
-                                        espnPlayerInfo.ln = 'Wilson';
-                                    }
-                                    if(espnPlayerInfo.ln.includes('Jr.') || espnPlayerInfo.ln.includes('Sr.') || espnPlayerInfo.ln.includes('III')) {
-                                        espnPlayerInfo.ln = espnPlayerInfo.ln.slice(0, espnPlayerInfo.ln.length - 4);
-                                    } else if(espnPlayerInfo.ln.includes('II')) {
-                                        espnPlayerInfo.ln = espnPlayerInfo.ln.slice(0, espnPlayerInfo.ln.length - 3);
-                                    } else if(espnPlayerInfo.ln.slice(espnPlayerInfo.ln.length - 2) == ' V') {
-                                        espnPlayerInfo.ln = espnPlayerInfo.ln.slice(0, espnPlayerInfo.ln.length - 2);
-                                    }
-                                    if(espnPlayerInfo.pos == 'PK') {
-                                        espnPlayerInfo.pos = 'K';
-                                    }
-                                    if(espnPlayerInfo.pos == 'FB') {
-                                        espnPlayerInfo.pos = 'RB';
-                                    }
-                                    let sleeperMatch = null;
                                     for(const recordManID in relevancyKey.starters) {
-                                        if(relevancyKey.starters[recordManID].filter(s => s.fn == espnPlayerInfo.fn && s.ln == espnPlayerInfo.ln && s.pos == espnPlayerInfo.pos).length > 0) {
-                                            sleeperMatch = relevancyKey.starters[recordManID].filter(s => s.fn == espnPlayerInfo.fn && s.ln == espnPlayerInfo.ln && s.pos == espnPlayerInfo.pos);
+                                        if(relevancyKey.starters[recordManID].find(s => s.playerID == allPlayersArray.find(p => p.espn.id == espnPlayerID).sleeper.id)) {
+                                            sleeperMatch = relevancyKey.starters[recordManID].find(s => s.playerID == allPlayersArray.find(p => p.espn.id == espnPlayerID).sleeper.id);
                                             break;
                                         }
                                     }
                                     // if the current player involved in the play is a starter, we combine the sleeper and espn info for their entry in the playEntry
-                                    if(sleeperMatch != null) {
-                                        // assigning correct team if player has retired (& thus Sleeper team info is blank) OR player was with different team than he is currently
-                                        if(sleeperMatch[0].t == null || sleeperMatch[0].t != playerTeam_sleeper) {
-                                            sleeperMatch[0].t = playerTeam_sleeper;
-                                            playersInfo.players[sleeperMatch[0].playerID].t = playerTeam_sleeper;
-                                        }
-                                        // remove from gameStartersArray (later we check who is left and then update their team if necessary)
-                                        gameStartersArray = gameStartersArray.filter(s => s.playerID != sleeperMatch[0].playerID);
+                                    if(sleeperMatch) {
 
                                         const relevantEntry = {
-                                            playerInfo: sleeperMatch[0],
-                                            manager: sleeperMatch[0].owner,
+                                            playerInfo: sleeperMatch,
+                                            manager: sleeperMatch.owner,
                                             statType: play.participants[playerKey].type,
                                             yards: play.statYardage, 
                                             playType: playType,
                                             playerTeam,
-                                            oppDef: null,
-                                        }
-                                        // assigning the opposing DEF here makes it easier to calculate DEF fantasy points later
-                                        if(sleeperMatch[0].t == home) {
-                                            relevantEntry.oppDef = away;
-                                        } else {
-                                            relevantEntry.oppDef = home;
                                         }
                                         playEntry.relevantPlayers.push(relevantEntry);
                                     } 
                                     // flagging DEF-relevant plays
-                                    if(noPlay == false && (homeDefStarted == true || awayDefStarted == true)) {
+                                    if(homeDefStarted == true || awayDefStarted == true) {
                                         let relevantDefEntry = isDefRelevant(play, playType, playTeam, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, playerKey, playerTeam);
-                                        if(relevantDefEntry != null) {
+                                        if(relevantDefEntry) {
                                             playEntry.relevantDEF.push(relevantDefEntry);
                                         }
                                     }
@@ -3559,9 +3496,7 @@
                                         lastPlay = drive.plays.items[drive.plays.items.length - 2];
                                     }
                                     let linkType = 'participants';
-                                    let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
-
-                                    let playTeam = nflTeams.find(n => n.espnID == espnTeamID).espnAbbreviation;
+                                    let playTeam = parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
                                     let oppTeam;
                                     let defense;
 
@@ -3599,9 +3534,9 @@
                                         teamStartPoss: lastPlay?.start.team?.$ref || null,
                                         teamEndPoss: lastPlay?.end.team?.$ref || null,
                                         noPlay: false,
-                                        penalty: new Boolean (false),
+                                        penalty: false,
                                         penaltyInfo: null,
-                                        injuredStarter: new Boolean (false),
+                                        injuredStarter: false,
                                         injuryInfo: [],
                                     }
 
@@ -3621,8 +3556,7 @@
                                         lastPlay = drive.plays.items[drive.plays.items.length - 2];
                                     }
                                     let linkType = 'participants';
-                                    let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
-                                    let playTeam = nflTeams.find(n => n.espnID == espnTeamID).espnAbbreviation;
+                                    let playTeam = parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
                                     let oppTeam;
                                     let defense;
 
@@ -3659,9 +3593,9 @@
                                         teamStartPoss: lastPlay?.start.team?.$ref || null,
                                         teamEndPoss: lastPlay?.end.team?.$ref || null,
                                         noPlay: false,
-                                        penalty: new Boolean (false),
+                                        penalty: false,
                                         penaltyInfo: null,
-                                        injuredStarter: new Boolean (false),
+                                        injuredStarter: false,
                                         injuryInfo: [],
                                     }
 
@@ -3677,14 +3611,6 @@
                                     fantasyRelevantPlaysForward.push(playEntry);
                                 }
                             }
-                        }
-                    }
-
-                    // if player NEVER showed up in any way, but scored points this week, we know he's on different team
-                    // set team to null so that he's removed from this Game Box (and he'll get updated when he shows up in play-by-play of actual team)
-                    for(const noParticipant in gameStartersArray) {
-                        if(gameStartersArray[noParticipant].fpts != 0) {
-                            playersInfo.players[gameStartersArray[noParticipant].playerID].t = null;
                         }
                     }
 
@@ -3706,7 +3632,6 @@
             runningTotals = {};
 
             let playByPlayData = await getPlayByPlay(gameSelection, true).catch((err) => { console.error(err); });
-            downloadData = playByPlayData;
             let fantasyRelevantPlaysForward = [];
             let defYdsThreshBreakers = [];
             // startersArray will help us match our sleeper playerInfo to espn player APIs, and also check if someone is starting one of the DEFs
@@ -3717,16 +3642,16 @@
 
                 for(const starter of starters) {
                     if(starter != '0') {
-                        const starterInfo = playersInfo.players[starter];
+                        const starterInfo = nflPlayerInfo[starter];
                         const starterEntry = {
                             playerID: starter,
                             rosterSpot: positions[starters.indexOf(starter)],
                             owner: managerInfo[recordManID],
-                            fn: starterInfo.fn,
-                            ln: starterInfo.ln,
-                            pos: starterInfo.pos,
-                            t: starterInfo.t,
-                            avatar: starterInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
+                            fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).fn : starterInfo.sleeper.fn,
+                            ln: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : starterInfo.sleeper.ln,
+                            pos: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : starterInfo.sleeper.pos,
+                            t: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection][0],
+                            avatar: playersInfo.players[starter].pos == 'DEF' ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                         }
                         startersArray.push(starterEntry);
                     }
@@ -3745,23 +3670,21 @@
             let awayEspn = game[1].team.espnAbbreviation;
             let awayDefense = null;
 
-            let gameStartersArray = startersArray.filter(s => s.t == home || s.t == away);
-
-            let homeDefStarted = new Boolean (false);
-            let awayDefStarted = new Boolean (false);
+            let homeDefStarted = false;
+            let awayDefStarted = false;
             let homeDefPtsAllowed = 0;
             let awayDefPtsAllowed = 0;
             let homeDefYdsAllowed = 0;
             let awayDefYdsAllowed = 0;
 
             // check if either DEF is being started
-            if(startersArray.filter(s => s.playerID == home).length > 0) {
+            if(startersArray.find(s => s.playerID == home)) {
                 homeDefStarted = true;
-                homeDefense = startersArray.filter(s => s.playerID == home)[0];
+                homeDefense = startersArray.find(s => s.playerID == home);
             }
-            if(startersArray.filter(s => s.playerID == away).length > 0) {
+            if(startersArray.find(s => s.playerID == away)) {
                 awayDefStarted = true;
-                awayDefense = startersArray.filter(s => s.playerID == away)[0];
+                awayDefense = startersArray.find(s => s.playerID == away);
             }
             if(playByPlayData && playByPlayData.length) {
                 // set key to number of API pages for the full PBP
@@ -3773,16 +3696,15 @@
                     for(let k = 0; k < playsData.length; k++) {
                         let play = playsData[k];
                         // which team made the play
-                        let espnTeamID;
+                        let playTeam;
                         let linkType;
                         if(play.participants && play.participants[0].athlete) {
                             linkType = 'participants';
-                            espnTeamID = await parseEspnTeamID(play.participants[0].athlete.$ref, linkType);
+                            playTeam = parseEspnTeamID(play.participants[0].athlete.$ref, linkType);
                         } else {
                             linkType = 'play';
-                            espnTeamID = await parseEspnTeamID(play.team.$ref, linkType);
+                            playTeam = parseEspnTeamID(play.team.$ref, linkType);
                         }
-                        let playTeam = nflTeams.find(n => n.espnID == espnTeamID).espnAbbreviation;
                         let oppTeam;
               
                         if(playTeam == homeEspn) {
@@ -3795,9 +3717,9 @@
                         let playType = play.type?.id || 0;
                         let noPlay = checkNoPlay(playType, play.alternativeText);
                         // flagging scoring plays & tracking DEF points allowed
-                        let scoringPlay = new Boolean (false);
-                        let scoreAgainstDEF = new Boolean (false);
-                        let scoreAgainstOppDEF = new Boolean (false);
+                        let scoringPlay = false;
+                        let scoreAgainstDEF = false;
+                        let scoreAgainstOppDEF = false;
                         let scoreValueAgainstDEF = 0;
                         let scoreValueAgainstOppDEF = 0;
                         let scoringType = null;
@@ -3897,9 +3819,9 @@
                             teamStartPoss: play.start.team?.$ref || null,
                             teamEndPoss: play?.end.team?.$ref || null,
                             noPlay,
-                            penalty: new Boolean (false),
+                            penalty: false,
                             penaltyInfo: null,
-                            injuredStarter: new Boolean (false),
+                            injuredStarter: false,
                             injuryInfo: [],
                         }
                         // flagging injuries
@@ -3939,62 +3861,30 @@
                                 } 
 
                                 // which team is player on
-                                const linkType = 'info';
-                                let espnPlayerInfo = await parseEspnTeamID(play.participants[playerKey].athlete.$ref, linkType);
-                                let playerTeam = nflTeams.find(n => n.espnID == espnPlayerInfo.t).espnAbbreviation;
-                                let playerTeam_sleeper = nflTeams.find(n => n.espnID == espnPlayerInfo.t).sleeperID;
-                                
-                                // Catching exceptions with different names
-                                if(espnPlayerInfo.fn == 'William' && espnPlayerInfo.ln == 'Fuller V') {
-                                    espnPlayerInfo.fn == 'Will';
-                                    espnPlayerInfo.ln == 'Fuller';
-                                } else if(espnPlayerInfo.fn == 'Jeff' && espnPlayerInfo.ln == 'Wilson Jr.') {
-                                    espnPlayerInfo.fn = 'Jeffery';
-                                    espnPlayerInfo.ln = 'Wilson';
+                                let linkType = 'player';
+                                let espnPlayerID = parseEspnTeamID(play.participants[playerKey].athlete.$ref, linkType);
+                                let sleeperMatch;
+                                linkType = 'participants';
+                                let playerTeam = parseEspnTeamID(play.participants[playerKey].athlete.$ref, linkType);
+
+                                if(startersArray.find(s => s.playerID == allPlayersArray.find(p => p.espn.id == espnPlayerID).sleeper.id)) {
+                                    sleeperMatch = startersArray.find(s => s.playerID == allPlayersArray.find(p => p.espn.id == espnPlayerID).sleeper.id);
                                 }
-                                if(espnPlayerInfo.ln.includes('Jr.') || espnPlayerInfo.ln.includes('Sr.') || espnPlayerInfo.ln.includes('III')) {
-                                    espnPlayerInfo.ln = espnPlayerInfo.ln.slice(0, espnPlayerInfo.ln.length - 4);
-                                } else if(espnPlayerInfo.ln.includes('II')) {
-                                    espnPlayerInfo.ln = espnPlayerInfo.ln.slice(0, espnPlayerInfo.ln.length - 3);
-                                } else if(espnPlayerInfo.ln.slice(espnPlayerInfo.ln.length - 2) == ' V') {
-                                    espnPlayerInfo.ln = espnPlayerInfo.ln.slice(0, espnPlayerInfo.ln.length - 2);
-                                }
-                                if(espnPlayerInfo.pos == 'PK') {
-                                    espnPlayerInfo.pos = 'K';
-                                }
-                                if(espnPlayerInfo.pos == 'FB') {
-                                    espnPlayerInfo.pos = 'RB';
-                                }
-                                let sleeperMatch = startersArray.filter(s => s.fn == espnPlayerInfo.fn && s.ln == espnPlayerInfo.ln && s.pos == espnPlayerInfo.pos);
                                 // if the current player involved in the play is a starter, we combine the sleeper and espn info for their entry in the playEntry
-                                if(sleeperMatch.length > 0) {
-                                    // assigning correct team if player has retired (& thus Sleeper team info is blank)
-                                    if(sleeperMatch[0].t == null || sleeperMatch[0].t != playerTeam_sleeper) {
-                                        sleeperMatch[0].t = playerTeam_sleeper;
-                                        playersInfo.players[sleeperMatch[0].playerID].t = playerTeam_sleeper;
-                                    }
-                                    // remove from gameStartersArray (later we check who is left and then update their team if necessary)
-                                    gameStartersArray = gameStartersArray.filter(s => s.playerID != sleeperMatch[0].playerID);
+                                if(sleeperMatch) {
 
                                     const relevantEntry = {
-                                        playerInfo: sleeperMatch[0],
-                                        manager: sleeperMatch[0].owner,
+                                        playerInfo: sleeperMatch,
+                                        manager: sleeperMatch.owner,
                                         statType: play.participants[playerKey].type,
                                         yards: play.statYardage, 
                                         playType: playType,
                                         playerTeam,
-                                        oppDef: null,
-                                    }
-                                    // assigning the opposing DEF here makes it easier to calculate DEF fantasy points later
-                                    if(sleeperMatch[0].t == home) {
-                                        relevantEntry.oppDef = away;
-                                    } else {
-                                        relevantEntry.oppDef = home;
                                     }
                                     playEntry.relevantPlayers.push(relevantEntry);
                                 } 
                                 // flagging DEF-relevant plays
-                                if(noPlay == false && (homeDefStarted == true || awayDefStarted == true)) {
+                                if(homeDefStarted == true || awayDefStarted == true) {
                                     let relevantDefEntry = isDefRelevant(play, playType, playTeam, homeDefStarted, awayDefStarted, homeEspn, awayEspn, homeDefense, awayDefense, playerKey, playerTeam);
                                     if(relevantDefEntry != null) {
                                         playEntry.relevantDEF.push(relevantDefEntry);
@@ -4043,9 +3933,7 @@
                                     lastPlay = drive.plays.items[drive.plays.items.length - 2];
                                 }
                                 let linkType = 'participants';
-                                let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
-
-                                let playTeam = nflTeams.find(n => n.espnID == espnTeamID).espnAbbreviation;
+                                let playTeam = parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
                                 let oppTeam;
                                 let defense;
 
@@ -4083,9 +3971,9 @@
                                     teamStartPoss: lastPlay?.start.team?.$ref || null,
                                     teamEndPoss: lastPlay?.end.team?.$ref || null,
                                     noPlay: false,
-                                    penalty: new Boolean (false),
+                                    penalty: false,
                                     penaltyInfo: null,
-                                    injuredStarter: new Boolean (false),
+                                    injuredStarter: false,
                                     injuryInfo: [],
                                 }
 
@@ -4105,8 +3993,7 @@
                                     lastPlay = drive.plays.items[drive.plays.items.length - 2];
                                 }
                                 let linkType = 'participants';
-                                let espnTeamID = await parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
-                                let playTeam = nflTeams.find(n => n.espnID == espnTeamID).espnAbbreviation;
+                                let playTeam = parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
                                 let oppTeam;
                                 let defense;
 
@@ -4143,9 +4030,9 @@
                                     teamStartPoss: lastPlay?.start.team?.$ref || null,
                                     teamEndPoss: lastPlay?.end.team?.$ref || null,
                                     noPlay: false,
-                                    penalty: new Boolean (false),
+                                    penalty: false,
                                     penaltyInfo: null,
-                                    injuredStarter: new Boolean (false),
+                                    injuredStarter: false,
                                     injuryInfo: [],
                                 }
 
@@ -4161,14 +4048,6 @@
                                 fantasyRelevantPlaysForward.push(playEntry);
                             }
                         }
-                    }
-                }
-
-                // if player NEVER showed up in any way, but scored points this week, we know he's on different team
-                // set team to null so that he's removed from this Game Box (and he'll get updated when he shows up in play-by-play of actual team)
-                for(const noParticipant in gameStartersArray) {
-                    if(gameStartersArray[noParticipant].fpts != 0) {
-                        playersInfo.players[gameStartersArray[noParticipant].playerID].t = null;
                     }
                 }
                 
@@ -4246,16 +4125,126 @@
     }
     $: filteredProducts = filterPlays(fantasyProducts, leaderBoardInfo, viewPlayerID, managerSelection);
 
-    // const download_txt = (dataToSave) => {
-    //     let textToSave;
-    //     for(let i = 0; i < dataToSave.length; i++) {
-    //         textToSave = JSON.stringify(dataToSave[i]);
-    //         let hiddenElement = document.createElement('a');
-    //         hiddenElement.href = 'data:attachment/text,' + encodeURI(textToSave);
-    //         hiddenElement.target = '_blank';
-    //         hiddenElement.download = 'myFile.txt';
-    //         hiddenElement.click();
+    // FOR DOWNLOADING HISTORICAL PLAYER INFO TO LOCAL
+
+    // const getEspnPlayerData = async () => {
+    //     const espnPlayersInfo = {};
+    //     let masterID = 1;
+        // for(const playerID in playersInfo.players) {
+        //     if(nflPlayerInfo.results.find(p => p.sleeper_id == playerID)?.espn_id) {
+        //         espnPlayersInfo[playerID] = {
+        //             id: masterID,
+        //             sleeper: {
+        //                 id: playerID,
+        //                 fn: playersInfo.players[playerID].fn,
+        //                 ln: playersInfo.players[playerID].ln,
+        //                 pos: playersInfo.players[playerID]?.pos || null,
+        //                 t: playersInfo.players[playerID]?.t || null,
+        //             },
+        //             espn: {
+        //                 id: nflPlayerInfo.results.find(p => p.sleeper_id == playerID).espn_id,
+        //                 t: {},
+        //                 height: nflPlayerInfo.results.find(p => p.sleeper_id == playerID).height,
+        //                 weight: nflPlayerInfo.results.find(p => p.sleeper_id == playerID).weight,
+        //                 college: nflPlayerInfo.results.find(p => p.sleeper_id == playerID).college,
+        //                 birthDate: nflPlayerInfo.results.find(p => p.sleeper_id == playerID).birth_date,
+        //                 rookieYear: null,
+        //                 jerseys: {},
+        //             },
+        //         }
+                
+        //         let playerYears = nflPlayerInfo.results.filter(p => p.sleeper_id == playerID);
+
+        //         espnPlayersInfo[playerID].espn.rookieYear = playerYears[playerYears.length - 1].season - playerYears[playerYears.length - 1].years_exp;
+
+        //         for(let i = 0; i < playerYears.length; i++) {
+        //             if(playerYears[i].team != 'NA') {
+        //                 if(!espnPlayersInfo[playerID].espn.t[playerYears[i].season]) {
+        //                     espnPlayersInfo[playerID].espn.t[playerYears[i].season] = [];
+        //                 }
+        //                 if(playerYears[i].team == 'LA') {
+        //                     espnPlayersInfo[playerID].espn.t[playerYears[i].season].push(nflTeams.find(t => t.sleeperID == 'LAR').espnAbbreviation);
+        //                 } else {
+        //                     espnPlayersInfo[playerID].espn.t[playerYears[i].season].push(nflTeams.find(t => t.sleeperID == playerYears[i].team).espnAbbreviation);
+        //                 }
+        //                 if(!espnPlayersInfo[playerID].espn.jerseys[playerYears[i].season]) {
+        //                     espnPlayersInfo[playerID].espn.jerseys[playerYears[i].season] = [];
+        //                 }
+        //                 espnPlayersInfo[playerID].espn.jerseys[playerYears[i].season].push(playerYears[i].jersey_number);
+        //             }
+        //         }
+        //         masterID++;
+        //     }
+        // }
+    //     let rookies = allPlayersArray.filter(p => p.espn.rookieYear == 2021 && p.espn.id == 'NA');
+
+    //     const scoreboardPromises = [];
+    //     scoreboardPromises.push(fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2021/draft/rounds?lang=en&region=us`, {compress: true}));
+
+    //     const scoreboardsRes = await waitForAll(...scoreboardPromises).catch((err) => { console.error(err); });
+
+    //     const scoreboardJsonPromises = [];
+    //     for(const scoreboardRes of scoreboardsRes) {
+    //         const data = scoreboardRes.json();
+    //         scoreboardJsonPromises.push(data)
+    //         if (!scoreboardRes.ok) {
+    //             throw new Error(data);
+    //         }
     //     }
+    //     const scoreboardsData = await waitForAll(...scoreboardJsonPromises).catch((err) => { console.error(err); });
+
+    //     for(let r = 0; r < 7; r++) {
+    //         const picks = scoreboardsData[0].items[r].picks;
+    //         for(let p = 0; p < picks.length; p++) {
+    //             const espnPlayerID = picks[p].athlete.$ref.slice(91, picks[p].athlete.$ref.indexOf('?'));
+
+    //             const gamesPromises = [];
+    //             gamesPromises.push(fetch(`${picks[p].athlete.$ref}`));
+                
+
+    //             const gamesRes = await waitForAll(...gamesPromises).catch((err) => { console.error(err); });
+    //             const gameJsonPromises = [];
+    //             for(const gameRes of gamesRes) {
+    //                 const data = gameRes.json();
+    //                 gameJsonPromises.push(data)
+    //                 if (!gameRes.ok) {
+    //                     throw new Error(data);
+    //                 }
+    //             }
+    //             const gamesData = await waitForAll(...gameJsonPromises).catch((err) => { console.error(err); });
+
+    //             const matcher = {
+    //                 fn: gamesData[0].firstName,
+    //                 ln: gamesData[0].lastName,
+    //                 pos: gamesData[0].position.abbreviation,
+    //             }
+    //             if(matcher.pos == 'PK') {
+    //                 matcher.pos = 'K';
+    //             } else if(matcher.pos == 'FB') {
+    //                 matcher.pos = 'RB';
+    //             }
+    //             const rookie = rookies.find(o => o.sleeper.fn == matcher.fn && o.sleeper.ln == matcher.ln && o.sleeper.pos == matcher.pos);
+    //             if(rookie) {
+    //                 espnPlayersInfo[rookie.sleeper.id] = espnPlayerID;
+    //             }
+    //         }
+    //     }
+
+    //     return espnPlayersInfo;
+
+    // }
+
+    // let espnPlayersInfo;
+
+    // const download_txt = async (dataToSave) => {
+    //     dataToSave = await getEspnPlayerData(dataToSave);
+    //     let textToSave = JSON.stringify(dataToSave);
+    //     let hiddenElement = document.createElement('a');
+    //     hiddenElement.href = 'data:attachment/text,' + encodeURI(textToSave);
+    //     hiddenElement.target = '_blank';
+    //     hiddenElement.download = 'myFile.txt';
+    //     hiddenElement.click();
+        
     // }
 
 
@@ -4461,7 +4450,7 @@
             {#if !fantasyProducts.fantasyProducts.length > 0}
                 <div class="noPlays">No plays yet...</div>
             {:else}
-                <!-- <div id="test" on:click={() => download_txt(downloadData)}>Click Me</div> -->
+                <!-- <div id="test" on:click={() => download_txt(espnPlayersInfo)}>Click Me</div> -->
                 {#each filteredProducts as filteredProduct}
                     <div class="playContainer">
                         {#if filteredProduct[0] && filteredProduct[0]?.fpts != 0}

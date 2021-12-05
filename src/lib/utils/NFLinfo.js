@@ -279,16 +279,18 @@ export const nflTeams = [
         alternateColor: "ffffff",
         status: "active",
     },
-    // OAK: {
-    //     espnID: 13,
-    //     sleeperID: "OAK",
-    //     fn: "Oakland",
-    //     ln: "Raiders",
-    //     color: "000000",
-    //     alternateColor: "a5acaf",
-    //     status: "inactive",
-    //     lastActive: 2019,
-    // },
+    //OAK
+    {
+        espnID: 13,
+        sleeperID: "OAK",
+        espnAbbreviation: 'OAK',
+        fn: "Oakland",
+        ln: "Raiders",
+        color: "000000",
+        alternateColor: "a5acaf",
+        status: "inactive",
+        lastActive: 2019,
+    },
     //PHI
     {
         espnID: 21,
@@ -322,6 +324,18 @@ export const nflTeams = [
         alternateColor: "69be28",
         status: "active",
     },
+    //SD
+    {
+        espnID: 24,
+        sleeperID: "SD",
+        espnAbbreviation: 'SD',
+        fn: "San Diego",
+        ln: "Chargers",
+        color: "042453",
+        alternateColor: "0073cf",
+        status: "inactive",
+        lastActive: 2016,
+    },
     //SF
     {
         espnID: 25,
@@ -332,6 +346,18 @@ export const nflTeams = [
         color: "981324",
         alternateColor: "b3995d",
         status: "active",
+    },
+    //STL
+    {
+        espnID: 14,
+        sleeperID: "STL",
+        espnAbbreviation: 'STL',
+        fn: "St. Louis",
+        ln: "Rams",
+        color: "00295B",
+        alternateColor: "b3995d",
+        status: "inactive",
+        lastActive: 2015,
     },
     //TB
     {

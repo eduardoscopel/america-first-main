@@ -6,7 +6,7 @@ import { getLeagueUsers } from "./leagueUsers"
 import { waitForAll } from './multiPromise';
 import { get } from 'svelte/store';
 import {records} from '$lib/stores';
-import { loadPlayers, getPreviousDrafts } from '$lib/utils/helper';
+import { loadPlayers, getPreviousDrafts, nflPlayerInfo } from '$lib/utils/helper';
 import { null_to_empty } from 'svelte/internal';
 import leagueHistory from '$lib/utils/leagueHistory.json';
 
@@ -15,15 +15,15 @@ export const getLeagueRecords = async (refresh = false) => {
 		return get(records);
 	}
 
-	// if this isn't a refresh data call, check if there are already transactions stored in localStorage
-	if(!refresh) {
-		let localRecords = await JSON.parse(localStorage.getItem("records"));
-		// check if transactions have been saved to localStorage before
-		if(localRecords) {
-			localRecords.stale = true;
-			return localRecords;
-		}
-	}
+	// // if this isn't a refresh data call, check if there are already transactions stored in localStorage
+	// if(!refresh) {
+	// 	let localRecords = await JSON.parse(localStorage.getItem("records"));
+	// 	// check if transactions have been saved to localStorage before
+	// 	if(localRecords) {
+	// 		localRecords.stale = true;
+	// 		return localRecords;
+	// 	}
+	// }
 
 	const playersData = await loadPlayers().catch((err) => { console.error(err); });
 	const playersInfo = playersData.players;
@@ -703,6 +703,7 @@ export const getLeagueRecords = async (refresh = false) => {
 							}
 							
 							let playerInfo = playersInfo[playerID];
+							let nflInfo = nflPlayerInfo[playerID];
 							let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`;
 		
 							const playerEntry = {		
@@ -726,6 +727,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								numStarters,
 								starterRankAVG: null,
 								playerInfo,
+								nflInfo,
 								avatar,
 								rosterSpot,
 							}
@@ -902,6 +904,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								}
 								
 								let playerInfo = playersInfo[playerID];
+								let nflInfo = nflPlayerInfo[playerID];
 								let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`;
 			
 								const playerEntry = {		
@@ -925,6 +928,7 @@ export const getLeagueRecords = async (refresh = false) => {
 									numStarters,
 									starterRankAVG: null,
 									playerInfo,
+									nflInfo,
 									avatar,
 									rosterSpot,
 								}
@@ -1097,6 +1101,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								}
 								
 								let playerInfo = playersInfo[playerID];
+								let nflInfo = nflPlayerInfo[playerID];
 								let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`;
 			
 								const playerEntry = {		
@@ -1120,6 +1125,7 @@ export const getLeagueRecords = async (refresh = false) => {
 									numStarters,
 									starterRankAVG: null,
 									playerInfo,
+									nflInfo,
 									avatar,
 									rosterSpot,
 								}
@@ -1292,6 +1298,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								}
 								
 								let playerInfo = playersInfo[playerID];
+								let nflInfo = nflPlayerInfo[playerID];
 								let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`;
 			
 								const playerEntry = {		
@@ -1315,6 +1322,7 @@ export const getLeagueRecords = async (refresh = false) => {
 									numStarters,
 									starterRankAVG: null,
 									playerInfo,
+									nflInfo,
 									avatar,
 									rosterSpot,
 								}
@@ -1483,6 +1491,7 @@ export const getLeagueRecords = async (refresh = false) => {
 					}
 					
 					let playerInfo = playersInfo[playerID];
+					let nflInfo = nflPlayerInfo[playerID];
     				let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`;
 
 					const playerEntry = {		
@@ -1506,6 +1515,7 @@ export const getLeagueRecords = async (refresh = false) => {
 						numStarters,
 						starterRankAVG: null,
 						playerInfo,
+						nflInfo,
 						avatar,
 						rosterSpot,
 					}
@@ -1906,6 +1916,7 @@ export const getLeagueRecords = async (refresh = false) => {
 									starterRankAVG: null,
 									starterRanks: 0,
 									playerInfo: player.playerInfo,
+									nflInfo: player.nflInfo,
 									avatar: player.avatar,
 									rosterSpot: player.rosterSpot,
 								}
@@ -2495,8 +2506,17 @@ export const getLeagueRecords = async (refresh = false) => {
 		lastYear,
 	};
 
+	// const storedData = {
+	// 	seasonWeekRecords,
+	// 	leagueRosterRecords,
+	// 	leagueWeekRecords: recordArrays.league.alltime.regularSeason.week_Top,
+	// 	allManagers,
+	// 	currentYear,
+	// 	lastYear,
+	// };
+
 	// update localStorage
-	localStorage.setItem("records", JSON.stringify(recordsData));
+	// localStorage.setItem("records", JSON.stringify(storedData));
 
 	records.update(() => recordsData);
 

@@ -2,7 +2,7 @@
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table'; 
     import Button, { Group, Label } from '@smui/button';
     import { Icon } from '@smui/tab';
-    import { gotoManager, round } from '$lib/utils/helper';
+    import { gotoManager, round, nflTeams } from '$lib/utils/helper';
     import { getManagerRecords } from '$lib/utils/helper';
     import { managerrecords } from '$lib/stores';
     import LeagueMatchup from '$lib/Records/LeagueMatchup.svelte';
@@ -34,46 +34,51 @@
         const newRecords = await getManagerRecords(managerrecords);
         managerrecords.update(() => newRecords);
         managerRecords = newRecords;
-
-        displayManagerLeft = {
-            info: managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][recordManID - 1]?.manager || managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][recordManID + 1].manager,
-            recordManID,
-            wins: 0,
-            ties: 0,
-            winPerc: 0,
-            epeWins: 0,
-            epeTies: 0,
-            epePerc: 0,
-            fpts: 0,
-            fptspg: 0,
-            matchups: [],
-            specialMatchups: {
-                highScore: null,
-                lowScore: null,
-                bestBlowout: null,
-                worstBlowout: null,
-                bestNailbiter: null,
-                worstNailbiter: null,
-            },
-        }
-
-        managerChoicesLeft = [];
-        managerChoicesLeft.push({
-            info: managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][recordManID - 1]?.manager || managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][recordManID + 1].manager,
-            recordManID,
-        })
-
-
-        if(displayStats == 'regular') {
-            setRegularTable(managerRecords, displayType, displayYear, displayPositionRecord);
-        } else if(displayStats == 'playoffs') {
-            setPlayoffsTable(managerRecords, displayType, displayYear, displayPositionRecord);
-        } else if(displayStats == 'combined') {
-            setCombinedTable(managerRecords, displayType, displayYear, displayPositionRecord);
-        }
+        refreshTables(managerRecords);
     }
   
     refreshRecords(managerrecords);
+
+    const refreshTables = () => {
+        if(managerRecords) {
+            displayManagerLeft = {
+                info: managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][recordManID - 1]?.manager || managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][recordManID + 1].manager,
+                recordManID,
+                wins: 0,
+                ties: 0,
+                winPerc: 0,
+                epeWins: 0,
+                epeTies: 0,
+                epePerc: 0,
+                fpts: 0,
+                fptspg: 0,
+                matchups: [],
+                specialMatchups: {
+                    highScore: null,
+                    lowScore: null,
+                    bestBlowout: null,
+                    worstBlowout: null,
+                    bestNailbiter: null,
+                    worstNailbiter: null,
+                },
+            }
+
+            managerChoicesLeft = [];
+            managerChoicesLeft.push({
+                info: managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][recordManID - 1]?.manager || managerRecords.headToHeadRecords.regularSeason.alltime[recordManID][recordManID + 1].manager,
+                recordManID,
+            })
+
+
+            if(displayStats == 'regular') {
+                setRegularTable(managerRecords, displayType, displayYear, displayPositionRecord);
+            } else if(displayStats == 'playoffs') {
+                setPlayoffsTable(managerRecords, displayType, displayYear, displayPositionRecord);
+            } else if(displayStats == 'combined') {
+                setCombinedTable(managerRecords, displayType, displayYear, displayPositionRecord);
+            }
+        }   
+    }
 
     const setRegularTable = (managerRecords, displayType, displayYear, displayPositionRecord) => {
         recordPrefix = "Regular Season";
@@ -347,21 +352,21 @@
     let displayStats;
     const changeSelection = (selection) => {
         displayStats = selection;
-        refreshRecords(displayStats);
+        refreshTables(displayStats);
     }
     $: changeSelection(selection);
 
     let displayType;
     const changeMasterSelection = (masterSelection) => {
         displayType = masterSelection;
-        refreshRecords(displayType);
+        refreshTables(displayType);
     }
     $: changeMasterSelection(masterSelection);
 
     let displayYear;
     const changeYear = (selectedYear) => {
         displayYear = selectedYear;
-        refreshRecords(displayYear);
+        refreshTables(displayYear);
     }
     $: changeYear(selectedYear);
 
@@ -642,9 +647,14 @@
     }
 
     :global(.changeYear) {
-        font-size: 3em;
+        position: relative;
+        display: inline-flex;
+        width: 20%;
+        z-index: 1;
+        font-size: 2.25em;
         cursor: pointer;
         color: #888;
+        justify-content: center;
     }
 
     :global(.changeYear:hover) {
@@ -652,7 +662,10 @@
     }
 
     .spacer {
-        width: 48px;
+        width: 20%;
+        position: relative;
+        display: inline-flex;
+        margin: 0 2.5%;
     }
 
         /* Start button resizing */
@@ -822,6 +835,9 @@
     }
 
     .headingText {
+        position: relative;
+        display: inline-flex;
+        justify-content: center;
         text-align: center;
         font-size: 2.25em;
         font-weight: 450;
@@ -1006,7 +1022,7 @@
             {:else}
                 <span class="spacer" />
             {/if}  
-            <div class="headingText">{masterPrefix} Records</div>
+            <div class="headingText" style="width: 60%;">{masterPrefix} Records</div>
             {#if masterSelection == 'yearly' && displayYear < currentYear}
                 <Icon class="material-icons changeYear" on:click={() => changeYear(displayYear + 1)}>chevron_right</Icon>
             {:else}
@@ -1503,7 +1519,7 @@
                                             {#if displayPositionRecord == 'ALL'}
                                                 <Cell class="center">{playerWeekBest.playerInfo.pos}</Cell>
                                             {/if}
-                                            <Cell class="center">{playerWeekBest.playerInfo.t}</Cell>
+                                            <Cell class="center">{playerWeekBest.playerInfo.pos == 'DEF' ? playerWeekBest.playerID : nflTeams.find(t => t.espnAbbreviation == playerWeekBest.nflInfo.espn.t[playerWeekBest.year][0]).sleeperID}</Cell>
                                             {#if masterSelection == 'alltime'}
                                                 <Cell class="center">{playerWeekBest.year}</Cell>
                                             {/if}
@@ -1553,7 +1569,7 @@
                                             {#if displayPositionRecord == 'ALL'}
                                                 <Cell class="center">{playerPeriodBest.playerInfo.pos}</Cell>
                                             {/if}
-                                            <Cell class="center">{playerPeriodBest.playerInfo.t}</Cell>
+                                            <Cell class="center">{playerPeriodBest.playerInfo.pos == 'DEF' ? playerPeriodBest.playerID : nflTeams.find(t => t.espnAbbreviation == playerPeriodBest.nflInfo.espn.t[playerPeriodBest.year][0]).sleeperID}</Cell>
                                             {#if masterSelection == 'alltime'}
                                                 <Cell class="center">{playerPeriodBest.year}</Cell>
                                             {/if}
@@ -1603,7 +1619,7 @@
                                             {#if displayPositionRecord == 'ALL'}
                                                 <Cell class="center">{playerWeekMissedBest.playerInfo.pos}</Cell>
                                             {/if}
-                                            <Cell class="center">{playerWeekMissedBest.playerInfo.t}</Cell>
+                                            <Cell class="center">{playerWeekMissedBest.playerInfo.pos == 'DEF' ? playerWeekMissedBest.playerID : nflTeams.find(t => t.espnAbbreviation == playerWeekMissedBest.nflInfo.espn.t[playerWeekMissedBest.year][0]).sleeperID}</Cell>
                                             {#if masterSelection == 'alltime'}
                                                 <Cell class="center">{playerWeekMissedBest.year}</Cell>
                                             {/if}
@@ -1690,10 +1706,12 @@
                     <div class="headToHeadWrap">
                         <div class="headToHeadChoices">
                             {#each managerChoicesLeft as manager}
-                                <div class="headToHeadRow">{manager.info.realname}</div>
-                                {#if masterSelection == 'yearly'}
-                                    <div class="fantasyTeamName">({manager.info.name})</div>
-                                {/if}
+                                <div class="columnWrap" style="width: 98%; align-items: flex-start;">
+                                    <div class="headToHeadRow">{manager.info.realname}</div>
+                                    {#if masterSelection == 'yearly'}
+                                        <div class="fantasyTeamName" style="padding: 0 4%;">({manager.info.name})</div>
+                                    {/if}
+                                </div>
                             {/each}
                         </div>
                         <div class="columnWrap" style="width: 58%;">
@@ -1802,10 +1820,12 @@
                         </div>
                         <div class="headToHeadChoices">
                             {#each managerChoicesRight as manager}
-                                <div class="headToHeadRow" on:click={() => changeManager(manager.recordManID, headToHeadRecords)} style="justify-content: flex-end; {displayManagerRight && displayManagerRight.info.realname == manager.info.realname ? "background-color: var(--gcSelect); border: 0.1em solid var(--g111);" : null}">{manager.info.realname}</div>
-                                {#if masterSelection == 'yearly'}
-                                    <div class="fantasyTeamName" style="display: inline-flex; position: relative; justify-content: flex-end;" >({manager.info.name})</div>
-                                {/if}
+                                <div class="columnWrap" style="width: 98%; align-items: flex-end;">
+                                    <div class="headToHeadRow" on:click={() => changeManager(manager.recordManID, headToHeadRecords)} style="justify-content: flex-end; {displayManagerRight && displayManagerRight.info.realname == manager.info.realname ? "background-color: var(--gcSelect); border: 0.1em solid var(--g111);" : null}">{manager.info.realname}</div>
+                                    {#if masterSelection == 'yearly'}
+                                        <div class="fantasyTeamName" style="display: inline-flex; position: relative; justify-content: flex-end; padding: 0 4%;" >({manager.info.name})</div>
+                                    {/if}
+                                </div>
                             {/each}
                         </div>
                     </div>     

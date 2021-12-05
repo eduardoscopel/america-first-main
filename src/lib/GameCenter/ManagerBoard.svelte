@@ -1,7 +1,7 @@
 <script>
     import MatchScore from "./MatchScore.svelte";
 
-    export let weekMatchups, week, matchSelection, completeGames, playersInfo, showGameBox, showMatchBox, yearSelection, weekSelection, currentYear;
+    export let weekMatchups, week, matchSelection, completeGames, playersInfo, nflPlayerInfo, showGameBox, showMatchBox, yearSelection, weekSelection, currentYear, nflTeams;
 
     let matchScores = [];
     const matchesObj = {};
@@ -19,7 +19,7 @@
             if(yearSelection == currentYear && weekSelection == week) {
                 for(let i = 0; i < matchTeams.length; i++) {
                     for(const starter of matchTeams[i].starters) {
-                        if(starter == '0' || !playersInfo.players[starter].wi[week] || playersInfo.players[starter].wi[week].o == null || completeGames.includes(starter) || completeGames.includes(playersInfo.players[starter].t)) {
+                        if(starter == '0' || !playersInfo.players[starter].wi[week] || playersInfo.players[starter].wi[week].o == null || completeGames.includes(starter) || (playersInfo.players[starter].pos != 'DEF' && completeGames.includes(nflTeams.find(t => t.espnAbbreviation == nflPlayerInfo[starter].espn.t[yearSelection][0]).sleeperID))) {
                             toPlay[i] --;
                         }
                     }
@@ -45,7 +45,7 @@
                     rosterID: matchTeams[1].rosterID,
                     toPlay: toPlay[1],
                 },
-                isComplete: new Boolean (false),
+                isComplete: false,
             }
 
             if(toPlay[0] == 0 && toPlay[1] == 0) {

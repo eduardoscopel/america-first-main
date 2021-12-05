@@ -6,7 +6,7 @@ import { getLeagueUsers } from "./leagueUsers"
 import { waitForAll } from './multiPromise';
 import { get } from 'svelte/store';
 import { managerrecords } from '$lib/stores';
-import { loadPlayers, getPreviousDrafts } from '$lib/utils/helper';
+import { loadPlayers, getPreviousDrafts, nflPlayerInfo } from '$lib/utils/helper';
 
 export const getManagerRecords = async (refresh = false) => {
 	if(get(managerrecords).managerRecordArrays) {
@@ -677,6 +677,7 @@ export const getManagerRecords = async (refresh = false) => {
 							}
 							
 							let playerInfo = playersInfo[playerID];
+							let nflInfo = nflPlayerInfo[playerID];
 							let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`;
 
 							const playerEntry = {		
@@ -700,6 +701,7 @@ export const getManagerRecords = async (refresh = false) => {
 								numStarters,
 								starterRankAVG: null,
 								playerInfo,
+								nflInfo,
 								avatar,
 								rosterSpot,
 								playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
@@ -886,6 +888,7 @@ export const getManagerRecords = async (refresh = false) => {
 								}
 								
 								let playerInfo = playersInfo[playerID];
+								let nflInfo = nflPlayerInfo[playerID];
 								let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`;
 
 								const playerEntry = {		
@@ -909,6 +912,7 @@ export const getManagerRecords = async (refresh = false) => {
 									numStarters,
 									starterRankAVG: null,
 									playerInfo,
+									nflInfo,
 									avatar,
 									rosterSpot,
 									playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
@@ -1091,6 +1095,7 @@ export const getManagerRecords = async (refresh = false) => {
 								}
 								
 								let playerInfo = playersInfo[playerID];
+								let nflInfo = nflPlayerInfo[playerID];
 								let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`;
 			
 								const playerEntry = {		
@@ -1114,6 +1119,7 @@ export const getManagerRecords = async (refresh = false) => {
 									numStarters,
 									starterRankAVG: null,
 									playerInfo,
+									nflInfo,
 									avatar,
 									rosterSpot,
 									playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
@@ -1296,6 +1302,7 @@ export const getManagerRecords = async (refresh = false) => {
 								}
 								
 								let playerInfo = playersInfo[playerID];
+								let nflInfo = nflPlayerInfo[playerID];
 								let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`;
 			
 								const playerEntry = {		
@@ -1319,6 +1326,7 @@ export const getManagerRecords = async (refresh = false) => {
 									numStarters,
 									starterRankAVG: null,
 									playerInfo,
+									nflInfo,
 									avatar,
 									rosterSpot,
 									playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
@@ -1498,6 +1506,7 @@ export const getManagerRecords = async (refresh = false) => {
 					}
 					
 					let playerInfo = playersInfo[playerID];
+					let nflInfo = nflPlayerInfo[playerID];
     				let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png)` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp)`;
 
 					const playerEntry = {		
@@ -1521,6 +1530,7 @@ export const getManagerRecords = async (refresh = false) => {
 						numStarters,
 						starterRankAVG: null,
 						playerInfo,
+						nflInfo,
 						avatar,
 						rosterSpot,
 						playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
@@ -1965,6 +1975,7 @@ export const getManagerRecords = async (refresh = false) => {
 									starterRankAVG: null,
 									starterRanks: 0,
 									playerInfo: player.playerInfo,
+									nflInfo: player.nflInfo,
 									avatar: player.avatar,
 									rosterSpot: player.rosterSpot,
 									playerAvatar: player.playerAvatar,

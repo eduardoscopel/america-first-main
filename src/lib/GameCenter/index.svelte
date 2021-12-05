@@ -7,7 +7,7 @@
     import { Icon } from '@smui/tab';
     import LinearProgress from '@smui/linear-progress';
 
-    export let playersInfo, nflWeek, matchupsInfo, standingsData;
+    export let nflWeek, matchupsInfo, standingsData, playersInfo, nflPlayerInfo;
 
     let viewPlayerID;
     let leaderBoardInfo;
@@ -139,6 +139,7 @@
                     const managerWeek = match[managerKey];
                     if(managerWeek.recordManID == recordManID) {
                         fantasyStarters[recordManID] = {
+                            players: managerWeek.players,
                             starters: managerWeek.starters,
                             startersPoints: managerWeek.points,
                         }
@@ -150,7 +151,7 @@
     $: getStarters(weekMatchups);
 
     //get position leaders
-    const getPositionLeaders = (weekMatchups, playersInfo) => {
+    const getPositionLeaders = (weekMatchups) => {
         positionLeaders = {};
         for(const matchup in weekMatchups) {
             const match = weekMatchups[matchup];
@@ -160,31 +161,36 @@
                     if(managerWeek.starters[i] == '0') {
                         continue;
                     } else {
-                        if(!positionLeaders[playersInfo.players[managerWeek.starters[i]].pos]) {
-                            positionLeaders[playersInfo.players[managerWeek.starters[i]].pos] = []; 
+                        if(playersInfo.players[managerWeek.starters[i]].pos == 'DEF' && !positionLeaders['DEF']) {
+                            positionLeaders['DEF'] = [];
+                        } else if(playersInfo.players[managerWeek.starters[i]].pos != 'DEF' && !positionLeaders[nflPlayerInfo[managerWeek.starters[i]].sleeper.pos]) {
+                            positionLeaders[nflPlayerInfo[managerWeek.starters[i]].sleeper.pos] = []; 
                         }
+                        const team = playersInfo.players[managerWeek.starters[i]].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == managerWeek.starters[i]).espnAbbreviation : nflPlayerInfo[managerWeek.starters[i]].espn.t[yearSelection][0];
                         const entry = {
                             playerID: managerWeek.starters[i],
-                            pos: playersInfo.players[managerWeek.starters[i]].pos,
+                            pos: playersInfo.players[managerWeek.starters[i]].pos == 'DEF' ? 'DEF' : nflPlayerInfo[managerWeek.starters[i]].sleeper.pos,
                             fpts: managerWeek.points[i],
                             owner: managerWeek.manager,
                             recordManID: managerWeek.recordManID,
-                            fn: playersInfo.players[managerWeek.starters[i]].fn,
-                            ln: playersInfo.players[managerWeek.starters[i]].ln,
-                            t: playersInfo.players[managerWeek.starters[i]].t,
+                            fn: playersInfo.players[managerWeek.starters[i]].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == managerWeek.starters[i]).fn : nflPlayerInfo[managerWeek.starters[i]].sleeper.fn,
+                            ln: playersInfo.players[managerWeek.starters[i]].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == managerWeek.starters[i]).ln : nflPlayerInfo[managerWeek.starters[i]].sleeper.ln,
+                            t: team,
                             avatar: playersInfo.players[managerWeek.starters[i]].pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${managerWeek.starters[i].toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${managerWeek.starters[i]}.jpg`,
-                            teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${playersInfo.players[managerWeek.starters[i]].t?.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${managerWeek.starters[i]}.jpg`,
-                            teamColor: `background-color: #${nflTeams.find(n => n.sleeperID == playersInfo.players[managerWeek.starters[i]].t || n.ln == playersInfo.players[managerWeek.starters[i]].ln)?.color}6b` || `background-color: var(--boxShadowThree)`,
-                            teamAltColor: `background-color: #${nflTeams.find(n => n.sleeperID == playersInfo.players[managerWeek.starters[i]].t || n.ln == playersInfo.players[managerWeek.starters[i]].ln)?.alternateColor}52` || `background-color: var(--boxShadowThree)`,
+                            teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${nflTeams.find(t => t.espnAbbreviation == team).sleeperID.toLowerCase()}.png`,
+                            teamColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).color}6b`,
+                            teamAltColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).alternateColor}52`,
                         }
-                        if(playersInfo.players[managerWeek.starters[i]].pos == 'DB' || playersInfo.players[managerWeek.starters[i]].pos == 'CB' || playersInfo.players[managerWeek.starters[i]].pos == 'SS' || playersInfo.players[managerWeek.starters[i]].pos == 'FS') {
+                        if(playersInfo.players[managerWeek.starters[i]].pos == 'DEF') {
+                            positionLeaders['DEF'].push(entry);
+                        } else if(nflPlayerInfo[managerWeek.starters[i]].sleeper.pos == 'DB' || nflPlayerInfo[managerWeek.starters[i]].sleeper.pos == 'CB' || nflPlayerInfo[managerWeek.starters[i]].sleeper.pos == 'SS' || nflPlayerInfo[managerWeek.starters[i]].sleeper.pos == 'FS') {
                             positionLeaders['DB'].push(entry);
-                        } else if(playersInfo.players[managerWeek.starters[i]].pos == 'LB') {
+                        } else if(nflPlayerInfo[managerWeek.starters[i]].sleeper.pos == 'LB') {
                             positionLeaders['LB'].push(entry);
-                        } else if(playersInfo.players[managerWeek.starters[i]].pos == 'DL' || playersInfo.players[managerWeek.starters[i]].pos == 'DE' || playersInfo.players[managerWeek.starters[i]].pos == 'DT') {
+                        } else if(nflPlayerInfo[managerWeek.starters[i]].sleeper.pos == 'DL' || nflPlayerInfo[managerWeek.starters[i]].sleeper.pos == 'DE' || nflPlayerInfo[managerWeek.starters[i]].sleeper.pos == 'DT') {
                             positionLeaders['DL'].push(entry);
                         } else {
-                            positionLeaders[playersInfo.players[managerWeek.starters[i]].pos].push(entry);
+                            positionLeaders[nflPlayerInfo[managerWeek.starters[i]].sleeper.pos].push(entry);
                         }
                     }
                 }
@@ -195,7 +201,7 @@
             positionLeaders[key] = positionLeaders[key].sort((a, b) => b.fpts - a.fpts);
         }
     }
-    $: getPositionLeaders(weekMatchups, playersInfo);
+    $: getPositionLeaders(weekMatchups);
 
 
 </script>
@@ -419,10 +425,10 @@
         </div>
         <div class="centerWrapper">
             <div class="gameBox">
-                <GameBox {nflTeams} {nflMatchups} bind:newLoading={newLoading} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} {currentYear} bind:yearLeagueData={yearLeagueData} bind:playersInfo={playersInfo} bind:fantasyStarters={fantasyStarters} bind:positionLeaders={positionLeaders} bind:managerInfo={managerInfo} bind:weekMatchups={weekMatchups} {standingsData} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
+                <GameBox {nflTeams} {nflMatchups} bind:newLoading={newLoading} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} {currentYear} bind:yearLeagueData={yearLeagueData} {playersInfo} {nflPlayerInfo} bind:fantasyStarters={fantasyStarters} bind:positionLeaders={positionLeaders} bind:managerInfo={managerInfo} bind:weekMatchups={weekMatchups} {standingsData} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
             </div>
             <div class="playByPlay">
-                <PlayByPlay {nflTeams} {nflMatchups} bind:newLoading={newLoading} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} bind:yearLeagueData={yearLeagueData} bind:playersInfo={playersInfo} bind:fantasyStarters={fantasyStarters} bind:managerInfo={managerInfo} bind:weekMatchups={weekMatchups} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
+                <PlayByPlay {nflTeams} {nflMatchups} bind:newLoading={newLoading} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} bind:yearLeagueData={yearLeagueData} {playersInfo} {nflPlayerInfo} bind:fantasyStarters={fantasyStarters} bind:managerInfo={managerInfo} bind:weekMatchups={weekMatchups} bind:fantasyProducts={fantasyProducts} bind:gameSelection={gameSelection} bind:managerSelection={managerSelection} bind:matchSelection={matchSelection} bind:viewPlayerID={viewPlayerID} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} bind:leaderBoardInfo={leaderBoardInfo} />
             </div>
         </div>
         <div class="rightWrapper">
@@ -441,7 +447,7 @@
                         <LinearProgress indeterminate />
                     </div>
                 {/if}
-                <ManagerBoard bind:weekMatchups={weekMatchups} {week} {currentYear} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} {completeGames} bind:playersInfo={playersInfo} bind:matchSelection={matchSelection} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
+                <ManagerBoard bind:weekMatchups={weekMatchups} {nflTeams} {week} {currentYear} bind:weekSelection={weekSelection} bind:yearSelection={yearSelection} {completeGames} {playersInfo} {nflPlayerInfo} bind:matchSelection={matchSelection} bind:showGameBox={showGameBox} bind:showMatchBox={showMatchBox} />
             </div>
         </div>
     </div>
