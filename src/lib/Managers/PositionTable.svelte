@@ -37,13 +37,24 @@
 	};
 
 	const breadcrumbs = node => {
+		let pathText;
+		let pathPoints;
+		let pointsSet = false;
 		const crumbs = [];
 		while (node) {
-			crumbs.unshift(node.data.name)
+			crumbs.unshift(node.data.name);
+			if(node && pointsSet == false) {
+				pathPoints = yootils.commas(round(node.value));
+				pointsSet = true;
+			}
 			node = node.parent;
 		}
-
-		return crumbs.join('/');
+		if(pathPoints) {
+			pathText = crumbs.join('/') + ` - ${pathPoints} points`;
+		} else {
+			pathText = crumbs.join('/');
+		}
+		return pathText;
 	};
 
 	const extents = tweened(undefined, {
