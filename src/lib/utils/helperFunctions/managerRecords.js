@@ -6,7 +6,7 @@ import { getLeagueUsers } from "./leagueUsers"
 import { waitForAll } from './multiPromise';
 import { get } from 'svelte/store';
 import { managerrecords } from '$lib/stores';
-import { loadPlayers, getPreviousDrafts, nflPlayerInfo } from '$lib/utils/helper';
+import { loadPlayers, getPreviousDrafts, nflPlayerInfo, nflTeams } from '$lib/utils/helper';
 
 export const getManagerRecords = async (refresh = false) => {
 	if(get(managerrecords).managerRecordArrays) {
@@ -179,6 +179,7 @@ export const getManagerRecords = async (refresh = false) => {
 			},
 		},
 	};
+	
 	let recordArrays = {
 		league: {
 			years: {},
@@ -215,9 +216,6 @@ export const getManagerRecords = async (refresh = false) => {
 	let acquisitionRecords = {};
 
 	const nflPositions = ["RB", "QB", "WR", "TE", "DEF", "K", "DL", "DE", "DT", "LB", "DB", "CB", "SS", "FS"];
-	
-	const nflTeams = ["ARI", "ATL", "BAL", "BUF", "CAR", "CHI", "CIN", "CLE", "DAL", "DEN", "DET", "GB", "HOU", "IND", "JAX", "KC",	
-					  "LAC", "LAR", "LV", "OAK", "MIA", "MIN", "NE", "NO", "NYG", "NYJ", "PHI", "PIT", "SEA", "SF", "TEN", "TB", "WAS"];
 
 	const numManagers = managers.length;
 	for(const managerID in managers) {
@@ -705,6 +703,7 @@ export const getManagerRecords = async (refresh = false) => {
 								avatar,
 								rosterSpot,
 								playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
+								playerTeam: playerInfo.pos == "DEF" ? playerID : nflInfo.espn.t[year].length == 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= POstartWeek && w.lastWeek >= POstartWeek).team).sleeperID,
 							}
 
 							// right now, acquisitions is just a list of the manager's draft picks
@@ -916,6 +915,7 @@ export const getManagerRecords = async (refresh = false) => {
 									avatar,
 									rosterSpot,
 									playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
+									playerTeam: playerInfo.pos == "DEF" ? playerID : nflInfo.espn.t[year].length == 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= POstartWeek && w.lastWeek >= POstartWeek).team).sleeperID,
 								}
 			
 								// right now, acquisitions is just a list of the manager's draft picks
@@ -1123,6 +1123,7 @@ export const getManagerRecords = async (refresh = false) => {
 									avatar,
 									rosterSpot,
 									playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
+									playerTeam: playerInfo.pos == "DEF" ? playerID : nflInfo.espn.t[year].length == 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= POstartWeek && w.lastWeek >= POstartWeek).team).sleeperID,
 								}
 			
 								// right now, acquisitions is just a list of the manager's draft picks
@@ -1330,6 +1331,7 @@ export const getManagerRecords = async (refresh = false) => {
 									avatar,
 									rosterSpot,
 									playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
+									playerTeam: playerInfo.pos == "DEF" ? playerID : nflInfo.espn.t[year].length == 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= POstartWeek && w.lastWeek >= POstartWeek).team).sleeperID,
 								}
 			
 								// right now, acquisitions is just a list of the manager's draft picks
@@ -1534,6 +1536,7 @@ export const getManagerRecords = async (refresh = false) => {
 						avatar,
 						rosterSpot,
 						playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
+						playerTeam: playerInfo.pos == "DEF" ? playerID : nflInfo.espn.t[year].length == 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= startWeek && w.lastWeek >= startWeek).team).sleeperID,
 					}
 
 					// right now, acquisitions is just a list of the manager's draft picks
@@ -1979,6 +1982,7 @@ export const getManagerRecords = async (refresh = false) => {
 									avatar: player.avatar,
 									rosterSpot: player.rosterSpot,
 									playerAvatar: player.playerAvatar,
+									teamTotals: {},
 								}
 								if(player.benched == false) {
 									uniqueStarters++;
@@ -1998,6 +2002,15 @@ export const getManagerRecords = async (refresh = false) => {
 								} else if(player.bottomStarter == true) {
 									playerTotals[player.playerID].bottomStarters++;
 								}
+								if(!playerTotals[player.playerID].teamTotals[player.playerTeam]) {
+									playerTotals[player.playerID].teamTotals[player.playerTeam] = {
+										fpts: 0,
+										fptspg: 0,
+										weeksStarted: 0,
+									}
+								}
+								playerTotals[player.playerID].teamTotals[player.playerTeam].fpts += player.playerPoints;
+								playerTotals[player.playerID].teamTotals[player.playerTeam].weeksStarted++;
 							} else if(player.benched == true) {
 								playerTotals[player.playerID].benchPoints += player.playerPoints;
 								playerTotals[player.playerID].weeksBenched++;
@@ -2011,6 +2024,9 @@ export const getManagerRecords = async (refresh = false) => {
 							if(player.weeksStarted > 0) {
 								player.playerPPStart = player.playerPoints / player.weeksStarted;
 								player.starterRankAVG = player.starterRanks / player.weeksStarted;
+								for(const team in player.teamTotals) {
+									player.teamTotals[team].fptspg = player.teamTotals[team].fpts / player.teamTotals[team].weeksStarted;
+								}
 							} else {
 								player.playerPPStart = 0;
 								player.starterRankAVG = 0;
@@ -2102,6 +2118,7 @@ export const getManagerRecords = async (refresh = false) => {
 				playerPositionRecords.league.years[year][recordPeriod].managerBests[position].period_Best = playerPositionRecords.league.years[year][recordPeriod].managerBests[position].period_Best.sort((a, b) => b.playerPoints - a.playerPoints);
 			}
 		}
+
 		recordArrays.league.years[year] = {
 			regularSeason: {
 				managerBests: {},

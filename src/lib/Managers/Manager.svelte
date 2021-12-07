@@ -2,19 +2,20 @@
     import Button, { Group, Label } from '@smui/button';
     import DataTable, { Head, Body, Row, Cell } from '@smui/data-table'; 
 	import LinearProgress from '@smui/linear-progress';
-    import {loadPlayers, getLeagueStandings, getNflState, getLeagueData, getTable, leagueID, round} from '$lib/utils/helper';
+    import {loadPlayers, getLeagueStandings, getNflState, getLeagueData, getPositionTable, getTeamTable, leagueID, round} from '$lib/utils/helper';
 	import Roster from '../Rosters/Roster.svelte';
 	import TransactionsPage from '../Transactions/TransactionsPage.svelte';
     import { goto } from '$app/navigation';
     import ManagerFantasyInfo from './ManagerFantasyInfo.svelte';
     import ManagerAwards from './ManagerAwards.svelte';
     import { onMount } from 'svelte';
-    import PlayerTable from './PlayerTable.svelte';
-    import PancakeTable from './PancakeTable.svelte';
+    import PositionTable from './PositionTable.svelte';
+    import TeamTable from './TeamTable.svelte';
+    import ManagerRecords from './ManagerRecords.svelte';
 
     export let manager, managers, rostersData, users, rosterPositions, transactions, currentManagers, awards, records, managerRecords;
 
-    let showRoster = new Boolean (true);
+    let showRoster = true;
     let viewManager = managers[manager];
     let recordManID = viewManager.managerID;
 
@@ -25,8 +26,7 @@
     }
 
     let firstYear = viewManager.yearsactive[0];
-    let inactiveLastYear; 
-    let inactiveLastManaged;
+    let inactiveLastYear, inactiveLastManaged;
     if(viewManager.status == "inactive") {
         showRoster = false;
         inactiveLastYear = viewManager.yearsactive[viewManager.yearsactive.length - 1];
@@ -44,14 +44,9 @@
 
     let user = users[roster.owner_id];
 
-    let players, playersInfo;
-    let positionsInfo;
+    let players, playersInfo, positionsInfo, teamsInfo, currentYear, nflStated, leagueDatum, standings;
     let loading = true;
     let curSeason = leagueID;
-    let currentYear;
-    let nflStated;
-    let leagueDatum;
-    let standings;
     let seasons = [];
 
     for(const year in records.leagueRosterRecords[recordManID].years) {
@@ -74,7 +69,7 @@
             regSeasonRankSuper: null,
             finalRank: null,
             finalRankSuper: null,
-            showTies: new Boolean (false),
+            showTies: false,
         }
         if(season.ties > 0) {
             seasonEntry.showTies = true;
@@ -159,7 +154,7 @@
         losses: records.leagueRecordArrays.combined.managerBests.winRecords.find(m => m.recordManID == recordManID).losses,
         ties: records.leagueRecordArrays.combined.managerBests.winRecords.find(m => m.recordManID == recordManID).ties,
         winPerc: records.leagueRecordArrays.combined.managerBests.winRecords.find(m => m.recordManID == recordManID).winPerc,
-        showTies: new Boolean (false),
+        showTies: false,
     }
     if(recordHistory.ties > 0) {
         recordHistory.showTies = true;
@@ -172,7 +167,7 @@
         losses: records.leagueRecordArrays.combined.managerBests.epeRecords.find(m => m.recordManID == recordManID).epeLosses,
         ties: records.leagueRecordArrays.combined.managerBests.epeRecords.find(m => m.recordManID == recordManID).epeTies,
         epePerc: records.leagueRecordArrays.combined.managerBests.epeRecords.find(m => m.recordManID == recordManID).epePerc,
-        showTies: new Boolean (false),
+        showTies: false,
     }
     if(epeHistory.ties > 0) {
         epeHistory.showTies = true;
@@ -193,7 +188,7 @@
         medianPerc: records.leagueRecordArrays.combined.managerBests.medianRecords.find(m => m.recordManID == recordManID).medianPerc,
         topScores: records.leagueRecordArrays.combined.managerBests.medianRecords.find(m => m.recordManID == recordManID).topScores,
         bottomScores: records.leagueRecordArrays.combined.managerBests.medianRecords.find(m => m.recordManID == recordManID).bottomScores,
-        showTies: new Boolean (false),
+        showTies: false,
     }
     if(medianHistory.ties > 0) {
         medianHistory.showTies = true;
@@ -226,8 +221,11 @@
         }
 
         let recordManID = viewManager.managerID;
-        const positionsData = await getTable(recordManID);
+        const positionsData = await getPositionTable(recordManID);
         positionsInfo = positionsData;
+
+        const teamsData = await getTeamTable(recordManID);
+        teamsInfo = teamsData;
 
         loading = false;
     })
@@ -341,6 +339,12 @@
         position: relative;
         display: inline-flex;
         flex-direction: column;
+    }
+
+    .pancakeTables {
+        width: 100%;
+        position: relative;
+        display: inline-flex;
     }
 
     .managerBlock {
@@ -926,16 +930,26 @@
         {:else}
         {/if} -->
 
-        <PlayerTable {recordManID} {firstYear} {currentYear} {managerRecords} />
+        <ManagerRecords {recordManID} {firstYear} {currentYear} {managerRecords} />
     </div>
 
-    <!-- UNDER CONSTRUCTION: dynamic tree map of fantasy points by NFL team -->
     <div class="managerConstrained" style="min-height: auto">
-        {#if loading}
-            Loading positions records...
-        {:else}
-            <PancakeTable {positionsInfo} />
-        {/if}
+        <div class="pancakeTables">
+            <div class="columnWrap">
+                {#if loading}
+                    Loading positions records...
+                {:else}
+                    <PositionTable {positionsInfo} />
+                {/if}
+            </div>
+            <div class="columnWrap">
+                {#if loading}
+                    Loading teams records...
+                {:else}
+                    <TeamTable {teamsInfo} />
+                {/if}
+            </div>
+        </div>
     </div>
 
     <h3>Team Transactions</h3>

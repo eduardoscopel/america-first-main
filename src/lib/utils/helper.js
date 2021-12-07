@@ -19,7 +19,7 @@ import { getBlogPosts } from './helperFunctions/getBlogPosts';
 import { getLeagueStandings, processStandings } from './helperFunctions/leagueStandings';
 import { getNflScoreboard, getPlayByPlay, getGameDrives, getYearMatchups } from './helperFunctions/gameCenter';
 import { nflTeams } from './NFLinfo';
-import { getTable } from './helperFunctions/positionTable'; 
+import { getPositionTable, getTeamTable } from './helperFunctions/pointsTrees'; 
 import nflPlayerInfo from '$lib/utils/nflPlayerInfo.json';
 
 export {
@@ -67,6 +67,7 @@ export {
     getAuthor,
     parseDate,
     getAvatar,
-    getTable,
+    getPositionTable,
+    getTeamTable,
     nflPlayerInfo,
 }
