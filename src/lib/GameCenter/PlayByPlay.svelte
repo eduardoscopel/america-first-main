@@ -101,7 +101,7 @@
                 playType == 20 || playType == 57 || play.pointAfterType == 0 || play.pointAfterType == 43 ||
                 (playType == 60 && play.alternativeText.includes('BLOCKED'))) {    
 
-                if(awayDefStarted == true && playTeam == home && playerTeam == away) {
+                if(awayDefStarted == true && ((playTeam == home && playerTeam == away) || (playType == 52 && play.alternativeText.includes('MUFFS') && playTeam == away && playerTeam == away))) {
                     const defense = awayDefense;
                     relevantEntry = {
                         playerInfo: defense,
@@ -111,7 +111,7 @@
                         playType: playType,
                         oppDef: away,
                     }
-                } else if(homeDefStarted == true && playTeam == away && playerTeam == home) {
+                } else if(homeDefStarted == true && ((playTeam == away && playerTeam == home) || (playType == 52 && play.alternativeText.includes('MUFFS') && playTeam == home && playerTeam == home))) {
                     const defense = homeDefense;
                     relevantEntry = {
                         playerInfo: defense,
@@ -285,7 +285,7 @@
                 finalDescription = finalDescription.slice(finalDescription.indexOf('REVERSED'));
             }
 
-            if(finalDescription.includes('FUMBLES')) {
+            if(finalDescription.includes('FUMBLES') || finalDescription.includes('MUFFS')) {
 
                 fumbleInfo = {
                     initialYards: null,
@@ -306,8 +306,8 @@
                 let fumbleText = [];
             
 
-                let firstFumble = finalDescription.slice(finalDescription.indexOf('FUMBLES'));
-                let secondFumble = finalDescription.slice(finalDescription.indexOf('FUMBLES') + 7);
+                let firstFumble = finalDescription.includes('MUFFS') ? finalDescription.slice() : finalDescription.slice(finalDescription.indexOf('FUMBLES'));
+                let secondFumble = finalDescription.includes('MUFFS') ? finalDescription.slice() : finalDescription.slice(finalDescription.indexOf('FUMBLES') + 7);
                 // current logic maxes out at 3 fumbles
                 if(secondFumble.includes('FUMBLES')) {
                     let index = firstFumble.indexOf('FUMBLES', firstFumble.indexOf('FUMBLES') + 1);
@@ -329,10 +329,9 @@
                     fumbleText.push(firstFumble);
                 }
 
-                if(play.playType != 9 && (play.playType == 29 || fumbleText[fumbleText.length - 1].includes(`RECOVERED by ${play.oppTeam}`))) {
+                if(play.playType != 9 && (play.playType == 29 || fumbleText[fumbleText.length - 1].includes(`RECOVERED by ${play.oppTeam}`) || (play.playType == 52 && finalDescription.includes('MUFFS') && finalDescription.includes(`RECOVERED by ${play.team}`) && !finalDescription.includes(`RECOVERED by ${play.oppTeam}`)))) {
                     fumbleInfo.turnover = true;
                 }
-
 
                 // STRIP-SACKS
                 if(play.playType == 7 || play.secondDescription.includes('Sacked')) {
@@ -438,42 +437,57 @@
                 let totalRecoveryYards = 0;
                 for(const key in fumbleText) {
 
-                    let recoveryTeam = fumbleText[key].slice(fumbleText[key].indexOf(' by ') + 4, fumbleText[key].indexOf(' by ') + 7);
-                    if(recoveryTeam[2] == '-') {
-                        recoveryTeam = recoveryTeam.slice(0, 2);
-                    }
+                    if(!fumbleText[key].includes('MUFFS')) {
 
-                    let recoveryYards = fumbleText[key].slice(fumbleText[key].indexOf(' for ') + 5, fumbleText[key].indexOf(' for ') + 8);
-                    if(recoveryYards.includes('no')) {
-                        recoveryYards = 0;
-                    } else if(recoveryYards[2] == ' ') {
-                        recoveryYards = recoveryYards.slice(0, 2);
-                    } else if(recoveryYards[2] == 'y') {
-                        recoveryYards = recoveryYards.slice (0, 1);
-                    }
-                    recoveryYards = parseInt(recoveryYards);
-
-                    if(fumbleInfo.turnover == false) {
-                        if(fumbleInfo.initialYards < 0 && recoveryYards > 0 && play.yards <= 0) {
-                            recoveryYards = 0;
-                        } else if(fumbleInfo.initialYards < 0 && recoveryYards > 0 && play.yards > 0) {
-                            if(key == 0 && recoveryYards + fumbleInfo.initialYards <= 0) {
+                        let recoveryTeam;
+                        let recoveryYards;
+                        if(fumbleText[key].includes('and recovers') && fumbleText[key].includes('(Aborted)')) {
+                            recoveryTeam = play.team;
+                            recoveryYards = play.secondDescription.slice(play.secondDescription.indexOf('Yrd Fumble Recovery') - 4, play.secondDescription.indexOf('Yrd Fumble Recovery') - 1);
+                            if(recoveryYards != '-') {
+                                recoveryYards = recoveryYards.slice(1);
+                            }
+                            recoveryYards = parseInt(recoveryYards);
+                        } else {
+                            recoveryTeam = fumbleText[key].slice(fumbleText[key].indexOf(' by ') + 4, fumbleText[key].indexOf(' by ') + 7);
+                            if(recoveryTeam[2] == '-') {
+                                recoveryTeam = recoveryTeam.slice(0, 2);
+                            }
+                        
+                            recoveryYards = fumbleText[key].slice(fumbleText[key].indexOf(' for ') + 5, fumbleText[key].indexOf(' for ') + 8);
+                            if(recoveryYards.includes('no')) {
                                 recoveryYards = 0;
-                            } else {
-                                recoveryYards = recoveryYards + fumbleInfo.initialYards;
+                            } else if(recoveryYards[2] == ' ') {
+                                recoveryYards = recoveryYards.slice(0, 2);
+                            } else if(recoveryYards[2] == 'y') {
+                                recoveryYards = recoveryYards.slice (0, 1);
+                            }
+                            recoveryYards = parseInt(recoveryYards);
+
+                            if(fumbleInfo.turnover == false) {
+                                if(fumbleInfo.initialYards < 0 && recoveryYards > 0 && play.yards <= 0) {
+                                    recoveryYards = 0;
+                                } else if(fumbleInfo.initialYards < 0 && recoveryYards > 0 && play.yards > 0) {
+                                    if(key == 0 && recoveryYards + fumbleInfo.initialYards <= 0) {
+                                        recoveryYards = 0;
+                                    } else {
+                                        recoveryYards = recoveryYards + fumbleInfo.initialYards;
+                                    }
+                                }
                             }
                         }
-                    }
 
-                    let recoveryEntry = {
-                        player: recoveryTeam,
-                        yards: recoveryYards,
-                    }
-                    if(recoveryTeam == play.team) {
-                        fumbleInfo.statYards.push(recoveryEntry);
-                        totalRecoveryYards += recoveryYards;
-                    } else {
-                        fumbleInfo.oppYards.push(recoveryEntry);
+                        let recoveryEntry = {
+                            player: recoveryTeam,
+                            yards: recoveryYards,
+                        }
+                        if(recoveryTeam == play.team) {
+                            fumbleInfo.statYards.push(recoveryEntry);
+                            totalRecoveryYards += recoveryYards;
+                        } else {
+                            fumbleInfo.oppYards.push(recoveryEntry);
+                        }
+                        
                     }
                 }
 
@@ -483,6 +497,14 @@
                     } else if(fumbleInfo.initialYards < 0 && totalRecoveryYards > 0 && play.yards <= 0) {
                         fumbleInfo.statYards[0].yards = play.yards;
                     } 
+                } else if(finalDescription.includes('MUFFS')) {
+
+                    fumbleInfo.statYards.push({
+                        player,
+                        yards: 0,
+                        recovery: false,
+                    });
+                 
                 } else {
                     if(fumbleInfo.initialYards < 0 && !fumbleInfo.statYards[1]) {
                         fumbleInfo.statYards[0].yards = fumbleInfo.ballMoved;
@@ -1221,7 +1243,7 @@
                 }
 
                 let fumbleInfo;
-                if((play.description.includes('FUMBLES'))) {
+                if((play.description.includes('FUMBLES') || play.description.includes('MUFFS'))) {
                     fumbleInfo = processFumble(play, play.relevantPlayers);
                 }
 
@@ -1360,6 +1382,28 @@
                         let fumblerTeam;
                         if(player.statType == 'fumbler') {
                             fumblerTeam = player.playerInfo.t;
+                        //     else if(player.playType == 52 && fumbleInfo && player.statType == 'punter') {
+                        //     if(fumbleInfo.turnover == true && score.fum_lost) {
+                        //         const fpts = (score?.ff || 0); 
+                        //             const stat = 'FF(D):';
+                        //             const entryDEF = {
+                        //                 order: play.order,
+                        //                 side: 'defense',
+                        //                 manager: player.manager,
+                        //                 playerInfo: player.playerInfo,
+                        //                 stat: ['ff'],
+                        //                 runningTotals: [],
+                        //                 fpts,
+                        //                 description: play.description,
+                        //                 shortDesc: 'Forced Fumble',
+                        //             }
+                        //             if(fpts != 0) {
+                        //                 let runningTotal = pushRunningTotal(fpts, stat, entryDEF.stat[0], 1, player.playerInfo.playerID, player.playerInfo.pos); 
+                        //                 entryDEF.runningTotals.push(runningTotal);
+                        //             }
+                        //             fantasyPlay[play.playID].push(entryDEF);
+                        //     }
+                        // }
                         } else if(player.playType == 20) {                                                              // SAFETY - TEAM DEF
                             if(player.statType == 'sackedBy') {
                                 const fpts = (score?.sack || 0) + player.yards * (score?.sack_yd || 0) + (score?.qb_hit || 0) + (score?.tkl || 0) + (score?.tkl_loss || 0);
@@ -1500,7 +1544,7 @@
                                         fantasyPlay[play.playID].push(entryDEF);
                                     }
                         } else if(player.statType == 'forcedBy' && (score.ff || score.def_st_ff)) {          // FORCED FUMBLE PTS - TEAM ST
-                            if(player.playType == 52 || player.playType == 12 || player.playType == 60 || player.playType == 17 || player.playType == 37 || player.playType == 32) {
+                            if(score.def_st_ff && (player.playType == 52 || player.playType == 12 || player.playType == 60 || player.playType == 17 || player.playType == 37 || player.playType == 32)) {
                                 const fpts = (score?.def_st_ff || 0);
                                 const stat = 'FF(ST):';
                                 const entryDEF = {

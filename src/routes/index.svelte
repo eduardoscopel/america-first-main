@@ -1,8 +1,51 @@
 <script>
 	import LinearProgress from '@smui/linear-progress';
-	import { getNflState, cleanName, leagueName, homepageText, managers, gotoManager, enableBlog } from '$lib/utils/helper';
+	import { getNflState, cleanName, leagueName, homepageText, managers, gotoManager, enableBlog, getLeagueStandings, getLeagueUsers, leagueID, getAwards, round, waitForAll } from '$lib/utils/helper';
 	import { Transactions, PowerRankings, HomePost } from '$lib/components';
-    import { getAwards } from "$lib/utils/helper"
+    import Standing from "$lib/Standings/Standing.svelte";
+    import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
+    import { onMount } from 'svelte';
+
+    const sortOrder = ["fptsAgainst", "fpts", "ties", "wins"]; 
+    const columnOrder = [{name: "W", field: "wins"}, {name: "T", field: "ties"}, {name: "L", field: "losses"}, {name: "PF", field: "fpts"}, {name: "PA", field: "fptsAgainst"}, {name: "Streak", field: "streak"}];
+    let rosters, standings, year, users;
+    let showTies = false;
+    let showStreak = false;
+
+    onMount(async () => {
+        const [standingsData, usersData] = await waitForAll(
+            getLeagueStandings(),
+            getLeagueUsers(leagueID),
+        ).catch((err) => { console.error(err); });
+
+        if(standingsData) {
+            users = usersData;
+            rosters = standingsData.rostersData;
+            year = standingsData.yearData;
+            const standingsInfo = standingsData.standingsInfo;
+
+            for(const standingKey in standingsInfo) {
+                const roster = rosters[standingsInfo[standingKey].rosterID - 1];
+                standingsInfo[standingKey].fpts = round(roster.settings.fpts + (roster.settings.fpts_decimal / 100));
+                standingsInfo[standingKey].fptsAgainst = round(roster.settings.fpts_against + (roster.settings.fpts_against_decimal / 100));
+                standingsInfo[standingKey].streak = roster.metadata.streak;
+                if(standingsInfo[standingKey].ties > 0) {
+                    showTies = true;
+                }
+            }
+
+            let finalStandings = Object.keys(standingsInfo).map((key) => standingsInfo[key]);
+
+            for(const sortType of sortOrder) {
+                if(!finalStandings[0][sortType] && finalStandings[0][sortType] != 0) {
+                    continue;
+                }
+                finalStandings = [...finalStandings].sort((a,b) => b[sortType] - a[sortType]);
+            }
+
+            standings = finalStandings;
+        }
+    })
 
     let nflState = getNflState();
     let podiumsData = getAwards();
@@ -77,6 +120,47 @@
         display: block;
         width: 95%;
         margin: 10px auto;
+    }
+
+    .standings {
+        display: block;
+        width: 95%;
+        margin: 10px auto 20px auto;
+    }
+
+    .homeBanner {
+        font-weight: 420;
+        font-size: 1.5em;
+    }
+
+    .standingsBanner {
+        font-weight: 420;
+        font-size: 1.5em;
+        display: inline-flex;
+        position: relative;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        margin: 0.7em 0;
+    }
+
+    .modal {
+        display: inline-flex;
+        flex-direction: column;
+        position: absolute; 
+        z-index: 1; 
+        width: 45%;
+        height: 77%; 
+        background-color: rgb(0,0,0); 
+        background-color: rgba(0,0,0,0.8); 
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modalContent {
+        justify-content: center;
+        align-items: center;
+        color: #ededed;
     }
 
     .center {
@@ -198,6 +282,39 @@
                 {/if}
             {:catch error}
                 <p class="center">Something went wrong: {error.message}</p>
+            {/await}
+        </div>
+
+        <div class="standings" bind:this={el} >
+            {#await standings}
+                <div class="modal">
+                    <div class="modalContent">Loading Standings...</div>
+                    <LinearProgress indeterminate />
+                </div>
+            {:then standings}
+                {#if standings && standings.length}
+                    <div class="standingsBanner">
+                        {year} Standings
+                    </div>
+                    <DataTable table$aria-label="League Standings" style="width: 100%; box-shadow: 0px 3px 3px -2px var(--boxShadowOne), 0px 3px 4px 0px var(--boxShadowTwo), 0px 1px 8px 0px var(--boxShadowThree);">
+                        <Head> <!-- Team name  -->
+                            <Row>
+                                <Cell class="center">Team</Cell>
+                                {#each columnOrder as column}
+                                    {#if (column.field != 'ties' && column.field != 'streak') || (column.field == 'ties' && showTies == true) || (column.field == 'streak' && showStreak == true)}
+                                        <Cell class="center wrappable">{column.name}</Cell>
+                                    {/if}
+                                {/each}
+                            </Row>
+                        </Head>
+                        <Body>
+                            <!-- 	Standing	 -->
+                            {#each standings as standing}
+                                <Standing {columnOrder} {standing} user={users[rosters[standing.rosterID - 1].owner_id]} roster={rosters[standing.rosterID - 1]} {showTies} {showStreak} />
+                            {/each}
+                        </Body>
+                    </DataTable>
+                {/if}
             {/await}
         </div>
 

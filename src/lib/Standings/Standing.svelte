@@ -2,7 +2,7 @@
     import { gotoManager } from '$lib/utils/helper';
   	import { Row, Cell } from '@smui/data-table';
 
-    export let columnOrder, roster, user, standing;
+    export let columnOrder, roster, user, standing, showTies, showStreak;
 </script>
 
 <style>
@@ -37,6 +37,8 @@
         </div>
     </Cell>
     {#each columnOrder as column}
-        <Cell class="center">{standing[column.field]}</Cell>
+        {#if (column.field != 'ties' && column.field != 'streak') || (column.field == 'ties' && showTies == true) || (column.field == 'streak' && showStreak == true)}
+            <Cell class="center">{standing[column.field]}</Cell>
+        {/if}
     {/each}
 </Row>

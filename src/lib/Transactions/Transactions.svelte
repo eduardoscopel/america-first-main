@@ -70,7 +70,7 @@
 	{:else}
 		<!-- waiver -->
 		{#if transactions.waivers.length}
-			<h5>Recent Waiver Moves</h5>
+			<h5>Waiver Wire</h5>
 			{#each transactions.waivers as transaction }
 				<Transaction {players} {transaction} {masterOffset} {currentManagers} />
 			{/each}

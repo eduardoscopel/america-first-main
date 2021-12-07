@@ -18,6 +18,8 @@
     const columnOrder = [{name: "W", field: "wins"}, {name: "T", field: "ties"}, {name: "L", field: "losses"}, {name: "PF", field: "fpts"}, {name: "PA", field: "fptsAgainst"}, {name: "Streak", field: "streak"}]
 
     let loading = true;
+    let showTies = false;
+    let showStreak = true;
     let rosters, standings, year, users;
     let currentYear;
     let displayYear;
@@ -35,6 +37,9 @@
             standingsInfo[standingKey].fpts = round(roster.settings.fpts + (roster.settings.fpts_decimal / 100));
             standingsInfo[standingKey].fptsAgainst = round(roster.settings.fpts_against + (roster.settings.fpts_against_decimal / 100));
             standingsInfo[standingKey].streak = roster.metadata.streak;
+            if(standingsInfo[standingKey].ties > 0) {
+                showTies = true;
+            }
         }
 
         let finalStandings = Object.keys(standingsInfo).map((key) => standingsInfo[key]);
@@ -54,6 +59,7 @@
 
     let newLoading = false;
     const changeYear = async (selectedYear) => {
+        showTies = false;
         newLoading = true;
         displayYear = selectedYear;
         let purpose = 'standings';
@@ -86,6 +92,9 @@
             } else {
                 newStandings[standingKey].streak = '-';
 
+            }
+            if(newStandings[standingKey].ties > 0) {
+                showTies = true;
             }
         }
 
@@ -230,14 +239,16 @@
                     <Row>
                         <Cell class="center">Team</Cell>
                         {#each columnOrder as column}
-                            <Cell class="center wrappable">{column.name}</Cell>
+                            {#if (column.field != 'ties' && column.field != 'streak') || (column.field == 'ties' && showTies == true) || (column.field == 'streak' && showStreak == true)}
+                                <Cell class="center wrappable">{column.name}</Cell>
+                            {/if}
                         {/each}
                     </Row>
                 </Head>
                 <Body>
                     <!-- 	Standing	 -->
                     {#each standings as standing}
-                        <Standing {columnOrder} {standing} user={users[rosters[standing.rosterID - 1].owner_id]} roster={rosters[standing.rosterID - 1]} />
+                        <Standing {columnOrder} {standing} user={users[rosters[standing.rosterID - 1].owner_id]} roster={rosters[standing.rosterID - 1]} {showTies} {showStreak} />
                     {/each}
                 </Body>
             </DataTable>
