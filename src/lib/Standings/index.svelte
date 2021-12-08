@@ -72,7 +72,7 @@
             yearMatchups.rawData = yearMatchups.rawData.slice(0, yearMatchups.week - 1);
         }
 
-        let medianMatch = new Boolean (false);
+        let medianMatch = false;
         if(yearMatchups.yearLeagueData.settings.league_average_match == 1) {
             medianMatch = true;
         }

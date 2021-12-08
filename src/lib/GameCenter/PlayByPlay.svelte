@@ -1097,8 +1097,8 @@
                     totalFpts: 0,
                     filter: 'password',
                     pos: position,
-                    yardsAllowedScored: new Boolean (false),
-                    pointsAllowedScored: new Boolean (false),
+                    yardsAllowedScored: false,
+                    pointsAllowedScored: false,
                     bonus: [],
                 }
             }

@@ -15,10 +15,10 @@
     let completeGames = [];
 
     let gameSelection;
-    let showGameBox = new Boolean (true);
+    let showGameBox = true;
 
     let matchSelection;
-    let showMatchBox = new Boolean (false);
+    let showMatchBox = false;
 
     let managerSelection = 0;
 

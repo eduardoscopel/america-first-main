@@ -674,12 +674,12 @@ export const getLeagueRecords = async (refresh = false) => {
 							const playerID = players[i];
 							const playerPoints = playersPTS[playerID];
 		
-							let topStarter = new Boolean (false);
-							let bottomStarter = new Boolean (false);
+							let topStarter = false;
+							let bottomStarter = false;
 							let starterRank;
 							let PTSasStarter;
 							let PTSonBench;
-							let benched = new Boolean (true);
+							let benched = true;
 							let rosterSpot;
 		
 							if(starters.includes(playerID)) {
@@ -875,12 +875,12 @@ export const getLeagueRecords = async (refresh = false) => {
 								const playerID = players[i];
 								const playerPoints = playersPTS[playerID];
 			
-								let topStarter = new Boolean (false);
-								let bottomStarter = new Boolean (false);
+								let topStarter = false;
+								let bottomStarter = false;
 								let starterRank;
 								let PTSasStarter;
 								let PTSonBench;
-								let benched = new Boolean (true);
+								let benched = true;
 								let rosterSpot;
 			
 								if(starters.includes(playerID)) {
@@ -1072,12 +1072,12 @@ export const getLeagueRecords = async (refresh = false) => {
 								const playerID = players[i];
 								const playerPoints = playersPTS[playerID];
 			
-								let topStarter = new Boolean (false);
-								let bottomStarter = new Boolean (false);
+								let topStarter = false;
+								let bottomStarter = false;
 								let starterRank;
 								let PTSasStarter;
 								let PTSonBench;
-								let benched = new Boolean (true);
+								let benched = true;
 								let rosterSpot;
 			
 								if(starters.includes(playerID)) {
@@ -1205,7 +1205,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								bottomScore: new Boolean(false),
 								matchWin: new Boolean(false),
 								matchLoss: new Boolean(false),
-								matchTie: new Boolean (false),
+								matchTie: false,
 								matchDifferential,
 								week: opponent.week,
 								year,
@@ -1269,12 +1269,12 @@ export const getLeagueRecords = async (refresh = false) => {
 								const playerID = players[i];
 								const playerPoints = playersPTS[playerID];
 			
-								let topStarter = new Boolean (false);
-								let bottomStarter = new Boolean (false);
+								let topStarter = false;
+								let bottomStarter = false;
 								let starterRank;
 								let PTSasStarter;
 								let PTSonBench;
-								let benched = new Boolean (true);
+								let benched = true;
 								let rosterSpot;
 			
 								if(starters.includes(playerID)) {
@@ -1462,12 +1462,12 @@ export const getLeagueRecords = async (refresh = false) => {
 					const playerID = players[i];
 					const playerPoints = playersPTS[playerID];
 
-					let topStarter = new Boolean (false);
-					let bottomStarter = new Boolean (false);
+					let topStarter = false;
+					let bottomStarter = false;
 					let starterRank;
 					let PTSasStarter;
 					let PTSonBench;
-					let benched = new Boolean (true);
+					let benched = true;
 					let rosterSpot;
 
 					if(starters.includes(playerID)) {

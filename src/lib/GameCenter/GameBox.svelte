@@ -171,7 +171,7 @@
                             wins: standingsData.standingsInfo[key].wins,
                             ties: standingsData.standingsInfo[key].ties,
                             losses: standingsData.standingsInfo[key].losses,
-                            showTies: new Boolean (false),
+                            showTies: false,
                         }
                         if(records[i].ties != 0) {
                             records[i].showTies = true;

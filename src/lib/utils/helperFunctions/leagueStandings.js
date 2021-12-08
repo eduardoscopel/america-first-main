@@ -19,7 +19,7 @@ export const getLeagueStandings = async () => {
 
 	const yearData = leagueData.season;
 	const regularSeasonLength = leagueData.settings.playoff_week_start - 1;
-	let medianMatch = new Boolean (false);
+	let medianMatch = false;
 	if(leagueData.settings.league_average_match == 1) {
 		medianMatch = true;
 	}
