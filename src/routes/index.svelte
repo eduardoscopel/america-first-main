@@ -133,7 +133,7 @@
         font-size: 1.5em;
     }
 
-    .standingsBanner {
+    .sectionBanner {
         font-weight: 420;
         font-size: 1.5em;
         display: inline-flex;
@@ -293,7 +293,7 @@
                 </div>
             {:then standings}
                 {#if standings && standings.length}
-                    <div class="standingsBanner">
+                    <div class="sectionBanner">
                         {year} Standings
                     </div>
                     <DataTable table$aria-label="League Standings" style="width: 100%; box-shadow: 0px 3px 3px -2px var(--boxShadowOne), 0px 3px 4px 0px var(--boxShadowTwo), 0px 1px 8px 0px var(--boxShadowThree);">
@@ -319,6 +319,7 @@
         </div>
 
         <div class="transactions" bind:this={el} >
+            <div class="sectionBanner">Waiver Priority</div>
             <Transactions masterOffset={left} />
         </div>
     </div>
