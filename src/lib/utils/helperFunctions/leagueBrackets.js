@@ -1,8 +1,9 @@
-import { getLeagueData } from './leagueData';
-import { leagueID } from '$lib/utils/leagueInfo';
-import { getLeagueRosters } from './leagueRosters';
-import { getLeagueUsers } from './leagueUsers';
-import {waitForAll} from './multiPromise';
+import {
+	waitForAll,
+	getLeagueUsers,
+	getLeagueRosters,
+	leagueID,
+	getLeagueData } from '$lib/utils/helper';
 import { get } from 'svelte/store';
 import {brackets} from '$lib/stores';
 

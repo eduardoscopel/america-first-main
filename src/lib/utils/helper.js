@@ -21,11 +21,13 @@ import { getNflScoreboard, getPlayByPlay, getGameDrives, getYearMatchups } from 
 import { nflTeams } from './NFLinfo';
 import { getPositionTable, getTeamTable } from './helperFunctions/pointsTrees'; 
 import nflPlayerInfo from '$lib/utils/nflPlayerInfo.json';
+import leagueHistory from '$lib/utils/leagueHistory.json';
 
 export {
     enableBlog,
     homepageText,
     importHistory,
+    leagueHistory,
     importType,
     creationYear,
     gotoManager,

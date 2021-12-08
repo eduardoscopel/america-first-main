@@ -1,10 +1,12 @@
-import { getLeagueData } from './leagueData';
-import { getLeagueRosters } from './leagueRosters';
-import { getLeagueUsers } from './leagueUsers';
-import {waitForAll} from './multiPromise';
+import {
+	waitForAll,
+	getLeagueUsers,
+	getLeagueRosters,
+	leagueID,
+	managers,
+	getLeagueData } from '$lib/utils/helper';
 import { get } from 'svelte/store';
 import {awards} from '$lib/stores';
-import { managers, leagueID } from '$lib/utils/leagueInfo';
 
 
 export const getAwards = async () => {

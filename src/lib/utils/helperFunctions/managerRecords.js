@@ -1,12 +1,17 @@
-import { getLeagueData } from './leagueData';
-import { leagueID, managers } from '$lib/utils/leagueInfo';
-import { getNflState } from './nflState';
-import { getLeagueRosters } from "./leagueRosters"
-import { getLeagueUsers } from "./leagueUsers"
-import { waitForAll } from './multiPromise';
 import { get } from 'svelte/store';
 import { managerrecords } from '$lib/stores';
-import { loadPlayers, getPreviousDrafts, nflPlayerInfo, nflTeams } from '$lib/utils/helper';
+import { 
+	loadPlayers, 
+	getPreviousDrafts, 
+	nflPlayerInfo, 
+	nflTeams, 
+	waitForAll, 
+	getLeagueUsers, 
+	getLeagueRosters, 
+	getNflState, 
+	leagueID, 
+	managers, 
+	getLeagueData } from '$lib/utils/helper';
 
 export const getManagerRecords = async (refresh = false) => {
 	if(get(managerrecords).managerRecordArrays) {

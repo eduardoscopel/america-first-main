@@ -1,5 +1,14 @@
-import { leagueID, managers } from '$lib/utils/leagueInfo';
-import { nflTeams, getLeagueData, getLeagueUsers, getLeagueRosters, getNflState, getLeagueMatchups, waitForAll, loadPlayers } from '$lib/utils/helper';
+import {
+	waitForAll,
+	getLeagueUsers,
+	getLeagueRosters,
+	getNflState,
+	leagueID,
+	managers,
+	getLeagueData,
+    nflTeams,
+    getLeagueMatchups,
+    loadPlayers } from '$lib/utils/helper';
 import { get } from 'svelte/store';
 import { leagueData, scoreboardStore } from '$lib/stores';
 
