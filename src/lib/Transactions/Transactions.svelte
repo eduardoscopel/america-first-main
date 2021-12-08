@@ -9,17 +9,22 @@
 	export let masterOffset = 0;
 
 	let loading = true;
-	let players, transactions, currentManagers, rosters, waiverBudget, waiverWire;
+	let players, transactions, currentManagers, rosters;
+	let waiverType, waiverBudget, waiverWire;
 
-	const getWaiverWire = (rosters, waiverBudget, currentManagers) => {
+	const getWaiverWire = (rosters, waiverBudget, waiverType, currentManagers) => {
 		waiverWire = [];
 		for(const key in rosters) {
-			const remainingFaab = waiverBudget - rosters[key].settings.waiver_budget_used;
+			let remainingFaab;
+			if(waiverType == 2) {
+				remainingFaab = waiverBudget - rosters[key].settings.waiver_budget_used;
+			}
 			waiverWire.push({
 				rosterID: rosters[key].roster_id,
 				faab: remainingFaab,
 				priority: rosters[key].settings.waiver_position,
 				manager: currentManagers[rosters[key].roster_id],
+				moves: rosters[key].settings.total_moves,
 			})
 		}
 		waiverWire = waiverWire.sort((a, b) => a.priority - b.priority);
@@ -31,7 +36,10 @@
 		transactions = transactionsData.transactions;
 		currentManagers = transactionsData.currentManagers;
 		rosters = rostersData.rosters;
-		waiverBudget = leagueData.settings.waiver_budget;
+		waiverType = leagueData.settings.waiver_type;
+		if(waiverType == 2) {
+			waiverBudget = leagueData.settings.waiver_budget;
+		}
 
 		if(transactionsData.stale) {
 			const newTransactions = await getLeagueTransactions(true, true);
@@ -43,7 +51,7 @@
 			players = newPlayersData.players;
 		}
 		if(rosters) {
-			getWaiverWire(rosters, waiverBudget, currentManagers);
+			getWaiverWire(rosters, waiverBudget, waiverType, currentManagers);
 		}
 
 		loading = false;
@@ -111,7 +119,10 @@
 					<Row>
 						<Cell class="center" />
 						<Cell class="center">Team</Cell>
-						<Cell class="center">FAAB</Cell>
+						<Cell class="center">Moves</Cell>
+						{#if waiverType == 2}
+							<Cell class="center">FAAB</Cell>
+						{/if}
 					</Row>
 				</Head>
 				<Body>
@@ -122,7 +133,10 @@
 								<img class="avatar clickable" on:click={() => gotoManager(waiver.rosterID)} src="{waiver.manager.avatar}" alt="{waiver.manager.name} avatar"/>
 								{waiver.manager.name}
 							</Cell>
-							<Cell class="center">${waiver.faab}</Cell>
+							<Cell class="center">{waiver.moves}</Cell>
+							{#if waiverType == 2}
+								<Cell class="center">${waiver.faab}</Cell>
+							{/if}
 						</Row>
 					{/each}
 				</Body>
