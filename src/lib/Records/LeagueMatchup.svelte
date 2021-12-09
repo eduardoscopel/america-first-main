@@ -256,7 +256,7 @@
             {#if starter}
                 <div class="rosterRow" style="justify-content: flex-end;">
                     <div class="rosterPlayerInfo">
-                        {#if starter.pos == 'DEF'}
+                        {#if starter?.playerInfo.pos == 'DEF'}
                             <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 7%;">{starter?.playerInfo.ln} D/ST</div>
                         {:else}
                             <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 3%;">{starter?.playerInfo.fn.slice(0, 1)}. {starter?.playerInfo.ln}</div>

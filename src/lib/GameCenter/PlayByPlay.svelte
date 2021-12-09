@@ -3530,133 +3530,135 @@
                     // IF DEF is started && IF stats count, loop thru drives API to flag 4th down stops, 3 & outs, etc
                     if((gameState == 'in' || gameState == 'post') && (homeDefStarted == true || awayDefStarted == true) && (score.def_3_and_out || score.def_4_and_stop)) { 
                         let drivesData = await getGameDrives(relevancyKey.games[gameSelect], true).catch((err) => { console.error(err); });
-                        let drivesKey = drivesData.length;
+                        if(drivesData) {
+                            let drivesKey = drivesData.length;
 
-                        for(let d = 0; d < drivesKey; d++) {
-                            let driveData = drivesData[d].items;
+                            for(let d = 0; d < drivesKey; d++) {
+                                let driveData = drivesData[d].items;
 
-                            for(let e = 0; e < driveData.length; e++) {
-                                let drive = driveData[e];
-                                
-                                if(score.def_3_and_out && drive.offensivePlays == 3 && drive.result == 'PUNT') {
-                                    let lastPlay = drive.plays.items[drive.plays.items.length - 1];
-                                    if(!lastPlay.participants) {
-                                        lastPlay = drive.plays.items[drive.plays.items.length - 2];
-                                    }
-                                    let linkType = 'participants';
-                                    let playTeam = parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
-                                    let oppTeam;
-                                    let defense;
-
-                                    if((playTeam == homeEspn && awayDefStarted == false) || (playTeam == awayEspn && homeDefStarted == false)) {
-                                        continue;
-                                    } else {
-                                        if(playTeam == homeEspn) {
-                                            oppTeam = awayEspn;
-                                            defense = awayDefense;
-                                        } else {
-                                            oppTeam = homeEspn;
-                                            defense = homeDefense;
+                                for(let e = 0; e < driveData.length; e++) {
+                                    let drive = driveData[e];
+                                    
+                                    if(score.def_3_and_out && drive.offensivePlays == 3 && drive.result == 'PUNT') {
+                                        let lastPlay = drive.plays.items[drive.plays.items.length - 1];
+                                        if(!lastPlay.participants) {
+                                            lastPlay = drive.plays.items[drive.plays.items.length - 2];
                                         }
-                                    }
-                                    // the play object with all necessary info
-                                    const playEntry = {
-                                        playID: lastPlay.id,
-                                        order: parseInt(lastPlay.sequenceNumber),
-                                        playType: '3andout',
-                                        team: playTeam,
-                                        oppTeam,
-                                        description: lastPlay.alternativeText,
-                                        secondDescription: lastPlay.shortAlternativeText,
-                                        scoringPlay: false,
-                                        scoringType: null,
-                                        pointAfterType: null,
-                                        scoreValue: 0,
-                                        scoreValueAgainstDEF: 0,
-                                        scoreValueAgainstOppDEF: 0,
-                                        yards: lastPlay.statYardage,
-                                        relevantPlayers: [],
-                                        relevantDEF: [],
-                                        scoreAgainstDEF: false,
-                                        scoreAgainstOppDEF: false,
-                                        teamStartPoss: lastPlay?.start.team?.$ref || null,
-                                        teamEndPoss: lastPlay?.end.team?.$ref || null,
-                                        noPlay: false,
-                                        penalty: false,
-                                        penaltyInfo: null,
-                                        injuredStarter: false,
-                                        injuryInfo: [],
-                                    }
+                                        let linkType = 'participants';
+                                        let playTeam = parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
+                                        let oppTeam;
+                                        let defense;
 
-                                    const relevantEntry = {
-                                        playerInfo: defense,
-                                        manager: defense.owner,
-                                        statType: lastPlay.participants[0].type,
-                                        yards: lastPlay.statYardage, 
-                                        playType: '3andout',
-                                        oppDef: playTeam,
-                                    }
-                                    playEntry.relevantDEF.push(relevantEntry);
-                                    fantasyRelevantPlaysForward.push(playEntry);
-                                } else if(score.def_4_and_stop && drive.result == 'DOWNS') {
-                                    let lastPlay = drive.plays.items[drive.plays.items.length - 1];
-                                    if(!lastPlay.participants) {
-                                        lastPlay = drive.plays.items[drive.plays.items.length - 2];
-                                    }
-                                    let linkType = 'participants';
-                                    let playTeam = parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
-                                    let oppTeam;
-                                    let defense;
-
-                                    if((playTeam == homeEspn && awayDefStarted == false) || (playTeam == awayEspn && homeDefStarted == false)) {
-                                        continue;
-                                    } else {
-                                        if(playTeam == homeEspn) {
-                                            oppTeam = awayEspn;
-                                            defense = awayDefense;
+                                        if((playTeam == homeEspn && awayDefStarted == false) || (playTeam == awayEspn && homeDefStarted == false)) {
+                                            continue;
                                         } else {
-                                            oppTeam = homeEspn;
-                                            defense = homeDefense;
+                                            if(playTeam == homeEspn) {
+                                                oppTeam = awayEspn;
+                                                defense = awayDefense;
+                                            } else {
+                                                oppTeam = homeEspn;
+                                                defense = homeDefense;
+                                            }
                                         }
-                                    }
-                                    // the play object with all necessary info
-                                    const playEntry = {
-                                        playID: lastPlay.id,
-                                        order: parseInt(lastPlay.sequenceNumber),
-                                        playType: '4thdown',
-                                        team: playTeam,
-                                        oppTeam,
-                                        description: lastPlay.alternativeText,
-                                        scoringPlay: false,
-                                        scoringType: null,
-                                        pointAfterType: null,
-                                        scoreValue: 0,
-                                        scoreValueAgainstDEF: 0,
-                                        scoreValueAgainstOppDEF: 0,
-                                        yards: lastPlay.statYardage,
-                                        relevantPlayers: [],
-                                        relevantDEF: [],
-                                        scoreAgainstDEF: false,
-                                        scoreAgainstOppDEF: false,
-                                        teamStartPoss: lastPlay?.start.team?.$ref || null,
-                                        teamEndPoss: lastPlay?.end.team?.$ref || null,
-                                        noPlay: false,
-                                        penalty: false,
-                                        penaltyInfo: null,
-                                        injuredStarter: false,
-                                        injuryInfo: [],
-                                    }
+                                        // the play object with all necessary info
+                                        const playEntry = {
+                                            playID: lastPlay.id,
+                                            order: parseInt(lastPlay.sequenceNumber),
+                                            playType: '3andout',
+                                            team: playTeam,
+                                            oppTeam,
+                                            description: lastPlay.alternativeText,
+                                            secondDescription: lastPlay.shortAlternativeText,
+                                            scoringPlay: false,
+                                            scoringType: null,
+                                            pointAfterType: null,
+                                            scoreValue: 0,
+                                            scoreValueAgainstDEF: 0,
+                                            scoreValueAgainstOppDEF: 0,
+                                            yards: lastPlay.statYardage,
+                                            relevantPlayers: [],
+                                            relevantDEF: [],
+                                            scoreAgainstDEF: false,
+                                            scoreAgainstOppDEF: false,
+                                            teamStartPoss: lastPlay?.start.team?.$ref || null,
+                                            teamEndPoss: lastPlay?.end.team?.$ref || null,
+                                            noPlay: false,
+                                            penalty: false,
+                                            penaltyInfo: null,
+                                            injuredStarter: false,
+                                            injuryInfo: [],
+                                        }
 
-                                    const relevantEntry = {
-                                        playerInfo: defense,
-                                        manager: defense.owner,
-                                        statType: lastPlay.participants[0].type,
-                                        yards: lastPlay.statYardage, 
-                                        playType: '4thdown',
-                                        oppDef: playTeam,
+                                        const relevantEntry = {
+                                            playerInfo: defense,
+                                            manager: defense.owner,
+                                            statType: lastPlay.participants[0].type,
+                                            yards: lastPlay.statYardage, 
+                                            playType: '3andout',
+                                            oppDef: playTeam,
+                                        }
+                                        playEntry.relevantDEF.push(relevantEntry);
+                                        fantasyRelevantPlaysForward.push(playEntry);
+                                    } else if(score.def_4_and_stop && drive.result == 'DOWNS') {
+                                        let lastPlay = drive.plays.items[drive.plays.items.length - 1];
+                                        if(!lastPlay.participants) {
+                                            lastPlay = drive.plays.items[drive.plays.items.length - 2];
+                                        }
+                                        let linkType = 'participants';
+                                        let playTeam = parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
+                                        let oppTeam;
+                                        let defense;
+
+                                        if((playTeam == homeEspn && awayDefStarted == false) || (playTeam == awayEspn && homeDefStarted == false)) {
+                                            continue;
+                                        } else {
+                                            if(playTeam == homeEspn) {
+                                                oppTeam = awayEspn;
+                                                defense = awayDefense;
+                                            } else {
+                                                oppTeam = homeEspn;
+                                                defense = homeDefense;
+                                            }
+                                        }
+                                        // the play object with all necessary info
+                                        const playEntry = {
+                                            playID: lastPlay.id,
+                                            order: parseInt(lastPlay.sequenceNumber),
+                                            playType: '4thdown',
+                                            team: playTeam,
+                                            oppTeam,
+                                            description: lastPlay.alternativeText,
+                                            scoringPlay: false,
+                                            scoringType: null,
+                                            pointAfterType: null,
+                                            scoreValue: 0,
+                                            scoreValueAgainstDEF: 0,
+                                            scoreValueAgainstOppDEF: 0,
+                                            yards: lastPlay.statYardage,
+                                            relevantPlayers: [],
+                                            relevantDEF: [],
+                                            scoreAgainstDEF: false,
+                                            scoreAgainstOppDEF: false,
+                                            teamStartPoss: lastPlay?.start.team?.$ref || null,
+                                            teamEndPoss: lastPlay?.end.team?.$ref || null,
+                                            noPlay: false,
+                                            penalty: false,
+                                            penaltyInfo: null,
+                                            injuredStarter: false,
+                                            injuryInfo: [],
+                                        }
+
+                                        const relevantEntry = {
+                                            playerInfo: defense,
+                                            manager: defense.owner,
+                                            statType: lastPlay.participants[0].type,
+                                            yards: lastPlay.statYardage, 
+                                            playType: '4thdown',
+                                            oppDef: playTeam,
+                                        }
+                                        playEntry.relevantDEF.push(relevantEntry);
+                                        fantasyRelevantPlaysForward.push(playEntry);
                                     }
-                                    playEntry.relevantDEF.push(relevantEntry);
-                                    fantasyRelevantPlaysForward.push(playEntry);
                                 }
                             }
                         }
@@ -3707,7 +3709,7 @@
             }
             
             // identify NFL teams in the current game
-            let game = nflMatchups.find(m => m[0].gameID == gameSelection);
+            let game = gameSelection ? nflMatchups.find(m => m[0].gameID == gameSelection) : nflMatchups[0];
             let gameState = game[0].status.type.state;
 
             let home = game[0].sleeperID;
@@ -3967,133 +3969,135 @@
                 // IF DEF is started && IF stats count, loop thru drives API to flag 4th down stops, 3 & outs, etc
                 if((gameState == 'in' || gameState == 'post') && (homeDefStarted == true || awayDefStarted == true) && (score.def_3_and_out || score.def_4_and_stop)) { 
                     let drivesData = await getGameDrives(gameSelection, true).catch((err) => { console.error(err); });
-                    let drivesKey = drivesData.length;
+                    if(drivesData) {
+                        let drivesKey = drivesData.length;
 
-                    for(let d = 0; d < drivesKey; d++) {
-                        let driveData = drivesData[d].items;
+                        for(let d = 0; d < drivesKey; d++) {
+                            let driveData = drivesData[d].items;
 
-                        for(let e = 0; e < driveData.length; e++) {
-                            let drive = driveData[e];
-                                
-                            if(score.def_3_and_out && drive.offensivePlays == 3 && drive.result == 'PUNT') {
-                                let lastPlay = drive.plays.items[drive.plays.items.length - 1];
-                                if(!lastPlay.participants) {
-                                    lastPlay = drive.plays.items[drive.plays.items.length - 2];
-                                }
-                                let linkType = 'participants';
-                                let playTeam = parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
-                                let oppTeam;
-                                let defense;
-
-                                if((playTeam == homeEspn && awayDefStarted == false) || (playTeam == awayEspn && homeDefStarted == false)) {
-                                    continue;
-                                } else {
-                                    if(playTeam == homeEspn) {
-                                        oppTeam = awayEspn;
-                                        defense = awayDefense;
-                                    } else {
-                                        oppTeam = homeEspn;
-                                        defense = homeDefense;
+                            for(let e = 0; e < driveData.length; e++) {
+                                let drive = driveData[e];
+                                    
+                                if(score.def_3_and_out && drive.offensivePlays == 3 && drive.result == 'PUNT') {
+                                    let lastPlay = drive.plays.items[drive.plays.items.length - 1];
+                                    if(!lastPlay.participants) {
+                                        lastPlay = drive.plays.items[drive.plays.items.length - 2];
                                     }
-                                }
-                                // the play object with all necessary info
-                                const playEntry = {
-                                    playID: lastPlay.id,
-                                    order: parseInt(lastPlay.sequenceNumber),
-                                    playType: '3andout',
-                                    team: playTeam,
-                                    oppTeam,
-                                    description: lastPlay.alternativeText,
-                                    secondDescription: lastPlay.shortAlternativeText,
-                                    scoringPlay: false,
-                                    scoringType: null,
-                                    pointAfterType: null,
-                                    scoreValue: 0,
-                                    scoreValueAgainstDEF: 0,
-                                    scoreValueAgainstOppDEF: 0,
-                                    yards: lastPlay.statYardage,
-                                    relevantPlayers: [],
-                                    relevantDEF: [],
-                                    scoreAgainstDEF: false,
-                                    scoreAgainstOppDEF: false,
-                                    teamStartPoss: lastPlay?.start.team?.$ref || null,
-                                    teamEndPoss: lastPlay?.end.team?.$ref || null,
-                                    noPlay: false,
-                                    penalty: false,
-                                    penaltyInfo: null,
-                                    injuredStarter: false,
-                                    injuryInfo: [],
-                                }
+                                    let linkType = 'participants';
+                                    let playTeam = parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
+                                    let oppTeam;
+                                    let defense;
 
-                                const relevantEntry = {
-                                    playerInfo: defense,
-                                    manager: defense.owner,
-                                    statType: lastPlay.participants[0].type,
-                                    yards: lastPlay.statYardage, 
-                                    playType: '3andout',
-                                    oppDef: playTeam,
-                                }
-                                playEntry.relevantDEF.push(relevantEntry);
-                                fantasyRelevantPlaysForward.push(playEntry);
-                            } else if(score.def_4_and_stop && drive.result == 'DOWNS') {
-                                let lastPlay = drive.plays.items[drive.plays.items.length - 1];
-                                if(!lastPlay.participants) {
-                                    lastPlay = drive.plays.items[drive.plays.items.length - 2];
-                                }
-                                let linkType = 'participants';
-                                let playTeam = parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
-                                let oppTeam;
-                                let defense;
-
-                                if((playTeam == homeEspn && awayDefStarted == false) || (playTeam == awayEspn && homeDefStarted == false)) {
-                                    continue;
-                                } else {
-                                    if(playTeam == homeEspn) {
-                                        oppTeam = awayEspn;
-                                        defense = awayDefense;
+                                    if((playTeam == homeEspn && awayDefStarted == false) || (playTeam == awayEspn && homeDefStarted == false)) {
+                                        continue;
                                     } else {
-                                        oppTeam = homeEspn;
-                                        defense = homeDefense;
+                                        if(playTeam == homeEspn) {
+                                            oppTeam = awayEspn;
+                                            defense = awayDefense;
+                                        } else {
+                                            oppTeam = homeEspn;
+                                            defense = homeDefense;
+                                        }
                                     }
-                                }
-                                // the play object with all necessary info
-                                const playEntry = {
-                                    playID: lastPlay.id,
-                                    order: parseInt(lastPlay.sequenceNumber),
-                                    playType: '4thdown',
-                                    team: playTeam,
-                                    oppTeam,
-                                    description: lastPlay.alternativeText,
-                                    scoringPlay: false,
-                                    scoringType: null,
-                                    pointAfterType: null,
-                                    scoreValue: 0,
-                                    scoreValueAgainstDEF: 0,
-                                    scoreValueAgainstOppDEF: 0,
-                                    yards: lastPlay.statYardage,
-                                    relevantPlayers: [],
-                                    relevantDEF: [],
-                                    scoreAgainstDEF: false,
-                                    scoreAgainstOppDEF: false,
-                                    teamStartPoss: lastPlay?.start.team?.$ref || null,
-                                    teamEndPoss: lastPlay?.end.team?.$ref || null,
-                                    noPlay: false,
-                                    penalty: false,
-                                    penaltyInfo: null,
-                                    injuredStarter: false,
-                                    injuryInfo: [],
-                                }
+                                    // the play object with all necessary info
+                                    const playEntry = {
+                                        playID: lastPlay.id,
+                                        order: parseInt(lastPlay.sequenceNumber),
+                                        playType: '3andout',
+                                        team: playTeam,
+                                        oppTeam,
+                                        description: lastPlay.alternativeText,
+                                        secondDescription: lastPlay.shortAlternativeText,
+                                        scoringPlay: false,
+                                        scoringType: null,
+                                        pointAfterType: null,
+                                        scoreValue: 0,
+                                        scoreValueAgainstDEF: 0,
+                                        scoreValueAgainstOppDEF: 0,
+                                        yards: lastPlay.statYardage,
+                                        relevantPlayers: [],
+                                        relevantDEF: [],
+                                        scoreAgainstDEF: false,
+                                        scoreAgainstOppDEF: false,
+                                        teamStartPoss: lastPlay?.start.team?.$ref || null,
+                                        teamEndPoss: lastPlay?.end.team?.$ref || null,
+                                        noPlay: false,
+                                        penalty: false,
+                                        penaltyInfo: null,
+                                        injuredStarter: false,
+                                        injuryInfo: [],
+                                    }
 
-                                const relevantEntry = {
-                                    playerInfo: defense,
-                                    manager: defense.owner,
-                                    statType: lastPlay.participants[0].type,
-                                    yards: lastPlay.statYardage, 
-                                    playType: '4thdown',
-                                    oppDef: playTeam,
+                                    const relevantEntry = {
+                                        playerInfo: defense,
+                                        manager: defense.owner,
+                                        statType: lastPlay.participants[0].type,
+                                        yards: lastPlay.statYardage, 
+                                        playType: '3andout',
+                                        oppDef: playTeam,
+                                    }
+                                    playEntry.relevantDEF.push(relevantEntry);
+                                    fantasyRelevantPlaysForward.push(playEntry);
+                                } else if(score.def_4_and_stop && drive.result == 'DOWNS') {
+                                    let lastPlay = drive.plays.items[drive.plays.items.length - 1];
+                                    if(!lastPlay.participants) {
+                                        lastPlay = drive.plays.items[drive.plays.items.length - 2];
+                                    }
+                                    let linkType = 'participants';
+                                    let playTeam = parseEspnTeamID(lastPlay.participants[0].athlete.$ref, linkType);
+                                    let oppTeam;
+                                    let defense;
+
+                                    if((playTeam == homeEspn && awayDefStarted == false) || (playTeam == awayEspn && homeDefStarted == false)) {
+                                        continue;
+                                    } else {
+                                        if(playTeam == homeEspn) {
+                                            oppTeam = awayEspn;
+                                            defense = awayDefense;
+                                        } else {
+                                            oppTeam = homeEspn;
+                                            defense = homeDefense;
+                                        }
+                                    }
+                                    // the play object with all necessary info
+                                    const playEntry = {
+                                        playID: lastPlay.id,
+                                        order: parseInt(lastPlay.sequenceNumber),
+                                        playType: '4thdown',
+                                        team: playTeam,
+                                        oppTeam,
+                                        description: lastPlay.alternativeText,
+                                        scoringPlay: false,
+                                        scoringType: null,
+                                        pointAfterType: null,
+                                        scoreValue: 0,
+                                        scoreValueAgainstDEF: 0,
+                                        scoreValueAgainstOppDEF: 0,
+                                        yards: lastPlay.statYardage,
+                                        relevantPlayers: [],
+                                        relevantDEF: [],
+                                        scoreAgainstDEF: false,
+                                        scoreAgainstOppDEF: false,
+                                        teamStartPoss: lastPlay?.start.team?.$ref || null,
+                                        teamEndPoss: lastPlay?.end.team?.$ref || null,
+                                        noPlay: false,
+                                        penalty: false,
+                                        penaltyInfo: null,
+                                        injuredStarter: false,
+                                        injuryInfo: [],
+                                    }
+
+                                    const relevantEntry = {
+                                        playerInfo: defense,
+                                        manager: defense.owner,
+                                        statType: lastPlay.participants[0].type,
+                                        yards: lastPlay.statYardage, 
+                                        playType: '4thdown',
+                                        oppDef: playTeam,
+                                    }
+                                    playEntry.relevantDEF.push(relevantEntry);
+                                    fantasyRelevantPlaysForward.push(playEntry);
                                 }
-                                playEntry.relevantDEF.push(relevantEntry);
-                                fantasyRelevantPlaysForward.push(playEntry);
                             }
                         }
                     }

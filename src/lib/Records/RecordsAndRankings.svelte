@@ -999,7 +999,7 @@
         position: relative;
         display: inline-flex;
         color: var(--gcPlayRowText);
-        width: 92%;
+        width: 90%;
         padding: 0 4%;
         height: 2.5em;
         align-items: center;
@@ -1009,7 +1009,7 @@
         cursor: pointer;
         background-color: var(--gcSelect);
         border: 0.1em solid var(--g111);
-        height: 2.3em;
+        height: 2.5em;
         width: 90%;
     }
 

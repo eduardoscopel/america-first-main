@@ -70,10 +70,12 @@
         completeGames = [];
 
         let newNflMatchups = await getNflScoreboard(yearSelection, newWeekSelection).catch((err) => { console.error(err); });;
-        nflMatchups = newNflMatchups.nflWeek;
-        gameSelection = nflMatchups[0][0].gameID;
         viewPlayerID = null;
-        newLoading = false;
+        if(newNflMatchups) {
+            nflMatchups = newNflMatchups.nflWeek;
+            gameSelection = nflMatchups[0][0].gameID;
+            newLoading = false;
+        }
     }
     $: changeWeek(weekSelection);
 
@@ -88,18 +90,22 @@
         }
 
         let newNflMatchups = await getNflScoreboard(newYearSelection, weekSelection).catch((err) => { console.error(err); });;
-        nflMatchups = newNflMatchups.nflWeek;
+        if(newNflMatchups) {
+            nflMatchups = newNflMatchups.nflWeek;
+        }
 
         let purpose = 'gameCenter';
         let newYearMatchups = await getYearMatchups(newYearSelection, weekSelection, purpose).catch((err) => { console.error(err); });;
-        weekMatchups = newYearMatchups.matchupWeeks[weekSelection - 1].matchups;
-        matchupsInfo = newYearMatchups;
-        yearLeagueData = newYearMatchups.yearLeagueData;
-        rosterData = newYearMatchups.rosters;
-        users = newYearMatchups.users;
-        gameSelection = nflMatchups[0][0].gameID;
         viewPlayerID = null;
-        newLoading = false;
+        if(newYearMatchups) {
+            weekMatchups = newYearMatchups.matchupWeeks[weekSelection - 1].matchups;
+            matchupsInfo = newYearMatchups;
+            yearLeagueData = newYearMatchups.yearLeagueData;
+            rosterData = newYearMatchups.rosters;
+            users = newYearMatchups.users;
+            gameSelection = nflMatchups[0][0].gameID;
+            newLoading = false;
+        }
     }
     $: changeYearSelection(yearSelection);
 
