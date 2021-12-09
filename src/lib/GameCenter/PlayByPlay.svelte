@@ -3256,7 +3256,7 @@
             }
             // process every relevant game's play by play for plays relevant to matchup
             for(const gameSelect in relevancyKey.games) {
-                let playByPlayData = await getPlayByPlay(relevancyKey.games[gameSelect], true).catch((err) => { console.error(err); });
+                let playByPlayData = await getPlayByPlay(relevancyKey.games[gameSelect]).catch((err) => { console.error(err); });
                 let fantasyRelevantPlaysForward = [];
                 let defYdsThreshBreakers = [];
 
@@ -3681,7 +3681,7 @@
 
             runningTotals = {};
 
-            let playByPlayData = await getPlayByPlay(gameSelection, true).catch((err) => { console.error(err); });
+            let playByPlayData = gameSelection ? await getPlayByPlay(gameSelection).catch((err) => { console.error(err); }) : await getPlayByPlay(nflMatchups[0][0].gameID).catch((err) => { console.error(err); });
             let fantasyRelevantPlaysForward = [];
             let defYdsThreshBreakers = [];
             // startersArray will help us match our sleeper playerInfo to espn player APIs, and also check if someone is starting one of the DEFs

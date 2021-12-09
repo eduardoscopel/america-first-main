@@ -22,38 +22,46 @@ export const getPlayByPlay = async (gameID) => {
     const playbyplaysRes = await waitForAll(...playbyplayPromises).catch((err) => { console.error(err); });
 
     const playbyplayJsonPromises = [];
-    for(const playbyplayRes of playbyplaysRes) {
-        const data = playbyplayRes.json();
-        playbyplayJsonPromises.push(data)
-        if (!playbyplayRes.ok) {
-            throw new Error(data);
-        }
-    }
-    const playbyplaysData = await waitForAll(...playbyplayJsonPromises).catch((err) => { console.error(err); });
-
-    let pageCount = playbyplaysData[0].pageCount;
-    if(pageCount > 1) {
-        const pagePromises = [];
-        for(let i = 1; i < pageCount + 1; i++) {
-            pagePromises.push(fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/${gameID}/competitions/${gameID}/plays?lang=en&region=us&page=${i}`, {compress: true}));
-        }
-
-        const pagesRes = await waitForAll(...pagePromises).catch((err) => { console.error(err); });
-
-        const pageJsonPromises = [];
-        for(const pageRes of pagesRes) {
-            const data = pageRes.json();
-            pageJsonPromises.push(data)
-            if (!pageRes.ok) {
+    if(playbyplaysRes.length) {
+        for(const playbyplayRes of playbyplaysRes) {
+            const data = playbyplayRes.json();
+            playbyplayJsonPromises.push(data)
+            if (!playbyplayRes.ok) {
                 throw new Error(data);
             }
         }
-        const pagesData = await waitForAll(...pageJsonPromises).catch((err) => { console.error(err); });
-        fullPlayByPlay = pagesData;
-    } else {
-        fullPlayByPlay = playbyplaysData;
+        const playbyplaysData = await waitForAll(...playbyplayJsonPromises).catch((err) => { console.error(err); });
+        if(playbyplaysData.length) {
+
+            let pageCount = playbyplaysData[0].pageCount;
+            if(pageCount > 1) {
+                const pagePromises = [];
+                for(let i = 1; i < pageCount + 1; i++) {
+                    pagePromises.push(fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/${gameID}/competitions/${gameID}/plays?lang=en&region=us&page=${i}`, {compress: true}));
+                }
+
+                const pagesRes = await waitForAll(...pagePromises).catch((err) => { console.error(err); });
+                if(pagesRes.length) {
+
+                    const pageJsonPromises = [];
+                    for(const pageRes of pagesRes) {
+                        const data = pageRes.json();
+                        pageJsonPromises.push(data)
+                        if (!pageRes.ok) {
+                            throw new Error(data);
+                        }
+                    }
+                    const pagesData = await waitForAll(...pageJsonPromises).catch((err) => { console.error(err); });
+                    if(pagesData.length) {
+                        fullPlayByPlay = pagesData;
+                    }
+                }
+            } else {
+                fullPlayByPlay = playbyplaysData;
+            }
+            return fullPlayByPlay;
+        }
     }
-    return fullPlayByPlay;
 }
 
 export const getGameDrives = async (gameID) => {
@@ -65,39 +73,47 @@ export const getGameDrives = async (gameID) => {
 
     const drivesRes = await waitForAll(...drivesPromises).catch((err) => { console.error(err); });
 
-    const drivesJsonPromises = [];
-    for(const driveRes of drivesRes) {
-        const data = driveRes.json();
-        drivesJsonPromises.push(data)
-        if (!driveRes.ok) {
-            throw new Error(data);
-        }
-    }
-    const drivesData = await waitForAll(...drivesJsonPromises).catch((err) => { console.error(err); });
+    if(drivesRes.length) {
 
-    let pageCount = drivesData[0].pageCount;
-    if(pageCount > 1) {
-        const pagePromises = [];
-        for(let i = 1; i < pageCount + 1; i++) {
-            pagePromises.push(fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/${gameID}/competitions/${gameID}/drives?lang=en&region=us&page=${i}`, {compress: true}));
-        }
-
-        const pagesRes = await waitForAll(...pagePromises).catch((err) => { console.error(err); });
-
-        const pageJsonPromises = [];
-        for(const pageRes of pagesRes) {
-            const data = pageRes.json();
-            pageJsonPromises.push(data)
-            if (!pageRes.ok) {
+        const drivesJsonPromises = [];
+        for(const driveRes of drivesRes) {
+            const data = driveRes.json();
+            drivesJsonPromises.push(data)
+            if (!driveRes.ok) {
                 throw new Error(data);
             }
         }
-        const pagesData = await waitForAll(...pageJsonPromises).catch((err) => { console.error(err); });
-        fullDrives = pagesData;
-    } else {
-        fullDrives = drivesData;
+        const drivesData = await waitForAll(...drivesJsonPromises).catch((err) => { console.error(err); });
+
+        if(drivesData.length) {
+            let pageCount = drivesData[0].pageCount;
+            if(pageCount > 1) {
+                const pagePromises = [];
+                for(let i = 1; i < pageCount + 1; i++) {
+                    pagePromises.push(fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/${gameID}/competitions/${gameID}/drives?lang=en&region=us&page=${i}`, {compress: true}));
+                }
+
+                const pagesRes = await waitForAll(...pagePromises).catch((err) => { console.error(err); });
+                if(pagesRes.length) {
+                    const pageJsonPromises = [];
+                    for(const pageRes of pagesRes) {
+                        const data = pageRes.json();
+                        pageJsonPromises.push(data)
+                        if (!pageRes.ok) {
+                            throw new Error(data);
+                        }
+                    }
+                    const pagesData = await waitForAll(...pageJsonPromises).catch((err) => { console.error(err); });
+                    if(pagesData.length) {
+                        fullDrives = pagesData;
+                    }
+                }
+            } else {
+                fullDrives = drivesData;
+            }
+            return fullDrives;
+        }
     }
-    return fullDrives;
 }
 
 let yearSelection = null;
