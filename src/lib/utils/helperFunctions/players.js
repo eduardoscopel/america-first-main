@@ -1,5 +1,6 @@
 import { get } from 'svelte/store';
 import {players} from '$lib/stores';
+import { creationYear, LZString } from '$lib/utils/helper'
 
 export const loadPlayers = async (refresh = false) => {     
 	if(get(players)[1426]) {
@@ -10,7 +11,9 @@ export const loadPlayers = async (refresh = false) => {
 	} 
     
     const now = Math.round(new Date().getTime() / 1000);
-    const playersInfo = JSON.parse(localStorage.getItem("playersInfo"));
+    const playersInfoCompressed = await localStorage.getItem("playersInfo");
+    const newString = await  LZString.decompressFromUTF16(playersInfoCompressed);
+    const playersInfo = JSON.parse(newString);
     let expiration = parseInt(localStorage.getItem("expiration"));
 
     if(playersInfo && playersInfo[1426] && expiration && now > expiration && !refresh) {
@@ -19,16 +22,23 @@ export const loadPlayers = async (refresh = false) => {
             stale: true
         }
     }
-    
+
+    // let playersInfo, expiration, now;
+
     if(!playersInfo || !expiration || now > expiration) {
         const res = await fetch(`/api/fetch_players_info`, {compress: true});
         const data = await res.json();
+        const string = await JSON.stringify(data);
+        const dataCompressed = await LZString.compressToUTF16(string);
+        
 
 
         if (!res.ok) {
             throw new Error(data);
         }
-        localStorage.setItem("playersInfo", JSON.stringify(data))
+
+        localStorage.setItem("playersInfo", dataCompressed);
+        
 
         const ts = Math.round(new Date().getTime() / 1000);
         const newExpiration = ts + (24 * 3600);

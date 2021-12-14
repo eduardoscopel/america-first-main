@@ -115,6 +115,6 @@
         {/if}
     </div>
     {#each matchupArray as matchup, ix (rand * (ix + 1))}
-        <Matchup {ix} {matchup} {players} {displayWeek} bind:active={active} />
+        <Matchup {ix} {matchup} {players} {displayWeek} {year} bind:active={active} />
     {/each}
 </div>

@@ -13,15 +13,16 @@ import { getLeagueRecords } from './helperFunctions/leagueRecords'
 import { getManagerRecords } from './helperFunctions/managerRecords'
 import { getAwards } from './helperFunctions/leagueAwards'
 import { cleanName, round, min, max, generateGraph, gotoManager, getAuthor, parseDate, getAvatar } from './helperFunctions/universalFunctions';
-import { predictScores } from './helperFunctions/predictOptimalScore';
+import { predictScores, getStarterPositions } from './helperFunctions/predictOptimalScore';
 import { getBrackets } from './helperFunctions/leagueBrackets';
 import { getBlogPosts } from './helperFunctions/getBlogPosts';
 import { getLeagueStandings, processStandings } from './helperFunctions/leagueStandings';
-import { getNflScoreboard, getPlayByPlay, getGameDrives, getYearMatchups } from './helperFunctions/gameCenter';
+import { getNflScoreboard, getPlayByPlay, getGameDrives, getYearMatchups, getGameStats, getPlayerStats, getGameStatus, getGameScore } from './helperFunctions/gameCenter';
 import { nflTeams } from './NFLinfo';
 import { getPositionTable, getTeamTable } from './helperFunctions/pointsTrees'; 
 import nflPlayerInfo from '$lib/utils/nflPlayerInfo.json';
 import leagueHistory from '$lib/utils/leagueHistory.json';
+import { LZString } from './helperFunctions/stringCompress';
 
 export {
     enableBlog,
@@ -59,12 +60,17 @@ export {
     generateGraph,
     getBlogPosts,
     predictScores,
+    getStarterPositions,
     getLeagueStandings,
     processStandings,
     getNflScoreboard,
     getPlayByPlay,
     getGameDrives,
     getYearMatchups,
+    getGameStats,
+    getPlayerStats,
+    getGameStatus,
+    getGameScore,
     nflTeams,
     getAuthor,
     parseDate,
@@ -72,4 +78,5 @@ export {
     getPositionTable,
     getTeamTable,
     nflPlayerInfo,
+    LZString,
 }

@@ -7,37 +7,30 @@
     const rosters = rostersData.rosters;
 
     const currentManagers = {};
-
-    let activeManagers = {};
+    const activeManagers = {};
 
 	for(const managerID in managers) {
 		const manager = managers[managerID];
 
-		const entryMan = {
-			managerID: manager.managerID,
-			rosterID: manager.roster,
-			name: manager.name,
-			status: manager.status,
-			yearsactive: manager.yearsactive,
-		}
-
-		if(!activeManagers[manager.roster] && manager.status == "active") {
-			activeManagers[manager.roster] = [];
-            activeManagers[manager.roster].push(entryMan);
+        if(manager.status == 'active') {
+			activeManagers[manager.roster] = {
+                managerID: manager.managerID,
+                rosterID: manager.roster,
+                name: manager.name,
+            };
 		}
 	}
 
     for(const roster of rosters) {
         const user = users[roster.owner_id];
         const rosterID = roster.roster_id;
-
-        let recordManager = activeManagers[rosterID];
-        let recordManID = recordManager[0].managerID;
+        const recordManager = activeManagers[rosterID];
+        const recordManID = recordManager.managerID;
 
         currentManagers[recordManID] = {
             avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
             name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
-            realname: recordManager[0].name,
+            realname: recordManager.name,
         }
     }
 
@@ -55,10 +48,7 @@
 
         for(const roster of rosters) {
 
-            const rosterID = roster.roster_id;
-
-            let recordManager = activeManagers[rosterID];
-            let recordManID = recordManager[0].managerID;
+            const recordManID = activeManagers[roster.roster_id].managerID;
             // make sure the roster has players on it
             if(!roster.players) continue;
             // if at least one team has players, create the graph

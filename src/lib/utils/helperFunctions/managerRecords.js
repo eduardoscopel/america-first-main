@@ -11,7 +11,8 @@ import {
 	getNflState, 
 	leagueID, 
 	managers, 
-	getLeagueData } from '$lib/utils/helper';
+	getLeagueData,
+	getStarterPositions } from '$lib/utils/helper';
 
 export const getManagerRecords = async (refresh = false) => {
 	if(get(managerrecords).managerRecordArrays) {
@@ -253,7 +254,7 @@ export const getManagerRecords = async (refresh = false) => {
 		).catch((err) => { console.error(err); });
 	
 		let year = parseInt(leagueData.season);
-		const positions = leagueData.roster_positions.filter(p => p != 'BN');
+		const positions = getStarterPositions(leagueData);
 
 		// variables for playoff records
 		let numPOTeams = parseInt(leagueData.settings.playoff_teams);
@@ -708,7 +709,7 @@ export const getManagerRecords = async (refresh = false) => {
 								avatar,
 								rosterSpot,
 								playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
-								playerTeam: playerInfo.pos == "DEF" ? playerID : nflInfo.espn.t[year].length == 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= POstartWeek && w.lastWeek >= POstartWeek).team).sleeperID,
+								playerTeam: playerInfo.pos == 'DEF' ? playerID : nflInfo.espn.t[year].length > 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= POstartWeek && w.lastWeek >= POstartWeek).team).sleeperID : playerInfo.wi[year][POstartWeek].t ? playerInfo.wi[year][POstartWeek].t : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID,
 							}
 
 							// right now, acquisitions is just a list of the manager's draft picks
@@ -920,7 +921,7 @@ export const getManagerRecords = async (refresh = false) => {
 									avatar,
 									rosterSpot,
 									playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
-									playerTeam: playerInfo.pos == "DEF" ? playerID : nflInfo.espn.t[year].length == 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= POstartWeek && w.lastWeek >= POstartWeek).team).sleeperID,
+									playerTeam: playerInfo.pos == 'DEF' ? playerID : nflInfo.espn.t[year].length > 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= POstartWeek && w.lastWeek >= POstartWeek).team).sleeperID : playerInfo.wi[year][POstartWeek].t ? playerInfo.wi[year][POstartWeek].t : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID,
 								}
 			
 								// right now, acquisitions is just a list of the manager's draft picks
@@ -1128,7 +1129,7 @@ export const getManagerRecords = async (refresh = false) => {
 									avatar,
 									rosterSpot,
 									playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
-									playerTeam: playerInfo.pos == "DEF" ? playerID : nflInfo.espn.t[year].length == 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= POstartWeek && w.lastWeek >= POstartWeek).team).sleeperID,
+									playerTeam: playerInfo.pos == 'DEF' ? playerID : nflInfo.espn.t[year].length > 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= POstartWeek && w.lastWeek >= POstartWeek).team).sleeperID : playerInfo.wi[year][POstartWeek].t ? playerInfo.wi[year][POstartWeek].t : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID,
 								}
 			
 								// right now, acquisitions is just a list of the manager's draft picks
@@ -1336,7 +1337,7 @@ export const getManagerRecords = async (refresh = false) => {
 									avatar,
 									rosterSpot,
 									playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
-									playerTeam: playerInfo.pos == "DEF" ? playerID : nflInfo.espn.t[year].length == 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= POstartWeek && w.lastWeek >= POstartWeek).team).sleeperID,
+									playerTeam: playerInfo.pos == 'DEF' ? playerID : nflInfo.espn.t[year].length > 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= POstartWeek && w.lastWeek >= POstartWeek).team).sleeperID : playerInfo.wi[year][POstartWeek].t ? playerInfo.wi[year][POstartWeek].t : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID,
 								}
 			
 								// right now, acquisitions is just a list of the manager's draft picks
@@ -1541,7 +1542,7 @@ export const getManagerRecords = async (refresh = false) => {
 						avatar,
 						rosterSpot,
 						playerAvatar: playerInfo.pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg`,
-						playerTeam: playerInfo.pos == "DEF" ? playerID : nflInfo.espn.t[year].length == 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= startWeek && w.lastWeek >= startWeek).team).sleeperID,
+						playerTeam: playerInfo.pos == 'DEF' ? playerID : nflInfo.espn.t[year].length > 1 ? nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year].find(w => w.firstWeek <= startWeek && w.lastWeek >= startWeek).team).sleeperID : playerInfo.wi[year][startWeek].t ? playerInfo.wi[year][startWeek].t : nflTeams.find(n => n.espnAbbreviation == nflInfo.espn.t[year][0]).sleeperID,
 					}
 
 					// right now, acquisitions is just a list of the manager's draft picks

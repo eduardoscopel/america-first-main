@@ -71,13 +71,12 @@
 
         let newNflMatchups = await getNflScoreboard(yearSelection, newWeekSelection).catch((err) => { console.error(err); });;
         viewPlayerID = null;
-        if(newNflMatchups) {
+        if(newNflMatchups.nflWeek) {
             nflMatchups = newNflMatchups.nflWeek;
             gameSelection = nflMatchups[0][0].gameID;
             newLoading = false;
         }
     }
-    $: changeWeek(weekSelection);
 
     const changeYearSelection = async (newYearSelection) => {
         newLoading = true;
@@ -90,14 +89,14 @@
         }
 
         let newNflMatchups = await getNflScoreboard(newYearSelection, weekSelection).catch((err) => { console.error(err); });;
-        if(newNflMatchups) {
+        if(newNflMatchups.nflWeek) {
             nflMatchups = newNflMatchups.nflWeek;
         }
 
         let purpose = 'gameCenter';
         let newYearMatchups = await getYearMatchups(newYearSelection, weekSelection, purpose).catch((err) => { console.error(err); });;
         viewPlayerID = null;
-        if(newYearMatchups) {
+        if(newYearMatchups.matchupWeeks) {
             weekMatchups = newYearMatchups.matchupWeeks[weekSelection - 1].matchups;
             matchupsInfo = newYearMatchups;
             yearLeagueData = newYearMatchups.yearLeagueData;
@@ -107,7 +106,6 @@
             newLoading = false;
         }
     }
-    $: changeYearSelection(yearSelection);
 
     const getStarters = (weekMatchups) => {
         fantasyStarters = {};
@@ -116,14 +114,14 @@
             const rosterID = roster.roster_id;
             const user = users[roster.owner_id];
 
-            let recordManager = leagueManagers[rosterID].filter(m => m.yearsactive.includes(year));
-            let recordManID = recordManager[0].managerID;
+            let recordManager = leagueManagers[rosterID].find(m => m.yearsactive.includes(year));
+            let recordManID = recordManager.managerID;
             if(user) {
                 managerInfo[recordManID] = {
                     avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
                     name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
-                    realname: recordManager[0].name,
-                    abbreviation: recordManager[0].abbreviation,
+                    realname: recordManager.name,
+                    abbreviation: recordManager.abbreviation,
                     rosterID,
                     recordManID,
                 };
@@ -141,15 +139,14 @@
             // get starters
             for(const matchup in weekMatchups) {
                 const match = weekMatchups[matchup];
-                for(const managerKey in match) {
-                    const managerWeek = match[managerKey];
-                    if(managerWeek.recordManID == recordManID) {
-                        fantasyStarters[recordManID] = {
-                            players: managerWeek.players,
-                            starters: managerWeek.starters,
-                            startersPoints: managerWeek.points,
-                        }
+                
+                if(match.find(m => m.recordManID == recordManID)) {
+                    fantasyStarters[recordManID] = {
+                        players: match.find(m => m.recordManID == recordManID).players,
+                        starters: match.find(m => m.recordManID == recordManID).starters,
+                        startersPoints: match.find(m => m.recordManID == recordManID).points,
                     }
+                    break;
                 }
             }
         }
@@ -172,7 +169,7 @@
                         } else if(playersInfo.players[managerWeek.starters[i]].pos != 'DEF' && !positionLeaders[nflPlayerInfo[managerWeek.starters[i]].sleeper.pos]) {
                             positionLeaders[nflPlayerInfo[managerWeek.starters[i]].sleeper.pos] = []; 
                         }
-                        const team = playersInfo.players[managerWeek.starters[i]].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == managerWeek.starters[i]).espnAbbreviation : nflPlayerInfo[managerWeek.starters[i]].espn.t[yearSelection].length == 1 ? nflPlayerInfo[managerWeek.starters[i]].espn.t[yearSelection][0] : nflPlayerInfo[managerWeek.starters[i]].espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team;
+                        const team = playersInfo.players[managerWeek.starters[i]].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == managerWeek.starters[i]).espnAbbreviation : !nflPlayerInfo[managerWeek.starters[i]].espn.t[yearSelection] ? null : nflPlayerInfo[managerWeek.starters[i]].espn.t[yearSelection].length == 1 ? nflPlayerInfo[managerWeek.starters[i]].espn.t[yearSelection][0] : nflPlayerInfo[managerWeek.starters[i]].espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team;
                         const entry = {
                             playerID: managerWeek.starters[i],
                             pos: playersInfo.players[managerWeek.starters[i]].pos == 'DEF' ? 'DEF' : nflPlayerInfo[managerWeek.starters[i]].sleeper.pos,
@@ -183,9 +180,9 @@
                             ln: playersInfo.players[managerWeek.starters[i]].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == managerWeek.starters[i]).ln : nflPlayerInfo[managerWeek.starters[i]].sleeper.ln,
                             t: team,
                             avatar: playersInfo.players[managerWeek.starters[i]].pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${managerWeek.starters[i].toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${managerWeek.starters[i]}.jpg`,
-                            teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${nflTeams.find(t => t.espnAbbreviation == team).sleeperID.toLowerCase()}.png`,
-                            teamColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).color}6b`,
-                            teamAltColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).alternateColor}52`,
+                            teamAvatar: team ? `https://sleepercdn.com/images/team_logos/nfl/${nflTeams.find(t => t.espnAbbreviation == team).sleeperID.toLowerCase()}.png` : null,
+                            teamColor: team ? `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).color}6b` : null,
+                            teamAltColor: team ? `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).alternateColor}52` : null,
                         }
                         if(playersInfo.players[managerWeek.starters[i]].pos == 'DEF') {
                             positionLeaders['DEF'].push(entry);

@@ -23,12 +23,11 @@
         regularSeasonLength = matchupsInfo.regularSeasonLength;
         const playersInfo = await playersData;
         players = playersInfo.players;
-        loading = false;
-
         if(playersInfo.stale) {
             const newPlayersInfo = await loadPlayers(true);
             players = newPlayersInfo.players;
         }
+        loading = false;
     });
 
     const changeSelection = (s) => {
@@ -43,7 +42,6 @@
     }
 
     let selection = 'regular';
-    let playoffWeek
 </script>
 
 <style>

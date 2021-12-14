@@ -1,10 +1,10 @@
 <script>
-    import {round} from '$lib/utils/helper'; 
+    import {round, getStarterPositions} from '$lib/utils/helper'; 
     import LinearProgress from '@smui/linear-progress';
 
     export let nflTeams, nflMatchups, weekSelection, yearSelection, currentYear, yearLeagueData, playersInfo, nflPlayerInfo, fantasyStarters, positionLeaders, managerInfo, weekMatchups, standingsData, matchSelection, managerSelection, fantasyProducts, gameSelection = nflMatchups[0][0].gameID, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo, newLoading;
     
-    const positions = yearLeagueData.roster_positions.filter(p => p != 'BN');
+    const positions = getStarterPositions(yearLeagueData);
     const nflPositions = [];
     for(const position in positions) {
         if(!nflPositions.includes(positions[position]) && positions[position] != 'FLEX' && positions[position] != 'WRRB_FLEX' && positions[position] != 'REC_FLEX' && positions[position] != 'SUPER_FLEX') {
@@ -30,7 +30,7 @@
             for(const starter of starters) {
                 const starterInfo = nflPlayerInfo[starter];
                 if(starter != '0') {
-                    const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection].length == 1 ? starterInfo.espn.t[yearSelection][0] : starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team;
+                    const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection].length > 1 ? starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team : playersInfo.players[starter].wi[yearSelection][weekSelection].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][weekSelection].t).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
                     const starterEntry = {
                         playerID: starter,
                         fpts: fantasyStarters[recordManID].startersPoints[starters.indexOf(starter)],
@@ -40,7 +40,7 @@
                         ln: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : starterInfo.sleeper.ln,
                         pos: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : starterInfo.sleeper.pos,
                         t: team,
-                        projection: yearSelection == currentYear ? playersInfo.players[starter].wi[weekSelection]?.p : null,
+                        projection: playersInfo.players[starter].wi[yearSelection][weekSelection] ? Number.parseFloat(playersInfo.players[starter].wi[yearSelection][weekSelection].p) : 0,
                         avatar: playersInfo.players[starter].pos == 'DEF' ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                         teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${nflTeams.find(t => t.espnAbbreviation == team).sleeperID.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                         teamColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).color}6b`,
@@ -125,13 +125,11 @@
             const projections = {};
             const matchStarters = {};
             for(const opponent in match) {
-                if(yearSelection == currentYear) {
-                    projections[match[opponent].recordManID] = 0;
-                }
+                projections[match[opponent].recordManID] = 0;
                 for(const starter of match[opponent].starters) {
                     if(starter != '0') {
                         const starterInfo = nflPlayerInfo[starter];
-                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection].length == 1 ? starterInfo.espn.t[yearSelection][0] : starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team;
+                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection].length > 1 ? starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team : playersInfo.players[starter].wi[yearSelection][weekSelection].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][weekSelection].t).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
                         const starterEntry = {
                             playerID: starter,
                             fpts: match[opponent].points[match[opponent].starters.indexOf(starter)],
@@ -142,16 +140,14 @@
                             ln: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : starterInfo.sleeper.ln,
                             pos: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : starterInfo.sleeper.pos,
                             t: team,
-                            projection: yearSelection == currentYear ? Number.parseFloat(playersInfo.players[starter].wi[weekSelection].p) : null,
+                            projection: playersInfo.players[starter].wi[yearSelection][weekSelection] ? Number.parseFloat(playersInfo.players[starter].wi[yearSelection][weekSelection].p) : 0,
                             avatar: playersInfo.players[starter].pos == 'DEF' ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                             teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${nflTeams.find(t => t.espnAbbreviation == team).sleeperID.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                             teamColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).color}6b`,
                             teamAltColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).alternateColor}52`,
                         }
 
-                        if(yearSelection == currentYear) {
-                            projections[match[opponent].recordManID] += starterEntry.projection;
-                        }
+                        projections[match[opponent].recordManID] += starterEntry.projection;
 
                         if(!matchStarters[match[opponent].recordManID]) {
                             matchStarters[match[opponent].recordManID] = [];
@@ -184,7 +180,7 @@
                 matchInfo: match[0],
                 manager: match[0].manager,
                 fpts: match[0].totalFpts,
-                projection: yearSelection == currentYear ? projections[match[0].recordManID] : null,
+                projection: projections[match[0].recordManID],
                 starters: matchStarters[match[0].recordManID],
                 record: records[0],
             }
@@ -192,7 +188,7 @@
                 matchInfo: match[1],
                 manager: match[1].manager,
                 fpts: match[1].totalFpts,
-                projection: yearSelection == currentYear ? projections[match[1].recordManID] : null,
+                projection: projections[match[1].recordManID],
                 starters: matchStarters[match[1].recordManID],
                 record: records[1],
             }
@@ -259,7 +255,7 @@
                 for(const starter of starters) {
                     const starterInfo = nflPlayerInfo[starter];
                     if(starter != '0') {
-                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection].length == 1 ? starterInfo.espn.t[yearSelection][0] : starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team;
+                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection].length > 1 ? starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team : playersInfo.players[starter].wi[yearSelection][weekSelection].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][weekSelection].t).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
                         if(nflTeams.find(t => t.espnAbbreviation == team).sleeperID == game.home.sleeperID || nflTeams.find(t => t.espnAbbreviation == team).sleeperID == game.away.sleeperID) {
                             const starterEntry = {
                                 playerID: starter,
@@ -271,7 +267,7 @@
                                 ln: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : starterInfo.sleeper.ln,
                                 pos: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : starterInfo.sleeper.pos,
                                 t: team,
-                                projection: yearSelection == currentYear ? playersInfo.players[starter].wi[weekSelection].p : null,
+                                projection: playersInfo.players[starter].wi[yearSelection][weekSelection] ? Number.parseFloat(playersInfo.players[starter].wi[yearSelection][weekSelection].p) : 0,
                                 avatar: playersInfo.players[starter].pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                                 teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${nflTeams.find(t => t.espnAbbreviation == team).sleeperID.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                                 teamColor: `background-color: #${nflTeams.find(t => t.espnAbbreviation == team).color}6b`,
@@ -405,12 +401,9 @@
         if(newFantasyProducts.fantasyProducts && newFantasyProducts.fantasyProducts.length > 0 && viewPlayer.player != null  && newFantasyProducts.runningTotals[viewPlayer.player.playerID]) {
             let runningTotals = newFantasyProducts.runningTotals;
             viewPlayerStats[viewPlayer.player.playerID] = {
-                stats: [],
-                totalFpts: runningTotals[viewPlayer.player.playerID]?.totalFpts || null,
+                stats: runningTotals[viewPlayer.player.playerID]?.stats || null,
+                totalFpts: runningTotals[viewPlayer.player.playerID]?.fpts || null,
                 playerID: viewPlayer.player.playerID,
-            }
-            for(const stat in runningTotals[viewPlayer.player.playerID].stats) {
-                viewPlayerStats[viewPlayer.player.playerID].stats.push(runningTotals[viewPlayer.player.playerID].stats[stat]);
             }
             displayStats.push(viewPlayerStats[viewPlayer.player.playerID]);
         // if game has started, show Fpts as 0.00
@@ -1029,7 +1022,7 @@
     .gameHeaderBox {
         display: inline-flex;
         position: absolute;
-        z-index: 3;
+        z-index: 2;
         width: 96%;
         height: 104%;
         border: 0.25px solid #555;
@@ -1476,10 +1469,8 @@
                                                     <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 3% 0 0;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                                 {/if}
                                                 <div class="rosterPlayer" style="justify-content: flex-start; color: var(--g555); font-size: 0.75em; line-height: 1em; {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">{starter.owner.name}</div>
-                                                <div class="rosterPlayer" style="{yearSelection != currentYear ? "justify-content: flex-end;" : "justify-content: space-between;"} {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">
-                                                    {#if yearSelection == currentYear}
-                                                        <div style="display: inline-flex; color: var(--g555); justify-content: flex-end;">({starter.projection})</div>
-                                                    {/if}
+                                                <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">
+                                                    <div style="display: inline-flex; color: var(--g555);">({round(starter.projection)})</div>
                                                     <div style="display: inline-flex; font-weight: 600; {starter.pos == 'DEF' ? "margin: 0 2% 0 0;" : "margin: 0 5% 0 0;"}">{round(starter.fpts)}</div>
                                                 </div>
                                             </div>
@@ -1503,11 +1494,9 @@
                                                     <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 3%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                                 {/if}
                                                 <div class="rosterPlayer" style="justify-content: flex-end; color: var(--g555); font-size: 0.75em; line-height: 1em; {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">{starter.owner.name}</div>
-                                                <div class="rosterPlayer" style="{yearSelection != currentYear ? "justify-content: flex-start;" : "justify-content: space-between;"} {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">
+                                                <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">
                                                     <div style="display: inline-flex; font-weight: 600; {starter.pos == 'DEF' ? "margin: 0 0 0 -2%;" : "margin: 0 0 0 2%;"}">{round(starter.fpts)}</div>  
-                                                    {#if yearSelection == currentYear}
-                                                        <div style="display: inline-flex; color: var(--g555); justify-content: flex-start;">({starter.projection})</div>
-                                                    {/if}
+                                                    <div style="display: inline-flex; color: var(--g555);">({round(starter.projection)})</div>
                                                 </div>
                                             </div>                                
                                             <div class="avatarHolder" style="{starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 0 0 5%;" : "margin: 0 0 0 2%;"} left: 1%; {row >= 2 && iv == 0 ? "border-radius: 0 1em 0 0;" : row >= 2 && iv == positionGameStarters[gameSelection][game.away.sleeperID].starters[ix].length - 1 ? "border-radius: 0 0 1em 0;" : row >= 2 && iv > 0 && iv < positionGameStarters[gameSelection][game.away.sleeperID].starters[ix].length - 1 ? "border-radius: 0;" : "border-radius: 0 1em 1em 0;"} {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 2; background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}">
@@ -1549,15 +1538,11 @@
                 <div class="totalPointsRow">
                     <div class="totalPointsWrap">
                         <div class="totalPoints">{round(match.home.fpts)}</div>
-                        {#if yearSelection == currentYear}
-                            <div class="projectedPoints">{round(match.home.projection)}</div>
-                        {/if}
+                        <div class="projectedPoints">{round(match.home.projection)}</div>
                     </div>
                     <div class="totalPointsWrap">
                         <div class="totalPoints">{round(match.away.fpts)}</div>
-                        {#if yearSelection == currentYear}
-                            <div class="projectedPoints">{round(match.away.projection)}</div>
-                        {/if}
+                        <div class="projectedPoints">{round(match.away.projection)}</div>
                     </div>
                 </div>
                 <div class="matchContainer">
@@ -1574,9 +1559,7 @@
                                         <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 3% 0 0;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                     {/if}
                                     <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">
-                                        {#if yearSelection == currentYear}
-                                            <div style="display: inline-flex; color: var(--g555); {yearSelection != currentYear ? "justify-content: flex-end;" : "justify-content: space-between;"}">({round(starter.projection)})</div>
-                                        {/if}
+                                        <div style="display: inline-flex; color: var(--g555);">({round(starter.projection)})</div>
                                         <div style="display: inline-flex; font-weight: 600; {starter.pos == 'DEF' ? "margin: 0 2% 0 0;" : "margin: 0 5% 0 0;"}">{round(starter.fpts)}</div>
                                     </div>
                                 </div>
@@ -1601,11 +1584,9 @@
                                     {:else}
                                         <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 3%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
                                     {/if}
-                                    <div class="rosterPlayer" style="{yearSelection != currentYear ? "justify-content: flex-start;" : "justify-content: space-between;"} {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">
+                                    <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">
                                         <div style="display: inline-flex; font-weight: 600; {starter.pos == 'DEF' ? "margin: 0 0 0 -2%;" : "margin: 0 0 0 2%;"}">{round(starter.fpts)}</div>  
-                                        {#if yearSelection == currentYear}
-                                            <div style="display: inline-flex; color: var(--g555); justify-content: flex-start;">({round(starter.projection)})</div>
-                                        {/if}
+                                        <div style="display: inline-flex; color: var(--g555);">({round(starter.projection)})</div>
                                     </div>
                                 </div>                                
                                 <div class="avatarHolder" style="{starter.pos == 'DEF' ? "width: 52%; top: 1%; margin: 0 0 0 5%;" : "margin: 0 0 0 2%;"} left: 1%; border-radius: 0 1em 1em 0; {viewPlayer?.player?.playerID == starter.playerID ? "z-index: 2; background-color: var(--aaa); border: 0.5px solid var(--g111);" : null}">

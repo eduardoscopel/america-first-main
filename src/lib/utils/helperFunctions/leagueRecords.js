@@ -13,7 +13,8 @@ import {
 	getNflState,
 	getLeagueData,
 	waitForAll,
-	leagueHistory } from '$lib/utils/helper';
+	leagueHistory,
+	getStarterPositions } from '$lib/utils/helper';
 
 export const getLeagueRecords = async (refresh = false) => {
 	if(get(records).seasonWeekRecords) {
@@ -262,7 +263,7 @@ export const getLeagueRecords = async (refresh = false) => {
 		).catch((err) => { console.error(err); });
 	
 		let year = parseInt(leagueData.season);
-		const positions = leagueData.roster_positions.filter(p => p != 'BN');
+		const positions = getStarterPositions(leagueData);
 
 		// variables for playoff records
 		let numPOTeams = parseInt(leagueData.settings.playoff_teams);

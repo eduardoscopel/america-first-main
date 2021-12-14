@@ -1,8 +1,9 @@
 export const predictScores = (players, week, leagueData) => {
     const starterPositions = getStarterPositions(leagueData);
+    const year = parseInt(leagueData.season);
 
     // sort roster by highest projected points for that week
-    const projectedPlayers = [...players].sort((a, b) => (b.wi && b.wi[week] ? b.wi[week].p : 0) - (a.wi && a.wi[week] ? a.wi[week].p : 0));
+    const projectedPlayers = [...players].sort((a, b) => (b.wi[year] && b.wi[year][week] ? b.wi[year][week].p : 0) - (a.wi[year] && a.wi[year][week] ? a.wi[year][week].p : 0));
 
     // now that the players are sorted, grab the QBs
     const qbs = projectedPlayers.filter(p => p.pos == 'QB');
@@ -26,15 +27,15 @@ export const predictScores = (players, week, leagueData) => {
     let powerScore = 0;
     // next, use the roster configuration to grab the highest scorer at each position
     for(const starterPosition of starterPositions) {
-        const qb = parseFloat(qbs[0]?.wi && qbs[0]?.wi[week] ? qbs[0].wi[week].p : 0);
-        const rb = parseFloat(rbs[0]?.wi && rbs[0]?.wi[week] ? rbs[0].wi[week].p : 0);
-        const wr = parseFloat(wrs[0]?.wi && wrs[0]?.wi[week] ? wrs[0].wi[week].p : 0);
-        const te = parseFloat(tes[0]?.wi && tes[0]?.wi[week] ? tes[0].wi[week].p : 0);
-        const dl = parseFloat(dls[0]?.wi && dls[0]?.wi[week] ? dls[0].wi[week].p : 0);
-        const lb = parseFloat(lbs[0]?.wi && lbs[0]?.wi[week] ? lbs[0].wi[week].p : 0);
-        const db = parseFloat(dbs[0]?.wi && dbs[0]?.wi[week] ? dbs[0].wi[week].p : 0);
-        const k = parseFloat(ks[0]?.wi && ks[0]?.wi[week] ? ks[0].wi[week].p : 0);
-        const def = parseFloat(defs[0]?.wi && defs[0]?.wi[week] ? defs[0].wi[week].p : 0);
+        const qb = parseFloat(qbs[0]?.wi[year] && qbs[0]?.wi[year][week] ? qbs[0].wi[year][week].p : 0);
+        const rb = parseFloat(rbs[0]?.wi[year] && rbs[0]?.wi[year][week] ? rbs[0].wi[year][week].p : 0);
+        const wr = parseFloat(wrs[0]?.wi[year] && wrs[0]?.wi[year][week] ? wrs[0].wi[year][week].p : 0);
+        const te = parseFloat(tes[0]?.wi[year] && tes[0]?.wi[year][week] ? tes[0].wi[year][week].p : 0);
+        const dl = parseFloat(dls[0]?.wi[year] && dls[0]?.wi[year][week] ? dls[0].wi[year][week].p : 0);
+        const lb = parseFloat(lbs[0]?.wi[year] && lbs[0]?.wi[year][week] ? lbs[0].wi[year][week].p : 0);
+        const db = parseFloat(dbs[0]?.wi[year] && dbs[0]?.wi[year][week] ? dbs[0].wi[year][week].p : 0);
+        const k = parseFloat(ks[0]?.wi[year] && ks[0]?.wi[year][week] ? ks[0].wi[year][week].p : 0);
+        const def = parseFloat(defs[0]?.wi[year] && defs[0]?.wi[year][week] ? defs[0].wi[year][week].p : 0);
         switch (starterPosition) {
             case 'QB':
                 qbs.shift();

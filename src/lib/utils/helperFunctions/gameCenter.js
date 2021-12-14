@@ -116,6 +116,24 @@ export const getGameDrives = async (gameID) => {
     }
 }
 
+export const getGameStatus = async (statusLink) => {
+    const secureStatusLink = 'https' + statusLink.slice(4); 
+    const res = await fetch(`${secureStatusLink}`, {compress: true}).catch((err) => { console.error(err); });
+    const data = await res.json().catch((err) => { console.error(err); });
+    if(data) {
+        return data;
+    }
+}
+
+export const getGameScore = async (scoreLink) => {
+    const secureScoreLink = 'https' + scoreLink.slice(4); 
+    const res = await fetch(`${secureScoreLink}`, {compress: true}).catch((err) => { console.error(err); });
+    const data = await res.json().catch((err) => { console.error(err); });
+    if(data) {
+        return data.value;
+    }
+}
+
 let yearSelection = null;
 let weekSelection = null;
 let newWeekSelection = null;
@@ -131,13 +149,6 @@ export const getNflScoreboard = async (yearSelection, weekSelection) => {
     const week = nflState.week;
     const year = parseInt(nflState.season);
 
-    // http://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/situation?lang=en&region=us CURRENT DOWN
-    // http://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/plays?lang=en&region=us PLAY BY PLAY
-    // http://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436/competitions/401326436/competitors/22/statistics?lang=en&region=us GAME STATS
-    // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/401326436?lang=en&region=us GAME
-    // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2021/types/2/weeks ALL WEEKS
-    // https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2021/types/2/weeks/11/events?lang=en&region=us ALL GAMES GIVEN WEEK
-
     const scoreboardData = {
         nflWeek: [],
         week: week,
@@ -148,11 +159,6 @@ export const getNflScoreboard = async (yearSelection, weekSelection) => {
     }
     if(weekSelection == null) {
         weekSelection = week;
-    }
-
-    const getSleeperID = (searchID) => {
-        let sleeperID = nflTeams.find(n => n.espnID == searchID).sleeperID;
-        return sleeperID;
     }
 
     if(yearSelection == year && weekSelection == week) {
@@ -182,7 +188,7 @@ export const getNflScoreboard = async (yearSelection, weekSelection) => {
             }
             for(let i = 0; i < 2; i++) {
                 let team = nflGame.competitions[0].competitors[i];
-                let sleeperID = getSleeperID(team.id);
+                let sleeperID = nflTeams.find(n => n.espnID == team.id).sleeperID;
 
                 const teamEntry = {
                     team: nflTeams.find(n => n.sleeperID == sleeperID),
@@ -240,65 +246,27 @@ export const getNflScoreboard = async (yearSelection, weekSelection) => {
         }
         const gamesData = await waitForAll(...gameJsonPromises).catch((err) => { console.error(err); });
 
-        const getScore = async (scoreLink) => {
-            const secureScoreLink = 'https' + scoreLink.slice(4); 
-            const scoresPromises = [];
-            scoresPromises.push(fetch(`${secureScoreLink}`, {compress: true}));
-            const scoresRes = await waitForAll(...scoresPromises).catch((err) => { console.error(err); });
-            const scoreJsonPromises = [];
-            for(const scoreRes of scoresRes) {
-                const data = scoreRes.json();
-                scoreJsonPromises.push(data)
-                if (!scoreRes.ok) {
-                    throw new Error(data);
-                }
-            }
-            const scoreData = await waitForAll(...scoreJsonPromises).catch((err) => { console.error(err); });
-            let score = scoreData[0].value;
-            return score;
-        }
-
-        const getStatus = async (statusLink) => {
-            const secureStatusLink = 'https' + statusLink.slice(4); 
-            const statusPromises = [];
-            statusPromises.push(fetch(`${secureStatusLink}`, {compress: true}));
-            const statusRes = await waitForAll(...statusPromises).catch((err) => { console.error(err); });
-            const statusJsonPromises = [];
-            for(const stateRes of statusRes) {
-                const data = stateRes.json();
-                statusJsonPromises.push(data)
-                if (!stateRes.ok) {
-                    throw new Error(data);
-                }
-            }
-            const statusData = await waitForAll(...statusJsonPromises).catch((err) => { console.error(err); });
-            let status = statusData[0];
-            return status;
-        }
-
-        let gameInfo = {};
+        const gameInfo = {};
 
         for(const key in gamesData) {
             const nflGame = gamesData[key];
-            if(!gameInfo[nflGame.id]) {
-                gameInfo[nflGame.id] = [];
-            }
+            gameInfo[nflGame.id] = [];
             for(let i = 0; i < 2; i++) {
                 let team = nflGame.competitions[0].competitors[i];
-                let sleeperID = getSleeperID(team.id);
+                let sleeperID = nflTeams.find(n => n.espnID == team.id).sleeperID;
 
-                let score = await getScore(team.score.$ref);
-                let status = await getStatus(nflGame.competitions[0].status.$ref);
-
-                const teamEntry = {
-                    team: nflTeams.find(n => n.sleeperID == sleeperID),
-                    sleeperID,
-                    score: score,
-                    homeAway: team.homeAway,
-                    gameID: nflGame.id,
-                    status: status,
-                };
-                gameInfo[nflGame.id].push(teamEntry);
+                let score = await getGameScore(team.score.$ref);
+                let status = await getGameStatus(nflGame.competitions[0].status.$ref);
+                if(status) {
+                    gameInfo[nflGame.id].push({
+                        team: nflTeams.find(n => n.sleeperID == sleeperID),
+                        sleeperID,
+                        score: score,
+                        homeAway: team.homeAway,
+                        gameID: nflGame.id,
+                        status: status,
+                    });
+                }
             }
             scoreboardData.nflWeek.push(gameInfo[nflGame.id]);
         }
@@ -359,14 +327,19 @@ export const getYearMatchups = async (yearSelection, weekSelection, purpose) => 
         const yearLeagueID = leagueIdArray[idIndex];
         const yearLeagueData = leagueDataArray[idIndex];
 
-        const [rosterRes, users] = await waitForAll(
+        const [rosterRes, users, playoffsRes] = await waitForAll(
             getLeagueRosters(yearLeagueID),
             getLeagueUsers(yearLeagueID),
+            fetch(`https://api.sleeper.app/v1/league/${leagueID}/winners_bracket`, {compress: true}),
         ).catch((err) => { console.error(err); });
+
+        const playoffs = await playoffsRes.json();
+        const regularSeasonLength = yearLeagueData.settings.playoff_week_start - 1;
+        const fullSeasonLength = regularSeasonLength + playoffs.pop().r;;
 
         const rosters = rosterRes.rosters;
     
-        let yearManagers = {};
+        const yearManagers = {};
         for(const managerID in managers) {
             const manager = managers[managerID];
 
@@ -382,53 +355,11 @@ export const getYearMatchups = async (yearSelection, weekSelection, purpose) => 
             }
         }
 
-        const regularSeasonLength = yearLeagueData.settings.playoff_week_start - 1;
-
-        const numPOTeams = parseInt(yearLeagueData.settings.playoff_teams);
-        const playoffStart = parseInt(yearLeagueData.settings.playoff_week_start);
-        let playoffLength;
-        let playoffType;
-
-        // before 2020, 1 week per PO round was only option
-        if(yearSelection > 2019) {
-            playoffType = parseInt(yearLeagueData.settings.playoff_round_type);
-        } else {
-            playoffType = 0;
-        }
-
-        // calculate length of playoffs										"Relevant" Match IDs
-        if(playoffType == 0) {							// 1W/r		4-team		6-team		8-team
-            if(numPOTeams == 6) {						// last:	1, 2		1, 2		1, 2, 3, 4 						
-                playoffLength = 3;						// 2-last:	1, 2		1, 2, 3		1, 2, 3, 4
-            } else if(numPOTeams == 8) {                // 3-last:				1, 2		1, 2, 3, 4
-                playoffLength = 3;
-            } else if(numPOTeams == 4) {			
-                playoffLength = 2;						
-            }
-        } else if(playoffType == 1 && year > 2020) {	// 1W/r+2c  4-team		6-team		8-team
-            if(numPOTeams == 6) {						// last:	1			1			1
-                playoffLength = 4;						// 2-last:	1, 2		1, 2		1, 2, 3, 4						
-            } else if(numPOTeams == 8) {                // 3-last:	1, 2		1, 2, 3		1, 2, 3, 4				
-                playoffLength = 4;                      // 4-last:				1, 2		1, 2, 3, 4
-            } else if(numPOTeams == 4) {
-                playoffLength = 3;
-            }
-        } else if(playoffType == 2 ||
-                    playoffType == 1 && year == 2020) {	// 2W/r  	4-team		6-team		8-team
-            if(numPOTeams == 6) {						// last:	1, 2		1, 2		1, 2, 3, 4	
-                playoffLength = 6;						// 2-last:	1, 2		1, 2		1, 2, 3, 4							
-            } else if (numPOTeams == 8) {				// 3-last:	1, 2		1, 2, 3 	1, 2, 3, 4
-                playoffLength = 6;						// 4-last: 	1, 2		1, 2, 3		1, 2, 3, 4					
-            } else if (numPOTeams == 4) {               // 5-last:				1, 2		1, 2, 3, 4	
-                playoffLength = 4;                      // 6-last:				1, 2		1, 2, 3, 4
-            }
-        }
-
         let searchStart;
         if(purpose == 'gameCenter') {
-            searchStart = playoffStart + playoffLength - 1;
+            searchStart = fullSeasonLength;
         } else if(purpose == 'standings') {
-            searchStart = playoffStart - 1;
+            searchStart = regularSeasonLength;
         }
 
         const matchupsPromises = [];
@@ -480,6 +411,41 @@ export const getYearMatchups = async (yearSelection, weekSelection, purpose) => 
 
 
     return matchupsData;
+}
+
+export const getGameStats = async (gameID, espnTeamIDs) => {
+
+    const statsPromises = [];
+    for(const teamID of espnTeamIDs) {
+        statsPromises.push(fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/events/${gameID}/competitions/${gameID}/competitors/${teamID}/statistics?lang=en&region=us`, {compress: true}))
+    }
+    const statsRes = await waitForAll(...statsPromises).catch((err) => { console.error(err); });
+
+    // convert the json matchup responses
+    const statsJsonPromises = [];
+    for(const statRes of statsRes) {
+        const data = statRes.json();
+        statsJsonPromises.push(data)
+        if (!statRes.ok) {
+            throw new Error(data);
+        }
+    }
+    const statsData = await waitForAll(...statsJsonPromises).catch((err) => { console.error(err); });
+    const gameStats = {
+        home: statsData[0],
+        away: statsData[1],
+    }
+
+    return gameStats;
+}
+
+export const getPlayerStats = async (statsLink) => {
+    const secureStatsLink = 'https' + statsLink.slice(4); 
+    const res = await fetch(`${secureStatsLink}`, {compress: true}).catch((err) => { console.error(err); });
+	const data = await res.json().catch((err) => { console.error(err); });
+    if(data) {
+        return data.splits.categories;
+    }
 }
 
 const processMatchups = (inputMatchups, yearManagers, rosters, users, week) => {

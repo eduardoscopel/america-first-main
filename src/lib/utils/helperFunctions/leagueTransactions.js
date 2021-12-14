@@ -41,10 +41,28 @@ export const getLeagueTransactions = async (preview, refresh = false) => {
 		week = nflState.week;
 	}
 
-	const {transactionsData, prevManagers, currentManagers, currentSeason, numberManagers} = await combThroughTransactions(week, leagueID).catch((err) => { console.error(err); });
+	const numberManagers = managers.length;
+	const leagueManagers = {};
+	for(const managerID in managers) {
+		const manager = managers[managerID];
+
+		const entryMan = {
+			managerID: manager.managerID,
+			rosterID: manager.roster,
+			name: manager.name,
+			yearsactive: manager.yearsactive,
+		}
+
+		if(!leagueManagers[manager.roster]) {
+			leagueManagers[manager.roster] = [];
+		}
+		leagueManagers[manager.roster].push(entryMan);
+	}
+
+	const {transactionsData, prevManagers, currentManagers, currentSeason} = await combThroughTransactions(week, leagueID, leagueManagers).catch((err) => { console.error(err); });
 
 	// const { transactions, totals } = digestTransactions(transactionsData, prevManagers, currentSeason, Object.keys(currentManagers).length);
-	const { transactions, totals } = digestTransactions(transactionsData, prevManagers, currentSeason, numberManagers);
+	const { transactions, totals } = digestTransactions(transactionsData, prevManagers, currentSeason, numberManagers, leagueManagers);
 
 	const transactionPackage = {
 		transactions,
@@ -90,43 +108,13 @@ const checkPreview = (preview, passedTransactions) => {
 	return passedTransactions;
 }
 
-const combThroughTransactions = async (week, currentLeagueID) => {
+const combThroughTransactions = async (week, currentLeagueID, leagueManagers) => {
 	week = week > 0 ? week : 1;
 	
 	const leagueIDs = [];
 	const prevManagers = {};
 	let currentManagers = null;
 	let currentSeason = null;
-
-	const numberManagers = managers.length;
-
-	let leagueManagers = {};
-	let activeManagers = [];
-
-	for(const managerID in managers) {
-		const manager = managers[managerID];
-
-		const entryMan = {
-			managerID: manager.managerID,
-			rosterID: manager.roster,
-			name: manager.name,
-			status: manager.status,
-			yearsactive: manager.yearsactive,
-		}
-
-		if(!leagueManagers[manager.roster]) {
-			leagueManagers[manager.roster] = [];
-		}
-		leagueManagers[manager.roster].push(entryMan);
-
-		if(manager.status == "active") {
-			activeManagers[manager.managerID] = {
-				avatar: [],
-				name: [],
-				realname: [],
-			}
-		}
-	}
 
 	while(currentLeagueID && currentLeagueID != 0) {
 		// gather supporting info simultaneously
@@ -147,20 +135,20 @@ const combThroughTransactions = async (week, currentLeagueID) => {
 			const rosterID = roster.roster_id;
 			const user = users[roster.owner_id]; 
 			
-			let recordManager = leagueManagers[rosterID].filter(m => m.yearsactive.includes(year));
-			let recordManID = recordManager[0].managerID;
+			let recordManager = leagueManagers[rosterID].find(m => m.yearsactive.includes(year));
+			let recordManID = recordManager.managerID;
 
 			if(user) {
 				managers[recordManID] = {
 					avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
 					name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
-					realname: recordManager[0].name,
+					realname: recordManager.name,
 				}
 			} else {
 				managers[recordManID] = {
 					avatar: `https://sleepercdn.com/images/v2/icons/player_default.webp`,
 					name: 'Unknown Manager',
-					realname: recordManager[0].name,
+					realname: recordManager.name,
 				}
 			}
 		}
@@ -207,57 +195,27 @@ const combThroughTransactions = async (week, currentLeagueID) => {
 		transactionsData = transactionsData.concat(transactionDataJson);
 	}
 
-	return {transactionsData, prevManagers, currentManagers, currentSeason, numberManagers};
+	return {transactionsData, prevManagers, currentManagers, currentSeason};
 }
 
-const digestTransactions = (transactionsData, prevManagers, currentSeason, numberManagers) => {
+const digestTransactions = (transactionsData, prevManagers, currentSeason, numberManagers, leagueManagers) => {
 	const transactions = [];
 	const totals = {
 		allTime: {},
 		seasons: {}
 	};
 
-	let leagueManagers = {};
-	let activeManagers = {};
-
-	for(const managerID in managers) {
-		const manager = managers[managerID];
-
-		const entryMan = {
-			managerID: manager.managerID,
-			rosterID: manager.roster,
-			name: manager.name,
-			status: manager.status,
-			yearsactive: manager.yearsactive,
-		}
-
-		if(!leagueManagers[manager.roster]) {
-			leagueManagers[manager.roster] = [];
-		}
-		leagueManagers[manager.roster].push(entryMan);
-
-		if(manager.status == "active") {
-			activeManagers[manager.managerID] = {
-				avatar: [],
-				name: [],
-				realname: [],
-			};
-		}
-	}
-
 	// trades can be out of order because they are aded to sleeper when the offer is sent
 	// this sort puts everything in the correct order
 	const transactionOrder = transactionsData.sort((a,b) => b.status_updated - a.status_updated);
 	
 	for(const transaction of transactionOrder) {
-		const {digestedTransaction, season, success} = digestTransaction(transaction, prevManagers, currentSeason)
+		const {digestedTransaction, season, success} = digestTransaction(transaction, prevManagers, currentSeason, leagueManagers)
 		if(!success) continue;
 		transactions.push(digestedTransaction);
 
 		for(const roster of digestedTransaction.rosters) {
-			
-			let recordManager = leagueManagers[roster].filter(m => m.yearsactive.includes(season));
-			let recordManID = recordManager[0].managerID;
+			const recordManID = leagueManagers[roster].find(m => m.yearsactive.includes(season)).managerID;
 			
 			const type = digestedTransaction.type;
 			// add to league long totals
@@ -301,7 +259,7 @@ const digestDate = (tStamp) => {
 	return month + ' ' + date + ' ' + year + ', ' + (hour % 12 == 0 ? 12 : hour % 12) + ':' + min + (hour / 12 >= 1 ? "PM" : "AM");
 }
 
-const digestTransaction = (transaction, prevManagers, currentSeason) => {
+const digestTransaction = (transaction, prevManagers, currentSeason, leagueManagers) => {
 	// don't include failed waiver claims
 	if(transaction.status == 'failed') return {success: false};
 	const handled = [];
@@ -310,38 +268,9 @@ const digestTransaction = (transaction, prevManagers, currentSeason) => {
 	const date = digestDate(transaction.status_updated)
 	const season = parseInt(date.split(',')[0].split(' ')[2]);
 
-	let leagueManagers = {};
-	let activeManagers = {};
-
-	for(const managerID in managers) {
-		const manager = managers[managerID];
-
-		const entryMan = {
-			managerID: manager.managerID,
-			rosterID: manager.roster,
-			name: manager.name,
-			status: manager.status,
-			yearsactive: manager.yearsactive,
-		}
-
-		if(!leagueManagers[manager.roster]) {
-			leagueManagers[manager.roster] = [];
-		}
-		leagueManagers[manager.roster].push(entryMan);
-
-		if(manager.status == "active") {
-			activeManagers[manager.managerID] = {
-				avatar: [],
-				name: [],
-				realname: [],
-			};
-		}
-	}
-
 	let transactionManagers = [];
 	for(const transactionRoster of transactionRosters) {
-		let recordManager = leagueManagers[transactionRoster].filter(m => m.yearsactive.includes(season));
-		let recordManID = recordManager[0].managerID;
+		let recordManID = leagueManagers[transactionRoster].find(m => m.yearsactive.includes(season)).managerID;
 		transactionManagers.push(recordManID);
 	}
 
@@ -361,10 +290,7 @@ const digestTransaction = (transaction, prevManagers, currentSeason) => {
 	if(season != currentSeason) {
 		digestedTransaction.previousOwners = [];
 		for(const roster of transactionRosters) {
-
-			let recordManager = leagueManagers[roster].filter(m => m.yearsactive.includes(season));
-			let recordManID = recordManager[0].managerID;
-
+			let recordManID = leagueManagers[roster].filter(m => m.yearsactive.includes(season)).managerID;
 			digestedTransaction.previousOwners.push(prevManagers[season][recordManID]);
 		}
 	}
