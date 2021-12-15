@@ -206,13 +206,13 @@
 			</div>
 		{:else}
 			<div class="columnWrap" style="width: 50%;">
-				<!-- <div class="rowWrap trade"> -->
+				<div class="rowWrap trade">
 					<span class="nameHolder">
 						<span class="pos {players[cell.player].pos}">{players[cell.player].pos}</span> 
 						<div class="playerAvatar" style="{getAvatar(players[cell.player].pos, cell.player)}" />
 						<span class="name" bind:this={origin}>{players[cell.player].pos == 'DEF' ? `${players[cell.player].ln} DEF` : `${players[cell.player].fn} ${players[cell.player].ln}`}</span>
 					</span>
-				<!-- </div> -->
+				</div>
 			</div>
 		{/if}
 	{:else if cell && cell.pick}
