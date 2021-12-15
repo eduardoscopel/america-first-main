@@ -7,8 +7,7 @@ import {
 	managers,
 	getLeagueData,
     nflTeams,
-    getLeagueMatchups,
-    loadPlayers } from '$lib/utils/helper';
+    getLeagueMatchups } from '$lib/utils/helper';
 import { get } from 'svelte/store';
 import { leagueData, scoreboardStore } from '$lib/stores';
 
@@ -457,9 +456,9 @@ const processMatchups = (inputMatchups, yearManagers, rosters, users, week) => {
 		if(!matchups[match.matchup_id]) {
 			matchups[match.matchup_id] = [];
 		}
-		let user = users[rosters[match.roster_id - 1].owner_id];
-        let recordManager = yearManagers[match.roster_id]; 
-		let recordManID = recordManager.managerID;
+		const user = users[rosters[match.roster_id - 1].owner_id];
+        const recordManager = yearManagers[match.roster_id]; 
+		const recordManID = recordManager.managerID;
 
 		matchups[match.matchup_id].push({
 			manager: {

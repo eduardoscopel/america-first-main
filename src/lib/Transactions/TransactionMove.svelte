@@ -3,7 +3,7 @@
   	import { Row, Cell } from '@smui/data-table';
 	import { Icon } from '@smui/tab';
 
-	export let move, type, masterOffset, currentManagers, players;
+	export let move, number, type, masterOffset, currentManagers, players;
 	
 	let trade = false;
 	
@@ -77,14 +77,17 @@
 	}
 
 	.playerAvatar {
-		display: inline-block;
-		vertical-align: middle;
-		height: 35px;
-		width: 35px;
+		display: inline-flex;
+		position: relative;
+		align-items: center;
+		justify-content: center;
+		height: 45px;
+		width: 45px;
 		background-position: center;
 		border-radius: 100%;
 		background-repeat: no-repeat;
-		background-size: auto 35px;
+		background-size: auto 45px;
+		margin: 0 0.5em 0 0;
 	}
 
 	.name {
@@ -97,7 +100,8 @@
 		justify-content: center;
 		border-radius: 8px;
 		width: 32px;
-		height: 24px;
+		height: 32px;
+		margin: 0 0.5em;
 	}
 
 	:global(.QB) {
@@ -138,18 +142,97 @@
 
 	.nameHolder {
 		margin: 6px 0;
-    	display: inline-block;
+    	display: inline-flex;
+		align-items: center;
 	}
 
 	.destination {
-		display: block;
+		display: inline-flex;
 		margin: 0 auto;
 		width: 0px;
 		height: 2px;
 	}
+
+	:global(.movesWrapper) {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 50%
+	}
+
+	.columnWrap {
+		position: relative;
+		display: inline-flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+	}
+
+	.rowWrap {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+	}
 </style>
 
-<Row>
+{#each move as cell}
+	{#if cell && cell.player}
+		{#if trade == false}
+			<div class="movesWrapper {cell.type}" style="{number == 2 ? "width: 25%;" : null}">
+				<div class="columnWrap">
+					<div class="rowWrap">
+						{#if cell.type == "Added"}
+							<Icon class="indicator material-icons">arrow_drop_up</Icon>
+						{:else if cell.type == "Dropped"}
+							<Icon class="indicator material-icons">arrow_drop_down</Icon>
+						{/if}
+						{cell.type == "Added" || cell.type == "Dropped" ? cell.type : ""}
+						{#if cell.type == "Added"}
+							<Icon class="indicator material-icons">arrow_drop_up</Icon>
+						{:else if cell.type == "Dropped"}
+							<Icon class="indicator material-icons">arrow_drop_down</Icon>
+						{/if}
+					</div>
+					<span class="nameHolder">
+						<span class="pos {players[cell.player].pos}">{players[cell.player].pos}</span> 
+						<div class="playerAvatar" style="{getAvatar(players[cell.player].pos, cell.player)}" />
+						<span class="name" bind:this={origin}>{players[cell.player].pos == 'DEF' ? `${players[cell.player].ln} DEF` : `${players[cell.player].fn} ${players[cell.player].ln}`}</span>
+					</span>
+				</div>
+			</div>
+		{:else}
+			<div class="columnWrap" style="width: 50%;">
+				<!-- <div class="rowWrap trade"> -->
+					<span class="nameHolder">
+						<span class="pos {players[cell.player].pos}">{players[cell.player].pos}</span> 
+						<div class="playerAvatar" style="{getAvatar(players[cell.player].pos, cell.player)}" />
+						<span class="name" bind:this={origin}>{players[cell.player].pos == 'DEF' ? `${players[cell.player].ln} DEF` : `${players[cell.player].fn} ${players[cell.player].ln}`}</span>
+					</span>
+				<!-- </div> -->
+			</div>
+		{/if}
+	{:else if cell && cell.pick}
+		<div class="movesWrapper {cell.type}">
+			<span bind:this={origin} class="name">{cell.pick.season} Round {cell.pick.round}{@html cell.pick.original_owner ?  `<br /><span class="originalOwner">(${cell.pick.original_owner.original && cleanName(cell.pick.original_owner.original) != cleanName(currentManagers[cell.pick.original_owner.current].name) ? `${cell.pick.original_owner.original} [` : ''}${currentManagers[cell.pick.original_owner.current].name}${cell.pick.original_owner.original && cleanName(cell.pick.original_owner.original) != cleanName(currentManagers[cell.pick.original_owner.current].name)  ? ']' : ''})</span>` : ""}</span>
+		</div>
+	{:else if cell && cell.budget}
+		<div class="movesWrapper {cell.type}">
+			<span bind:this={origin} class="name">{cell.budget.amount}</span>
+		</div>
+	<!-- {:else if cell && cell == "destination"}
+		<div class="movesWrapper {cell.type}">
+			<span class="destination" bind:this={destination} />
+		</div>
+	{:else}
+		<div class="trade" /> -->
+	{/if}
+{/each}
+
+<!-- <Row>
 	{#each move as cell}
 		{#if cell && cell.player}
 			<Cell class="move {cell.type}">
@@ -181,7 +264,7 @@
 			<Cell class="trade"/>
 		{/if}
 	{/each}
-</Row>
+</Row> -->
 
 {#if trade}
 	<svg class="lineParent">

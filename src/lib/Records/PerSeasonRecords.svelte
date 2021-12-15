@@ -86,10 +86,14 @@
                 manager: transactionTotals.seasons[season][recordManID].manager,
                 trades: transactionTotals.seasons[season][recordManID].trade,
             })
+            
+            const waiverPerc = transactionTotals.seasons[season][recordManID].waiver + transactionTotals.seasons[season][recordManID].outbid > 0 ? transactionTotals.seasons[season][recordManID].waiver / (transactionTotals.seasons[season][recordManID].waiver + transactionTotals.seasons[season][recordManID].outbid) * 100 : 'N/A';
             yearsObj[season].waiversData.push({
                 recordManID: transactionTotals.seasons[season][recordManID].recordManID,
                 manager: transactionTotals.seasons[season][recordManID].manager,
                 waivers: transactionTotals.seasons[season][recordManID].waiver,
+                outbid: transactionTotals.seasons[season][recordManID].outbid,
+                waiverPerc,
             })
         }
     }

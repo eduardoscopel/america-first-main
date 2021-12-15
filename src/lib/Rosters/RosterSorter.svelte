@@ -5,10 +5,7 @@
 	export let rosters, users, startersAndReserve, leagueData, players;
 
 	const rosterPositions = leagueData.roster_positions;
-
-
 	const numDivisions = leagueData.settings.divisions || 1;
-
 	const divisions = [];
 
 	for(let i = 0; i < numDivisions; i++) {

@@ -16,10 +16,14 @@
             manager: transactionTotals.allTime[recordManID].manager,
             trades: transactionTotals.allTime[recordManID].trade,
         })
+
+        const waiverPerc = transactionTotals.allTime[recordManID].waiver + transactionTotals.allTime[recordManID].outbid > 0 ? transactionTotals.allTime[recordManID].waiver / (transactionTotals.allTime[recordManID].waiver + transactionTotals.allTime[recordManID].outbid) * 100 : 'N/A';
         waiversData.push({
             recordManID: transactionTotals.allTime[recordManID].recordManID,
             manager: transactionTotals.allTime[recordManID].manager,
             waivers: transactionTotals.allTime[recordManID].waiver,
+            outbid: transactionTotals.allTime[recordManID].outbid,
+            waiverPerc,
         })
     }
 

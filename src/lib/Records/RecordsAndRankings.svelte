@@ -9,7 +9,7 @@
 
     export let selection = 'regular', displayPositionRecord = 'ALL', displayYear, waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerWeekTOPS, allManagers, displayObject, headToHeadRecords, leaguePlayerRecords, allTime=false;
 
-    let leagueManagers = {};
+    const leagueManagers = {};
     const numManagers = managers.length;
 
     const changeSelection = (s) => {
@@ -261,14 +261,13 @@
     for(let i = 1; i <= numManagers; i++) {
         if(waiversData.find(w => w.recordManID == i)) {
             const waiver = waiversData.find(w => w.recordManID == i);
-            const trades = tradesData.find(t => t.recordManID == i)?.trades || 0;
-            const waivers = waiver?.waivers || 0;
-            const manager = waiver.manager;
             transactions.push({
                 recordManID: i,
-                manager,
-                trades,
-                waivers,
+                manager: waiver.manager,
+                trades: tradesData.find(t => t.recordManID == i)?.trades || 0,
+                waivers: waiver?.waivers || 0,
+                outbid: waiver?.outbid || 0,
+                waiverPerc: waiver?.waiverPerc || 'N/A',
             })
         }
     }
@@ -1852,7 +1851,7 @@
             <DataTable class="rankingTable">
                 <Head>
                     <Row>
-                        <Cell class="header" colspan=4>
+                        <Cell class="header" colspan=6>
                             {prefix} Transaction Totals
                         </Cell>
                     </Row>
@@ -1861,6 +1860,8 @@
                         <Cell class="header">Manager</Cell>
                         <Cell class="header">Trades</Cell>
                         <Cell class="header">Waivers</Cell>
+                        <Cell class="header">Outbid</Cell>
+                        <Cell class="header">Win %</Cell>
                     </Row>
                 </Head>
                 <Body>
@@ -1875,6 +1876,8 @@
                             </Cell>
                             <Cell class="center">{transaction.trades}</Cell>
                             <Cell class="center">{transaction.waivers}</Cell>
+                            <Cell class="center">{transaction.outbid}</Cell>
+                            <Cell class="center">{transaction.waiverPerc == 'N/A' ? transaction.waiverPerc : round(transaction.waiverPerc)}</Cell>
                         </Row>
                     {/each}
                 </Body>
