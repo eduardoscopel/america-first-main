@@ -1,45 +1,21 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { getLeagueTransactions, getLeagueRosters, getLeagueData, loadPlayers, waitForAll, leagueID, gotoManager } from '$lib/utils/helper';
+	import { getLeagueTransactions, getLeagueData, loadPlayers, waitForAll, leagueID } from '$lib/utils/helper';
 	import LinearProgress from '@smui/linear-progress';
 	import { onMount } from 'svelte';
 	import Transaction from './Transaction.svelte';
-	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
 
 	export let masterOffset = 0;
 
 	let loading = true;
-	let players, transactions, currentManagers, rosters;
-	let waiverType, waiverBudget, waiverWire;
-
-	const getWaiverWire = (rosters, waiverBudget, waiverType, currentManagers) => {
-		waiverWire = [];
-		for(const key in rosters) {
-			let remainingFaab;
-			if(waiverType == 2) {
-				remainingFaab = waiverBudget - rosters[key].settings.waiver_budget_used;
-			}
-			waiverWire.push({
-				rosterID: rosters[key].roster_id,
-				faab: remainingFaab,
-				priority: rosters[key].settings.waiver_position,
-				manager: currentManagers[rosters[key].roster_id],
-				moves: rosters[key].settings.total_moves,
-			})
-		}
-		waiverWire = waiverWire.sort((a, b) => a.priority - b.priority);
-	}
+	let players, transactions, currentManagers, waiverType;
 
 	onMount(async () => {
-		const [transactionsData, playersData, rostersData, leagueData] = await waitForAll(getLeagueTransactions(true),loadPlayers(),getLeagueRosters(leagueID), getLeagueData(leagueID));
+		const [transactionsData, playersData, leagueData] = await waitForAll(getLeagueTransactions(true),loadPlayers(), getLeagueData(leagueID));
 		players = playersData.players;
 		transactions = transactionsData.transactions;
 		currentManagers = transactionsData.currentManagers;
-		rosters = rostersData.rosters;
 		waiverType = leagueData.settings.waiver_type;
-		if(waiverType == 2) {
-			waiverBudget = leagueData.settings.waiver_budget;
-		}
 
 		if(transactionsData.stale) {
 			const newTransactions = await getLeagueTransactions(true, true);
@@ -49,9 +25,6 @@
 		if(playersData.stale) {
 			const newPlayersData = await loadPlayers(true);
 			players = newPlayersData.players;
-		}
-		if(rosters) {
-			getWaiverWire(rosters, waiverBudget, waiverType, currentManagers);
 		}
 
 		loading = false;
@@ -93,18 +66,6 @@
 		margin: 5em 0;
 	}
 
-	.avatar {
-		vertical-align: middle;
-		border-radius: 50%;
-		height: 25px;
-		width: 25px;
-		margin: 0 0.2em 0 0;
-		border: 0.25px solid #777;
-	}
-
-	.clickable {
-		cursor: pointer;
-	}
 </style>
 
 <div class="transactions">
@@ -112,41 +73,11 @@
 		<p>Loading league transactions...</p>
 		<LinearProgress indeterminate />
 	{:else}
-		<!-- waiver wire summary -->
-		{#if waiverWire.length}
-			<DataTable table$aria-label="Waiver Priority" style="width: 100%; box-shadow: 0px 3px 3px -2px var(--boxShadowOne), 0px 3px 4px 0px var(--boxShadowTwo), 0px 1px 8px 0px var(--boxShadowThree);">
-				<Head> 
-					<Row>
-						<Cell class="center" />
-						<Cell class="center">Team</Cell>
-						<Cell class="center">Moves</Cell>
-						{#if waiverType == 2}
-							<Cell class="center">FAAB</Cell>
-						{/if}
-					</Row>
-				</Head>
-				<Body>
-					{#each waiverWire as waiver}
-						<Row>
-							<Cell class="center">{waiver.priority}</Cell>
-							<Cell class="cellname">
-								<img class="avatar clickable" on:click={() => gotoManager(waiver.rosterID)} src="{waiver.manager.avatar}" alt="{waiver.manager.name} avatar"/>
-								{waiver.manager.name}
-							</Cell>
-							<Cell class="center">{waiver.moves}</Cell>
-							{#if waiverType == 2}
-								<Cell class="center">${waiver.faab}</Cell>
-							{/if}
-						</Row>
-					{/each}
-				</Body>
-			</DataTable>
-		{/if}
 		<!-- waiver -->
 		{#if transactions.waivers.length}
 			<h5>Waiver Wire</h5>
 			{#each transactions.waivers as transaction }
-				<Transaction {players} {transaction} {masterOffset} {currentManagers} />
+				<Transaction {players} {transaction} {masterOffset} {currentManagers} {waiverType} />
 			{/each}
 
 			<p on:click={() => goto("/transactions?show=waiver&query=&page=1")} class="link">( view more )</p>
@@ -162,7 +93,7 @@
 		{#if transactions.trades.length}
 			<h5>Recent Trades</h5>
 			{#each transactions.trades as transaction }
-				<Transaction {players} {transaction} {masterOffset} currentManagers={currentManagers} />
+				<Transaction {players} {transaction} {masterOffset} currentManagers={currentManagers} {waiverType} />
 			{/each}
 
 			<p on:click={() => goto("/transactions?show=trade&query=&page=1")} class="link">( view more )</p>

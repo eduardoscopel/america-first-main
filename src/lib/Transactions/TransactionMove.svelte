@@ -3,7 +3,7 @@
   	import { Row, Cell } from '@smui/data-table';
 	import { Icon } from '@smui/tab';
 
-	export let move, number, type, masterOffset, currentManagers, players;
+	export let move, number, type, masterOffset, currentManagers, players, allMoves, index, traders;
 	
 	let trade = false;
 	
@@ -64,15 +64,19 @@
 	}
 
 	.lineParent {
-		position: absolute;
+		position: relative;
+		display: inline-flex;
 		overflow: visible;
 		width: 1px;
 		height: 1px;
+		margin: 0 10px;
 		pointer-events: none;
+		z-index: 2;
 	}
 
 	.line{
-		position: absolute;
+		position: relative;
+		display: inline-flex;
 		z-index: 2;
 	}
 
@@ -87,7 +91,7 @@
 		border-radius: 100%;
 		background-repeat: no-repeat;
 		background-size: auto 45px;
-		margin: 0 0.5em 0 0;
+		margin: 0 0.2em;
 	}
 
 	.name {
@@ -204,16 +208,42 @@
 					</span>
 				</div>
 			</div>
-		{:else}
-			<div class="columnWrap" style="width: 50%;">
-				<div class="rowWrap trade">
+		{:else if cell.side == "origin"}
+			{#if traders[0] == cell.rosterID}
+				<div class="rowWrap trade" style="justify-content: flex-start;">
 					<span class="nameHolder">
 						<span class="pos {players[cell.player].pos}">{players[cell.player].pos}</span> 
 						<div class="playerAvatar" style="{getAvatar(players[cell.player].pos, cell.player)}" />
 						<span class="name" bind:this={origin}>{players[cell.player].pos == 'DEF' ? `${players[cell.player].ln} DEF` : `${players[cell.player].fn} ${players[cell.player].ln}`}</span>
 					</span>
+					<svg class="lineParent">
+						<defs>
+							<marker id="arrowhead" markerWidth="10" markerHeight="7" 
+							refX="0" refY="2.5" orient="auto" fill="#ccc">
+								<polygon points="0 0, 10 2.5, 0 5" />
+							</marker>
+						</defs>
+						<line stroke-width="1.8px" stroke="#ccc" x1=0 y1=0 x2=20 y2=auto class="line" marker-end="url(#arrowhead)"/>
+					</svg>
 				</div>
-			</div>
+			{:else}
+				<div class="rowWrap trade" style="justify-content: flex-end;">
+					<svg class="lineParent">
+						<defs>
+							<marker id="arrowhead" markerWidth="10" markerHeight="7" 
+							refX="0" refY="2.5" orient="auto" fill="#ccc">
+								<polygon points="0 0, 10 2.5, 0 5" />
+							</marker>
+						</defs>
+						<line stroke-width="1.8px" stroke="#ccc" x1=0 y1=0 x2=-20 y2=auto class="line" marker-end="url(#arrowhead)"/>
+					</svg>
+					<span class="nameHolder">
+						<span class="name" bind:this={origin}>{players[cell.player].pos == 'DEF' ? `${players[cell.player].ln} DEF` : `${players[cell.player].fn} ${players[cell.player].ln}`}</span>
+						<div class="playerAvatar" style="{getAvatar(players[cell.player].pos, cell.player)}" />
+						<span class="pos {players[cell.player].pos}">{players[cell.player].pos}</span>
+					</span>
+				</div>
+			{/if}
 		{/if}
 	{:else if cell && cell.pick}
 		<div class="movesWrapper {cell.type}">
@@ -266,7 +296,7 @@
 	{/each}
 </Row> -->
 
-{#if trade}
+<!-- {#if trade}
 	<svg class="lineParent">
 		<defs>
 		  <marker id="arrowhead" markerWidth="10" markerHeight="7" 
@@ -276,7 +306,7 @@
 		</defs>
 		<line stroke-width="2px" stroke="#ccc"  x1="{x1}" y1="{y}" x2="{x2}" y2="{y}" class="line" marker-end="url(#arrowhead)"/>
 	</svg>
-{/if}
+{/if} -->
 
 
 

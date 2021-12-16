@@ -3,9 +3,10 @@
   	// import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
 	import TransactionMove from './TransactionMove.svelte';
 
-	export let transaction, masterOffset, currentManagers, players;
+	export let transaction, masterOffset, currentManagers, players, waiverType;
 
 	const numTraders = transaction.type == 'trade' ? transaction.rosters.length : 0;
+	const traders = transaction.type == 'trade' ? transaction.rosters : null;
 
 </script>
 
@@ -61,6 +62,7 @@
 		position: relative;
 		display: inline-flex;
 		width: 100%;
+		border-bottom: 0.25px solid var(--ccc);
 	}
 
 	:global(.transDate) {
@@ -103,6 +105,7 @@
 		justify-content: center;
 		width: 25%;
 		background-color: var(--transactHeader);
+		border-left: 0.25px solid var(--ccc);
 	}
 
 	.columnWrap {
@@ -131,7 +134,7 @@
 	<div class="trans">
 		{#if transaction.type == 'trade'}
 			{#if numTraders == 2}
-				<div class="transManager">
+				<div class="transManager" style="border-right: 0.25px solid var(--ccc);">
 					{#if transaction.previousOwners && cleanName(transaction.previousOwners[0].name) != cleanName(currentManagers[transaction.recordManIDs[0]].name)}
 						<img class="avatar clickable" on:click={() => gotoManager(transaction.recordManIDs[0])} src="{transaction.previousOwners[0].avatar}" alt="{transaction.previousOwners[0].name} avatar"/>
 						<span class="clickable" on:click={() => gotoManager(transaction.recordManIDs[0])}>{transaction.previousOwners[0].name}</span>
@@ -144,7 +147,7 @@
 			{/if}
 		{:else}
 			{#each transaction.recordManIDs as owner, ix}
-				<div class="transManager">
+				<div class="transManager" style="border-right: 0.25px solid var(--ccc);">
 					{#if transaction.previousOwners && cleanName(transaction.previousOwners[ix].name) != cleanName(currentManagers[owner].name)}
 						<img class="avatar clickable" on:click={() => gotoManager(owner)} src="{transaction.previousOwners[ix].avatar}" alt="{transaction.previousOwners[ix].name} avatar"/>
 						<span class="clickable" on:click={() => gotoManager(owner)}>{transaction.previousOwners[ix].name}</span>
@@ -156,12 +159,20 @@
 				</div>
 			{/each}
 		{/if}
-		{#each transaction.moves as move}
-			<TransactionMove {players} {move} number={transaction.moves.length} type={transaction.type} {masterOffset} {currentManagers} />
-		{/each}
+		{#if transaction.type == 'trade'}
+			<div class="columnWrap" style="width: 50%">
+				{#each transaction.moves as move, ix}
+					<TransactionMove {players} {move} allMoves={transaction.moves} index={ix} {traders} number={transaction.moves.length} type={transaction.type} {masterOffset} {currentManagers} />
+				{/each}
+			</div>
+		{:else}
+			{#each transaction.moves as move, ix}
+				<TransactionMove {players} {move} allMoves={transaction.moves} index={ix} {traders} number={transaction.moves.length} type={transaction.type} {masterOffset} {currentManagers} />
+			{/each}
+		{/if}
 		{#if transaction.type == 'trade'}
 			{#if numTraders == 2}
-				<div class="transManager">
+				<div class="transManager" style="border-left: 0.25px solid var(--ccc);">
 					{#if transaction.previousOwners && cleanName(transaction.previousOwners[1].name) != cleanName(currentManagers[transaction.recordManIDs[1]].name)}
 						<img class="avatar clickable" on:click={() => gotoManager(transaction.recordManIDs[1])} src="{transaction.previousOwners[1].avatar}" alt="{transaction.previousOwners[1].name} avatar"/>
 						<span class="clickable" on:click={() => gotoManager(transaction.recordManIDs[1])}>{transaction.previousOwners[1].name}</span>

@@ -395,11 +395,13 @@ const digestTransaction = (transaction, prevManagers, currentSeason, leagueManag
 
 		move[transactionRosters.indexOf(pick.previous_owner_id)] = {
 			type: "trade",
+			side: "origin",
 			pick: {
 				season: pick.season,
 				round: pick.round,
 				original_owner: null,
 			},
+			rosterID: pick.previous_owner_id,
 		}
 
 		if(pick.roster_id != pick.previous_owner_id) {
@@ -411,8 +413,17 @@ const digestTransaction = (transaction, prevManagers, currentSeason, leagueManag
 			move[transactionRosters.indexOf(pick.previous_owner_id)].pick.original_owner = original_owner;
 		}
 
-		move[transactionRosters.indexOf(pick.owner_id)] = "destination";
-
+		move[transactionRosters.indexOf(pick.owner_id)] = {
+			type: "trade",
+			side: "destination",
+			pick: {
+				season: pick.season,
+				round: pick.round,
+				original_owner: null,
+			},
+			rosterID: pick.owner_id,
+		}
+		
 		digestedTransaction.moves.push(move);
 	}
 
@@ -422,13 +433,22 @@ const digestTransaction = (transaction, prevManagers, currentSeason, leagueManag
 
 		move[transactionRosters.indexOf(wBudget.sender)] = {
 			type: "trade",
+			side: "origin",
 			budget: {
 				amount: `${wBudget.amount}$`,
 			},
+			rosterID: wBudget.sender,
 		}
 
-		move[transactionRosters.indexOf(wBudget.receiver)] = "destination";
-
+		move[transactionRosters.indexOf(wBudget.receiver)] = {
+			type: "trade",
+			side: "destination",
+			budget: {
+				amount: `${wBudget.amount}$`,
+			},
+			rosterID: wBudget.receiver,
+		}
+		
 		digestedTransaction.moves.push(move);
 	}
 
@@ -440,10 +460,18 @@ const handleAdds = (rosters, adds, drops, player, bid, season, waiverBudgets) =>
 	if(drops && drops[player]) {
 		move[rosters.indexOf(drops[player])] = {
 			type: "trade",
-			player
+			side: "origin",
+			player,
+			rosterID: drops[player],
 		}
 
-		move[rosters.indexOf(adds[player])] = "destination";
+		move[rosters.indexOf(adds[player])] =  {
+			type: "trade",
+			side: "destination",
+			player,
+			rosterID: adds[player],
+		}
+		
 		return move;
 	}
 

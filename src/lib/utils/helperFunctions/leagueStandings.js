@@ -42,7 +42,7 @@ export const getLeagueStandings = async () => {
 	}
 
 	// if the season hasn't started, standings can't be created
-	if(leagueData.status != "in_season" && leagueData.status != "complete") {
+	if(leagueData.status != "in_season" && leagueData.status != "post_season" && leagueData.status != "complete") {
 		return null;
 	}
 

@@ -16,6 +16,7 @@ import HomePost from './BlogPosts/HomePost.svelte';
 import Posts from './BlogPosts/Posts.svelte';
 import Standings from './Standings/index.svelte';
 import GameCenter from './GameCenter/index.svelte';
+import WaiverWire from './Transactions/WaiverWire.svelte'
 
 export {
     Nav,
@@ -36,4 +37,5 @@ export {
     Posts,
     Standings,
     GameCenter,
+    WaiverWire,
 };

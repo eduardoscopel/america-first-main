@@ -1,7 +1,7 @@
 <script>
 	import LinearProgress from '@smui/linear-progress';
 	import { getNflState, cleanName, leagueName, homepageText, managers, gotoManager, enableBlog, getLeagueStandings, getLeagueUsers, leagueID, getAwards, round, waitForAll } from '$lib/utils/helper';
-	import { Transactions, PowerRankings, HomePost } from '$lib/components';
+	import { Transactions, PowerRankings, HomePost, WaiverWire } from '$lib/components';
     import Standing from "$lib/Standings/Standing.svelte";
     import DataTable, { Head, Body, Row, Cell } from '@smui/data-table';
     import { onMount } from 'svelte';
@@ -85,6 +85,15 @@
         min-width: 320px;
         margin: 0 auto;
         padding: 60px 0;
+    }
+
+    .mainConstrained {
+        width: 100%;
+        max-width: 1000px;
+        margin: 0 auto 4em;
+        align-content: center;
+        position: relative;
+        padding: 3% 0;
     }
 
     .text {
@@ -243,6 +252,10 @@
             {/if}
         </div>
         <PowerRankings />
+        
+        <div class="mainConstrained">
+            <Transactions masterOffset={left} />
+        </div>
     </div>
     
     <div class="leagueData">
@@ -320,7 +333,7 @@
 
         <div class="transactions" bind:this={el} >
             <div class="sectionBanner">Waiver Priority</div>
-            <Transactions masterOffset={left} />
+            <WaiverWire />
         </div>
     </div>
 </div>
