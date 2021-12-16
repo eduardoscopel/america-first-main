@@ -8,19 +8,21 @@
 	export let masterOffset = 0;
 
 	let loading = true;
-	let players, transactions, currentManagers, waiverType;
+	let players, transactions, currentManagers, prevManagers, waiverType;
 
 	onMount(async () => {
 		const [transactionsData, playersData, leagueData] = await waitForAll(getLeagueTransactions(true),loadPlayers(), getLeagueData(leagueID));
 		players = playersData.players;
 		transactions = transactionsData.transactions;
 		currentManagers = transactionsData.currentManagers;
+		prevManagers = transactionsData.prevManagers;
 		waiverType = leagueData.settings.waiver_type;
 
 		if(transactionsData.stale) {
 			const newTransactions = await getLeagueTransactions(true, true);
 			transactions = newTransactions.transactions;
 			currentManagers = newTransactions.currentManagers;
+			prevManagers = newTransactions.prevManagers;
 		}
 		if(playersData.stale) {
 			const newPlayersData = await loadPlayers(true);
@@ -77,7 +79,7 @@
 		{#if transactions.waivers.length}
 			<h5>Waiver Wire</h5>
 			{#each transactions.waivers as transaction }
-				<Transaction {players} {transaction} {masterOffset} {currentManagers} {waiverType} />
+				<Transaction {players} {transaction} {masterOffset} {currentManagers} prevManagers={prevManagers[transaction.year]} {waiverType} />
 			{/each}
 
 			<p on:click={() => goto("/transactions?show=waiver&query=&page=1")} class="link">( view more )</p>
@@ -93,7 +95,7 @@
 		{#if transactions.trades.length}
 			<h5>Recent Trades</h5>
 			{#each transactions.trades as transaction }
-				<Transaction {players} {transaction} {masterOffset} currentManagers={currentManagers} {waiverType} />
+				<Transaction {players} {transaction} {masterOffset} currentManagers={currentManagers} prevManagers={prevManagers[transaction.year]} {waiverType} />
 			{/each}
 
 			<p on:click={() => goto("/transactions?show=trade&query=&page=1")} class="link">( view more )</p>

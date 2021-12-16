@@ -9,7 +9,7 @@
 	import { goto } from '$app/navigation';
 	import { getLeagueTransactions, loadPlayers } from '$lib/utils/helper';
 
-	export let masterOffset = 0, show, playersInfo, query, queryPage, transactions, currentManagers, stale, perPage, postUpdate=false;
+	export let masterOffset = 0, show, playersInfo, query, queryPage, transactions, currentManagers, prevManagers, stale, perPage, postUpdate=false;
 	const oldQuery = query;
 	let page = queryPage || 0;
 
@@ -17,6 +17,7 @@
 		const newTransactions = await getLeagueTransactions(false, true);
 		transactions = newTransactions.transactions;
 		currentManagers = newTransactions.currentManagers;
+		prevManagers = newTransactions.prevManagers;
 	}
 
 	if(stale) {
@@ -274,7 +275,7 @@
 		<Pagination {perPage} total={totalTransactions} bind:page={page} target={top} scroll={false} />
 		<div class="transactions-child">
 			{#each displayTransactions as transaction (transaction.id)}
-				<Transaction {players} {transaction} masterOffset={masterOffset + 15} {currentManagers} />
+				<Transaction {players} {transaction} masterOffset={masterOffset + 15} {currentManagers} prevManagers={prevManagers[transaction.year]} />
 			{/each}
 		</div>
 		<Pagination {perPage} total={totalTransactions} bind:page={page} target={top} scroll={true} />

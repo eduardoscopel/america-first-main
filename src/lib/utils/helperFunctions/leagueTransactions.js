@@ -16,6 +16,7 @@ export const getLeagueTransactions = async (preview, refresh = false) => {
 		return {
 			transactions: checkPreview(preview, transactionsStoreVal.transactions),
 			currentManagers: transactionsStoreVal.currentManagers,
+			prevManagers: transactionsStoreVal.prevManagers,
 			totals: transactionsStoreVal.totals,
 			stale: false
 		};
@@ -64,6 +65,7 @@ export const getLeagueTransactions = async (preview, refresh = false) => {
 	const transactionPackage = {
 		transactions,
 		currentManagers,
+		prevManagers,
 		totals
 	};
 
@@ -76,6 +78,7 @@ export const getLeagueTransactions = async (preview, refresh = false) => {
 	return {
 		transactions: checkPreview(preview, transactions),
 		currentManagers,
+		prevManagers,
 		totals,
 		stale: false
 	};
@@ -229,34 +232,47 @@ const digestTransactions = (transactionsData, prevManagers, currentSeason, numbe
 		if(!success) continue;
 	
 		if(digestedTransaction.type == 'outbid') {
-			if(transactions.find(t => t.moves[0][0].player == digestedTransaction.player)) {
-				if(!transactions.find(t => t.moves[0][0].player == digestedTransaction.player).failedAdds) {
-					transactions.find(t => t.moves[0][0].player == digestedTransaction.player).failedAdds = [];
+			if(transactions.find(t => t.moves[0][0].player == digestedTransaction.player && t.date == digestedTransaction.date)) {
+
+				const transactionMatch = transactions.find(t => t.moves[0][0].player == digestedTransaction.player && t.date == digestedTransaction.date);
+				if(!transactionMatch.failedAdds) {
+					transactionMatch.failedAdds = [];
 				}
 				const recordManID = leagueManagers[digestedTransaction.adds[digestedTransaction.player]].find(m => m.yearsactive.includes(season)).managerID;
-				transactions.find(t => t.moves[0][0].player == digestedTransaction.player).failedAdds.push({
+				transactionMatch.failedAdds.push({
 					recordManID,
 					bid: digestedTransaction.bid,
 				})
 			} else {
 				if(!failedAdds[digestedTransaction.player]) {
-					failedAdds[digestedTransaction.player] = [];
+					failedAdds[digestedTransaction.player] = {};
+					failedAdds[digestedTransaction.player][digestedTransaction.date] = [];
+				} else if(!failedAdds[digestedTransaction.player][digestedTransaction.date]) {
+					failedAdds[digestedTransaction.player][digestedTransaction.date] = [];
+				} else if(failedAdds[digestedTransaction.player][digestedTransaction.date] && failedAdds[digestedTransaction.player][digestedTransaction.date].find(f => f.bid == digestedTransaction.bid && f.recordManID == digestedTransaction.adds[digestedTransaction.player])) {
+					continue;
 				}
 				const recordManID = leagueManagers[digestedTransaction.adds[digestedTransaction.player]].find(m => m.yearsactive.includes(season)).managerID;
-				failedAdds[digestedTransaction.player].push({
+				failedAdds[digestedTransaction.player][digestedTransaction.date].push({
 					recordManID,
 					bid: digestedTransaction.bid,
 				});
 			}
 		}
 		if(digestedTransaction.type != 'outbid') {
-			if(failedAdds[digestedTransaction.moves[0][0].player]) {
-				digestedTransaction.failedAdds = [];
-				for(const failedAdd in failedAdds[digestedTransaction.moves[0][0].player]) {
-					digestedTransaction.failedAdds.push({
-						recordManID: failedAdds[digestedTransaction.moves[0][0].player][failedAdd].recordManID,
-						bid: failedAdds[digestedTransaction.moves[0][0].player][failedAdd].bid,
-					});
+			if(failedAdds[digestedTransaction.moves[0][0].player] && failedAdds[digestedTransaction.moves[0][0].player][digestedTransaction.date]) {
+
+				if(failedAdds[digestedTransaction.moves[0][0].player][digestedTransaction.date].find(f => f.bid == digestedTransaction.moves[0][0].bid && f.recordManID == digestedTransaction.recordManIDs[0])) {
+					totals.allTime[digestedTransaction.recordManIDs[0]].outbid--;
+					totals.seasons[season][digestedTransaction.recordManIDs[0]].outbid--;
+				} else {
+					digestedTransaction.failedAdds = [];
+					for(const failedAdd in failedAdds[digestedTransaction.moves[0][0].player][digestedTransaction.date]) {
+						digestedTransaction.failedAdds.push({
+							recordManID: failedAdds[digestedTransaction.moves[0][0].player][digestedTransaction.date][failedAdd].recordManID,
+							bid: failedAdds[digestedTransaction.moves[0][0].player][digestedTransaction.date][failedAdd].bid,
+						});
+					}
 				}
 			}
 			transactions.push(digestedTransaction);
@@ -322,6 +338,7 @@ const digestTransaction = (transaction, prevManagers, currentSeason, leagueManag
 		let digestedTransaction = {
 			player: Object.keys(transaction.adds)[0],
 			adds: transaction.adds,
+			date,
 			bid: transaction.settings?.waiver_bid,
 			rosters: transaction.roster_ids,
 			type: 'outbid',
@@ -342,6 +359,7 @@ const digestTransaction = (transaction, prevManagers, currentSeason, leagueManag
 	let digestedTransaction = {
 		id: transaction.transaction_id,
 		date,
+		year: season,
 		type: "waiver",
 		rosters: transactionRosters,
 		recordManIDs: transactionManagers,

@@ -13,7 +13,7 @@
     import TeamTable from './TeamTable.svelte';
     import ManagerRecords from './ManagerRecords.svelte';
 
-    export let manager, managers, rostersData, users, rosterPositions, transactions, currentManagers, awards, records, managerRecords;
+    export let manager, managers, rostersData, users, rosterPositions, transactions, currentManagers, prevManagers, awards, records, managerRecords;
 
     let showRoster = true;
     let viewManager = managers[manager];
@@ -961,7 +961,7 @@
                 <LinearProgress indeterminate />
             </div>
         {:else}
-            <TransactionsPage {playersInfo} transactions={teamTransactions} {currentManagers} {masterOffset} show='both' query='' page={0} perPage={5} />
+            <TransactionsPage {playersInfo} transactions={teamTransactions} {currentManagers} {prevManagers} {masterOffset} show='both' query='' page={0} perPage={5} />
         {/if}
     </div>
 
