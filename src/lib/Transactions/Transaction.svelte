@@ -134,27 +134,27 @@
 	<div class="trans">
 		{#if transaction.type == 'trade'}
 			{#if numTraders == 2}
-				<div class="transManager" style="border-right: 0.25px solid var(--ccc);">
+				<div class="transManager clickable" on:click={() => gotoManager(transaction.recordManIDs[0])} style="border-right: 0.25px solid var(--ccc);">
 					{#if transaction.previousOwners && cleanName(transaction.previousOwners[0].name) != cleanName(currentManagers[transaction.recordManIDs[0]].name)}
-						<img class="avatar clickable" on:click={() => gotoManager(transaction.recordManIDs[0])} src="{transaction.previousOwners[0].avatar}" alt="{transaction.previousOwners[0].name} avatar"/>
-						<span class="clickable" on:click={() => gotoManager(transaction.recordManIDs[0])}>{transaction.previousOwners[0].name}</span>
+						<img class="avatar" src="{transaction.previousOwners[0].avatar}" alt="{transaction.previousOwners[0].name} avatar"/>
+						<span>{transaction.previousOwners[0].name}</span>
 						<span class="currentOwner">({currentManagers[transaction.recordManIDs[0]].name})</span>
 					{:else}
-						<img class="avatar clickable" on:click={() => gotoManager(transaction.recordManIDs[0])} src="{currentManagers[transaction.recordManIDs[0]].avatar}" alt="{currentManagers[transaction.recordManIDs[0]].name} avatar"/>
-						<span class="clickable" on:click={() => gotoManager(transaction.recordManIDs[0])}>{currentManagers[transaction.recordManIDs[0]].name}</span>
+						<img class="avatar" src="{currentManagers[transaction.recordManIDs[0]].avatar}" alt="{currentManagers[transaction.recordManIDs[0]].name} avatar"/>
+						<span>{currentManagers[transaction.recordManIDs[0]].name}</span>
 					{/if}
 				</div>
 			{/if}
 		{:else}
 			{#each transaction.recordManIDs as owner, ix}
-				<div class="transManager" style="border-right: 0.25px solid var(--ccc);">
+				<div class="transManager clickable" on:click={() => gotoManager(owner)} style="border-right: 0.25px solid var(--ccc);">
 					{#if transaction.previousOwners && cleanName(transaction.previousOwners[ix].name) != cleanName(currentManagers[owner].name)}
-						<img class="avatar clickable" on:click={() => gotoManager(owner)} src="{transaction.previousOwners[ix].avatar}" alt="{transaction.previousOwners[ix].name} avatar"/>
-						<span class="clickable" on:click={() => gotoManager(owner)}>{transaction.previousOwners[ix].name}</span>
+						<img class="avatar" src="{transaction.previousOwners[ix].avatar}" alt="{transaction.previousOwners[ix].name} avatar"/>
+						<span>{transaction.previousOwners[ix].name}</span>
 						<span class="currentOwner">({currentManagers[owner].name})</span>
 					{:else}
-						<img class="avatar clickable" on:click={() => gotoManager(owner)} src="{currentManagers[owner].avatar}" alt="{currentManagers[owner].name} avatar"/>
-						<span class="clickable" on:click={() => gotoManager(owner)}>{currentManagers[owner].name}</span>
+						<img class="avatar" src="{currentManagers[owner].avatar}" alt="{currentManagers[owner].name} avatar"/>
+						<span>{currentManagers[owner].name}</span>
 					{/if}
 				</div>
 			{/each}
@@ -172,14 +172,14 @@
 		{/if}
 		{#if transaction.type == 'trade'}
 			{#if numTraders == 2}
-				<div class="transManager" style="border-left: 0.25px solid var(--ccc);">
+				<div class="transManager clickable" on:click={() => gotoManager(transaction.recordManIDs[1])} style="border-left: 0.25px solid var(--ccc);">
 					{#if transaction.previousOwners && cleanName(transaction.previousOwners[1].name) != cleanName(currentManagers[transaction.recordManIDs[1]].name)}
-						<img class="avatar clickable" on:click={() => gotoManager(transaction.recordManIDs[1])} src="{transaction.previousOwners[1].avatar}" alt="{transaction.previousOwners[1].name} avatar"/>
-						<span class="clickable" on:click={() => gotoManager(transaction.recordManIDs[1])}>{transaction.previousOwners[1].name}</span>
+						<img class="avatar" src="{transaction.previousOwners[1].avatar}" alt="{transaction.previousOwners[1].name} avatar"/>
+						<span>{transaction.previousOwners[1].name}</span>
 						<span class="currentOwner">({currentManagers[transaction.recordManIDs[1]].name})</span>
 					{:else}
-						<img class="avatar clickable" on:click={() => gotoManager(transaction.recordManIDs[1])} src="{currentManagers[transaction.recordManIDs[1]].avatar}" alt="{currentManagers[transaction.recordManIDs[1]].name} avatar"/>
-						<span class="clickable" on:click={() => gotoManager(transaction.recordManIDs[1])}>{currentManagers[transaction.recordManIDs[1]].name}</span>
+						<img class="avatar" src="{currentManagers[transaction.recordManIDs[1]].avatar}" alt="{currentManagers[transaction.recordManIDs[1]].name} avatar"/>
+						<span>{currentManagers[transaction.recordManIDs[1]].name}</span>
 					{/if}
 				</div>
 			{/if}
