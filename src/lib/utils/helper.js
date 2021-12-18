@@ -21,6 +21,7 @@ import { getNflScoreboard, getPlayByPlay, getGameDrives, getYearMatchups, getGam
 import { nflTeams } from './NFLinfo';
 import { getPositionTable, getTeamTable } from './helperFunctions/pointsTrees'; 
 import nflPlayerInfo from '$lib/utils/nflPlayerInfo.json';
+import nflPlayerInfo2 from '$lib/utils/nflPlayerInfo2.json';
 import leagueHistory from '$lib/utils/leagueHistory.json';
 import { LZString } from './helperFunctions/stringCompress';
 
@@ -78,5 +79,6 @@ export {
     getPositionTable,
     getTeamTable,
     nflPlayerInfo,
+    nflPlayerInfo2,
     LZString,
 }

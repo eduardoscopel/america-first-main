@@ -1,5 +1,5 @@
 <script context="module">
-	import { getNflScoreboard, getYearMatchups, getLeagueStandings, loadPlayers, waitForAll, nflPlayerInfo } from '$lib/utils/helper';
+	import { getNflScoreboard, getYearMatchups, getLeagueStandings, loadPlayers, waitForAll, nflPlayerInfo, nflPlayerInfo2 } from '$lib/utils/helper';
 
     export async function load() {
         const scoreboardInfo = waitForAll(
@@ -8,10 +8,17 @@
 			getLeagueStandings(),
             loadPlayers(),
         );
+		const allPlayerInfo = {};
+		for(const player in nflPlayerInfo) {
+			allPlayerInfo[player] = nflPlayerInfo[player];
+		}
+		for(const player in nflPlayerInfo2) {
+			allPlayerInfo[player] = nflPlayerInfo2[player];
+		}
 		return {
 			props: {
 				scoreboardInfo,
-				nflPlayerInfo,
+				allPlayerInfo,
 			}
 		};
 	}
@@ -21,7 +28,7 @@
     import LinearProgress from '@smui/linear-progress';
 	import { GameCenter } from '$lib/components';
 
-    export let scoreboardInfo; 
+    export let scoreboardInfo, allPlayerInfo; 
 </script>
 
 <style>
@@ -46,7 +53,7 @@
 		</div>
 	{:then [nflWeek, matchupsInfo, standingsData, playersInfo]}
 		<!-- promise was fulfilled -->
-		<GameCenter {nflWeek} {matchupsInfo} {standingsData} {playersInfo} {nflPlayerInfo} /> 
+		<GameCenter {nflWeek} {matchupsInfo} {standingsData} {playersInfo} nflPlayerInfo={allPlayerInfo} /> 
 	{:catch error}
 		<!-- promise was rejected -->
 		<p>Something went wrong: {error.message}</p>
