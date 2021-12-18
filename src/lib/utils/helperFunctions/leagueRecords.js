@@ -11,7 +11,7 @@ import {
 	importType, 
 	getLeagueUsers, 
 	getLeagueRosters, 
-	getLeagueTransactions
+	getLeagueTransactions,
 	getNflState,
 	getLeagueData,
 	waitForAll,
