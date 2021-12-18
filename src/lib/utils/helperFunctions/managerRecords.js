@@ -20,18 +20,31 @@ export const getManagerRecords = async (refresh = false) => {
 		return get(managerrecords);
 	}
 
-	const playersData = await loadPlayers().catch((err) => { console.error(err); });
-	const playersInfo = playersData.players;
+	const [playersData, previousDraftsData, nflState, transactionsData] = await waitForAll(
+		loadPlayers(),
+		getPreviousDrafts(),
+		getNflState(),
+		getLeagueTransactions(true),
+	).catch((err) => { console.error(err); });
 
-	const previousDraftsData = await getPreviousDrafts().catch((err) => { console.error(err); });
+	let transactions = transactionsData.transactions;
+	if(transactionsData.stale) {
+		const newTransactions = await getLeagueTransactions(true, true);
+		transactions = newTransactions.transactions;
+	}
+
+	let playersInfo = playersData.players;
+	if(playersData.stale) {
+		const newPlayersData = await loadPlayers(true);
+		players = newPlayersData.players;
+	}
+
 	let draftInfo = {};
-
 	for(const key in previousDraftsData) {
 		const prevDraft = previousDraftsData[key];
 		draftInfo[prevDraft.year] = prevDraft;
 	}
 
-	const nflState = await getNflState().catch((err) => { console.error(err); });
 	let week = 0;
 	let POrecordsWeek = 0;
 	if(nflState.season_type == 'regular') {
@@ -42,15 +55,14 @@ export const getManagerRecords = async (refresh = false) => {
 
 	let curSeason = leagueID;
 
-	let allManagers = {};
+	const allManagers = {};
 	
-	let currentYear;
-	let lastYear;
+	let currentYear, lastYear;
 
-	let leagueRosterRecords = {}; 				// every full season stat point (for each year and all years combined)
+	const leagueRosterRecords = {}; 				// every full season stat point (for each year and all years combined)
 	let seasonWeekRecords = []; 				// highest weekly points within a single season
 
-	let masterRecordBook = {
+	const masterRecordBook = {
 		managers: {
 			regularSeason: {
 				alltime: {},
@@ -144,10 +156,9 @@ export const getManagerRecords = async (refresh = false) => {
 		},
 	};
 
-	let leagueManagers = {};
-	let activeManagers = [];
+	const leagueManagers = {};
 
-	let headToHeadRecords = {
+	const headToHeadRecords = {
 		regularSeason: {
 			alltime: {},
 			years: {},
@@ -162,7 +173,7 @@ export const getManagerRecords = async (refresh = false) => {
 		},
 	}
 
-	let playerPositionRecords = {
+	const playerPositionRecords = {
 		league: {
 			years: {},
 			alltime: {
@@ -187,7 +198,7 @@ export const getManagerRecords = async (refresh = false) => {
 		},
 	};
 	
-	let recordArrays = {
+	const recordArrays = {
 		league: {
 			years: {},
 			alltime: {
@@ -220,7 +231,7 @@ export const getManagerRecords = async (refresh = false) => {
 			},
 		},
 	};
-	let acquisitionRecords = {};
+	const acquisitionRecords = {};
 
 	const nflPositions = ["RB", "QB", "WR", "TE", "DEF", "K", "DL", "DE", "DT", "LB", "DB", "CB", "SS", "FS"];
 
@@ -241,11 +252,7 @@ export const getManagerRecords = async (refresh = false) => {
 		}
 		leagueManagers[manager.roster].push(entryMan);
 
-		if(manager.status == "active") {
-			activeManagers.push(manager.managerID);
-		}
 	}
-	const numActiveManagers = activeManagers.length;
 
 	while(curSeason && curSeason != 0) {
 		const [rosterRes, users, leagueData] = await waitForAll(
