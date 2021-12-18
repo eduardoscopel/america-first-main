@@ -30,15 +30,15 @@
             for(const starter of starters) {
                 const starterInfo = nflPlayerInfo[starter];
                 if(starter != '0') {
-                    const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection].length > 1 ? starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team : playersInfo.players[starter].wi[yearSelection][weekSelection] && playersInfo.players[starter].wi[yearSelection][weekSelection].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][weekSelection].t).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
+                    const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo && starterInfo.espn.t[yearSelection].length > 1 ? starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team : playersInfo.players[starter].wi[yearSelection][weekSelection] && playersInfo.players[starter].wi[yearSelection][weekSelection].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][weekSelection].t).espnAbbreviation : playersInfo.players[starter].wi[yearSelection][1] && playersInfo.players[starter].wi[yearSelection][1].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][1].t).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
                     const starterEntry = {
                         playerID: starter,
                         fpts: fantasyStarters[recordManID].startersPoints[starters.indexOf(starter)],
                         owner: managerInfo[recordManID],
                         recordManID,
-                        fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).fn : starterInfo.sleeper.fn,
-                        ln: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : starterInfo.sleeper.ln,
-                        pos: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : starterInfo.sleeper.pos,
+                        fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : playersInfo.players[starter].fn,
+                        ln: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : playersInfo.players[starter].ln,
+                        pos: playersInfo.players[starter].pos,
                         t: team,
                         projection: playersInfo.players[starter].wi[yearSelection][weekSelection] ? Number.parseFloat(playersInfo.players[starter].wi[yearSelection][weekSelection].p) : 0,
                         avatar: playersInfo.players[starter].pos == 'DEF' ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
@@ -129,16 +129,16 @@
                 for(const starter of match[opponent].starters) {
                     if(starter != '0') {
                         const starterInfo = nflPlayerInfo[starter];
-                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection].length > 1 ? starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team : playersInfo.players[starter].wi[yearSelection][weekSelection] && playersInfo.players[starter].wi[yearSelection][weekSelection].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][weekSelection].t).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
+                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo && starterInfo.espn.t[yearSelection].length > 1 ? starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team : playersInfo.players[starter].wi[yearSelection][weekSelection] && playersInfo.players[starter].wi[yearSelection][weekSelection].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][weekSelection].t).espnAbbreviation : playersInfo.players[starter].wi[yearSelection][1] && playersInfo.players[starter].wi[yearSelection][1].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][1].t).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
                         const starterEntry = {
                             playerID: starter,
                             fpts: match[opponent].points[match[opponent].starters.indexOf(starter)],
                             rosterSpot: positions[match[opponent].starters.indexOf(starter)],
                             owner: match[opponent].manager,
                             recordManID: match[opponent].recordManID,
-                            fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).fn : starterInfo.sleeper.fn,
-                            ln: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : starterInfo.sleeper.ln,
-                            pos: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : starterInfo.sleeper.pos,
+                            fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : playersInfo.players[starter].fn,
+                            ln: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : playersInfo.players[starter].ln,
+                            pos: playersInfo.players[starter].pos,
                             t: team,
                             projection: playersInfo.players[starter].wi[yearSelection][weekSelection] ? Number.parseFloat(playersInfo.players[starter].wi[yearSelection][weekSelection].p) : 0,
                             avatar: playersInfo.players[starter].pos == 'DEF' ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
@@ -255,7 +255,7 @@
                 for(const starter of starters) {
                     const starterInfo = nflPlayerInfo[starter];
                     if(starter != '0') {
-                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection].length > 1 ? starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team : playersInfo.players[starter].wi[yearSelection][weekSelection] && playersInfo.players[starter].wi[yearSelection][weekSelection].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][weekSelection].t).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
+                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo && starterInfo.espn.t[yearSelection].length > 1 ? starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team : playersInfo.players[starter].wi[yearSelection][weekSelection] && playersInfo.players[starter].wi[yearSelection][weekSelection].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][weekSelection].t).espnAbbreviation : playersInfo.players[starter].wi[yearSelection][1] && playersInfo.players[starter].wi[yearSelection][1].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][1].t).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
                         if(nflTeams.find(t => t.espnAbbreviation == team).sleeperID == game.home.sleeperID || nflTeams.find(t => t.espnAbbreviation == team).sleeperID == game.away.sleeperID) {
                             const starterEntry = {
                                 playerID: starter,
@@ -263,9 +263,9 @@
                                 rosterSpot: positions[starters.indexOf(starter)],
                                 owner: managerInfo[recordManID],
                                 recordManID,
-                                fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).fn : starterInfo.sleeper.fn,
-                                ln: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : starterInfo.sleeper.ln,
-                                pos: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : starterInfo.sleeper.pos,
+                                fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : playersInfo.players[starter].fn,
+                                ln: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : playersInfo.players[starter].ln,
+                                pos: playersInfo.players[starter].pos,
                                 t: team,
                                 projection: playersInfo.players[starter].wi[yearSelection][weekSelection] ? Number.parseFloat(playersInfo.players[starter].wi[yearSelection][weekSelection].p) : 0,
                                 avatar: playersInfo.players[starter].pos == "DEF" ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
@@ -330,24 +330,12 @@
                         newViewPlayerRank = positionLeaderboard.indexOf(positionLeaderboard.find(l => l.playerID == viewPlayerID)) + 1;
                         let leaderboardRows = document.getElementsByClassName('leaderboardRow');
                         for(const row in leaderboardRows) {
-                            if(row != 'length') {
-                                if(newViewPlayer.pos == 'DEF') {
-                                    if(leaderboardRows[row].textContent?.includes(nflTeams.find(t => t.sleeperID == viewPlayerID).ln)) {
-                                        leaderboardRows[row].scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'center',
-                                        });
-                                        break;
-                                    }
-                                } else {
-                                    if(leaderboardRows[row].textContent?.includes(`${nflPlayerInfo[viewPlayerID].sleeper.fn} ${nflPlayerInfo[viewPlayerID].sleeper.ln}`) && leaderboardRows[row].textContent.includes(`${newViewPlayerRank}`)) {
-                                        leaderboardRows[row].scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'center',
-                                        });
-                                        break;
-                                    }
-                                }
+                            if(row != 'length' && leaderboardRows[row].textContent?.includes(`${playersInfo.players[viewPlayerID].fn} ${playersInfo.players[viewPlayerID].ln}`) && leaderboardRows[row].textContent.includes(`${newViewPlayerRank}`)) {
+                                leaderboardRows[row].scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'center',
+                                });
+                                break;
                             }
                         }
                         break;
@@ -360,24 +348,12 @@
                         newViewPlayerRank = positionLeaderboard.indexOf(positionLeaderboard.find(l => l.playerID == viewPlayerID)) + 1;
                         let leaderboardRows = document.getElementsByClassName('leaderboardRow');
                         for(const row in leaderboardRows) {
-                            if(row != 'length') {
-                                if(newViewPlayer.pos == 'DEF') {
-                                    if(leaderboardRows[row].textContent?.includes(nflTeams.find(t => t.sleeperID == viewPlayerID).ln)) {
-                                        leaderboardRows[row].scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'center',
-                                        });
-                                        break;
-                                    }
-                                } else {
-                                    if(leaderboardRows[row].textContent?.includes(`${nflPlayerInfo[viewPlayerID].sleeper.fn} ${nflPlayerInfo[viewPlayerID].sleeper.ln}`) && leaderboardRows[row].textContent?.includes(`${newViewPlayerRank}`)) {
-                                        leaderboardRows[row].scrollIntoView({
-                                            behavior: 'smooth',
-                                            block: 'center',
-                                        });
-                                        break;
-                                    }
-                                }
+                            if(row != 'length' && leaderboardRows[row].textContent?.includes(`${playersInfo.players[viewPlayerID].fn} ${playersInfo.players[viewPlayerID].ln}`) && leaderboardRows[row].textContent.includes(`${newViewPlayerRank}`)) {
+                                leaderboardRows[row].scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'center',
+                                });
+                                break;
                             }
                         }
                         break;
@@ -1463,11 +1439,7 @@
                                                 <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 2; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa);" : null}">
                                             </div>
                                             <div class="rosterPlayerInfo" style="{starter.pos == 'DEF' ? "margin: 0 2% 0 0;" : null}" >
-                                                {#if starter.pos == 'DEF'}
-                                                    <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 7% 0 0;">{starter.ln} D/ST</div>
-                                                {:else}
-                                                    <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 3% 0 0;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
-                                                {/if}
+                                                <div class="rosterPlayer" style="justify-content: flex-start; {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">{starter.pos == 'DEF' ? `${starter.fn} ${starter.ln}` : `${starter.fn.slice(0, 1)}. ${starter.ln}`}</div>
                                                 <div class="rosterPlayer" style="justify-content: flex-start; color: var(--g555); font-size: 0.75em; line-height: 1em; {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">{starter.owner.name}</div>
                                                 <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">
                                                     <div style="display: inline-flex; color: var(--g555);">({round(starter.projection)})</div>
@@ -1488,11 +1460,7 @@
                                     {#each positionGameStarters[gameSelection][game.away.sleeperID].starters[ix] as starter, iv}
                                         <div class="rosterRow" style="justify-content: flex-end; height: {100 / row}%;">
                                             <div class="rosterPlayerInfo">
-                                                {#if starter.pos == 'DEF'}
-                                                    <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 7%;">{starter.ln} D/ST</div>
-                                                {:else}
-                                                    <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 3%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
-                                                {/if}
+                                                <div class="rosterPlayer" style="justify-content: flex-end; {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">{starter.pos == 'DEF' ? `${starter.fn} ${starter.ln}` : `${starter.fn.slice(0, 1)}. ${starter.ln}`}</div>
                                                 <div class="rosterPlayer" style="justify-content: flex-end; color: var(--g555); font-size: 0.75em; line-height: 1em; {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">{starter.owner.name}</div>
                                                 <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">
                                                     <div style="display: inline-flex; font-weight: 600; {starter.pos == 'DEF' ? "margin: 0 0 0 -2%;" : "margin: 0 0 0 2%;"}">{round(starter.fpts)}</div>  
@@ -1553,11 +1521,7 @@
                                     <img class="rosterAvatar" src="{starter.avatar}" alt="" on:click={() => multiFunction(starter.playerID, starter.t, null, null, null)} style="z-index: 2; {viewPlayer?.player?.playerID == starter.playerID ? "background-color: var(--aaa);" : null}">
                                 </div>
                                 <div class="rosterPlayerInfo" style="{starter.pos == 'DEF' ? "margin: 0 2% 0 0;" : null}" >
-                                    {#if starter.pos == 'DEF'}
-                                        <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 7% 0 0;">{starter.ln} D/ST</div>
-                                    {:else}
-                                        <div class="rosterPlayer" style="justify-content: flex-start; margin: 0 3% 0 0;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
-                                    {/if}
+                                    <div class="rosterPlayer" style="justify-content: flex-start; {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">{starter.pos == 'DEF' ? `${starter.fn} ${starter.ln}` : `${starter.fn.slice(0, 1)}. ${starter.ln}`}</div>
                                     <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "margin: 0 7% 0 0;" : "margin: 0 3% 0 0;"}">
                                         <div style="display: inline-flex; color: var(--g555);">({round(starter.projection)})</div>
                                         <div style="display: inline-flex; font-weight: 600; {starter.pos == 'DEF' ? "margin: 0 2% 0 0;" : "margin: 0 5% 0 0;"}">{round(starter.fpts)}</div>
@@ -1579,11 +1543,7 @@
                         {#each match.away.starters as starter}
                             <div class="rosterRow" style="justify-content: flex-end;">
                                 <div class="rosterPlayerInfo">
-                                    {#if starter.pos == 'DEF'}
-                                        <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 7%;">{starter.ln} D/ST</div>
-                                    {:else}
-                                        <div class="rosterPlayer" style="justify-content: flex-end; margin: 0 0 0 3%;">{starter.fn.slice(0, 1)}. {starter.ln}</div>
-                                    {/if}
+                                    <div class="rosterPlayer" style="justify-content: flex-end; {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">{starter.pos == 'DEF' ? `${starter.fn} ${starter.ln}` : `${starter.fn.slice(0, 1)}. ${starter.ln}`}</div>
                                     <div class="rosterPlayer" style="justify-content: space-between; {starter.pos == 'DEF' ? "margin: 0 0 0 7%;" : "margin: 0 0 0 3%;"}">
                                         <div style="display: inline-flex; font-weight: 600; {starter.pos == 'DEF' ? "margin: 0 0 0 -2%;" : "margin: 0 0 0 2%;"}">{round(starter.fpts)}</div>  
                                         <div style="display: inline-flex; color: var(--g555);">({round(starter.projection)})</div>
@@ -1659,17 +1619,10 @@
                         <div class="leaderboardRow" id="{positionLeader.playerID == viewPlayer?.player?.playerID ? "viewPlayer" : null}" style="{positionLeader.playerID == viewPlayer?.player?.playerID ? "background-color: var(--aaa); border: 0.5px solid var(--g111); font-weight: 700;" : null}">
                             <div class="posPlayerRank">{ix + 1}</div>
                             <div class="posPlayerProfile">
-                                {#if positionLeader.pos == 'DEF'}
-                                    <div class="posPlayerAvatarHolder">
-                                        <img class="posDefenseAvatar" src="{positionLeader.avatar}" alt="">
-                                    </div>
-                                    <div class="posPlayerName">{positionLeader.ln + ' DEF' || ''}</div> 
-                                {:else}
-                                    <div class="posPlayerAvatarHolder">
-                                        <img class="posPlayerAvatar" src="{positionLeader.avatar}" alt="">
-                                    </div>
-                                    <div class="posPlayerName">{positionLeader.fn || ''} {positionLeader.ln || ''}</div> 
-                                {/if}
+                                <div class="posPlayerAvatarHolder">
+                                    <img class="{positionLeader.pos == 'DEF' ? "posDefenseAvatar" : "posPlayerAvatar"}" src="{positionLeader.avatar}" alt="">
+                                </div>
+                                <div class="posPlayerName">{positionLeader.fn || ''} {positionLeader.ln || ''}</div> 
                             </div>
                             <div class="posPlayerManager">{positionLeader.owner.name}</div>
                             <div class="posPlayerFpts">{round(positionLeader.fpts)}</div>

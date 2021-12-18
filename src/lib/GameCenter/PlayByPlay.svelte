@@ -1,5 +1,5 @@
 <script>
-    import { getPlayByPlay, getGameStats, getPlayerStats, waitForAll, round, getGameDrives, getStarterPositions } from '$lib/utils/helper'; 
+    import { getPlayByPlay, getGameStats, getPlayerStats, waitForAll, round, getGameDrives, getStarterPositions, LZString } from '$lib/utils/helper'; 
     import LinearProgress from '@smui/linear-progress';
 
     export let newLoading, nflTeams, nflMatchups, yearLeagueData, fantasyStarters, managerInfo, weekMatchups, playersInfo, nflPlayerInfo, gameSelection, matchSelection, managerSelection, fantasyProducts, viewPlayerID, showGameBox, showMatchBox, leaderBoardInfo, weekSelection, yearSelection;
@@ -226,10 +226,12 @@
                 espnID = teamLink.slice(85, teamLink.indexOf('?'));
             } else if(linkType == 'participants') {
                 let espnPlayerID = teamLink.slice(85, teamLink.indexOf('?'));
-                if(allNflPlayerInfo.find(n => n.espn.id == espnPlayerID).espn.t[yearSelection].length > 1) {
+                if(allNflPlayerInfo.find(n => n.espn.id == espnPlayerID) && allNflPlayerInfo.find(n => n.espn.id == espnPlayerID).espn.t[yearSelection].length > 1) {
                     espnID = nflTeams.find(t => t.espnAbbreviation == allNflPlayerInfo.find(n => n.espn.id == espnPlayerID).espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team).espnAbbreviation;
                 } else if(allPlayersInfo.find(n => n.espnID == espnPlayerID) && allPlayersInfo.find(n => n.espnID == espnPlayerID).wi[yearSelection] && allPlayersInfo.find(n => n.espnID == espnPlayerID).wi[yearSelection][weekSelection]?.t) {
                     espnID = nflTeams.find(t => t.sleeperID == allPlayersInfo.find(n => n.espnID == espnPlayerID).wi[yearSelection][weekSelection].t).espnAbbreviation;
+                } else if(allPlayersInfo.find(n => n.espnID == espnPlayerID) && allPlayersInfo.find(n => n.espnID == espnPlayerID).wi[yearSelection] && allPlayersInfo.find(n => n.espnID == espnPlayerID).wi[yearSelection][1]?.t) {
+                    espnID = nflTeams.find(t => t.sleeperID == allPlayersInfo.find(n => n.espnID == espnPlayerID).wi[yearSelection][1].t).espnAbbreviation;
                 } else {
                     espnID = nflTeams.find(t => t.espnAbbreviation == allNflPlayerInfo.find(n => n.espn.id == espnPlayerID).espn.t[yearSelection][0]).espnAbbreviation;
                 }
@@ -3258,7 +3260,7 @@
                 for(const starter of starters) {
                     if(starter != '0') {
                         const starterInfo = nflPlayerInfo[starter];
-                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection].length > 1 ? starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team : playersInfo.players[starter].wi[yearSelection][weekSelection] && playersInfo.players[starter].wi[yearSelection][weekSelection].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][weekSelection].t).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
+                        const team = playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo && starterInfo.espn.t[yearSelection].length > 1 ? starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team : playersInfo.players[starter].wi[yearSelection][weekSelection] && playersInfo.players[starter].wi[yearSelection][weekSelection].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][weekSelection].t).espnAbbreviation : starterInfo.espn.t[yearSelection][0];
                         const starterEntry = {
                             playerID: starter,
                             espnID: playersInfo.players[starter].pos == 'DEF' ? null : playersInfo.players[starter].espnID ? playersInfo.players[starter].espnID : starterInfo.espn.id,
@@ -3266,9 +3268,9 @@
                             fpts: match[opponent].points[starters.indexOf(starter)],
                             owner: match[opponent].manager,
                             recordManID: match[opponent].recordManID,
-                            fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).fn : starterInfo.sleeper.fn,
-                            ln: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : starterInfo.sleeper.ln,
-                            pos: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : starterInfo.sleeper.pos,
+                            fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : playersInfo.players[starter].fn,
+                            ln: playersInfo.players[starter].pos == 'DEF' ? 'Defense' : playersInfo.players[starter].ln,
+                            pos: playersInfo.players[starter].pos,
                             t: team,
                             avatar: playersInfo.players[starter].pos == 'DEF' ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                             teamAvatar: `https://sleepercdn.com/images/team_logos/nfl/${nflTeams.find(t => t.espnAbbreviation == team).sleeperID.toLowerCase()}.png` || `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
@@ -3919,10 +3921,10 @@
                             espnID: playersInfo.players[starter].pos == 'DEF' ? null : playersInfo.players[starter].espnID ? playersInfo.players[starter].espnID : starterInfo.espn.id,
                             rosterSpot: positions[starters.indexOf(starter)],
                             owner: managerInfo[recordManID],
-                            fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).fn : starterInfo.sleeper.fn,
-                            ln: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : starterInfo.sleeper.ln,
-                            pos: playersInfo.players[starter].pos == 'DEF' ? 'DEF' : starterInfo.sleeper.pos,
-                            t: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo.espn.t[yearSelection].length > 1 ? starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team : playersInfo.players[starter].wi[yearSelection][weekSelection] && playersInfo.players[starter].wi[yearSelection][weekSelection].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][weekSelection].t).espnAbbreviation : starterInfo.espn.t[yearSelection][0],
+                            fn: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).ln : playersInfo.players[starter].fn,
+                            ln: playersInfo.players[starter].pos == 'DEF' ? 'Defense' : playersInfo.players[starter].ln,
+                            pos: playersInfo.players[starter].pos,
+                            t: playersInfo.players[starter].pos == 'DEF' ? nflTeams.find(t => t.sleeperID == starter).espnAbbreviation : starterInfo && starterInfo.espn.t[yearSelection].length > 1 ? starterInfo.espn.t[yearSelection].find(w => w.firstWeek <= weekSelection && w.lastWeek >= weekSelection).team : playersInfo.players[starter].wi[yearSelection][weekSelection] && playersInfo.players[starter].wi[yearSelection][weekSelection].t ? nflTeams.find(t => t.sleeperID == playersInfo.players[starter].wi[yearSelection][weekSelection].t).espnAbbreviation : starterInfo.espn.t[yearSelection][0],
                             avatar: playersInfo.players[starter].pos == 'DEF' ? `https://sleepercdn.com/images/team_logos/nfl/${starter.toLowerCase()}.png` : `https://sleepercdn.com/content/nfl/players/thumb/${starter}.jpg`,
                         }
                         startersArray.push(starterEntry);
@@ -4554,166 +4556,235 @@
 
     // const getEspnPlayerData = async () => {
     //     const espnPlayersInfo = {};
-    //     let masterID = 1;
-    //     for(const playerID in playersInfo.players) {
-    //         if(allNflPlayerInfo.find(p => p.sleeper.id == playerID)) {
-    //             const espnInfo = allNflPlayerInfo.find(p => p.sleeper.id == playerID).espn;
-    //             espnPlayersInfo[playerID] = {
-    //                 id: masterID,
-    //                 sleeperID: playerID,
-    //                 espnID: espnInfo.id != 'NA' ? espnInfo.id : playersInfo.players[playerID].espnID,
-    //                 fn: playersInfo.players[playerID].fn,
-    //                 ln: playersInfo.players[playerID].ln,
-    //                 pos: playersInfo.players[playerID]?.pos || null,
-    //                 ht: espnInfo.height,
-    //                 wt: espnInfo.weight,
-    //                 col: espnInfo.college,
-    //                 bd: espnInfo.birthDate,
-    //                 ry: espnInfo.rookieYear,
-    //                 years: {},
-    //             }
 
-    //             for(const year in espnInfo.t) {
-    //                 espnPlayersInfo[playerID].years[year] = {
-    //                     j: [],
-    //                     w: {},
-    //                 };
+    //     for(const playerID in nflPlayerInfo) {
+    //         const sleeper = playersInfo.players[playerID];
 
-    //                 if(playersInfo.players[playerID].wi[year]) {
-    //                     for(const week in playersInfo.players[playerID].wi[year]) {
-    //                         if(week < 19) {
+    //         if(sleeper.espnID == null || Object.keys(sleeper.wi).length == 0) {
+    //             espnPlayersInfo[playerID] = nflPlayerInfo[playerID];
+    //             continue;
+    //         }
 
-    //                             let team;
-    //                             if(espnInfo.t[year].length > 1) {
-    //                                 if(espnInfo.t[year][0].firstWeek <= week && espnInfo.t[year][0].lastWeek >= week) {
-    //                                     team = espnInfo.t[year][0].team;
-    //                                 } else {
-    //                                     team = espnInfo.t[year][1].team;
-    //                                 }
-    //                             } else if(nflTeams.find(t => t.sleeperID == playersInfo.players[playerID].wi[year][week].t)) {
-    //                                 team = nflTeams.find(t => t.sleeperID == playersInfo.players[playerID].wi[year][week].t).espnAbbreviation;
-    //                             } else {
-    //                                 team = espnInfo.t[year][0];
-    //                             }
-
-
-    //                             espnPlayersInfo[playerID].years[year].w[week] = {
-    //                                 t: team,
-    //                             }
-    //                         }
-    //                     }
-    //                 } else {
-    //                     for(let i = 1; i < 19; i++) {
-    //                         let team;
-    //                         if(espnInfo.t[year].length > 1) {
-    //                             if(espnInfo.t[year][0].firstWeek <= i && espnInfo.t[year][0].lastWeek >= i) {
-    //                                 team = espnInfo.t[year][0].team;
-    //                             } else {
-    //                                 team = espnInfo.t[year][1].team;
-    //                             }
-    //                         } else {
-    //                             team = espnInfo.t[year][0];
-    //                         }
-
-
-    //                         espnPlayersInfo[playerID].years[year][i] = {
-    //                             t: team,
-    //                             j: espnInfo.jerseys[year].length == 1 ? espnInfo.jerseys[year][0] : i >= espnInfo.jerseys[year][0].firstWeek && espnInfo.jerseys[year][0].lastWeek >= i ? espnInfo.jerseys[year][0].number : espnInfo.jerseys[year][1].number,
-    //                         }
-    //                     }
-    //                 }
-
-    //             }
-    //         } else if(playersInfo.players[playerID].pos == 'DEF') {
-    //             const team = nflTeams.find(t => t.sleeperID == playerID);
-    //             espnPlayersInfo[playerID] = {
-    //                 id: masterID,
-    //                 sleeperID: playerID,
-    //                 espnID: team.espnID,
-    //                 abv: team.espnAbbreviation,
-    //                 fn: team.fn,
-    //                 ln: team.ln,
-    //                 pos: 'DEF',
-    //                 col: team.color,
-    //                 alt: team.alternateColor,
-    //             }
-    //             for(const year in playersInfo.players[playerID].wi) {
-    //                 espnPlayersInfo[playerID].years[year] = {};
-    //                 for(const week in playersInfo.players[playerID].wi[year]) {
-    //                     if(week < 19) {
-    //                         espnPlayersInfo[playerID].years[year][week] = {
-    //                             p: playersInfo.players[playerID].wi[year][week].p,
-    //                             o: playersInfo.players[playerID].wi[year][week].o,
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         } else {
-    //             espnPlayersInfo[playerID] = {
-    //                 id: masterID,
-    //                 sleeperID: playerID,
-    //                 espnID: playersInfo.players[playerID].espnID,
-    //                 fn: playersInfo.players[playerID].fn,
-    //                 ln: playersInfo.players[playerID].ln,
-    //                 pos: playersInfo.players[playerID]?.pos || null,
+    //         for(const year in nflPlayerInfo[playerID].espn.t) {
+    //             if(nflPlayerInfo[playerID].espn.t[year].length > 1) {
+    //                 espnPlayersInfo[playerID] = nflPlayerInfo[playerID];
+    //                 break;
     //             }
     //         }
-    //         masterID++;
-            
     //     }
-        // let rookies = allNflPlayerInfo.filter(p => p.espn.rookieYear == 2021 && p.espn.id == 'NA');
 
-        // const scoreboardPromises = [];
-        // scoreboardPromises.push(fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2021/draft/rounds?lang=en&region=us`, {compress: true}));
+        // let masterID = 1;
+        // for(const playerID in playersInfo.players) {
+        //     if(allNflPlayerInfo.find(p => p.sleeper.id == playerID)) {
+        //         const espnInfo = allNflPlayerInfo.find(p => p.sleeper.id == playerID).espn;
+        
+        //         espnPlayersInfo[playerID] = {
+        //             id: masterID,
+        //             sleeperID: playerID,
+        //             espnID: espnInfo.id != 'NA' ? espnInfo.id : playersInfo.players[playerID].espnID,
+        //             fn: playersInfo.players[playerID].fn,
+        //             ln: playersInfo.players[playerID].ln,
+        //             pos: playersInfo.players[playerID]?.pos || null,
+        //             ht: espnInfo.height,
+        //             wt: espnInfo.weight,
+        //             col: espnInfo.college,
+        //             bd: espnInfo.birthDate,
+        //             ry: espnInfo.rookieYear,
+        //             t: [],
+        //         }
 
-        // const scoreboardsRes = await waitForAll(...scoreboardPromises).catch((err) => { console.error(err); });
+        //         for(const year in espnInfo.t) {
 
-        // const scoreboardJsonPromises = [];
-        // for(const scoreboardRes of scoreboardsRes) {
-        //     const data = scoreboardRes.json();
-        //     scoreboardJsonPromises.push(data)
-        //     if (!scoreboardRes.ok) {
-        //         throw new Error(data);
+        //             if(playersInfo.players[playerID].wi[year]) {
+        //                 for(const week in playersInfo.players[playerID].wi[year]) {
+        //                     if(week < 19) {
+
+        //                         let team;
+        //                         if(espnInfo.t[year].length > 1) {
+        //                             if(espnInfo.t[year][0].firstWeek <= week && espnInfo.t[year][0].lastWeek >= week) {
+        //                                 team = espnInfo.t[year][0].team;
+        //                             } else {
+        //                                 team = espnInfo.t[year][1].team;
+        //                             }
+        //                         } else if(nflTeams.find(t => t.sleeperID == playersInfo.players[playerID].wi[year][week].t)) {
+        //                             team = nflTeams.find(t => t.sleeperID == playersInfo.players[playerID].wi[year][week].t).espnAbbreviation;
+        //                         } else {
+        //                             team = espnInfo.t[year][0];
+        //                         }
+
+        //                         if(espnPlayersInfo[playerID].t.length == 0 || !espnPlayersInfo[playerID].t.find(e => e.t == team)) {
+
+        //                             espnPlayersInfo[playerID].t.push({
+        //                                 t: team,
+        //                                 s: {
+        //                                     y: year,
+        //                                     w: week,
+        //                                 },
+        //                                 f: {
+        //                                     y: null,
+        //                                     w: null,
+        //                                 },
+        //                                 j: espnInfo.jerseys[year].length == 1 ? espnInfo.jerseys[year][0] : week >= espnInfo.jerseys[year][0].firstWeek && espnInfo.jerseys[year][0].lastWeek >= week ? espnInfo.jerseys[year][0].number : espnInfo.jerseys[year][1].number,
+        //                             })
+         
+        //                         } else if(espnPlayersInfo[playerID].t.find(e => e.t == team).f.y == null) {
+        //                             espnPlayersInfo[playerID].t.find(e => e.t == team).f.y = year;
+        //                             espnPlayersInfo[playerID].t.find(e => e.t == team).f.w = week;
+        //                         } else  {
+        //                             if(espnPlayersInfo[playerID].t.find(e => e.t == team && e.s.y <= year && e.s.w <= week && e.f.y >= year && e.f.w >= week)) {
+        //                                 continue;
+        //                             } else if(espnPlayersInfo[playerID].t.find(e => e.t == team && e.s.y <= year && e.s.w <= week)) {
+        //                                 espnPlayersInfo[playerID].t.find(e => e.t == team && e.s.y <= year && e.s.w <= week).f.y = year;
+        //                                 espnPlayersInfo[playerID].t.find(e => e.t == team && e.s.y <= year && e.s.w <= week).f.w = week;
+        //                             } else {
+        //                                 espnPlayersInfo[playerID].t.find(e => e.t == team && e.f.y >= year && e.f.w >= week).s.y = year;
+        //                                 espnPlayersInfo[playerID].t.find(e => e.t == team && e.f.y >= year && e.f.w >= week).s.w = week;
+        //                             }
+
+        //                         }
+        //                     }
+        //                 }
+        //             } else {
+        //                 for(let i = 1; i < 19; i++) {
+        //                     let team;
+        //                     if(espnInfo.t[year].length > 1) {
+        //                         if(espnInfo.t[year][0].firstWeek <= i && espnInfo.t[year][0].lastWeek >= i) {
+        //                             team = espnInfo.t[year][0].team;
+        //                         } else {
+        //                             team = espnInfo.t[year][1].team;
+        //                         }
+        //                     } else {
+        //                         team = espnInfo.t[year][0];
+        //                     }
+
+        //                     if(espnPlayersInfo[playerID].t.length == 0 || !espnPlayersInfo[playerID].t.find(e => e.t == team)) {
+
+        //                         espnPlayersInfo[playerID].t.push({
+        //                             t: team,
+        //                             s: {
+        //                                 y: year,
+        //                                 w: i,
+        //                             },
+        //                             f: {
+        //                                 y: null,
+        //                                 w: null,
+        //                             },
+        //                             j: espnInfo.jerseys[year].length == 1 ? espnInfo.jerseys[year][0] : i >= espnInfo.jerseys[year][0].firstWeek && espnInfo.jerseys[year][0].lastWeek >= i ? espnInfo.jerseys[year][0].number : espnInfo.jerseys[year][1].number,
+        //                         })
+
+        //                     } else if(espnPlayersInfo[playerID].t.find(e => e.t == team).f.y == null) {
+        //                     espnPlayersInfo[playerID].t.find(e => e.t == team).f.y = year;
+        //                     espnPlayersInfo[playerID].t.find(e => e.t == team).f.w = i;
+        //                     } else  {
+        //                         if(espnPlayersInfo[playerID].t.find(e => e.t == team && e.s.y <= year && e.s.w <= i && e.f.y >= year && e.f.w >= i)) {
+        //                             continue;
+        //                         } else if(espnPlayersInfo[playerID].t.find(e => e.t == team && e.s.y <= year && e.s.w <= i)) {
+        //                             espnPlayersInfo[playerID].t.find(e => e.t == team && e.s.y <= year && e.s.w <= i).f.y = year;
+        //                             espnPlayersInfo[playerID].t.find(e => e.t == team && e.s.y <= year && e.s.w <= i).f.w = i;
+        //                         } else {
+        //                             espnPlayersInfo[playerID].t.find(e => e.t == team && e.f.y >= year && e.f.w >= i).s.y = year;
+        //                             espnPlayersInfo[playerID].t.find(e => e.t == team && e.f.y >= year && e.f.w >= i).s.w = i;
+        //                         }
+        //                     }
+
+                            
+
+
+
+        //                 }
+        //             }
+
+        //         }
+        //     } else if(playersInfo.players[playerID].pos == 'DEF') {
+        //         const team = nflTeams.find(t => t.sleeperID == playerID);
+        //         espnPlayersInfo[playerID] = {
+        //             id: masterID,
+        //             sleeperID: playerID,
+        //             espnID: team.espnID,
+        //             abv: team.espnAbbreviation,
+        //             fn: team.fn,
+        //             ln: team.ln,
+        //             pos: 'DEF',
+        //             col: team.color,
+        //             alt: team.alternateColor,
+        //         }
+        //         // for(const year in playersInfo.players[playerID].wi) {
+        //         //     espnPlayersInfo[playerID].years[year] = {};
+        //         //     for(const week in playersInfo.players[playerID].wi[year]) {
+        //         //         if(week < 19) {
+        //         //             espnPlayersInfo[playerID].years[year][week] = {
+        //         //                 p: playersInfo.players[playerID].wi[year][week].p,
+        //         //                 o: playersInfo.players[playerID].wi[year][week].o,
+        //         //             }
+        //         //         }
+        //         //     }
+        //         // }
+        //     } else {
+        //         espnPlayersInfo[playerID] = {
+        //             id: masterID,
+        //             sleeperID: playerID,
+        //             espnID: playersInfo.players[playerID].espnID,
+        //             fn: playersInfo.players[playerID].fn,
+        //             ln: playersInfo.players[playerID].ln,
+        //             pos: playersInfo.players[playerID]?.pos || null,
+        //         }
         //     }
+        //     masterID++;
+            
         // }
-        // const scoreboardsData = await waitForAll(...scoreboardJsonPromises).catch((err) => { console.error(err); });
+        // // let rookies = allNflPlayerInfo.filter(p => p.espn.rookieYear == 2021 && p.espn.id == 'NA');
 
-        // for(let r = 0; r < 7; r++) {
-        //     const picks = scoreboardsData[0].items[r].picks;
-        //     for(let p = 0; p < picks.length; p++) {
-        //         const espnPlayerID = picks[p].athlete.$ref.slice(91, picks[p].athlete.$ref.indexOf('?'));
+        // // const scoreboardPromises = [];
+        // // scoreboardPromises.push(fetch(`https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2021/draft/rounds?lang=en&region=us`, {compress: true}));
 
-        //         const gamesPromises = [];
-        //         gamesPromises.push(fetch(`${picks[p].athlete.$ref}`));
+        // // const scoreboardsRes = await waitForAll(...scoreboardPromises).catch((err) => { console.error(err); });
+
+        // // const scoreboardJsonPromises = [];
+        // // for(const scoreboardRes of scoreboardsRes) {
+        // //     const data = scoreboardRes.json();
+        // //     scoreboardJsonPromises.push(data)
+        // //     if (!scoreboardRes.ok) {
+        // //         throw new Error(data);
+        // //     }
+        // // }
+        // // const scoreboardsData = await waitForAll(...scoreboardJsonPromises).catch((err) => { console.error(err); });
+
+        // // for(let r = 0; r < 7; r++) {
+        // //     const picks = scoreboardsData[0].items[r].picks;
+        // //     for(let p = 0; p < picks.length; p++) {
+        // //         const espnPlayerID = picks[p].athlete.$ref.slice(91, picks[p].athlete.$ref.indexOf('?'));
+
+        // //         const gamesPromises = [];
+        // //         gamesPromises.push(fetch(`${picks[p].athlete.$ref}`));
                 
 
-        //         const gamesRes = await waitForAll(...gamesPromises).catch((err) => { console.error(err); });
-        //         const gameJsonPromises = [];
-        //         for(const gameRes of gamesRes) {
-        //             const data = gameRes.json();
-        //             gameJsonPromises.push(data)
-        //             if (!gameRes.ok) {
-        //                 throw new Error(data);
-        //             }
-        //         }
-        //         const gamesData = await waitForAll(...gameJsonPromises).catch((err) => { console.error(err); });
+        // //         const gamesRes = await waitForAll(...gamesPromises).catch((err) => { console.error(err); });
+        // //         const gameJsonPromises = [];
+        // //         for(const gameRes of gamesRes) {
+        // //             const data = gameRes.json();
+        // //             gameJsonPromises.push(data)
+        // //             if (!gameRes.ok) {
+        // //                 throw new Error(data);
+        // //             }
+        // //         }
+        // //         const gamesData = await waitForAll(...gameJsonPromises).catch((err) => { console.error(err); });
 
-        //         const matcher = {
-        //             fn: gamesData[0].firstName,
-        //             ln: gamesData[0].lastName,
-        //             pos: gamesData[0].position.abbreviation,
-        //         }
-        //         if(matcher.pos == 'PK') {
-        //             matcher.pos = 'K';
-        //         } else if(matcher.pos == 'FB') {
-        //             matcher.pos = 'RB';
-        //         }
-        //         const rookie = rookies.find(o => o.sleeper.fn == matcher.fn && o.sleeper.ln == matcher.ln && o.sleeper.pos == matcher.pos);
-        //         if(rookie) {
-        //             espnPlayersInfo[rookie.sleeper.id] = espnPlayerID;
-        //         }
-        //     }
-        // }
+        // //         const matcher = {
+        // //             fn: gamesData[0].firstName,
+        // //             ln: gamesData[0].lastName,
+        // //             pos: gamesData[0].position.abbreviation,
+        // //         }
+        // //         if(matcher.pos == 'PK') {
+        // //             matcher.pos = 'K';
+        // //         } else if(matcher.pos == 'FB') {
+        // //             matcher.pos = 'RB';
+        // //         }
+        // //         const rookie = rookies.find(o => o.sleeper.fn == matcher.fn && o.sleeper.ln == matcher.ln && o.sleeper.pos == matcher.pos);
+        // //         if(rookie) {
+        // //             espnPlayersInfo[rookie.sleeper.id] = espnPlayerID;
+        // //         }
+        // //     }
+        // // }
 
     //     return espnPlayersInfo;
 
@@ -4723,8 +4794,9 @@
 
     // const download_txt = async (dataToSave) => {
     //     dataToSave = await getEspnPlayerData(dataToSave);
-    //     let textToSave = JSON.stringify(dataToSave);
-    //     let hiddenElement = document.createElement('a');
+    //     const textToSave = await JSON.stringify(dataToSave);
+    //     const hiddenElement = document.createElement('a');
+    //     // hiddenElement.href = 'data:attachment/text,' + LZString.compressToEncodedURIComponent(textToSave);
     //     hiddenElement.href = 'data:attachment/text,' + encodeURI(textToSave);
     //     hiddenElement.target = '_blank';
     //     hiddenElement.download = 'myFile.txt';
@@ -4935,7 +5007,7 @@
             {#if !fantasyProducts.fantasyProducts.length > 0}
                 <div class="noPlays">No plays yet...</div>
             {:else}
-                <!-- <div id="test" on:click={() => download_txt(espnPlayersInfo)}>Click Me</div> -->
+                <!-- <div id="test" on:click={() => download_txt(nflPlayerInfo)}>Click Me</div> -->
                 {#each filteredProducts as filteredProduct}
                     <div class="playContainer">
                         {#if filteredProduct[0] && filteredProduct[0]?.fpts != 0}
@@ -4957,11 +5029,7 @@
                                     {:else}
                                         <img class="defenseAvatar" src="{play.playerInfo ? play.playerInfo.avatar : "https://sleepercdn.com/images/v2/icons/player_default.webp"}" alt="{play.playerInfo ? play.playerInfo.ln : "Player"}">
                                     {/if}
-                                    {#if play.side == 'offense' || play.side == 'injury'}
-                                        <div class="playerName">{play.playerInfo.fn} {play.playerInfo.ln}</div>
-                                    {:else}
-                                        <div class="playerName">{play.playerInfo.playerID} Defense</div>
-                                    {/if}
+                                    <div class="playerName">{play.playerInfo.fn} {play.playerInfo.ln}</div>
                                     <div class="shortDescription">{play.shortDesc}</div>
                                     <div class="managerContainer">
                                         <div class="manager">{play.manager.name}</div>
