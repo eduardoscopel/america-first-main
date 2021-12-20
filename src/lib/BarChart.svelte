@@ -20,6 +20,13 @@
         "#393D3F",
     ];
 
+    const classColors = [
+        "#A33B20",
+        "#F2C14E",
+        "#4D9078",
+    ]
+    
+
     $: yMin = graphs[curGraph].secondStats.length > 0 ? graphs[curGraph].yMin/2 : graphs[curGraph].yMin;
     $: yMax = graphs[curGraph].yMax;
     $: stats = graphs[curGraph].stats;
@@ -32,10 +39,10 @@
     const refreshStats = (selection, displayYear) => {
         if((selection && selection != null) || (displayYear && displayYear != null)) {
             for(const graph in graphs) {
-                let newStats = displayObject[selection][graphs[graph].statCat];
+                let newStats = displayObject[selection][graphs[graph].statCat].stats;
                 let newSecondStats; 
                 if(graphs[graph].secondStatCat) {
-                    newSecondStats = displayObject[selection][graphs[graph].secondStatCat]
+                    newSecondStats = displayObject[selection][graphs[graph].secondStatCat].stats;
                 }
                 // if yearly stats, refresh the recordManIDs
                 if(allTime == false) {

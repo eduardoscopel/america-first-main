@@ -360,6 +360,7 @@ const digestTransaction = (transaction, prevManagers, currentSeason, leagueManag
 		id: transaction.transaction_id,
 		date,
 		year: season,
+		week: transaction.leg,
 		type: "waiver",
 		rosters: transactionRosters,
 		recordManIDs: transactionManagers,
@@ -414,6 +415,7 @@ const digestTransaction = (transaction, prevManagers, currentSeason, leagueManag
 		move[transactionRosters.indexOf(pick.previous_owner_id)] = {
 			type: "trade",
 			side: "origin",
+			asset: 'pick',
 			pick: {
 				season: pick.season,
 				round: pick.round,
@@ -434,6 +436,7 @@ const digestTransaction = (transaction, prevManagers, currentSeason, leagueManag
 		move[transactionRosters.indexOf(pick.owner_id)] = {
 			type: "trade",
 			side: "destination",
+			asset: 'pick',
 			pick: {
 				season: pick.season,
 				round: pick.round,
@@ -452,6 +455,7 @@ const digestTransaction = (transaction, prevManagers, currentSeason, leagueManag
 		move[transactionRosters.indexOf(wBudget.sender)] = {
 			type: "trade",
 			side: "origin",
+			asset: 'faab',
 			budget: {
 				amount: `${wBudget.amount}$`,
 			},
@@ -461,6 +465,7 @@ const digestTransaction = (transaction, prevManagers, currentSeason, leagueManag
 		move[transactionRosters.indexOf(wBudget.receiver)] = {
 			type: "trade",
 			side: "destination",
+			asset: 'faab',
 			budget: {
 				amount: `${wBudget.amount}$`,
 			},
@@ -479,6 +484,7 @@ const handleAdds = (rosters, adds, drops, player, bid, season, waiverBudgets) =>
 		move[rosters.indexOf(drops[player])] = {
 			type: "trade",
 			side: "origin",
+			asset: 'player',
 			player,
 			rosterID: drops[player],
 		}
@@ -486,6 +492,7 @@ const handleAdds = (rosters, adds, drops, player, bid, season, waiverBudgets) =>
 		move[rosters.indexOf(adds[player])] =  {
 			type: "trade",
 			side: "destination",
+			asset: 'player',
 			player,
 			rosterID: adds[player],
 		}
@@ -509,6 +516,7 @@ const handleAdds = (rosters, adds, drops, player, bid, season, waiverBudgets) =>
 
 	move[rosters.indexOf(adds[player])] = {
 		type: "Added",
+		asset: 'player',
 		player,
 		bid,
 		budgetPercs: {

@@ -30,6 +30,70 @@
 
     let displayManagerLeft;
 
+    const displayObject = {};
+    displayObject[selection] = {
+        periodWorsts: {
+            stats: periodWorsts,
+            sort: 'fptspg',
+            inverted: false,
+        },
+        periodBests: {
+            stats: periodBests,
+            sort: 'fptspg',
+            inverted: false,
+        },
+        weekBests: {
+            stats: weekBests,
+            sort: 'fpts',
+            inverted: false,
+        },
+        weekWorsts: {
+            stats: weekWorsts,
+            sort: 'fpts',
+            inverted: false,
+        },
+        playerPeriodBests: {
+            stats: playerPeriodBests,
+            sort: 'playerPoints',
+            inverted: false,
+        },
+        playerWeekBests: {
+            stats: playerWeekBests,
+            sort: 'playerPoints',
+            inverted: false,
+        },
+        playerWeekMissedBests: {
+            stats: playerWeekMissedBests,
+            sort: 'benchPoints',
+            inverted: false,
+        },
+        blowoutBests: {
+            stats: blowoutBests,
+            sort: 'matchDifferential',
+            inverted: false,
+        },
+        blowoutWorsts: {
+            stats: blowoutWorsts,
+            sort: 'matchDifferential',
+            inverted: false,
+        },
+        narrowBests: {
+            stats: narrowBests,
+            sort: 'matchDifferential',
+            inverted: false,
+        },
+        narrowWorsts: {
+            stats: narrowWorsts,
+            sort: 'matchDifferential',
+            inverted: false,
+        },
+        headToHeads: {
+            stats: headToHeads,
+            sort: 'winPerc',
+            inverted: false,
+        },
+    }
+
     const refreshRecords = async () => {
         const newRecords = await getManagerRecords(managerrecords);
         managerrecords.update(() => newRecords);
@@ -124,6 +188,8 @@
                 }
             }
             headToHeads = headToHeads.sort((a, b) => b.winPerc - a.winPerc);
+
+            
 
         } else if(displayType == 'yearly') {
             masterPrefix = displayYear;
@@ -553,6 +619,29 @@
         refreshRecords(displayPositionRecord);
     }
     $: changePositionRecord(displayPositionRecord);
+
+    let rand = 1;
+    const changeSort = (arrayName, recordArray, newKey, inverted = false) => {
+        let newRecordArray = recordArray;
+        if(displayObject[selection][arrayName].sort == newKey) {
+            if(displayObject[selection][arrayName].inverted == false) {
+                newRecordArray = newRecordArray.sort((a, b) => a[newKey] - b[newKey]);
+                displayObject[selection][arrayName].inverted = true;
+            } else {
+                newRecordArray = newRecordArray.sort((a, b) => b[newKey] - a[newKey]);
+                displayObject[selection][arrayName].inverted = false;
+            }
+        } else {
+            if(inverted == false) {
+                newRecordArray = newRecordArray.sort((a, b) => b[newKey] - a[newKey]);
+                displayObject[selection][arrayName].sort = newKey;
+            } else {
+                newRecordArray = newRecordArray.sort((a, b) => a[newKey] - b[newKey]);
+                displayObject[selection][arrayName].sort = newKey;
+            }
+        } 
+        rand = rand * Math.random();
+    }
 
 </script>
 
@@ -1002,6 +1091,13 @@
         /* box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 30%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 4px 3px var(--gcScoreShadow); */
     }
 
+    :global(.changeSort) {
+        position: absolute;
+        margin: 2px 0 0 7px;
+        font-size: 1.05em;
+        cursor: pointer;
+    }
+
 </style>
 
 <div class="rankingsWrapper">
@@ -1168,20 +1264,30 @@
                                             {#if masterSelection == 'alltime'}
                                                 <Cell class="header">Year</Cell>
                                             {/if}
-                                            <Cell class="header">PF</Cell>
-                                            <Cell class="header">PPG</Cell>
+                                            <Cell class="header">
+                                                PF
+                                                <Icon class="material-icons changeSort" on:click={() => changeSort('periodBests', periodBests, 'fpts')}>filter_list</Icon>
+                                            </Cell>
+                                            <Cell class="header">
+                                                PPG
+                                                <Icon class="material-icons changeSort" on:click={() => changeSort('periodBests', periodBests, 'fptspg')}>filter_list</Icon>
+                                            </Cell>
                                         </Row>
                                     </Head>
                                     <Body>
-                                        {#each periodBests as periodBest, ix}
-                                            <Row>
-                                                <Cell>{ix + 1}</Cell>
-                                                {#if masterSelection == 'alltime'}				
-                                                    <Cell class="center">{periodBest.year}</Cell>
-                                                {/if}
-                                                <Cell class="center">{round(periodBest.fpts)}</Cell>
-                                                <Cell class="center">{round(periodBest.fptspg)}</Cell>
-                                            </Row>
+                                        {#each periodBests as periodBest, ix (rand * (ix + 1))}
+                                            {#if rand == 0}
+                                                nothing
+                                            {:else}
+                                                <Row>
+                                                    <Cell>{ix + 1}</Cell>
+                                                    {#if masterSelection == 'alltime'}				
+                                                        <Cell class="center">{periodBest.year}</Cell>
+                                                    {/if}
+                                                    <Cell class="center">{round(periodBest.fpts)}</Cell>
+                                                    <Cell class="center">{round(periodBest.fptspg)}</Cell>
+                                                </Row>
+                                            {/if}
                                         {/each}
                                     </Body>
                                 </DataTable>
@@ -1203,20 +1309,30 @@
                                             {#if masterSelection == 'alltime'}				
                                                 <Cell class="header">Year</Cell>
                                             {/if}
-                                            <Cell class="header">PF</Cell>
-                                            <Cell class="header">PPG</Cell>
+                                            <Cell class="header">
+                                                PF
+                                                <Icon class="material-icons changeSort" on:click={() => changeSort('periodWorsts', periodWorsts, 'fpts')}>filter_list</Icon>
+                                            </Cell>
+                                            <Cell class="header">
+                                                PPG
+                                                <Icon class="material-icons changeSort" on:click={() => changeSort('periodWorsts', periodWorsts, 'fptspg')}>filter_list</Icon>
+                                            </Cell>
                                         </Row>
                                     </Head>
                                     <Body>
-                                        {#each periodWorsts as periodWorst, ix}
-                                            <Row>
-                                                <Cell>{ix + 1}</Cell>
-                                                {#if masterSelection == 'alltime'}				
-                                                    <Cell class="center">{periodWorst.year}</Cell>
-                                                {/if}
-                                                <Cell class="center">{round(periodWorst.fpts)}</Cell>
-                                                <Cell class="center">{round(periodWorst.fptspg)}</Cell>
-                                            </Row>
+                                        {#each periodWorsts as periodWorst, ix (rand * (ix + 1))}
+                                            {#if rand == 0}
+                                                nothing
+                                            {:else}
+                                                <Row>
+                                                    <Cell>{ix + 1}</Cell>
+                                                    {#if masterSelection == 'alltime'}				
+                                                        <Cell class="center">{periodWorst.year}</Cell>
+                                                    {/if}
+                                                    <Cell class="center">{round(periodWorst.fpts)}</Cell>
+                                                    <Cell class="center">{round(periodWorst.fptspg)}</Cell>
+                                                </Row>
+                                            {/if}
                                         {/each}
                                     </Body>
                                 </DataTable>
@@ -1553,32 +1669,51 @@
                                         {#if masterSelection == 'alltime'}
                                             <Cell class="header">Year</Cell>
                                         {/if}
-                                        <Cell class="header">Led Team</Cell>
-                                        <Cell class="header">Avg Rank</Cell>
-                                        <Cell class="header">Starts</Cell>
-                                        <Cell class="header">PF</Cell>
-                                        <Cell class="header">PPG</Cell>
+                                        <Cell class="header">
+                                            Led Team
+                                            <Icon class="material-icons changeSort" on:click={() => changeSort('playerPeriodBests', playerPeriodBests, 'topStarters')}>filter_list</Icon>
+                                        </Cell>
+                                        <Cell class="header">
+                                            Avg Rank
+                                            <Icon class="material-icons changeSort" on:click={() => changeSort('playerPeriodBests', playerPeriodBests, 'starterRankAVG', true)}>filter_list</Icon>
+                                        </Cell>
+                                        <Cell class="header">
+                                            Starts
+                                            <Icon class="material-icons changeSort" on:click={() => changeSort('playerPeriodBests', playerPeriodBests, 'weeksStarted')}>filter_list</Icon>
+                                        </Cell>
+                                        <Cell class="header">
+                                            PF
+                                            <Icon class="material-icons changeSort" on:click={() => changeSort('playerPeriodBests', playerPeriodBests, 'playerPoints')}>filter_list</Icon>
+                                        </Cell>
+                                        <Cell class="header">
+                                            PPG
+                                            <Icon class="material-icons changeSort" on:click={() => changeSort('playerPeriodBests', playerPeriodBests, 'playerPPStart')}>filter_list</Icon>
+                                        </Cell>
                                     </Row>
                                 </Head>
                                 <Body>
-                                    {#each playerPeriodBests as playerPeriodBest, ix}
-                                        <Row>
-                                            <Cell class="rank">{ix + 1}</Cell>
-                                            <Cell class="playerAvatar playerInfo" style="{playerPeriodBest.avatar}; background-color: var(--gcSelect); vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
-                                            <Cell class="left">{playerPeriodBest.playerInfo.fn} {playerPeriodBest.playerInfo.ln}</Cell>
-                                            {#if displayPositionRecord == 'ALL'}
-                                                <Cell class="center">{playerPeriodBest.playerInfo.pos}</Cell>
-                                            {/if}
-                                            <Cell class="center">{playerPeriodBest.playerInfo.pos == 'DEF' ? playerPeriodBest.playerID : playerPeriodBest.nflInfo && playerPeriodBest.nflInfo.espn.t[playerPeriodBest.year].length > 1 ? nflTeams.find(t => t.espnAbbreviation == playerPeriodBest.nflInfo.espn.t[playerPeriodBest.year].find(w => w.lastWeek == 100).team).sleeperID : playerPeriodBest.playerInfo.wi[playerPeriodBest.year][playerPeriodBest.week] && playerPeriodBest.playerInfo.wi[playerPeriodBest.year][playerPeriodBest.week].t ? playerPeriodBest.playerInfo.wi[playerPeriodBest.year][playerPeriodBest.week].t : nflTeams.find(t => t.espnAbbreviation == playerPeriodBest.nflInfo.espn.t[playerPeriodBest.year][0]).sleeperID}</Cell>
-                                            {#if masterSelection == 'alltime'}
-                                                <Cell class="center">{playerPeriodBest.year}</Cell>
-                                            {/if}
-                                            <Cell class="center">{playerPeriodBest.topStarters}</Cell>
-                                            <Cell class="center">{round(playerPeriodBest.starterRankAVG)}</Cell>
-                                            <Cell class="center">{playerPeriodBest.weeksStarted} / {playerPeriodBest.weeksOwned}</Cell>
-                                            <Cell class="center">{round(playerPeriodBest.playerPoints)}</Cell>
-                                            <Cell class="center">{round(playerPeriodBest.playerPPStart)}</Cell>
-                                        </Row>
+                                    {#each playerPeriodBests as playerPeriodBest, ix (rand * (ix + 1))}
+                                        {#if rand == 0}
+                                            nothing
+                                        {:else}
+                                            <Row>
+                                                <Cell class="rank">{ix + 1}</Cell>
+                                                <Cell class="playerAvatar playerInfo" style="{playerPeriodBest.avatar}; background-color: var(--gcSelect); vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
+                                                <Cell class="left">{playerPeriodBest.playerInfo.fn} {playerPeriodBest.playerInfo.ln}</Cell>
+                                                {#if displayPositionRecord == 'ALL'}
+                                                    <Cell class="center">{playerPeriodBest.playerInfo.pos}</Cell>
+                                                {/if}
+                                                <Cell class="center">{playerPeriodBest.playerInfo.pos == 'DEF' ? playerPeriodBest.playerID : playerPeriodBest.nflInfo && playerPeriodBest.nflInfo.espn.t[playerPeriodBest.year].length > 1 ? nflTeams.find(t => t.espnAbbreviation == playerPeriodBest.nflInfo.espn.t[playerPeriodBest.year].find(w => w.lastWeek == 100).team).sleeperID : playerPeriodBest.playerInfo.wi[playerPeriodBest.year][1] && playerPeriodBest.playerInfo.wi[playerPeriodBest.year][1].t ? playerPeriodBest.playerInfo.wi[playerPeriodBest.year][1].t : nflTeams.find(t => t.espnAbbreviation == playerPeriodBest.nflInfo.espn.t[playerPeriodBest.year][0]).sleeperID}</Cell>
+                                                {#if masterSelection == 'alltime'}
+                                                    <Cell class="center">{playerPeriodBest.year}</Cell>
+                                                {/if}
+                                                <Cell class="center">{playerPeriodBest.topStarters}</Cell>
+                                                <Cell class="center">{round(playerPeriodBest.starterRankAVG)}</Cell>
+                                                <Cell class="center">{playerPeriodBest.weeksStarted} / {playerPeriodBest.weeksOwned}</Cell>
+                                                <Cell class="center">{round(playerPeriodBest.playerPoints)}</Cell>
+                                                <Cell class="center">{round(playerPeriodBest.playerPPStart)}</Cell>
+                                            </Row>
+                                        {/if}
                                     {/each}
                                 </Body>
                             </DataTable>
@@ -1656,49 +1791,91 @@
                                 <Row>
                                     <Cell class="header"></Cell>
                                     <Cell class="header">Manager</Cell>
-                                    <Cell class="header">Win %</Cell>
-                                    <Cell class="header">W</Cell>
+                                    <Cell class="header">
+                                        Win %
+                                        <Icon class="material-icons changeSort" on:click={() => changeSort('headToHeads', headToHeads, 'winPerc')}>filter_list</Icon>
+                                    </Cell>
+                                    <Cell class="header">
+                                        W
+                                        <Icon class="material-icons changeSort" on:click={() => changeSort('headToHeads', headToHeads, 'wins')}>filter_list</Icon>
+                                    </Cell>
                                     {#if headShowTies == true}
-                                        <Cell class="header">T</Cell>
+                                        <Cell class="header">
+                                            T
+                                            <Icon class="material-icons changeSort" on:click={() => changeSort('headToHeads', headToHeads, 'ties')}>filter_list</Icon>
+                                        </Cell>
                                     {/if}
-                                    <Cell class="header">L</Cell>
-                                    <Cell class="header">EPE Win %</Cell>
-                                    <Cell class="header">EPE W</Cell>
+                                    <Cell class="header">
+                                        L
+                                        <Icon class="material-icons changeSort" on:click={() => changeSort('headToHeads', headToHeads, 'losses')}>filter_list</Icon>
+                                    </Cell>
+                                    <Cell class="header">
+                                        EPE Win %
+                                        <Icon class="material-icons changeSort" on:click={() => changeSort('headToHeads', headToHeads, 'epePerc')}>filter_list</Icon>
+                                    </Cell>
+                                    <Cell class="header">
+                                        EPE W
+                                        <Icon class="material-icons changeSort" on:click={() => changeSort('headToHeads', headToHeads, 'epeWins')}>filter_list</Icon>
+                                    </Cell>
                                     {#if headShowTiesEPE == true}
-                                        <Cell class="header">EPE T</Cell>
+                                        <Cell class="header">
+                                            EPE T
+                                            <Icon class="material-icons changeSort" on:click={() => changeSort('headToHeads', headToHeads, 'epeTies')}>filter_list</Icon>
+                                        </Cell>
                                     {/if}
-                                    <Cell class="header">EPE L</Cell>
-                                    <Cell class="header">PF (PPG)</Cell>
-                                    <Cell class="header">PA (PPG)</Cell>
-                                    <Cell class="header">Diff</Cell>
+                                    <Cell class="header">
+                                        EPE L
+                                        <Icon class="material-icons changeSort" on:click={() => changeSort('headToHeads', headToHeads, 'epeLosses')}>filter_list</Icon>
+                                    </Cell>
+                                    <Cell class="header">
+                                        PF 
+                                        <Icon class="material-icons changeSort" on:click={() => changeSort('headToHeads', headToHeads, 'fpts')}>filter_list</Icon>
+                                        <br>
+                                        (PPG)
+                                        <Icon class="material-icons changeSort" on:click={() => changeSort('headToHeads', headToHeads, 'fptspg')}>filter_list</Icon></Cell>
+                                    <Cell class="header">
+                                        PA 
+                                        <Icon class="material-icons changeSort" on:click={() => changeSort('headToHeads', headToHeads, 'fptsAgainst')}>filter_list</Icon>
+                                        <br>
+                                        (PPG)
+                                        <Icon class="material-icons changeSort" on:click={() => changeSort('headToHeads', headToHeads, 'fptsAgainstPg')}>filter_list</Icon>
+                                    </Cell>
+                                    <Cell class="header">
+                                        Diff
+                                        <Icon class="material-icons changeSort" on:click={() => changeSort('headToHeads', headToHeads, 'differential')}>filter_list</Icon>
+                                    </Cell>
                                 </Row>
                             </Head>
                             <Body>
-                                {#each headToHeads as opponent, ix}
-                                    <Row>
-                                        <Cell>{ix + 1}</Cell>
-                                        <Cell class="cellName" on:click={() => gotoManager(opponent.againstRecordManID)}>
-                                            {opponent.againstManager.realname}
-                                            {#if masterSelection == 'yearly'}
-                                                <div class="fantasyTeamName">({opponent.againstManager.name})</div>
+                                {#each headToHeads as opponent, ix (rand * (ix + 1))}
+                                    {#if rand == 0}
+                                        nothing
+                                    {:else}
+                                        <Row>
+                                            <Cell>{ix + 1}</Cell>
+                                            <Cell class="cellName" on:click={() => gotoManager(opponent.againstRecordManID)}>
+                                                {opponent.againstManager.realname}
+                                                {#if masterSelection == 'yearly'}
+                                                    <div class="fantasyTeamName">({opponent.againstManager.name})</div>
+                                                {/if}
+                                            </Cell>
+                                            <Cell class="center">{round(opponent.winPerc)}</Cell>
+                                            <Cell class="center">{opponent.wins}</Cell>
+                                            {#if headShowTies == true}
+                                                <Cell class="center">{opponent.ties}</Cell>
                                             {/if}
-                                        </Cell>
-                                        <Cell class="center">{round(opponent.winPerc)}</Cell>
-                                        <Cell class="center">{opponent.wins}</Cell>
-                                        {#if headShowTies == true}
-                                            <Cell class="center">{opponent.ties}</Cell>
-                                        {/if}
-                                        <Cell class="center">{opponent.losses}</Cell>
-                                        <Cell class="center">{round(opponent.epePerc)}</Cell>
-                                        <Cell class="center">{opponent.epeWins}</Cell>
-                                        {#if headShowTiesEPE == true}
-                                            <Cell class="center">{opponent.epeTies}</Cell>
-                                        {/if}
-                                        <Cell class="center">{opponent.epeLosses}</Cell>
-                                        <Cell class="center">{round(opponent.fpts)}  <div style="font-size: 0.9em">({round(opponent.fptspg)})</div></Cell>
-                                        <Cell class="center">{round(opponent.fptsAgainst)}  <div style="font-size: 0.9em">({round(opponent.fptsAgainstPg)})</div></Cell>
-                                        <Cell class="center">{round(opponent.fpts - opponent.fptsAgainst)}</Cell>
-                                    </Row>
+                                            <Cell class="center">{opponent.losses}</Cell>
+                                            <Cell class="center">{round(opponent.epePerc)}</Cell>
+                                            <Cell class="center">{opponent.epeWins}</Cell>
+                                            {#if headShowTiesEPE == true}
+                                                <Cell class="center">{opponent.epeTies}</Cell>
+                                            {/if}
+                                            <Cell class="center">{opponent.epeLosses}</Cell>
+                                            <Cell class="center">{round(opponent.fpts)}  <div style="font-size: 0.9em">({round(opponent.fptspg)})</div></Cell>
+                                            <Cell class="center">{round(opponent.fptsAgainst)}  <div style="font-size: 0.9em">({round(opponent.fptsAgainstPg)})</div></Cell>
+                                            <Cell class="center">{round(opponent.differential)}</Cell>
+                                        </Row>
+                                    {/if}
                                 {/each}
                             </Body>
                         </DataTable>

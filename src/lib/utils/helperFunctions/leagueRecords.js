@@ -37,25 +37,36 @@ export const getLeagueRecords = async (refresh = false) => {
 		loadPlayers(),
 		getPreviousDrafts(),
 		getNflState(),
-		getLeagueTransactions(true),
+		getLeagueTransactions(false),
 	).catch((err) => { console.error(err); });
 
 	let transactions = transactionsData.transactions;
 	if(transactionsData.stale) {
-		const newTransactions = await getLeagueTransactions(true, true);
+		const newTransactions = await getLeagueTransactions(false, true);
 		transactions = newTransactions.transactions;
 	}
 
 	let playersInfo = playersData.players;
 	if(playersData.stale) {
 		const newPlayersData = await loadPlayers(true);
-		players = newPlayersData.players;
+		playersInfo = newPlayersData.players;
 	}
 
-	let draftInfo = {};
+	const draftInfo = {};
 	for(const key in previousDraftsData) {
 		const prevDraft = previousDraftsData[key];
 		draftInfo[prevDraft.year] = prevDraft;
+	}
+
+	const transactionsInfo = {};
+	for(const transaction in transactions) {
+		if(!transactionsInfo[transactions[transaction].year]) {
+			transactionsInfo[transactions[transaction].year] = {
+				waiver: [],
+				trade: [],
+			}
+		}
+		transactionsInfo[transactions[transaction].year][transactions[transaction].type].push(transactions[transaction]);
 	}
 
 	let week = 0;
@@ -186,6 +197,31 @@ export const getLeagueRecords = async (refresh = false) => {
 		},
 	}
 
+	const playerAcquisitionRecords = {
+		league: {
+			years: {},
+			alltime: {
+				regularSeason: {
+					managerBests: {},
+				},
+				playoffs: {
+					managerBests: {},
+				},
+				combined: {
+					managerBests: {},
+				},
+			},
+		},
+		managers: {
+			years: {},
+			alltime: {
+				regularSeason: {},
+				playoffs: {},
+				combined: {},
+			},
+		},
+	};
+
 	const playerPositionRecords = {
 		league: {
 			years: {},
@@ -258,7 +294,6 @@ export const getLeagueRecords = async (refresh = false) => {
 			leagueManagers[manager.roster] = [];
 		}
 		leagueManagers[manager.roster].push(entryMan);
-
 		leagueRecordManagers[manager.managerID] = entryMan;
 	}
 
@@ -270,15 +305,17 @@ export const getLeagueRecords = async (refresh = false) => {
 			getLeagueData(curSeason),
 		).catch((err) => { console.error(err); });
 	
-		let year = parseInt(leagueData.season);
+		const year = parseInt(leagueData.season);
 		const positions = getStarterPositions(leagueData);
 
+		for(const type in transactionsInfo[year]) {
+			transactionsInfo[year][type] = transactionsInfo[year][type].reverse();
+		}
+
 		// variables for playoff records
-		let numPOTeams = parseInt(leagueData.settings.playoff_teams);
-		let playoffStart = parseInt(leagueData.settings.playoff_week_start);
-		let playoffLength;
-		let playoffType;
-		let playoffCase;							// for later determining which playoff matchups we want to count (vs. discard)
+		const numPOTeams = parseInt(leagueData.settings.playoff_teams);
+		const playoffStart = parseInt(leagueData.settings.playoff_week_start);
+		let playoffLength, playoffType, playoffCase;							// for later determining which playoff matchups we want to count (vs. discard)
 
 		// before 2020, 1 week per PO round was only option
 		if(year > 2019) {
@@ -340,9 +377,9 @@ export const getLeagueRecords = async (refresh = false) => {
 		for(const roster of rosters) {
 			const rosterID = roster.roster_id;		
 
-			let recordManager = leagueManagers[rosterID].filter(m => m.yearsactive.includes(year));
-			let recordManrosterID = recordManager[0].rosterID;
-			let recordManID = recordManager[0].managerID;
+			const recordManager = leagueManagers[rosterID].find(m => m.yearsactive.includes(year));
+			const recordManrosterID = recordManager.rosterID;
+			const recordManID = recordManager.managerID;
 			
 			const draftResults = draftInfo[year].draft;
 			for(const round in draftResults) {
@@ -358,9 +395,78 @@ export const getLeagueRecords = async (refresh = false) => {
 					if(draftPick.rosterID == recordManrosterID) {
 
 						if(!acquisitionRecords[year][recordManID]) {
-							acquisitionRecords[year][recordManID] = [];
+							acquisitionRecords[year][recordManID] = {
+								draft: [],
+								waiver: [],
+								trade: [],
+							};
 						}
-						acquisitionRecords[year][recordManID].push(draftPick);
+						acquisitionRecords[year][recordManID].draft.push({
+							playerID: draftPick.playerID,
+							addWeek: 0,
+							dropWeek: null,
+						});
+					}
+				}
+			}
+
+			for(const type in transactionsInfo[year]) {
+	
+				for(const transaction in transactionsInfo[year][type]) {
+
+					if(transactionsInfo[year][type][transaction].moves[0][0].asset == 'player') {
+
+						if(type == 'waiver' && transactionsInfo[year][type][transaction].recordManIDs[0] == recordManID) {
+
+							for(const move in transactionsInfo[year][type][transaction].moves) {
+
+								if(transactionsInfo[year][type][transaction].moves[move].find(m => m.type == 'Added')) {
+									
+									acquisitionRecords[year][recordManID][type].push({
+										playerID: transactionsInfo[year][type][transaction].moves[move].find(m => m.type == 'Added').player,
+										addWeek: transactionsInfo[year][type][transaction].week,
+										dropWeek: null,
+									});
+								}
+								if(transactionsInfo[year][type][transaction].moves[move].find(m => m.type == 'Dropped')) {
+
+									const dropID = transactionsInfo[year][type][transaction].moves[move].find(m => m.type == 'Dropped').player;
+									
+									for(const transType in acquisitionRecords[year][recordManID]) {
+
+										if(acquisitionRecords[year][recordManID][transType].find(a => a.playerID == dropID) && acquisitionRecords[year][recordManID][transType].find(a => a.playerID == dropID).dropWeek == null) {
+											acquisitionRecords[year][recordManID][transType].find(a => a.playerID == dropID).dropWeek = transactionsInfo[year][type][transaction].week;
+											break;
+										}
+									}
+								}
+							}
+
+						} else if(type == 'trade' && transactionsInfo[year][type][transaction].moves.some(m => m.find(n => n.rosterID == recordManrosterID))) {
+							
+							for(const move in transactionsInfo[year][type][transaction].moves) {
+
+								if(transactionsInfo[year][type][transaction].moves[move].find(m => m.side == 'destination').rosterID == recordManrosterID) {
+
+									acquisitionRecords[year][recordManID][type].push({
+										playerID: transactionsInfo[year][type][transaction].moves[move].find(m => m.side == 'destination').player,
+										addWeek: transactionsInfo[year][type][transaction].week,
+										dropWeek: null,
+									});
+								} else if(transactionsInfo[year][type][transaction].moves[move].find(m => m.side == 'origin').rosterID == recordManrosterID) {
+
+									const dropID = transactionsInfo[year][type][transaction].moves[move].find(m => m.side == 'origin').player;
+									
+									for(const transType in acquisitionRecords[year][recordManID]) {
+
+										if(acquisitionRecords[year][recordManID][transType].find(a => a.playerID == dropID) && acquisitionRecords[year][recordManID][transType].find(a => a.playerID == dropID).dropWeek == null) {
+											acquisitionRecords[year][recordManID][transType].find(a => a.playerID == dropID).dropWeek = transactionsInfo[year][type][transaction].week;
+											break;
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -372,14 +478,14 @@ export const getLeagueRecords = async (refresh = false) => {
 			const rosterID = roster.roster_id;
 			const user = users[roster.owner_id];
 			
-			let recordManager = leagueManagers[rosterID].filter(m => m.yearsactive.includes(year));
-			let recordManID = recordManager[0].managerID;
+			const recordManager = leagueManagers[rosterID].find(m => m.yearsactive.includes(year));
+			const recordManID = recordManager.managerID;
 
 			if(user) {
 				originalManagers[recordManID] = {
 					avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
 					name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
-					realname: recordManager[0].name,
+					realname: recordManager.name,
 				};
 			} else {
 				originalManagers[recordManID] = {
@@ -559,12 +665,11 @@ export const getLeagueRecords = async (refresh = false) => {
 			// process all the PLAYOFFS matchups
 
 			for(const POmatchupWeek of POmatchupsData) {
-				let POmatchups = {};
-				let POround = POstartWeek - POrecordsWeek;
+				const POmatchups = {};
+				const POround = POstartWeek - POrecordsWeek;
 
 				for(const POmatchup of POmatchupWeek) {
-					let recordManager = leagueManagers[POmatchup.roster_id].filter(m => m.yearsactive.includes(year));
-					let recordManID = recordManager[0].managerID;
+					const recordManID = leagueManagers[POmatchup.roster_id].find(m => m.yearsactive.includes(year)).managerID;
 
 					const POentry = {
 						manager: originalManagers[recordManID],
@@ -598,7 +703,6 @@ export const getLeagueRecords = async (refresh = false) => {
 						home = champMatch[1];
 						away = champMatch[0];
 					}
-					const matchDifferential = home.fpts - away.fpts;
 
 					for(const key in champMatch) {
 						const opponent = champMatch[key];
@@ -609,9 +713,9 @@ export const getLeagueRecords = async (refresh = false) => {
 							rosterID: opponent.rosterID,
 							fpts: opponent.fpts,
 							fptspg: null,
-							fptsAgainst: null,
-							againstManager: null,
-							againstRecordManID: null,
+							fptsAgainst: home.fpts == away.fpts ? opponent.fpts : opponent == home ? away.fpts : home.fpts,
+							againstManager: opponent.recordManID == home.recordManID ? away.manager : home.manager,
+							againstRecordManID: opponent.recordManID == home.recordManID ? away.recordManID : home.recordManID,
 							epeWins: 0,
 							epeTies: 0,
 							epeLosses: 0,
@@ -622,36 +726,17 @@ export const getLeagueRecords = async (refresh = false) => {
 							medianPerc: null,
 							topScore: false,
 							bottomScore: false,
-							matchWin: false,
-							matchLoss: false,
-							matchTie: false,
-							matchDifferential,
+							matchWin: home.fpts != away.fpts && opponent == home ? true : false,
+							matchLoss: home.fpts != away.fpts && opponent == away ? true : false,
+							matchTie: home.fpts == away.fpts ? true : false,
+							matchDifferential: home.fpts != away.fpts && opponent == away ? (home.fpts - away.fpts) * (-1) : home.fpts - away.fpts,
 							week: opponent.week,
 							year,
-							matchupInfo: opponent,
-						}
-
-						if(home.fpts == away.fpts) {
-							comboEntry.matchTie = true;
-							comboEntry.fptsAgainst = away.fpts;
-							if(opponent.recordManID == home.recordManID) {
-								comboEntry.againstManager = away.manager;
-								comboEntry.againstRecordManID = away.recordManID;
-							} else {
-								comboEntry.againstManager = home.manager;
-								comboEntry.againstRecordManID = home.recordManID;
-							}
-						} else if(opponent == home) {
-							comboEntry.matchWin = true;
-							comboEntry.fptsAgainst = away.fpts;
-							comboEntry.againstManager = away.manager;
-							comboEntry.againstRecordManID = away.recordManID;
-						} else if(opponent == away) {
-							comboEntry.matchLoss = true;
-							comboEntry.matchDifferential = matchDifferential * (-1);
-							comboEntry.fptsAgainst = home.fpts;
-							comboEntry.againstManager = home.manager;
-							comboEntry.againstRecordManID = home.recordManID;
+							matchupInfo: {
+								info: POmatchupWeek.find(m => m.roster_id == opponent.rosterID),
+								positions: positions,
+								starters: [],
+							},
 						}
 
 						masterRecordBook.league.playoffs.alltime.push(comboEntry);
@@ -677,9 +762,7 @@ export const getLeagueRecords = async (refresh = false) => {
 						masterRecordBook.managers.combined.years[year][opponent.recordManID].push(comboEntry);
 
 						const starters = opponent.starters;
-						const startersPTS = opponent.starters_points.sort((a, b) => b - a);
-						const numStarters = opponent.starters_points.length;
-		
+						const startersPTS = opponent.starters_points.sort((a, b) => b - a);		
 						const players = opponent.players;
 						const playersPTS = opponent.players_points;
 						
@@ -687,39 +770,7 @@ export const getLeagueRecords = async (refresh = false) => {
 		
 							const playerID = players[i];
 							const playerPoints = playersPTS[playerID];
-		
-							let topStarter = false;
-							let bottomStarter = false;
-							let starterRank;
-							let PTSasStarter;
-							let PTSonBench;
-							let benched = true;
-							let rosterSpot;
-		
-							if(starters.includes(playerID)) {
-								benched = false;
-								PTSasStarter = playerPoints;
-								PTSonBench = 0;
-								starterRank = startersPTS.indexOf(playerPoints) + 1;
-								if(startersPTS[0] == playerPoints) {
-									topStarter = true;
-								} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
-									bottomStarter = true;
-								}
-								rosterSpot = positions[starters.indexOf(playerID)];
-							} else {
-								benched = true;
-								PTSonBench = playerPoints;
-								PTSasStarter = 0;
-								topStarter = false;
-								bottomStarter = false;
-								starterRank = null;
-							}
-							
-							let playerInfo = playersInfo[playerID];
-							let nflInfo = nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID];
-							let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`;
-		
+									
 							const playerEntry = {		
 								recordManID: opponent.recordManID,
 								manager: originalManagers[opponent.recordManID],
@@ -727,32 +778,35 @@ export const getLeagueRecords = async (refresh = false) => {
 								year,
 								rosterID: opponent.rosterID,
 								playerID,
-								playerPoints: PTSasStarter,
-								benchPoints: PTSonBench,
+								playerPoints: starters.includes(playerID) ? playerPoints : 0,
+								benchPoints: !starters.includes(playerID) ? playerPoints : 0,
 								weeksStarted: null,
 								weeksBenched: null,
 								weeksOwned: null,
-								benched,
-								howAcquired: null,
-								weekAcquired: null,
-								topStarter,
-								bottomStarter,
-								starterRank,
-								numStarters,
+								benched: starters.includes(playerID) ? false : true,
+								topStarter: starters.includes(playerID) && startersPTS[0] == playerPoints ? true : false,
+								bottomStarter: starters.includes(playerID) && startersPTS[startersPTS.length - 1] == playerPoints ? true : false,
+								starterRank: starters.includes(playerID) ? startersPTS.indexOf(playerPoints) + 1 : null,
+								numStarters: opponent.starters_points.length,
 								starterRankAVG: null,
-								playerInfo,
-								nflInfo,
-								avatar,
-								rosterSpot,
+								playerInfo: playersInfo[playerID],
+								nflInfo: nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID],
+								avatar: playersInfo[playerID].pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`,
+								rosterSpot: starters.includes(playerID) ? positions[starters.indexOf(playerID)] : null,
 							}
 
-							// right now, acquisitions is just a list of the manager's draft picks
-							let acquisitions = acquisitionRecords[year][opponent.recordManID];
-							for(let i = 0; i < acquisitions.length; i++) {
-								if(acquisitions[i].playerID == playerID) {
-									playerEntry.howAcquired = 'draft';
-									playerEntry.weekAcquired = 0;
-								} 
+							const acquisitions = acquisitionRecords[year][opponent.recordManID];
+							for(const transType in acquisitions) {
+								const playerTrans = acquisitions[transType].filter(a => a.playerID == playerID);
+								
+								if(playerTrans?.find(t => t.addWeek <= POstartWeek && (POstartWeek <= t.dropWeek || t.dropWeek == null))) {
+									playerEntry.howAcquired = transType;
+								}
+							}
+
+							// add playerEntry to comboEntry
+							if(playerEntry.benched == false) { 
+								comboEntry.matchupInfo.starters[starters.indexOf(playerID)] = playerEntry;
 							}
 
 							// add player arrays to ALLTIME
@@ -799,7 +853,6 @@ export const getLeagueRecords = async (refresh = false) => {
 							home = POmatchups[i][1];
 							away = POmatchups[i][0];
 						}
-						const matchDifferential = home.fpts - away.fpts;
 
 						for(const key in POmatchups[i]) {
 							const opponent = POmatchups[i][key];
@@ -810,9 +863,9 @@ export const getLeagueRecords = async (refresh = false) => {
 								rosterID: opponent.rosterID,
 								fpts: opponent.fpts,
 								fptspg: null,
-								fptsAgainst: null,
-								againstManager: null,
-								againstRecordManID: null,
+								fptsAgainst: home.fpts == away.fpts ? opponent.fpts : opponent == home ? away.fpts : home.fpts,
+								againstManager: opponent.recordManID == home.recordManID ? away.manager : home.manager,
+								againstRecordManID: opponent.recordManID == home.recordManID ? away.recordManID : home.recordManID,
 								epeWins: 0,
 								epeTies: 0,
 								epeLosses: 0,
@@ -823,36 +876,17 @@ export const getLeagueRecords = async (refresh = false) => {
 								medianPerc: null,
 								topScore: false,
 								bottomScore: false,
-								matchWin: false,
-								matchLoss: false,
-								matchTie: false,
-								matchDifferential,
+								matchWin: home.fpts != away.fpts && opponent == home ? true : false,
+								matchLoss: home.fpts != away.fpts && opponent == away ? true : false,
+								matchTie: home.fpts == away.fpts ? true : false,
+								matchDifferential: home.fpts != away.fpts && opponent == away ? (home.fpts - away.fpts) * (-1) : home.fpts - away.fpts,
 								week: opponent.week,
 								year,
-								matchupInfo: opponent,
-							}
-
-							if(home.fpts == away.fpts) {
-								comboEntry.matchTie = true;
-								comboEntry.fptsAgainst = away.fpts;
-								if(opponent.recordManID == home.recordManID) {
-									comboEntry.againstManager = away.manager;
-									comboEntry.againstRecordManID = away.recordManID;
-								} else {
-									comboEntry.againstManager = home.manager;
-									comboEntry.againstRecordManID = home.recordManID;
-								}
-							} else if(opponent == home) {
-								comboEntry.matchWin = true;
-								comboEntry.fptsAgainst = away.fpts;
-								comboEntry.againstManager = away.manager;
-								comboEntry.againstRecordManID = away.recordManID;
-							} else if(opponent == away) {
-								comboEntry.matchLoss = true;
-								comboEntry.matchDifferential = matchDifferential * (-1);
-								comboEntry.fptsAgainst = home.fpts;
-								comboEntry.againstManager = home.manager;
-								comboEntry.againstRecordManID = home.recordManID;
+								matchupInfo: {
+									info: POmatchupWeek.find(m => m.roster_id == opponent.rosterID),
+									positions: positions,
+									starters: [],
+								},
 							}
 							
 							masterRecordBook.league.playoffs.alltime.push(comboEntry);
@@ -878,9 +912,7 @@ export const getLeagueRecords = async (refresh = false) => {
 							masterRecordBook.managers.combined.years[year][opponent.recordManID].push(comboEntry);
 
 							const starters = opponent.starters;
-							const startersPTS = opponent.starters_points.sort((a, b) => b - a);
-							const numStarters = opponent.starters_points.length;
-			
+							const startersPTS = opponent.starters_points.sort((a, b) => b - a);			
 							const players = opponent.players;
 							const playersPTS = opponent.players_points;
 							
@@ -888,39 +920,7 @@ export const getLeagueRecords = async (refresh = false) => {
 			
 								const playerID = players[i];
 								const playerPoints = playersPTS[playerID];
-			
-								let topStarter = false;
-								let bottomStarter = false;
-								let starterRank;
-								let PTSasStarter;
-								let PTSonBench;
-								let benched = true;
-								let rosterSpot;
-			
-								if(starters.includes(playerID)) {
-									benched = false;
-									PTSasStarter = playerPoints;
-									PTSonBench = 0;
-									starterRank = startersPTS.indexOf(playerPoints) + 1;
-									if(startersPTS[0] == playerPoints) {
-										topStarter = true;
-									} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
-										bottomStarter = true;
-									}
-									rosterSpot = positions[starters.indexOf(playerID)];
-								} else {
-									benched = true;
-									PTSonBench = playerPoints;
-									PTSasStarter = 0;
-									topStarter = false;
-									bottomStarter = false;
-									starterRank = null;
-								}
-								
-								let playerInfo = playersInfo[playerID];
-								let nflInfo = nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID];
-								let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`;
-			
+											
 								const playerEntry = {		
 									recordManID: opponent.recordManID,
 									manager: originalManagers[opponent.recordManID],
@@ -928,32 +928,35 @@ export const getLeagueRecords = async (refresh = false) => {
 									year,
 									rosterID: opponent.rosterID,
 									playerID,
-									playerPoints: PTSasStarter,
-									benchPoints: PTSonBench,
+									playerPoints: starters.includes(playerID) ? playerPoints : 0,
+									benchPoints: !starters.includes(playerID) ? playerPoints : 0,
 									weeksStarted: null,
 									weeksBenched: null,
 									weeksOwned: null,
-									benched,
-									howAcquired: null,
-									weekAcquired: null,
-									topStarter,
-									bottomStarter,
-									starterRank,
-									numStarters,
+									benched: starters.includes(playerID) ? false : true,
+									topStarter: starters.includes(playerID) && startersPTS[0] == playerPoints ? true : false,
+									bottomStarter: starters.includes(playerID) && startersPTS[startersPTS.length - 1] == playerPoints ? true : false,
+									starterRank: starters.includes(playerID) ? startersPTS.indexOf(playerPoints) + 1 : null,
+									numStarters: opponent.starters_points.length,
 									starterRankAVG: null,
-									playerInfo,
-									nflInfo,
-									avatar,
-									rosterSpot,
+									playerInfo: playersInfo[playerID],
+									nflInfo: nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID],
+									avatar: playersInfo[playerID].pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`,
+									rosterSpot: starters.includes(playerID) ? positions[starters.indexOf(playerID)] : null,
 								}
 			
-								// right now, acquisitions is just a list of the manager's draft picks
-								let acquisitions = acquisitionRecords[year][opponent.recordManID];
-								for(let i = 0; i < acquisitions.length; i++) {
-									if(acquisitions[i].playerID == playerID) {
-										playerEntry.howAcquired = 'draft';
-										playerEntry.weekAcquired = 0;
-									} 
+								const acquisitions = acquisitionRecords[year][opponent.recordManID];
+								for(const transType in acquisitions) {
+									const playerTrans = acquisitions[transType].filter(a => a.playerID == playerID);
+									
+									if(playerTrans?.find(t => t.addWeek <= POstartWeek && (POstartWeek <= t.dropWeek || t.dropWeek == null))) {
+										playerEntry.howAcquired = transType;
+									}
+								}
+
+								// add playerEntry to comboEntry
+								if(playerEntry.benched == false) { 
+									comboEntry.matchupInfo.starters[starters.indexOf(playerID)] = playerEntry;
 								}
 	
 								// add player arrays to ALLTIME
@@ -996,7 +999,6 @@ export const getLeagueRecords = async (refresh = false) => {
 							home = POmatchups[i][1];
 							away = POmatchups[i][0];
 						}
-						const matchDifferential = home.fpts - away.fpts;
 	
 						for(const key in POmatchups[i]) {
 							const opponent = POmatchups[i][key]
@@ -1007,9 +1009,9 @@ export const getLeagueRecords = async (refresh = false) => {
 								rosterID: opponent.rosterID,
 								fpts: opponent.fpts,
 								fptspg: null,
-								fptsAgainst: null,
-								againstManager: null,
-								againstRecordManID: null,
+								fptsAgainst: home.fpts == away.fpts ? opponent.fpts : opponent == home ? away.fpts : home.fpts,
+								againstManager: opponent.recordManID == home.recordManID ? away.manager : home.manager,
+								againstRecordManID: opponent.recordManID == home.recordManID ? away.recordManID : home.recordManID,
 								epeWins: 0,
 								epeTies: 0,
 								epeLosses: 0,
@@ -1020,36 +1022,17 @@ export const getLeagueRecords = async (refresh = false) => {
 								medianPerc: null,
 								topScore: false,
 								bottomScore: false,
-								matchWin: false,
-								matchLoss: false,
-								matchTie: false,
-								matchDifferential,
+								matchWin: home.fpts != away.fpts && opponent == home ? true : false,
+								matchLoss: home.fpts != away.fpts && opponent == away ? true : false,
+								matchTie: home.fpts == away.fpts ? true : false,
+								matchDifferential: home.fpts != away.fpts && opponent == away ? (home.fpts - away.fpts) * (-1) : home.fpts - away.fpts,
 								week: opponent.week,
 								year,
-								matchupInfo: opponent,
-							}
-
-							if(home.fpts == away.fpts) {
-								comboEntry.matchTie = true;
-								comboEntry.fptsAgainst = away.fpts;
-								if(opponent.recordManID == home.recordManID) {
-									comboEntry.againstManager = away.manager;
-									comboEntry.againstRecordManID = away.recordManID;
-								} else {
-									comboEntry.againstManager = home.manager;
-									comboEntry.againstRecordManID = home.recordManID;
-								}
-							} else if(opponent == home) {
-								comboEntry.matchWin = true;
-								comboEntry.fptsAgainst = away.fpts;
-								comboEntry.againstManager = away.manager;
-								comboEntry.againstRecordManID = away.recordManID;
-							} else if(opponent == away) {
-								comboEntry.matchLoss = true;
-								comboEntry.matchDifferential = matchDifferential * (-1);
-								comboEntry.fptsAgainst = home.fpts;
-								comboEntry.againstManager = home.manager;
-								comboEntry.againstRecordManID = home.recordManID;
+								matchupInfo: {
+									info: POmatchupWeek.find(m => m.roster_id == opponent.rosterID),
+									positions: positions,
+									starters: [],
+								},
 							}
 
 							masterRecordBook.league.playoffs.alltime.push(comboEntry);
@@ -1075,9 +1058,7 @@ export const getLeagueRecords = async (refresh = false) => {
 							masterRecordBook.managers.combined.years[year][opponent.recordManID].push(comboEntry);
 							
 							const starters = opponent.starters;
-							const startersPTS = opponent.starters_points.sort((a, b) => b - a);
-							const numStarters = opponent.starters_points.length;
-			
+							const startersPTS = opponent.starters_points.sort((a, b) => b - a);			
 							const players = opponent.players;
 							const playersPTS = opponent.players_points;
 							
@@ -1085,39 +1066,7 @@ export const getLeagueRecords = async (refresh = false) => {
 			
 								const playerID = players[i];
 								const playerPoints = playersPTS[playerID];
-			
-								let topStarter = false;
-								let bottomStarter = false;
-								let starterRank;
-								let PTSasStarter;
-								let PTSonBench;
-								let benched = true;
-								let rosterSpot;
-			
-								if(starters.includes(playerID)) {
-									benched = false;
-									PTSasStarter = playerPoints;
-									PTSonBench = 0;
-									starterRank = startersPTS.indexOf(playerPoints) + 1;
-									if(startersPTS[0] == playerPoints) {
-										topStarter = true;
-									} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
-										bottomStarter = true;
-									}
-									rosterSpot = positions[starters.indexOf(playerID)];
-								} else {
-									benched = true;
-									PTSonBench = playerPoints;
-									PTSasStarter = 0;
-									topStarter = false;
-									bottomStarter = false;
-									starterRank = null;
-								}
-								
-								let playerInfo = playersInfo[playerID];
-								let nflInfo = nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID];
-								let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`;
-			
+											
 								const playerEntry = {		
 									recordManID: opponent.recordManID,
 									manager: originalManagers[opponent.recordManID],
@@ -1125,32 +1074,35 @@ export const getLeagueRecords = async (refresh = false) => {
 									year,
 									rosterID: opponent.rosterID,
 									playerID,
-									playerPoints: PTSasStarter,
-									benchPoints: PTSonBench,
+									playerPoints: starters.includes(playerID) ? playerPoints : 0,
+									benchPoints: !starters.includes(playerID) ? playerPoints : 0,
 									weeksStarted: null,
 									weeksBenched: null,
 									weeksOwned: null,
-									benched,
-									howAcquired: null,
-									weekAcquired: null,
-									topStarter,
-									bottomStarter,
-									starterRank,
-									numStarters,
+									benched: starters.includes(playerID) ? false : true,
+									topStarter: starters.includes(playerID) && startersPTS[0] == playerPoints ? true : false,
+									bottomStarter: starters.includes(playerID) && startersPTS[startersPTS.length - 1] == playerPoints ? true : false,
+									starterRank: starters.includes(playerID) ? startersPTS.indexOf(playerPoints) + 1 : null,
+									numStarters: opponent.starters_points.length,
 									starterRankAVG: null,
-									playerInfo,
-									nflInfo,
-									avatar,
-									rosterSpot,
+									playerInfo: playersInfo[playerID],
+									nflInfo: nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID],
+									avatar: playersInfo[playerID].pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`,
+									rosterSpot: starters.includes(playerID) ? positions[starters.indexOf(playerID)] : null,
 								}
 			
-								// right now, acquisitions is just a list of the manager's draft picks
-								let acquisitions = acquisitionRecords[year][opponent.recordManID];
-								for(let i = 0; i < acquisitions.length; i++) {
-									if(acquisitions[i].playerID == playerID) {
-										playerEntry.howAcquired = 'draft';
-										playerEntry.weekAcquired = 0;
-									} 
+								const acquisitions = acquisitionRecords[year][opponent.recordManID];
+								for(const transType in acquisitions) {
+									const playerTrans = acquisitions[transType].filter(a => a.playerID == playerID);
+									
+									if(playerTrans?.find(t => t.addWeek <= POstartWeek && (POstartWeek <= t.dropWeek || t.dropWeek == null))) {
+										playerEntry.howAcquired = transType;
+									}
+								}
+
+								// add playerEntry to comboEntry
+								if(playerEntry.benched == false) { 
+									comboEntry.matchupInfo.starters[starters.indexOf(playerID)] = playerEntry;
 								}
 	
 								// add player arrays to ALLTIME
@@ -1193,7 +1145,6 @@ export const getLeagueRecords = async (refresh = false) => {
 							home = POmatchups[i][1];
 							away = POmatchups[i][0];
 						}
-						const matchDifferential = home.fpts - away.fpts;
 	
 						for(const key in POmatchups[i]) {
 							const opponent = POmatchups[i][key];
@@ -1204,9 +1155,9 @@ export const getLeagueRecords = async (refresh = false) => {
 								rosterID: opponent.rosterID,
 								fpts: opponent.fpts,
 								fptspg: null,
-								fptsAgainst: null,
-								againstManager: null,
-								againstRecordManID: null,
+								fptsAgainst: home.fpts == away.fpts ? opponent.fpts : opponent == home ? away.fpts : home.fpts,
+								againstManager: opponent.recordManID == home.recordManID ? away.manager : home.manager,
+								againstRecordManID: opponent.recordManID == home.recordManID ? away.recordManID : home.recordManID,
 								epeWins: 0,
 								epeTies: 0,
 								epeLosses: 0,
@@ -1217,36 +1168,17 @@ export const getLeagueRecords = async (refresh = false) => {
 								medianPerc: null,
 								topScore: false,
 								bottomScore: false,
-								matchWin: false,
-								matchLoss: false,
-								matchTie: false,
-								matchDifferential,
+								matchWin: home.fpts != away.fpts && opponent == home ? true : false,
+								matchLoss: home.fpts != away.fpts && opponent == away ? true : false,
+								matchTie: home.fpts == away.fpts ? true : false,
+								matchDifferential: home.fpts != away.fpts && opponent == away ? (home.fpts - away.fpts) * (-1) : home.fpts - away.fpts,
 								week: opponent.week,
 								year,
-								matchupInfo: opponent,
-							}
-
-							if(home.fpts == away.fpts) {
-								comboEntry.matchTie = true;
-								comboEntry.fptsAgainst = away.fpts;
-								if(opponent.recordManID == home.recordManID) {
-									comboEntry.againstManager = away.manager;
-									comboEntry.againstRecordManID = away.recordManID;
-								} else {
-									comboEntry.againstManager = home.manager;
-									comboEntry.againstRecordManID = home.recordManID;
-								}
-							} else if(opponent == home) {
-								comboEntry.matchWin = true;
-								comboEntry.fptsAgainst = away.fpts;
-								comboEntry.againstManager = away.manager;
-								comboEntry.againstRecordManID = away.recordManID;
-							} else if(opponent == away) {
-								comboEntry.matchLoss = true;
-								comboEntry.matchDifferential = matchDifferential * (-1);
-								comboEntry.fptsAgainst = home.fpts;
-								comboEntry.againstManager = home.manager;
-								comboEntry.againstRecordManID = home.recordManID;
+								matchupInfo: {
+									info: POmatchupWeek.find(m => m.roster_id == opponent.rosterID),
+									positions: positions,
+									starters: [],
+								},
 							}
 
 							masterRecordBook.league.playoffs.alltime.push(comboEntry);
@@ -1272,9 +1204,7 @@ export const getLeagueRecords = async (refresh = false) => {
 							masterRecordBook.managers.combined.years[year][opponent.recordManID].push(comboEntry);
 
 							const starters = opponent.starters;
-							const startersPTS = opponent.starters_points.sort((a, b) => b - a);
-							const numStarters = opponent.starters_points.length;
-			
+							const startersPTS = opponent.starters_points.sort((a, b) => b - a);			
 							const players = opponent.players;
 							const playersPTS = opponent.players_points;
 							
@@ -1282,39 +1212,7 @@ export const getLeagueRecords = async (refresh = false) => {
 			
 								const playerID = players[i];
 								const playerPoints = playersPTS[playerID];
-			
-								let topStarter = false;
-								let bottomStarter = false;
-								let starterRank;
-								let PTSasStarter;
-								let PTSonBench;
-								let benched = true;
-								let rosterSpot;
-			
-								if(starters.includes(playerID)) {
-									benched = false;
-									PTSasStarter = playerPoints;
-									PTSonBench = 0;
-									starterRank = startersPTS.indexOf(playerPoints) + 1;
-									if(startersPTS[0] == playerPoints) {
-										topStarter = true;
-									} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
-										bottomStarter = true;
-									}
-									rosterSpot = positions[starters.indexOf(playerID)];
-								} else {
-									benched = true;
-									PTSonBench = playerPoints;
-									PTSasStarter = 0;
-									topStarter = false;
-									bottomStarter = false;
-									starterRank = null;
-								}
-								
-								let playerInfo = playersInfo[playerID];
-								let nflInfo = nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID];
-								let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`;
-			
+											
 								const playerEntry = {		
 									recordManID: opponent.recordManID,
 									manager: originalManagers[opponent.recordManID],
@@ -1322,32 +1220,35 @@ export const getLeagueRecords = async (refresh = false) => {
 									year,
 									rosterID: opponent.rosterID,
 									playerID,
-									playerPoints: PTSasStarter,
-									benchPoints: PTSonBench,
+									playerPoints: starters.includes(playerID) ? playerPoints : 0,
+									benchPoints: !starters.includes(playerID) ? playerPoints : 0,
 									weeksStarted: null,
 									weeksBenched: null,
 									weeksOwned: null,
-									benched,
-									howAcquired: null,
-									weekAcquired: null,
-									topStarter,
-									bottomStarter,
-									starterRank,
-									numStarters,
+									benched: starters.includes(playerID) ? false : true,
+									topStarter: starters.includes(playerID) && startersPTS[0] == playerPoints ? true : false,
+									bottomStarter: starters.includes(playerID) && startersPTS[startersPTS.length - 1] == playerPoints ? true : false,
+									starterRank: starters.includes(playerID) ? startersPTS.indexOf(playerPoints) + 1 : null,
+									numStarters: opponent.starters_points.length,
 									starterRankAVG: null,
-									playerInfo,
-									nflInfo,
-									avatar,
-									rosterSpot,
+									playerInfo: playersInfo[playerID],
+									nflInfo: nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID],
+									avatar: playersInfo[playerID].pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`,
+									rosterSpot: starters.includes(playerID) ? positions[starters.indexOf(playerID)] : null,
 								}
 			
-								// right now, acquisitions is just a list of the manager's draft picks
-								let acquisitions = acquisitionRecords[year][opponent.recordManID];
-								for(let i = 0; i < acquisitions.length; i++) {
-									if(acquisitions[i].playerID == playerID) {
-										playerEntry.howAcquired = 'draft';
-										playerEntry.weekAcquired = 0;
-									} 
+								const acquisitions = acquisitionRecords[year][opponent.recordManID];
+								for(const transType in acquisitions) {
+									const playerTrans = acquisitions[transType].filter(a => a.playerID == playerID);
+									
+									if(playerTrans?.find(t => t.addWeek <= POstartWeek && (POstartWeek <= t.dropWeek || t.dropWeek == null))) {
+										playerEntry.howAcquired = transType;
+									}
+								}
+
+								// add playerEntry to comboEntry
+								if(playerEntry.benched == false) { 
+									comboEntry.matchupInfo.starters[starters.indexOf(playerID)] = playerEntry;
 								}
 	
 								// add player arrays to ALLTIME
@@ -1387,12 +1288,11 @@ export const getLeagueRecords = async (refresh = false) => {
 		
 		// process all the REGULAR SEASON matchups
 		for(const matchupWeek of matchupsData) {
-			let matchups = {};
+			const matchups = {};
 
 			for(const matchup of matchupWeek) {
 
-				let recordManager = leagueManagers[matchup.roster_id].filter(m => m.yearsactive.includes(year));
-				let recordManID = recordManager[0].managerID;
+				const recordManID = leagueManagers[matchup.roster_id].find(m => m.yearsactive.includes(year)).managerID;
 
 				const entry = {
 					manager: originalManagers[recordManID],
@@ -1439,35 +1339,15 @@ export const getLeagueRecords = async (refresh = false) => {
 					matchDifferential: 0,
 					week: startWeek,
 					year,
-					matchupInfo: matchup,
+					matchupInfo: {
+						info: matchup,
+						positions: positions,
+						starters: [],
+					},
 				}
-
-				masterRecordBook.league.regularSeason.alltime.push(comboEntry);
-				masterRecordBook.league.combined.alltime.push(comboEntry);				
-				if(!masterRecordBook.managers.regularSeason.alltime[recordManID]) {
-					masterRecordBook.managers.regularSeason.alltime[recordManID] = [];
-				}
-				masterRecordBook.managers.regularSeason.alltime[recordManID].push(comboEntry);
-				if(!masterRecordBook.managers.combined.alltime[recordManID]) {
-					masterRecordBook.managers.combined.alltime[recordManID] = [];
-				}
-				masterRecordBook.managers.combined.alltime[recordManID].push(comboEntry);
-
-				masterRecordBook.league.regularSeason.years[year].push(comboEntry);
-				masterRecordBook.league.combined.years[year].push(comboEntry);
-				if(!masterRecordBook.managers.regularSeason.years[year][recordManID]) {
-					masterRecordBook.managers.regularSeason.years[year][recordManID] = [];
-				}
-				masterRecordBook.managers.regularSeason.years[year][recordManID].push(comboEntry);
-				if(!masterRecordBook.managers.combined.years[year][recordManID]) {
-					masterRecordBook.managers.combined.years[year][recordManID] = [];
-				}
-				masterRecordBook.managers.combined.years[year][recordManID].push(comboEntry);
 
 				const starters = matchup.starters;
 				const startersPTS = matchup.starters_points.sort((a, b) => b - a);
-				const numStarters = matchup.starters_points.length;
-
 				const players = matchup.players;
 				const playersPTS = matchup.players_points;
 				
@@ -1476,38 +1356,6 @@ export const getLeagueRecords = async (refresh = false) => {
 					const playerID = players[i];
 					const playerPoints = playersPTS[playerID];
 
-					let topStarter = false;
-					let bottomStarter = false;
-					let starterRank;
-					let PTSasStarter;
-					let PTSonBench;
-					let benched = true;
-					let rosterSpot;
-
-					if(starters.includes(playerID)) {
-						benched = false;
-						PTSasStarter = playerPoints;
-						PTSonBench = 0;
-						starterRank = startersPTS.indexOf(playerPoints) + 1;
-						if(startersPTS[0] == playerPoints) {
-							topStarter = true;
-						} else if(startersPTS[startersPTS.length - 1] == playerPoints) {
-							bottomStarter = true;
-						}
-						rosterSpot = positions[starters.indexOf(playerID)];
-					} else {
-						benched = true;
-						PTSonBench = playerPoints;
-						PTSasStarter = 0;
-						topStarter = false;
-						bottomStarter = false;
-						starterRank = null;
-					}
-					
-					let playerInfo = playersInfo[playerID];
-					let nflInfo = nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID];
-    				let avatar = playerInfo.pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`;
-
 					const playerEntry = {		
 						recordManID,
 						manager: originalManagers[recordManID],
@@ -1515,32 +1363,35 @@ export const getLeagueRecords = async (refresh = false) => {
 						year,
 						rosterID: matchup.roster_id,
 						playerID,
-						playerPoints: PTSasStarter,
-						benchPoints: PTSonBench,
+						playerPoints: starters.includes(playerID) ? playerPoints : 0,
+						benchPoints: !starters.includes(playerID) ? playerPoints : 0,
 						weeksStarted: null,
 						weeksBenched: null,
 						weeksOwned: null,
-						benched,
-						howAcquired: null,
-						weekAcquired: null,
-						topStarter,
-						bottomStarter,
-						starterRank,
-						numStarters,
+						benched: starters.includes(playerID) ? false : true,
+						topStarter: starters.includes(playerID) && startersPTS[0] == playerPoints ? true : false,
+						bottomStarter: starters.includes(playerID) && startersPTS[startersPTS.length - 1] == playerPoints ? true : false,
+						starterRank: starters.includes(playerID) ? startersPTS.indexOf(playerPoints) + 1 : null,
+						numStarters: matchup.starters_points.length,
 						starterRankAVG: null,
-						playerInfo,
-						nflInfo,
-						avatar,
-						rosterSpot,
+						playerInfo: playersInfo[playerID],
+						nflInfo: nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID],
+						avatar: playersInfo[playerID].pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`,
+						rosterSpot: starters.includes(playerID) ? positions[starters.indexOf(playerID)] : null,
 					}
 
-					// right now, acquisitions is just a list of the manager's draft picks
-					let acquisitions = acquisitionRecords[year][recordManID];
-					for(let i = 0; i < acquisitions.length; i++) {
-						if(acquisitions[i].playerID == playerID) {
-							playerEntry.howAcquired = 'draft';
-							playerEntry.weekAcquired = 0;
-						} 
+					const acquisitions = acquisitionRecords[year][recordManID];
+					for(const transType in acquisitions) {
+						const playerTrans = acquisitions[transType].filter(a => a.playerID == playerID);
+						
+						if(playerTrans?.find(t => t.addWeek <= startWeek && (startWeek <= t.dropWeek || t.dropWeek == null))) {
+							playerEntry.howAcquired = transType;
+						}
+					}
+
+					// add playerEntry to comboEntry if starter
+					if(playerEntry.benched == false) { 
+						comboEntry.matchupInfo.starters[starters.indexOf(playerID)] = playerEntry;
 					}
 
 					// add player arrays to ALLTIME
@@ -1570,6 +1421,28 @@ export const getLeagueRecords = async (refresh = false) => {
 					masterRecordBook.players.managers.combined.years[year][recordManID].push(playerEntry);
 
 				}
+
+				masterRecordBook.league.regularSeason.alltime.push(comboEntry);
+				masterRecordBook.league.combined.alltime.push(comboEntry);				
+				if(!masterRecordBook.managers.regularSeason.alltime[recordManID]) {
+					masterRecordBook.managers.regularSeason.alltime[recordManID] = [];
+				}
+				masterRecordBook.managers.regularSeason.alltime[recordManID].push(comboEntry);
+				if(!masterRecordBook.managers.combined.alltime[recordManID]) {
+					masterRecordBook.managers.combined.alltime[recordManID] = [];
+				}
+				masterRecordBook.managers.combined.alltime[recordManID].push(comboEntry);
+
+				masterRecordBook.league.regularSeason.years[year].push(comboEntry);
+				masterRecordBook.league.combined.years[year].push(comboEntry);
+				if(!masterRecordBook.managers.regularSeason.years[year][recordManID]) {
+					masterRecordBook.managers.regularSeason.years[year][recordManID] = [];
+				}
+				masterRecordBook.managers.regularSeason.years[year][recordManID].push(comboEntry);
+				if(!masterRecordBook.managers.combined.years[year][recordManID]) {
+					masterRecordBook.managers.combined.years[year][recordManID] = [];
+				}
+				masterRecordBook.managers.combined.years[year][recordManID].push(comboEntry);
 				
 			}
 			startWeek--;
@@ -1731,22 +1604,39 @@ export const getLeagueRecords = async (refresh = false) => {
 					for(const recordManID in typeRecord.years[year]) {
 						const recordMan = typeRecord.years[year][recordManID];
 
-						let fptsTotal = 0;
-						let fptsAgainstTotal = 0;
-						let winTotal = 0;
-						let lossTotal = 0;
-						let tieTotal = 0;
-						let runningDifferential = 0;
-						let epeWinsTotal = 0;
-						let epeTiesTotal = 0;
-						let epeLossesTotal = 0;
-						let weekWinners = 0;
-						let weekLosers = 0;
-						let weekTies = 0;
-						let topScores = 0;
-						let bottomScores = 0;
+						const comboEntry = {
+							manager: recordMan[0].manager,
+							recordManID,
+							rosterID: recordMan[0].rosterID,
+							fpts: 0,
+							fptsAgainst: 0,
+							epeWins: 0,
+							epeTies: 0,
+							epeLosses: 0,
+							weekWinners: 0,
+							weekLosers: 0,
+							weekTies: 0,
+							topScores: 0,
+							bottomScores: 0,
+							wins: 0,
+							losses: 0,
+							ties: 0,
+							periodDifferential: 0,
+							week: null,
+							year,
+							acquisitionFpts: {
+								draft: 0,
+								waiver: 0,
+								trade: 0,
+							},
+						}
 						// looping thru each week in that year
 						for(let i = 0; i < recordMan.length; i++) {
+
+							// add each week's score to acquisition totals
+							for(const starter in recordMan[i].matchupInfo.starters) {
+								comboEntry.acquisitionFpts[recordMan[i].matchupInfo.starters[starter].howAcquired] += recordMan[i].matchupInfo.starters[starter].playerPoints;
+							}
 
 							// add each week's score to running total & head-to-head totals
 							headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].fpts += recordMan[i].fpts;
@@ -1754,19 +1644,19 @@ export const getLeagueRecords = async (refresh = false) => {
 							headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].fptsAgainst += recordMan[i].fptsAgainst;
 							headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].fptsAgainst += recordMan[i].fptsAgainst;
 
-							fptsTotal += recordMan[i].fpts;
-							fptsAgainstTotal += recordMan[i].fptsAgainst;
-							runningDifferential += recordMan[i].matchDifferential;
+							comboEntry.fpts += recordMan[i].fpts;
+							comboEntry.fptsAgainst += recordMan[i].fptsAgainst;
+							comboEntry.periodDifferential += recordMan[i].matchDifferential;
 							if(recordMan[i].matchWin == true) {
-								winTotal++;
+								comboEntry.wins++;
 								headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].wins++;
 								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].wins++;
 							} else if(recordMan[i].matchLoss == true) {
-								lossTotal++;
+								comboEntry.losses++;
 								headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].losses++;
 								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].losses++;
 							} else if(recordMan[i].matchTie == true) {
-								tieTotal++;
+								comboEntry.ties++;
 								headToHeadRecords[recordType].years[year][recordManID][recordMan[i].againstRecordManID].ties++;
 								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].ties++;
 								headToHeadRecords[recordType].alltime[recordManID][recordMan[i].againstRecordManID].showTies = true;
@@ -1776,12 +1666,9 @@ export const getLeagueRecords = async (refresh = false) => {
 							const compareLosses = masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.fpts > recordMan[i].fpts);
 							const compareTies = masterRecordBook.league[recordType].years[year].filter(p => p.week == recordMan[i].week && p.fpts == recordMan[i].fpts && p.recordManID != recordMan[i].recordManID);
 							// add EPE stats to running totals & head-to-head totals
-							const epeWins = compareWins.length;
-							const epeLosses = compareLosses.length;
-							const epeTies = compareTies.length;
-							epeWinsTotal += epeWins;
-							epeLossesTotal += epeLosses;
-							epeTiesTotal += epeTies;
+							comboEntry.epeWins += compareWins.length;
+							comboEntry.epeLosses += compareLosses.length;
+							comboEntry.epeTies += compareTies.length;
 
 							for(const opponent in compareWins) {
 								headToHeadRecords[recordType].alltime[recordManID][compareWins[opponent].recordManID].epeWins++;
@@ -1796,17 +1683,16 @@ export const getLeagueRecords = async (refresh = false) => {
 								headToHeadRecords[recordType].years[year][recordManID][compareTies[opponent].recordManID].epeTies++;
 							}
 							// update that week's EPE stats in league & manager(??) records
-							const epePerc = (epeWins + epeTies / 2) / (epeWins + epeTies + epeLosses) * 100;
-							masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).epeWins = epeWins;
-							masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).epeLosses = epeLosses;
-							masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).epeTies = epeTies;
-							masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).epePerc = epePerc;
+							masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).epeWins = compareWins.length;
+							masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).epeLosses = compareLosses.length;
+							masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).epeTies = compareTies.length;
+							masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).epePerc = (compareWins.length + compareTies.length / 2) / (compareWins.length + compareTies.length + compareLosses.length) * 100;
 							// determine if top score of week AND update that week's entry in league & manager records
-							if(epeLosses == 0) {			
-								topScores++;
+							if(compareLosses.length == 0) {			
+								comboEntry.topScores++;
 								masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).topScore = true;
-							} else if(epeWins == 0) {
-								bottomScores++;
+							} else if(compareWins.length == 0) {
+								comboEntry.bottomScores++;
 								masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).bottomScore = true;
 							}
 							// determine if beat median score AND update that week's entry in league & manager(??) records
@@ -1815,13 +1701,13 @@ export const getLeagueRecords = async (refresh = false) => {
 							scoresArray = scoresArray.sort((a, b) => b.fpts - a.fpts).slice(numScores / 2 - 1, numScores / 2 + 1);
 							const medianScore = (scoresArray[0].fpts + scoresArray[1].fpts) / 2;
 							if(recordMan[i].fpts > medianScore) {
-								weekWinners++;
+								comboEntry.weekWinners++;
 								masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).weekWinner = true;
 							} else if(recordMan[i].fpts < medianScore) {
-								weekLosers++;
+								comboEntry.weekLosers++;
 								masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).weekLoser = true;
 							} else if(recordMan[i].fpts == medianScore) {
-								weekTies++;
+								comboEntry.weekTies++;
 								masterRecordBook.league[recordType].years[year].find(p => p.week == recordMan[i].week && p.recordManID == recordMan[i].recordManID).weekTie = true;
 							}
 						}
@@ -1833,35 +1719,10 @@ export const getLeagueRecords = async (refresh = false) => {
 							headToHeadRecords[recordType].years[year][recordManID][opponent].fptsAgainstPg = headToHeadRecords[recordType].years[year][recordManID][opponent].fptsAgainst / (headToHeadRecords[recordType].years[year][recordManID][opponent].wins + headToHeadRecords[recordType].years[year][recordManID][opponent].ties + headToHeadRecords[recordType].years[year][recordManID][opponent].losses);
 						}
 
-						const totalPPG = fptsTotal / recordMan.length; 
-						const epePerc = (epeWinsTotal + epeTiesTotal / 2) / (epeWinsTotal + epeTiesTotal + epeLossesTotal) * 100;
-						const medianPerc = (weekWinners + weekTies / 2) / (weekWinners + weekTies + weekLosers) * 100;
-						const winPerc = (winTotal + tieTotal / 2) / (winTotal + tieTotal + lossTotal) * 100;
-						const comboEntry = {
-							manager: recordMan[0].manager,
-							recordManID,
-							rosterID: recordMan[0].rosterID,
-							fpts: fptsTotal,
-							fptspg: totalPPG,
-							fptsAgainst: fptsAgainstTotal,
-							epeWins: epeWinsTotal,
-							epeTies: epeTiesTotal,
-							epeLosses: epeLossesTotal,
-							epePerc,
-							weekWinners,
-							weekLosers,
-							weekTies,
-							medianPerc,
-							topScores,
-							bottomScores,
-							winPerc,
-							wins: winTotal,
-							losses: lossTotal,
-							ties: tieTotal,
-							periodDifferential: runningDifferential,
-							week: null,
-							year,
-						}
+						comboEntry.fptspg = comboEntry.fpts / recordMan.length; 
+						comboEntry.epePerc = (comboEntry.epeWins + comboEntry.epeTies / 2) / (comboEntry.epeWins + comboEntry.epeTies + comboEntry.epeLosses) * 100;
+						comboEntry.medianPerc = (comboEntry.weekWinners + comboEntry.weekTies / 2) / (comboEntry.weekWinners + comboEntry.weekTies + comboEntry.weekLosers) * 100;
+						comboEntry.winPerc = (comboEntry.wins + comboEntry.ties / 2) / (comboEntry.wins + comboEntry.ties + comboEntry.losses) * 100;
 
 						if(!masterRecordBook.managers.totals.years[year][recordManID]) {
 							masterRecordBook.managers.totals.years[year][recordManID] = {
@@ -1900,7 +1761,7 @@ export const getLeagueRecords = async (refresh = false) => {
 					for(const recordManID in typeRecord.years[year]) {
 						const recordMan = typeRecord.years[year][recordManID];
 						
-						let playerTotals = {};
+						const playerTotals = {};
 						let uniqueStarters = 0;
 
 						for(const key in recordMan) {
@@ -1921,23 +1782,22 @@ export const getLeagueRecords = async (refresh = false) => {
 									weeksBenched: 0,
 									weeksOwned: 0,
 									benched: null,
-									howAcquired: null,
-									weekAcquired: null,
 									topStarters: 0,
 									bottomStarters: 0,
 									starterRank: null,
-									numStarters: null,
 									starterRankAVG: null,
 									starterRanks: 0,
 									playerInfo: player.playerInfo,
 									nflInfo: player.nflInfo,
 									avatar: player.avatar,
 									rosterSpot: player.rosterSpot,
+									acquisitionFpts: {},
 								}
 								if(player.benched == false) {
 									uniqueStarters++;
 								}
 							}
+							
 							if(playerTotals[player.playerID].rosterSpot == null || playerTotals[player.playerID].rosterSpot.includes('FLEX')) {
 								playerTotals[player.playerID].rosterSpot = player.rosterSpot;
 							}
@@ -1951,6 +1811,10 @@ export const getLeagueRecords = async (refresh = false) => {
 								} else if(player.bottomStarter == true) {
 									playerTotals[player.playerID].bottomStarters++;
 								}
+								if(!playerTotals[player.playerID].acquisitionFpts[player.howAcquired]) {
+									playerTotals[player.playerID].acquisitionFpts[player.howAcquired] = 0;
+								}
+								playerTotals[player.playerID].acquisitionFpts[player.howAcquired] += player.playerPoints;
 							} else if(player.benched == true) {
 								playerTotals[player.playerID].benchPoints += player.playerPoints;
 								playerTotals[player.playerID].weeksBenched++;
@@ -2053,6 +1917,103 @@ export const getLeagueRecords = async (refresh = false) => {
 				playerPositionRecords.league.years[year][recordPeriod].managerBests[position].period_Best = playerPositionRecords.league.years[year][recordPeriod].managerBests[position].period_Best.sort((a, b) => b.playerPoints - a.playerPoints);
 			}
 		}
+		playerAcquisitionRecords.managers.years[year] = {			
+			regularSeason: {},
+			playoffs: {},
+			combined: {},
+		}
+		playerAcquisitionRecords.league.years[year] = {			
+			regularSeason: {
+				managerBests: {
+					draft: {
+						week_Best: [],
+						period_Best: [],
+					},
+					trade: {
+						week_Best: [],
+						period_Best: [],
+					},
+					waiver: {
+						week_Best: [],
+						period_Best: [],
+					},
+				},
+			},
+			playoffs: {
+				managerBests: {
+					draft: {
+						week_Best: [],
+						period_Best: [],
+					},
+					trade: {
+						week_Best: [],
+						period_Best: [],
+					},
+					waiver: {
+						week_Best: [],
+						period_Best: [],
+					},
+				},
+			},
+			combined: {
+				managerBests: {
+					draft: {
+						week_Best: [],
+						period_Best: [],
+					},
+					trade: {
+						week_Best: [],
+						period_Best: [],
+					},
+					waiver: {
+						week_Best: [],
+						period_Best: [],
+					},
+				},
+			},
+		}
+		for(const recordPeriod in playerAcquisitionRecords.managers.years[year]) {
+			
+			playerAcquisitionRecords.league.years[year][recordPeriod].totals = [];
+
+			for(const transType in playerAcquisitionRecords.league.years[year][recordPeriod].managerBests) {
+				playerAcquisitionRecords.league.years[year][recordPeriod][transType] = {
+					week_Top: masterRecordBook.players.league[recordPeriod].years[year].slice().filter(p => p.howAcquired == transType && p.benched == false).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
+					period_Top: masterRecordBook.players.league.totals.years[year][recordPeriod].slice().filter(p => p.acquisitionFpts[transType]).sort((a, b) => b.acquisitionFpts[transType] - a.acquisitionFpts[transType]).slice(0, 10),
+				}
+			
+				for(const recordManID in masterRecordBook.managers.totals.years[year]) {
+					if(masterRecordBook.managers.totals.years[year][recordManID][recordPeriod].length > 0) {
+
+						const transPerc = masterRecordBook.managers.totals.years[year][recordManID][recordPeriod][0].acquisitionFpts[transType] / masterRecordBook.managers.totals.years[year][recordManID][recordPeriod][0].fpts * 100;
+						if(!playerAcquisitionRecords.managers.years[year][recordPeriod][recordManID]) {
+							playerAcquisitionRecords.managers.years[year][recordPeriod][recordManID] = {
+								fpts: masterRecordBook.managers.totals.years[year][recordManID][recordPeriod][0].fpts,
+								recordManID,
+								manager: masterRecordBook.managers.totals.years[year][recordManID][recordPeriod][0].manager,
+							};
+						}
+						playerAcquisitionRecords.managers.years[year][recordPeriod][recordManID][transType] = {
+							fpts: masterRecordBook.managers.totals.years[year][recordManID][recordPeriod][0].acquisitionFpts[transType],
+							perc: transPerc,
+						}	
+						
+		
+						// playerAcquisitionRecords.league.years[year][recordPeriod].managerBests[transType].week_Best.push(playerPositionRecords.managers.years[year][recordPeriod][recordManID][position].week_Top.slice(0, 1)[0]);
+						// playerAcquisitionRecords.league.years[year][recordPeriod].managerBests[transType].period_Best.push(playerPositionRecords.managers.years[year][recordPeriod][recordManID][position].period_Top.slice(0, 1)[0]);
+
+					}
+				}
+			}
+
+			for(const recordManID in playerAcquisitionRecords.managers.years[year][recordPeriod]) {
+				playerAcquisitionRecords.league.years[year][recordPeriod].totals.push(playerAcquisitionRecords.managers.years[year][recordPeriod][recordManID]);
+			}
+			playerAcquisitionRecords.league.years[year][recordPeriod].totals = playerAcquisitionRecords.league.years[year][recordPeriod].totals.sort((a, b) => b.fpts - a.fpts);
+
+		}
+	
+		
 		recordArrays.league.years[year] = {
 			regularSeason: {
 				managerBests: {},
@@ -2515,6 +2476,7 @@ export const getLeagueRecords = async (refresh = false) => {
 		leagueRosterRecords,
 		leagueWeekRecords: recordArrays.league.alltime.regularSeason.week_Top,
 		leagueRecordArrays: recordArrays.league.alltime,
+		playerAcquisitionRecords,
 		allManagers,
 		currentYear,
 		lastYear,

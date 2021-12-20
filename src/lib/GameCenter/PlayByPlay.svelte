@@ -471,7 +471,7 @@
         }
         // determines yardage on fumble plays
         const processFumble = (play, player) => {
-
+            // TO-DO Bengals-Bronces 2021-15 for fumble on a fumble return
             let fumbleInfo;
             let finalDescription = play.description;
             if(finalDescription.includes('REVERSED')) {

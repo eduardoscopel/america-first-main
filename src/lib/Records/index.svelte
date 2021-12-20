@@ -24,7 +24,7 @@
         totals = newTransactions.totals;
     }
 
-    let {leagueRosterRecords, allManagers, seasonWeekRecords, currentYear, lastYear, leagueWeekRecords, leagueRecordArrays } = leagueRecords;
+    let {leagueRosterRecords, allManagers, seasonWeekRecords, currentYear, lastYear, leagueWeekRecords, leagueRecordArrays, playerAcquisitionRecords } = leagueRecords;
 
     const refreshRecords = async () => {
         const newRecords = await getLeagueRecords(true);
@@ -38,6 +38,7 @@
         currentYear = newRecords.currentYear;
         lastYear = newRecords.lastYear;
         leagueRecordArrays = newRecords.leagueRecordArrays;
+        playerAcquisitionRecords = newRecords.playerAcquisitionRecords;
     }
 
     if(stale) {
@@ -104,12 +105,12 @@
 
         {#if displayType == 'alltime'}
             {#if leagueWeekRecords.length}
-                <AllTimeRecords transactionTotals={totals} {leagueWeekRecords} {leagueRosterRecords} {allManagers} {leagueRecordArrays} {managerRecords} />
+                <AllTimeRecords transactionTotals={totals} {leagueWeekRecords} {leagueRosterRecords} {allManagers} {leagueRecordArrays} {managerRecords} {playerAcquisitionRecords} />
             {:else}
                 <p class="empty">No records <i>yet</i>...</p>
             {/if}
         {:else if displayType == 'yearly'}
-            <PerSeasonRecords transactionTotals={totals} {leagueRosterRecords} {seasonWeekRecords} {allManagers} {currentYear} {lastYear} {managerRecords} />
+            <PerSeasonRecords transactionTotals={totals} {leagueRosterRecords} {seasonWeekRecords} {allManagers} {currentYear} {lastYear} {managerRecords} {playerAcquisitionRecords} />
         {/if}
     </div>
 </div>

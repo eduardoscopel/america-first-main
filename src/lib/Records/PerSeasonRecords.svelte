@@ -3,7 +3,7 @@
   	import RecordsAndRankings from './RecordsAndRankings.svelte';
     import { Icon } from '@smui/tab';
 
-    export let leagueRosterRecords, seasonWeekRecords, allManagers, currentYear, lastYear, transactionTotals, managerRecords;
+    export let leagueRosterRecords, seasonWeekRecords, allManagers, currentYear, lastYear, transactionTotals, managerRecords, playerAcquisitionRecords;
 
     const yearsObj = {};
     let years = [];
@@ -106,7 +106,7 @@
                 yearsObj[season.year].showTies = true;
             }
             // add lineup IQ rankings
-            let lineupIQ = {
+            const lineupIQ = {
                 recordManID,
                 manager: season.manager,
                 fpts: round(season.fpts),
@@ -284,29 +284,121 @@
         }
 
         displayObject[displayStats] = {
-            lineupIQs,
-            weekRecords,
-            weekLows,
-            seasonLongRecords,
-            seasonLongLows,
-            seasonEPERecords,
-            seasonWorsts,
-            seasonBests,
-            weekBests,
-            weekWorsts,
-            playerSeasonTOPS,
-            playerSeasonBests,
-            playerWeekBests,
-            playerWeekMissedBests,
-            playerWeekTOPS,
-            playerWeekMissedTOPS,
-            blowouts,
-            closestMatchups,
-            winPercentages,
-            fptsHistories,
-            medianRecords,
-            tradesData,
-            waiversData,
+            lineupIQs: {
+                stats: lineupIQs,
+                sort: 'iq',
+                inverted: false,
+            },
+            weekRecords: {
+                stats: weekRecords,
+                sort: 'fpts',
+                inverted: false,
+            },
+            weekLows: {
+                stats: weekLows,
+                sort: 'fpts',
+                inverted: false,
+            },
+            seasonLongRecords: {
+                stats: seasonLongRecords,
+                sort: 'fptpg',
+                inverted: false,
+            },
+            seasonLongLows: {
+                stats: seasonLongLows,
+                sort: 'fptspg',
+                inverted: false,
+            },
+            seasonEPERecords: {
+                stats: seasonEPERecords,
+                sort: 'epePerc',
+                inverted: false,
+            },
+            seasonWorsts: {
+                stats: seasonWorsts,
+                sort: 'fptspg',
+                inverted: false,
+            },
+            seasonBests: {
+                stats: seasonBests,
+                sort: 'fptspg',
+                inverted: false,
+            },
+            weekBests: {
+                stats: weekBests,
+                sort: 'fpts',
+                inverted: false,
+            },
+            weekWorsts: {
+                stats: weekWorsts,
+                sort: 'fpts',
+                inverted: false,
+            },
+            playerSeasonTOPS: {
+                stats: playerSeasonTOPS,
+                sort: 'playerPoints',
+                inverted: false,
+            },
+            playerSeasonBests: {
+                stats: playerSeasonBests,
+                sort: 'playerPoints',
+                inverted: false,
+            },
+            playerWeekBests: {
+                stats: playerWeekBests,
+                sort: 'playerPoints',
+                inverted: false,
+            },
+            playerWeekMissedBests: {
+                stats: playerWeekMissedBests,
+                sort: 'benchPoints',
+                inverted: false,
+            },
+            playerWeekTOPS: {
+                stats: playerWeekTOPS,
+                sort: 'playerPoints',
+                inverted: false,
+            },
+            playerWeekMissedTOPS: {
+                stats: playerWeekMissedTOPS,
+                sort: 'benchPoints',
+                inverted: false,
+            },
+            blowouts: {
+                stats: blowouts,
+                sort: 'matchDifferential',
+                inverted: false,
+            },
+            closestMatchups: {
+                stats: closestMatchups,
+                sort: 'matchDifferential',
+                inverted: false,
+            },
+            winPercentages: {
+                stats: winPercentages,
+                sort: 'winPerc',
+                inverted: false,
+            },
+            fptsHistories: {
+                stats: fptsHistories,
+                sort: 'fptspg',
+                inverted: false,
+            },
+            medianRecords: {
+                stats: medianRecords,
+                sort: 'medianPerc',
+                inverted: false,
+            },
+            tradesData: {
+                stats: tradesData,
+                sort: 'trades',
+                inverted: false,
+            },
+            waiversData: {
+                stats: waiversData,
+                sort: 'waivers',
+                inverted: false,
+            },
             headToHeadRecords,
         }
 

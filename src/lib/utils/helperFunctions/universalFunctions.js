@@ -71,7 +71,7 @@ export const parseDate = (rawDate) => {
     return stringDate(d);
 }
 
-export const generateGraph = ({stats, secondStats = null, x, y, stat, statCat, secondStatCat = null, header, field, short, secondField = null}, roundOverride = 10, yMinOverride = null) => {
+export const generateGraph = ({stats, secondStats = null, x, y, stat, statCat, secondStatCat = null, header, field, short, secondField = null}, roundOverride = 10, yMinOverride = null, classGraph = false) => {
     if(!stats) {
         return null;
     }
