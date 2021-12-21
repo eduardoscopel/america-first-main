@@ -53,7 +53,6 @@
     tradesData.sort((a, b) => b.trades - a.trades);
     waiversData.sort((a, b) => b.waivers - a.waivers);
 
-
     let allTimeBiggestBlowouts = leagueRecordArrays.regularSeason.biggestBlowouts;
     let allTimeClosestMatchups = leagueRecordArrays.regularSeason.narrowestVictories;
 

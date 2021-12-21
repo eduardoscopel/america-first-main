@@ -71,7 +71,7 @@ export const parseDate = (rawDate) => {
     return stringDate(d);
 }
 
-export const generateGraph = ({stats, secondStats = null, x, y, stat, statCat, secondStatCat = null, header, field, short, secondField = null}, roundOverride = 10, yMinOverride = null, classGraph = false) => {
+export const generateGraph = ({stats, secondStats = null, x, y, stat, statCat, secondStatCat = null, header, field, short, secondField = null, classes = null}, roundOverride = 10, yMinOverride = null, classGraph = false) => {
     if(!stats) {
         return null;
     }
@@ -88,7 +88,8 @@ export const generateGraph = ({stats, secondStats = null, x, y, stat, statCat, s
         header,
         yMin: 0,
         yMax: 0,
-        short
+        short,
+        classes,
     }
 
     const sortedStats = [...stats].sort((a, b) => a.recordManID - b.recordManID);
@@ -104,6 +105,96 @@ export const generateGraph = ({stats, secondStats = null, x, y, stat, statCat, s
 
         for(const indivSecondStat of sortedSecondStats) {
             graph.secondStats.push(Math.round(indivSecondStat[secondField]));
+        }
+    }
+
+    if(classes) {
+        graph.classes = [];
+
+        for(const statClass of classes) {
+            graph.classes.push({
+                keys: [],
+                stats: [],
+                percs: [],
+                heights: [],
+                short: statClass.short,
+                colors: statClass.colors,
+                yMax: 0,
+            });
+
+            if(!statClass.field) continue;
+
+            const totals = {};
+            const totalsArray = [];
+            const statsEntry = {};
+            const percsEntry = {};
+            const heightsEntry = {};
+
+            let goBetween = [];
+           
+            const graphClass = graph.classes.find(c => c.short == statClass.short);
+
+            for(const key of statClass.keys) {
+
+                if(sortedStats.find(m => m[statClass.field][key])) {
+
+                    graphClass.keys.push(key);
+                    
+                    for(const indivStat of sortedStats) {
+
+                        if(!statsEntry[indivStat.recordManID]) {
+                            statsEntry[indivStat.recordManID] = [];
+                        }
+                        if(!percsEntry[indivStat.recordManID]) {
+                            percsEntry[indivStat.recordManID] = [];
+                        }
+
+                        totalsArray.push(indivStat[statClass.totalField]);
+                        totals[indivStat.recordManID] = indivStat[statClass.totalField];
+
+                        if(indivStat[statClass.field][key]) {
+                            statsEntry[indivStat.recordManID].push(Math.round(indivStat[statClass.field][key].fpts));
+                            percsEntry[indivStat.recordManID].push(indivStat[statClass.field][key].perc);
+                        } else {
+                            statsEntry[indivStat.recordManID].push(0);
+                            percsEntry[indivStat.recordManID].push(0);
+                        }
+                    }
+                }
+            }
+
+            graphClass.yMax = Math.round(totalsArray.sort((a, b) => b - a)[0] + 0.1 * totalsArray.sort((a, b) => b - a)[0]); 
+            const actualMax = totalsArray.sort((a, b) => b - a)[0];
+
+            for(const recordManID in percsEntry) {
+
+                heightsEntry[recordManID] = [];
+                let runningHeight = 0;
+
+                for(let i = 0; i < percsEntry[recordManID].length; i++) {
+                    
+                    const adjustedPerc = percsEntry[recordManID][i] * totals[recordManID] / actualMax;
+                    runningHeight += adjustedPerc;
+                    heightsEntry[recordManID].push(runningHeight);
+                    percsEntry[recordManID][i] = Math.round(percsEntry[recordManID][i]);
+                }
+
+                goBetween.push({
+                    recordManID,
+                    stats: statsEntry[recordManID],
+                    percs: percsEntry[recordManID],
+                    heights: heightsEntry[recordManID],
+                    total: totals[recordManID],
+                })
+            }
+
+            goBetween = goBetween.sort((a, b) => a.recordManID - b.recordManID);
+            for(const entry of goBetween) {
+                graphClass.stats.push(entry.stats);
+                graphClass.percs.push(entry.percs);
+                graphClass.heights.push(entry.heights);
+            }
+            
         }
     }
 

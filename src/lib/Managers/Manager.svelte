@@ -930,7 +930,7 @@
         {:else}
         {/if} -->
 
-        <ManagerRecords {recordManID} {firstYear} {currentYear} {managerRecords} />
+        <ManagerRecords {recordManID} {firstYear} {currentYear} {managerRecords} {records} />
     </div>
 
     <div class="managerConstrained" style="min-height: auto">

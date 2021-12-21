@@ -8,7 +8,7 @@
     import LeagueMatchup from '$lib/Records/LeagueMatchup.svelte';
 
 
-    export let recordManID, firstYear, currentYear, managerRecords;
+    export let recordManID, firstYear, currentYear, managerRecords, records;
 
     let showEmpty = false;
     let emptyMessage;

@@ -106,9 +106,57 @@
         statCat: 'fptsHistories',
         header: "Team Fantasy Points",
         field: "fptspg",
-        short: "Fantasy Points"
+        short: "Fantasy Points",
+        classes: [
+            {
+                short: 'All',
+                field: null,
+                colors: null,
+                totalField: null,
+                keys: null,
+            },
+            {
+                short: 'Positions',
+                field: 'positionFpts',
+                colors: {
+                    QB: '#ff2a6d',
+                    WR: '#58a7ff',
+                    RB: '#00ceb8',
+                    TE: '#ffae58',
+                    K: '#bd66ff',
+                    DEF: '#fff67a',
+                    DL: '#ff795a',
+                    LB: '#6d7df5',
+                    DB: '#ff7cb6',
+                },
+                totalField: 'fpts',
+                keys: ['DB', 'LB', 'DL', 'DEF', 'K', 'TE', 'RB', 'WR', 'QB'],
+            },
+            {
+                short: 'Acquisitions',
+                field: 'acquisitionFpts',
+                colors: {
+                    draft: "#A33B20",
+                    waiver: "#4D9078",
+                    trade: "#F2C14E",
+                },
+                totalField: 'fpts',
+                keys: [
+                    'trade',
+                    'waiver',
+                    'draft',
+                ],
+            },
+        ],
+    }
+    const getPositionColors = (positionStats) => {
+        fptsHistoriesGraph.classes[1].colors = {};
+        for(const position in positionStats.positionFpts) {
+            fptsHistoriesGraph.classes[1].colors[position] = positionColors[position];
+        }
     }
     $: fptsHistoriesGraph.stats = displayObject[selection].fptsHistories.stats;
+    $: fptsHistoriesGraph.classes[1].colors = getPositionColors(displayObject[selection].fptsHistories.stats);
 
     let medianRecordsGraph = {
         stats: displayObject[selection].medianRecords.stats,
@@ -262,7 +310,6 @@
     graphs.push(generateGraph(playerWeekMissedBestGraph));
 
     const transactions = [];
-    
     for(let i = 1; i <= numManagers; i++) {
         if(waiversData.find(w => w.recordManID == i)) {
             const waiver = waiversData.find(w => w.recordManID == i);

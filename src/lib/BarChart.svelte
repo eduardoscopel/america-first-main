@@ -19,14 +19,7 @@
         "#F2C14E",
         "#393D3F",
     ];
-
-    const classColors = [
-        "#A33B20",
-        "#F2C14E",
-        "#4D9078",
-    ]
     
-
     $: yMin = graphs[curGraph].secondStats.length > 0 ? graphs[curGraph].yMin/2 : graphs[curGraph].yMin;
     $: yMax = graphs[curGraph].yMax;
     $: stats = graphs[curGraph].stats;
@@ -35,6 +28,7 @@
     $: recordManIDs = graphs[curGraph].recordManIDs;
     $: labels = graphs[curGraph].labels;
     $: header = graphs[curGraph].header;
+    $: classes = graphs[curGraph].classes;
 
     const refreshStats = (selection, displayYear) => {
         if((selection && selection != null) || (displayYear && displayYear != null)) {
@@ -85,6 +79,7 @@
             yMax = graphs[curGraph].yMax;
             recordManIDs = graphs[curGraph].recordManIDs;
             managers = graphs[curGraph].managers;
+            classes = graphs[curGraph].classes;
         }
     }
     $: refreshStats(selection, displayYear);
@@ -143,6 +138,31 @@
 
     $: resize(maxWidth);
     $: resize(innerWidth);
+
+
+    let curClass = 0;
+    let classStats;
+    const changeClass = (newClass) => {
+
+        if(classes && newClass != 0) {
+            classStats = classes[newClass];
+            yMin = 0;
+            yMax = classStats.yMax;
+        } else {
+            yMin = graphs[curGraph].yMin;
+            yMax = graphs[curGraph].yMax;
+        }
+        
+        interval = (yMax - yMin) / 4;
+        yScales = [
+            yMin,
+            yMin + interval,
+            yMin + interval * 2,
+            yMin + interval * 3,
+            yMin + interval * 4,
+        ];
+    }
+    $: changeClass(curClass);
     
     let innerWidth;
 
@@ -160,6 +180,7 @@
         padding: 1em 0 0.5em;
         margin: 0 auto;
         box-shadow: 0px 3px 3px -2px var(--boxShadowOne), 0px 3px 4px 0px var(--boxShadowTwo), 0px 1px 8px 0px var(--boxShadowThree);
+        overflow: hidden;
     }
     .barChart {
         display: block;
@@ -211,7 +232,7 @@
         right: 0;
         position: absolute;
         text-align: center;
-        bottom: 1%;
+        bottom: 5%;
     }
 
     .xIntervals {
@@ -236,6 +257,46 @@
         position: absolute;
         bottom: 0;
 		transition: height 0.6s;
+    }
+
+    .legendColumn {
+        position: relative;
+        display: inline-flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 50%;
+        font-size: 0.9em;
+        font-weight: 420;
+    }
+
+    .legendRow {
+        position: relative;
+        display: inline-flex;
+    }
+
+    .legendBox {
+        display: block;
+        position: absolute;
+        height: 18px;
+        width: 18px;
+        border: 0.25px solid var(--champShadow);
+    }
+
+    .legendHolder {
+        display: inline-flex;
+        flex-direction: column;
+        position: absolute;
+        bottom: 65px;
+        left: 35px;
+        width: 80px;
+    }
+
+    .classButton {
+        position: absolute;
+        text-align: center;
+        bottom: -50px;
+        left: -2px;
+		transition: bottom 0.6s;
     }
 
     h6 {
@@ -265,24 +326,47 @@
         }
     }
 
+    @media (max-width: 525px) {
+        :global(.classButton .selectionButtons) {
+            font-size: 0.6em;
+        }
+    }
+
+    @media (max-width: 405px) {
+        :global(.classButton .selectionButtons) {
+            font-size: 0.5em;
+            padding: 0 6px;
+        }
+    }
+
     /* End button resizing */
 </style>
-
+<!-- (stats[ix] - yMin) / (yMax - yMin == 0 ? 1 : (yMax - yMin)) * 100  -->
 <h6>{header}</h6>
-<div class="chartWrapper" style="width: {width}px; height: {width * .7}px">
+<div class="chartWrapper" style="width: {width}px; height: {width * .625}px">
     <div class="barChart" >
         <div class="barChartInner" style="width: {width * .85}px; height: {width * .7 * .66}px" bind:this={el}>
             <!-- x Axis label and intervals -->
-            {#each stats as stat, ix}
-                <div class="bar{secondStats.length == 0  ? '' : curTableDesc == `${graphs[curGraph].statCat}.${graphs[curGraph].field}` ? '' : ' opacity'}" style="background-color: {colors[(recordManIDs[ix]-1) % 12]}; width: {chartWidthInterval * 0.8}px; left: {chartWidthInterval * ix + (chartWidthInterval / 2)}px; height: {(stat - yMin) / (yMax - yMin == 0 ? 1 : (yMax - yMin)) * 100}%;">
-                    <span class="barLabel" style="font-size: {barLFont}em;">{stat}{labels.stat}</span>
-                </div>
-            {/each}
-            {#each secondStats as stat, ix}
-                <div class="bar{curTableDesc == `${graphs[curGraph].secondStatCat}.${graphs[curGraph].secondField}` ? '' : ' opacity'}" style="background-color: {colors[(recordManIDs[ix]-1) % 12]}; width: {chartWidthInterval * 0.8}px; left: {chartWidthInterval * ix + (chartWidthInterval / 2)}px; height: {(stat - yMin) / (yMax - yMin == 0 ? 1 : (yMax - yMin)) * 100}%;">
-                    <span class="barLabel" style="font-size: {barLFont}em;">{stat}{labels.stat}</span>
-                </div>
-            {/each}
+            {#if classes && curClass != 0}
+                {#each classStats.stats as subStats, ix}
+                    {#each subStats as stat, iv}
+                        <div class="bar" style="background-color: {classStats.colors[classStats.keys[iv]]}; width: {chartWidthInterval * 0.8}px; left: {chartWidthInterval * ix + (chartWidthInterval / 2)}px; height: {classStats.heights[ix][iv]}%; z-index: {classStats.heights[ix].length - iv};">
+                            <span class="barLabel" style="font-size: {barLFont}em;">{stat}</span>
+                        </div>
+                    {/each}
+                {/each}
+            {:else}
+                {#each stats as stat, ix}
+                    <div class="bar{secondStats.length == 0  ? '' : curTableDesc == `${graphs[curGraph].statCat}.${graphs[curGraph].field}` ? '' : ' opacity'}" style="background-color: {colors[(recordManIDs[ix]-1) % 12]}; width: {chartWidthInterval * 0.8}px; left: {chartWidthInterval * ix + (chartWidthInterval / 2)}px; height: {(stat - yMin) / (yMax - yMin == 0 ? 1 : (yMax - yMin)) * 100}%;">
+                        <span class="barLabel" style="font-size: {barLFont}em;">{stat}{labels.stat}</span>
+                    </div>
+                {/each}
+                {#each secondStats as stat, ix}
+                    <div class="bar{curTableDesc == `${graphs[curGraph].secondStatCat}.${graphs[curGraph].secondField}` ? '' : ' opacity'}" style="background-color: {colors[(recordManIDs[ix]-1) % 12]}; width: {chartWidthInterval * 0.8}px; left: {chartWidthInterval * ix + (chartWidthInterval / 2)}px; height: {(stat - yMin) / (yMax - yMin == 0 ? 1 : (yMax - yMin)) * 100}%;">
+                        <span class="barLabel" style="font-size: {barLFont}em;">{stat}{labels.stat}</span>
+                    </div>
+                {/each}
+            {/if}
         </div>
 
         <!-- y Axis label and intervals -->
@@ -298,6 +382,31 @@
         <!-- x Axis label and intervals -->
         <div class="xAxis">
             <div class="label xLabel" style="width: {chartWidth}px; font-size: {lFont}em;">{labels.x}</div>
+            <div class="classButton" style="{classes ? "bottom: -10px;" : null}">
+                {#if classes}
+                    {#if curClass != 0}
+                        <div class="legendHolder">
+                            {#each classStats.keys as key}
+                                <div class="legendRow">
+                                    <div class="legendColumn">
+                                        <div class="legendBox" style="background-color: {classStats.colors[key]}" />
+                                    </div>
+                                    <div class="legendColumn">
+                                        {key}
+                                    </div>
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+                    <Group variant="outlined">
+                        {#each classes as statClass, ix}
+                            <Button class="selectionButtons" on:click={() => curClass = ix} variant="{curClass == ix ? "raised" : "outlined"}">
+                                <Label>{statClass.short}</Label>
+                            </Button>
+                        {/each}
+                    </Group>
+                {/if}
+            </div>
             <div class="xIntervals" style="width: {chartWidth}px; top: {chartHeight + 6}px;">
                 {#each managers as manager, ix}
                     <div class="xInterval" style="left: {chartWidthInterval * (ix + 0.5)}px; font-size: {xIFont}em; height: {xIHeight}px;">{manager.realname}</div>

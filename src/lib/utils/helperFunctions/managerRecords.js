@@ -17,7 +17,7 @@ import {
 	getStarterPositions } from '$lib/utils/helper';
 
 export const getManagerRecords = async (refresh = false) => {
-	if(get(managerrecords).managerRecordArrays) {
+	if(get(managerrecords).playerPositionRecords) {
 		return get(managerrecords);
 	}
 
@@ -1520,9 +1520,10 @@ export const getManagerRecords = async (refresh = false) => {
 		}
 		
 		for(const recordType in masterRecordBook.managers) {
-			const typeRecord = masterRecordBook.managers[recordType];
 
 			if(recordType != "totals" && recordType != "grandTotals") {
+
+				const typeRecord = masterRecordBook.managers[recordType];
 
 				if(!masterRecordBook.league.totals.years[year][recordType]) {
 					masterRecordBook.league.totals.years[year][recordType] = [];
@@ -1745,21 +1746,16 @@ export const getManagerRecords = async (refresh = false) => {
 						masterRecordBook.league.totals.alltime[recordType].push(comboEntry);
 					}
 				} 
-			}
-		}
 
-		for(const recordType in masterRecordBook.players.managers) {
-			const typeRecord = masterRecordBook.players.managers[recordType];
-
-			if(recordType != "totals" && recordType != "grandTotals") {
+				const typeRecordPlayer = masterRecordBook.players.managers[recordType];
 
 				if(!masterRecordBook.players.league.totals.alltime[recordType]) {
 					masterRecordBook.players.league.totals.alltime[recordType] = [];
 				}
 
-				if(typeRecord.years[year].length > 0) {
-					for(const recordManID in typeRecord.years[year]) {
-						const recordMan = typeRecord.years[year][recordManID];
+				if(typeRecordPlayer.years[year].length > 0) {
+					for(const recordManID in typeRecordPlayer.years[year]) {
+						const recordMan = typeRecordPlayer.years[year][recordManID];
 						
 						const playerTotals = {};
 						let uniqueStarters = 0;
@@ -1785,7 +1781,7 @@ export const getManagerRecords = async (refresh = false) => {
 									topStarters: 0,
 									bottomStarters: 0,
 									starterRank: null,
-									starterRankAVG: null,
+									starterRankAVG: 0,
 									starterRanks: 0,
 									playerInfo: player.playerInfo,
 									nflInfo: player.nflInfo,
@@ -1837,9 +1833,6 @@ export const getManagerRecords = async (refresh = false) => {
 								for(const team in player.teamTotals) {
 									player.teamTotals[team].fptspg = player.teamTotals[team].fpts / player.teamTotals[team].weeksStarted;
 								}
-							} else {
-								player.playerPPStart = 0;
-								player.starterRankAVG = 0;
 							}
 
 							if(!masterRecordBook.players.managers.totals.playerIDs[playerID]) {
@@ -1914,6 +1907,7 @@ export const getManagerRecords = async (refresh = false) => {
 						week_Top: masterRecordBook.players.league[recordPeriod].years[year].slice().filter(p => p.playerInfo.pos == position && p.benched == false && p.recordManID == recordManID).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
 						period_Top: masterRecordBook.players.league.totals.years[year][recordPeriod].slice().filter(p => p.playerInfo.pos == position && p.recordManID == recordManID).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
 						week_MissedTop: masterRecordBook.players.league[recordPeriod].years[year].slice().filter(p => p.playerInfo.pos == position && p.benched == true && p.recordManID == recordManID).sort((a, b) => b.benchPoints - a.benchPoints).slice(0, 10),
+						games_Top: masterRecordBook.players.league.totals.years[year][recordPeriod].slice().filter(p => p.playerInfo.pos == position && p.recordManID == recordManID).sort((a, b) => b.weeksStarted - a.weeksStarted).slice(0, 10),
 					}
 					if(!playerPositionRecords.league.years[year][recordPeriod].managerBests[position]) {
 						playerPositionRecords.league.years[year][recordPeriod].managerBests[position] = {
@@ -2077,69 +2071,157 @@ export const getManagerRecords = async (refresh = false) => {
 					headToHeadRecords[recordType].alltime[recordManID][opponent].bestNailbiter = headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.indexOf(headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.slice().filter(m => m.matchDifferential >= 0).sort((a, b) => a.matchDifferential - b.matchDifferential)[0]);
 					headToHeadRecords[recordType].alltime[recordManID][opponent].worstNailbiter = headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.indexOf(headToHeadRecords[recordType].alltime[recordManID][opponent].matchups.slice().filter(m => m.matchDifferential <= 0).sort((a, b) => b.matchDifferential - a.matchDifferential)[0]);
 				}
-				
-				let fptsTotal = 0;
-				let winTotal = 0;
-				let tieTotal = 0;
-				let lossTotal = 0;
-				let fptsAgainstTotal = 0;
-				let epeWinsTotal = 0;
-				let epeTiesTotal = 0;
-				let epeLossesTotal = 0;
-				let weekWinners = 0;
-				let weekLosers = 0;
-				let weekTies = 0;
-				let topScores = 0;
-				let bottomScores = 0;
-				// looping thru totals from each regSeason, playoff, & combined regSeason+playoff
-				for(let i = 0; i < typeRecord.length; i++) {
-					fptsTotal += typeRecord[i].fpts;
-					fptsAgainstTotal += typeRecord[i].fptsAgainst;
-					winTotal += typeRecord[i].wins;
-					tieTotal += typeRecord[i].ties;
-					lossTotal += typeRecord[i].losses;
-					epeWinsTotal += typeRecord[i].epeWins;
-					epeTiesTotal += typeRecord[i].epeTies;
-					epeLossesTotal += typeRecord[i].epeLosses;
-					weekWinners += typeRecord[i].weekWinners;
-					weekLosers += typeRecord[i].weekLosers;
-					weekTies += typeRecord[i].weekTies;
-					topScores += typeRecord[i].topScores;
-					bottomScores += typeRecord[i].bottomScores;
-				}
-				// determine all-time PPG, epe W%, median W% for ALL regSeason, PO, & combined
-				const totalPPG = fptsTotal / (weekWinners + weekTies + weekLosers);  		// denominator is equal to # of games played for this record type
-				const epePerc = (epeWinsTotal + epeTiesTotal / 2) / (epeWinsTotal + epeTiesTotal + epeLossesTotal) * 100;
-				const medianPerc = (weekWinners + weekTies / 2) / (weekWinners + weekTies + weekLosers) * 100;
-				const winPerc = (winTotal + tieTotal / 2) / (winTotal + tieTotal + lossTotal) * 100;
 
 				const comboEntry = {
 					manager: typeRecord[0].manager,
 					recordManID,
 					rosterID: typeRecord[0].rosterID,
-					fpts: fptsTotal,
-					fptspg: totalPPG,
-					fptsAgainst: fptsAgainstTotal,
-					epeWins: epeWinsTotal,
-					epeTies: epeTiesTotal,
-					epeLosses: epeLossesTotal,
-					epePerc,
-					weekWinners,
-					weekLosers,
-					weekTies,
-					wins: winTotal,
-					ties: tieTotal,
-					losses: lossTotal,
-					winPerc,
-					medianPerc,
-					topScores,
-					bottomScores,
-					week: null,
-					year: null,
+					fpts: 0,
+					fptsAgainst: 0,
+					epeWins: 0,
+					epeTies: 0,
+					epeLosses: 0,
+					weekWinners: 0,
+					weekLosers: 0,
+					weekTies: 0,
+					wins: 0,
+					ties: 0,
+					losses: 0,
+					topScores: 0,
+					bottomScores: 0,
+					acquisitionFpts: {
+						draft: {
+							fpts: 0,
+						},
+						trade: {
+							fpts: 0,
+						},
+						waiver: {
+							fpts: 0,
+						},
+					},
+				}
+				
+				// looping thru totals from each regSeason, playoff, & combined regSeason+playoff
+				for(let i = 0; i < typeRecord.length; i++) {
+					comboEntry.fpts += typeRecord[i].fpts;
+					comboEntry.fptsAgainst += typeRecord[i].fptsAgainst;
+					comboEntry.wins += typeRecord[i].wins;
+					comboEntry.ties += typeRecord[i].ties;
+					comboEntry.losses += typeRecord[i].losses;
+					comboEntry.epeWins += typeRecord[i].epeWins;
+					comboEntry.epeTies += typeRecord[i].epeTies;
+					comboEntry.epeLosses += typeRecord[i].epeLosses;
+					comboEntry.weekWinners += typeRecord[i].weekWinners;
+					comboEntry.weekLosers += typeRecord[i].weekLosers;
+					comboEntry.weekTies += typeRecord[i].weekTies;
+					comboEntry.topScores += typeRecord[i].topScores;
+					comboEntry.bottomScores += typeRecord[i].bottomScores;
+
+					for(const transType in typeRecord[i].acquisitionFpts) {
+						comboEntry.acquisitionFpts[transType].fpts += typeRecord[i].acquisitionFpts[transType];
+					}
+				}
+				// determine all-time PPG, epe W%, median W% for ALL regSeason, PO, & combined
+				comboEntry.fptspg = comboEntry.fpts / (comboEntry.weekWinners + comboEntry.weekTies + comboEntry.weekLosers);  		// denominator is equal to # of games played for this record type
+				comboEntry.epePerc = (comboEntry.epeWins + comboEntry.epeTies / 2) / (comboEntry.epeWins + comboEntry.epeTies + comboEntry.epeLosses) * 100;
+				comboEntry.medianPerc = (comboEntry.weekWinners + comboEntry.weekTies / 2) / (comboEntry.weekWinners + comboEntry.weekTies + comboEntry.weekLosers) * 100;
+				comboEntry.winPerc = (comboEntry.wins + comboEntry.ties / 2) / (comboEntry.wins + comboEntry.ties + comboEntry.losses) * 100;
+
+				for(const transType in comboEntry.acquisitionFpts) {
+					comboEntry.acquisitionFpts[transType].transPerc = comboEntry.acquisitionFpts[transType].fpts / comboEntry.fpts * 100;
 				}
 
 				masterRecordBook.managers.grandTotals[recordManID][recordType].push(comboEntry);
 				masterRecordBook.league.grandTotals[recordType].push(comboEntry);
+			}
+		}
+
+		const recordManPlayer = masterRecordBook.players.managers.totals.alltime[recordManID];
+
+		for(const recordType in recordManPlayer) {
+			const typeRecord = recordManPlayer[recordType];
+
+			if(!masterRecordBook.players.managers.grandTotals[recordType][recordManID]) {
+				masterRecordBook.players.managers.grandTotals[recordType][recordManID] = [];
+			}
+
+			if(typeRecord.length > 0) {
+
+				for(const key in typeRecord) {
+					const player = typeRecord[key];
+				
+					if(!masterRecordBook.players.managers.grandTotals[recordType][recordManID].find(p => p.playerID == player.playerID)) {
+						masterRecordBook.players.managers.grandTotals[recordType][recordManID].push({
+							recordManID,
+							manager: player.manager,
+							rosterID: player.rosterID,
+							playerID: player.playerID,
+							playerPoints: 0,
+							playerPPStart: 0,
+							benchPoints: 0,
+							weeksStarted: 0,
+							weeksBenched: 0,
+							weeksOwned: 0,
+							years: [],
+							yearsOwned: 0,
+							topStarters: 0,
+							bottomStarters: 0,
+							starterRanks: 0,
+							starterRankAVG: 0,
+							numStarters: 0,
+							playerInfo: player.playerInfo,
+							nflInfo: player.nflInfo,
+							avatar: player.avatar,
+							rosterSpot: player.rosterSpot,
+							playerAvatar: player.playerAvatar,
+							teamTotals: {},
+						})
+					}
+
+					const playerRecord = masterRecordBook.players.managers.grandTotals[recordType][recordManID].find(p => p.playerID == player.playerID);
+
+					if(playerRecord.rosterSpot == null || playerRecord.rosterSpot.includes('FLEX')) {
+						playerRecord.rosterSpot = player.rosterSpot;
+					}
+
+					if(!playerRecord.years.includes(player.year)) {
+						playerRecord.years.push(player.year);
+						playerRecord.yearsOwned++;
+					}
+
+					playerRecord.weeksOwned += player.weeksOwned;
+					playerRecord.weeksStarted += player.weeksStarted;
+					playerRecord.weeksBenched += player.weeksBenched;
+					playerRecord.benchPoints += player.benchPoints;
+					playerRecord.playerPoints += player.playerPoints;
+					playerRecord.starterRanks += player.starterRanks;
+					playerRecord.numStarters += player.numStarters;
+					playerRecord.topStarters += player.topStarters;
+					playerRecord.bottomStarters += player.bottomStarters;
+					
+					for(const team in player.teamTotals) {
+
+						if(!playerRecord.teamTotals[team]) {
+							playerRecord.teamTotals[team] = player.teamTotals[team];
+						} else {
+							playerRecord.teamTotals[team].fpts += player.teamTotals[team].fpts;
+							playerRecord.teamTotals[team].weeksStarted += player.teamTotals[team].weeksStarted;
+						}
+					}
+				}
+
+				for(const playerID in masterRecordBook.players.managers.grandTotals[recordType][recordManID]) {
+					const player = masterRecordBook.players.managers.grandTotals[recordType][recordManID][playerID];
+				
+					if(player.weeksStarted > 0) {
+						player.playerPPStart = player.playerPoints / player.weeksStarted;
+						player.starterRankAVG = player.starterRanks / player.weeksStarted;
+						for(const team in player.teamTotals) {
+							player.teamTotals[team].fptspg = player.teamTotals[team].fpts / player.teamTotals[team].weeksStarted;
+						}
+					} 
+				}
 			}
 		}
 	}
