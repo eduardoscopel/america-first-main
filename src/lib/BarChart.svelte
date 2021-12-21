@@ -142,13 +142,17 @@
 
     let curClass = 0;
     let classStats;
+    let legendKeys;
     const changeClass = (newClass) => {
 
         if(classes && newClass != 0) {
             classStats = classes[newClass];
+            legendKeys = classes[newClass].keys.slice().reverse();
             yMin = 0;
             yMax = classStats.yMax;
         } else {
+            classStats = null;
+            legendKeys = null;
             yMin = graphs[curGraph].yMin;
             yMax = graphs[curGraph].yMax;
         }
@@ -386,7 +390,7 @@
                 {#if classes}
                     {#if curClass != 0}
                         <div class="legendHolder">
-                            {#each classStats.keys as key}
+                            {#each legendKeys as key}
                                 <div class="legendRow">
                                     <div class="legendColumn">
                                         <div class="legendBox" style="background-color: {classStats.colors[key]}" />
