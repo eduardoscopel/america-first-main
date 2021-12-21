@@ -12,11 +12,6 @@
     const leagueManagers = {};
     const numManagers = managers.length;
 
-    const currentSorts = {};
-    for(const recordArray in displayObject[selection]) {
-        currentSorts[recordArray];
-    }
-
     const changeSelection = (s) => {
         selection = s;
         setHeading(selection);
@@ -322,6 +317,11 @@
                 waiverPerc: waiver?.waiverPerc || 'N/A',
             })
         }
+    }
+    $: displayObject[selection]['transactions'] = {
+        inverted: false,
+        sort: null,
+        stats: transactions,
     }
     
     let allManagerChoices = [];
