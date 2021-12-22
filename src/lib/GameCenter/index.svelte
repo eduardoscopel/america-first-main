@@ -30,7 +30,7 @@
     let managerInfo = {};
     let fantasyStarters = {};
     let positionLeaders = {};
-    let weekMatchups = matchupsInfo.matchupWeeks[13].matchups; //matchupsInfo.week - 1
+    let weekMatchups = matchupsInfo.matchupWeeks[matchupsInfo.week - 1].matchups; 
     let yearLeagueData = matchupsInfo.yearLeagueData;
     let rosterData = matchupsInfo.rosters;
     let users = matchupsInfo.users;
@@ -114,8 +114,8 @@
             const rosterID = roster.roster_id;
             const user = users[roster.owner_id];
 
-            let recordManager = leagueManagers[rosterID].find(m => m.yearsactive.includes(year));
-            let recordManID = recordManager.managerID;
+            const recordManager = leagueManagers[rosterID].find(m => m.yearsactive.includes(year));
+            const recordManID = recordManager.managerID;
             if(user) {
                 managerInfo[recordManID] = {
                     avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,

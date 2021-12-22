@@ -2,7 +2,7 @@
     import {round} from '$lib/utils/helper';
   	import RecordsAndRankings from './RecordsAndRankings.svelte'; 
 
-    export let leagueRosterRecords, allManagers, transactionTotals, leagueWeekRecords, leagueRecordArrays, managerRecords, playerAcquisitionRecords;
+    export let leagueRosterRecords, allManagers, transactionTotals, leagueWeekRecords, leagueRecordArrays, managerRecords, playerAcquisitionRecords, playerPositionRecords;
 
     let lineupIQs = [];
     const tradesData = [];

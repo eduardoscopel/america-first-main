@@ -1,15 +1,45 @@
 <script>
-    import { goto } from "$app/navigation";
+    import { gotoManager } from '$lib/utils/helper';
 
+    export let viewManager, players, managerRecords, records;
 
-    export let viewManager, players;
+    // FAVORITE PLAYER - scored the most all-time points for manager
+    const favoritePlayer = managerRecords.playerBook.grandTotals.combined[viewManager.managerID].slice().sort((a, b) => b.playerPoints - a.playerPoints)[0].playerID;
 
-    const gotoRival = (rival) => {
-        if(!rival) {
-            goto(`/managers`);
+    // RIVAL - most competitive match history
+    let rivals = [];
+    for(const manager in managerRecords.headToHeadRecords.combined.alltime[viewManager.managerID]) {
+        const possRival = managerRecords.headToHeadRecords.combined.alltime[viewManager.managerID][manager];
+        if(possRival.wins > 0 && possRival.losses > 0) {
+            rivals.push(possRival);
         }
-        goto(`/managers?manager=${rival}`);
     }
+    const rival = rivals.sort((a, b) => a.differential - b.differential)[0];
+
+    // POSITION SPECIALTY - highest scoring compared to league average
+    let positionPlacements = [];
+    for(const position in records.playerPositionRecords.league.alltime.combined.leagueAverages) {
+        const diff = records.playerPositionRecords.league.alltime.combined.leagueAverages[position].managerAverages.find(m => m.recordManID == viewManager.managerID).fptspg - records.playerPositionRecords.league.alltime.combined.leagueAverages[position].fptspg;
+        positionPlacements.push({
+            position,
+            fptspg: records.playerPositionRecords.league.alltime.combined.leagueAverages[position].managerAverages.find(m => m.recordManID == viewManager.managerID).fptspg,
+            rank: records.playerPositionRecords.league.alltime.combined.leagueAverages[position].managerAverages.indexOf(records.playerPositionRecords.league.alltime.combined.leagueAverages[position].managerAverages.find(m => m.recordManID == viewManager.managerID)) + 1,
+            diff,
+        })
+    }
+    const sortOrder = ['diff', 'rank']; 
+    for(const sortType of sortOrder) {
+        if(!positionPlacements[0][sortType] && positionPlacements[0][sortType] != 0) {
+            continue;
+        }
+        if(sortType == 'diff') {
+            positionPlacements = [...positionPlacements].sort((a,b) => b[sortType] - a[sortType]);
+        } else {
+            positionPlacements = [...positionPlacements].sort((a,b) => a[sortType] - b[sortType])
+        }
+    }
+    const positionSpecialty = positionPlacements[0].position;
+
 </script>
 
 <style>
@@ -197,10 +227,10 @@
     {#if viewManager.valuePosition}
         <div class="infoSlot">
             <div class="infoLabel">
-                Favorite Fantasy Asset
+                Position Specialty
             </div>
-            <div class="infoIcon {viewManager.valuePosition}">
-                <span class="valuePosition">{viewManager.valuePosition}</span>
+            <div class="infoIcon {positionSpecialty}">
+                <span class="valuePosition">{positionSpecialty}</span>
             </div>
         </div>
     {/if}
@@ -218,17 +248,17 @@
             </div>
         </div>
     {/if}
-    <!-- Favorite player (optioonal) -->
-    {#if viewManager.favoritePlayer}
+    <!-- Favorite player (optional) -->
+    {#if favoritePlayer}
         <div class="infoSlot">
             <div class="infoLabel">
                 Favorite Player
             </div>
             <div class="infoIcon playerIcon">
-                <img class="favoritePlayer" src="https://sleepercdn.com/content/nfl/players/{viewManager.favoritePlayer}.jpg" alt="favorite player"/>
+                <img class="favoritePlayer" src="https://sleepercdn.com/content/nfl/players/{favoritePlayer}.jpg" alt="favorite player"/>
             </div>
             <div class="infoAnswer">
-                {players[viewManager.favoritePlayer].fn} {players[viewManager.favoritePlayer].ln}
+                {players[favoritePlayer].fn} {players[favoritePlayer].ln}
             </div>
         </div>
     {/if}
@@ -247,15 +277,15 @@
         </div>
     {/if}
     <!-- Rival -->
-    <div class="infoSlot infoRival" on:click={() => gotoRival(viewManager.rival.link)}>
+    <div class="infoSlot infoRival" on:click={() => gotoManager(rival.againstRecordManID)}>
         <div class="infoLabel">
             Rival
         </div>
         <div class="infoIcon">
-            <img class="rival" src="{viewManager.rival.image}" alt="rival"/>
+            <img class="rival" src="{rival.againstManager.avatar}" alt="rival"/>
         </div>
         <div class="infoAnswer">
-            {viewManager.rival.name}
+            {rival.againstManager.realname}
         </div>
     </div>
 </div>

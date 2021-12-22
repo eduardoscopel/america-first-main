@@ -3,7 +3,7 @@
   	import RecordsAndRankings from './RecordsAndRankings.svelte';
     import { Icon } from '@smui/tab';
 
-    export let leagueRosterRecords, seasonWeekRecords, allManagers, currentYear, lastYear, transactionTotals, managerRecords, playerAcquisitionRecords;
+    export let leagueRosterRecords, seasonWeekRecords, allManagers, currentYear, lastYear, transactionTotals, managerRecords, playerAcquisitionRecords, playerPositionRecords;
 
     const yearsObj = {};
     let years = [];

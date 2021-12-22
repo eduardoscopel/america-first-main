@@ -920,7 +920,7 @@
     <div class="managerConstrained">
         {#if !loading}
             <!-- Favorite player -->
-            <ManagerFantasyInfo {viewManager} {players} />
+            <ManagerFantasyInfo {viewManager} {players} {managerRecords} {records} />
         {/if}
 
         <ManagerAwards {recordManID} {awards} {records} {roster} />

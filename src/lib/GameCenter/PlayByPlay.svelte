@@ -2917,7 +2917,7 @@
             const fum = (returningStats?.find(s => s.abbreviation == 'KRF').value || 0) + (returningStats?.find(s => s.abbreviation == 'PRF').value || 0);
             const def_pass_def = (defensiveStats?.find(s => s.abbreviation == 'PD').value || 0) + (defensiveStats?.find(s => s.abbreviation == 'BATD').value || 0);
             const fum_rec = (opponentStats.find(c => c.name == 'general')?.stats.find(s => s.abbreviation == 'LST').value || 0) - ((opponentStats.find(c => c.name == 'returning')?.stats.find(s => s.abbreviation == 'KRFL').value || 0) + (opponentStats.find(c => c.name == 'returning')?.stats.find(s => s.abbreviation == 'PRFL').value || 0));
-            const def_4_and_stop = (opponentStats.find(c => c.abbreviation == 'misc')?.stats.find(s => s.abbreviation == '4THC').value || 0) - (opponentStats.find(c => c.abbreviation == 'misc')?.stats.find(s => s.abbreviation == 'FDA').value || 0);
+            const def_4_and_stop = (opponentStats.find(c => c.abbreviation == 'misc')?.stats.find(s => s.abbreviation == 'FDA').value || 0) - (opponentStats.find(c => c.abbreviation == 'misc')?.stats.find(s => s.abbreviation == '4THC').value || 0);
             
             const pointsAllowed = defensiveStats?.find(s => s.abbreviation == 'PA').value || 0;
             let yardsAllowed = defensiveStats?.find(s => s.abbreviation == 'YA').value || 0; 

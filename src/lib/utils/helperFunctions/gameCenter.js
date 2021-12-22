@@ -334,7 +334,7 @@ export const getYearMatchups = async (yearSelection, weekSelection, purpose) => 
 
         const playoffs = await playoffsRes.json();
         const regularSeasonLength = yearLeagueData.settings.playoff_week_start - 1;
-        const fullSeasonLength = regularSeasonLength + playoffs.pop().r;;
+        const fullSeasonLength = regularSeasonLength + playoffs.pop().r;
 
         const rosters = rosterRes.rosters;
     

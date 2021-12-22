@@ -20,10 +20,7 @@
     let loading = true;
     let showTies = false;
     let showStreak = true;
-    let rosters, standings, year, users;
-    let currentYear;
-    let displayYear;
-    let selectedYear;
+    let rosters, standings, year, users, currentYear, displayYear, selectedYear;
     onMount(async () => {
         const {standingsInfo, yearData, rostersData} = await standingsData;
         users = await usersData;
@@ -73,9 +70,8 @@
         }
 
         let medianMatch = false;
-        if(yearMatchups.yearLeagueData.settings.league_average_match == 1) {
-            medianMatch = true;
-        }
+        if(yearMatchups.yearLeagueData.settings.league_average_match == 1) medianMatch = true;
+        
 
         let newStandings = {};
         
@@ -91,19 +87,14 @@
                 newStandings[standingKey].streak = roster.metadata.streak;
             } else {
                 newStandings[standingKey].streak = '-';
-
             }
-            if(newStandings[standingKey].ties > 0) {
-                showTies = true;
-            }
+            if(newStandings[standingKey].ties > 0) showTies = true;
         }
 
         let finalStandings = Object.keys(newStandings).map((key) => newStandings[key]);
 
         for(const sortType of sortOrder) {
-            if(!finalStandings[0][sortType] && finalStandings[0][sortType] != 0) {
-                continue;
-            }
+            if(!finalStandings[0][sortType] && finalStandings[0][sortType] != 0) continue;
             finalStandings = [...finalStandings].sort((a,b) => b[sortType] - a[sortType]);
         }
 

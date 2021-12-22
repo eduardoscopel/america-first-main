@@ -267,12 +267,15 @@ export const getLeagueRecords = async (refresh = false) => {
 			alltime: {
 				regularSeason: {
 					managerBests: {},
+					leagueAverages: {},
 				},
 				playoffs: {
 					managerBests: {},
+					leagueAverages: {},
 				},
 				combined: {
 					managerBests: {},
+					leagueAverages: {},
 				},
 			},
 		},
@@ -314,7 +317,7 @@ export const getLeagueRecords = async (refresh = false) => {
 	};
 	const acquisitionRecords = {};
 
-	const nflPositions = ["RB", "QB", "WR", "TE", "DEF", "K", "DL", "DE", "DT", "LB", "DB", "CB", "SS", "FS"];
+	const alltimePositions = [];
 
 	const numManagers = managers.length;
 	const leagueRecordManagers = {};
@@ -345,7 +348,12 @@ export const getLeagueRecords = async (refresh = false) => {
 		).catch((err) => { console.error(err); });
 	
 		const year = parseInt(leagueData.season);
-		const positions = getStarterPositions(leagueData);
+		const rosterSpots = getStarterPositions(leagueData);
+		const positions = [];
+		for(const spot of rosterSpots) {
+			if(!positions.includes(spot) && spot != 'FLEX') positions.push(spot);
+			if(!alltimePositions.includes(spot) && spot != 'FLEX') alltimePositions.push(spot);
+		}
 
 		for(const type in transactionsInfo[year]) {
 			transactionsInfo[year][type] = transactionsInfo[year][type].reverse();
@@ -773,7 +781,7 @@ export const getLeagueRecords = async (refresh = false) => {
 							year,
 							matchupInfo: {
 								info: POmatchupWeek.find(m => m.roster_id == opponent.rosterID),
-								positions: positions,
+								positions: rosterSpots,
 								starters: [],
 							},
 						}
@@ -831,7 +839,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								playerInfo: playersInfo[playerID],
 								nflInfo: nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID],
 								avatar: playersInfo[playerID].pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`,
-								rosterSpot: starters.includes(playerID) ? positions[starters.indexOf(playerID)] : null,
+								rosterSpot: starters.includes(playerID) ? rosterSpots[starters.indexOf(playerID)] : null,
 							}
 
 							const acquisitions = acquisitionRecords[year][opponent.recordManID];
@@ -923,7 +931,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								year,
 								matchupInfo: {
 									info: POmatchupWeek.find(m => m.roster_id == opponent.rosterID),
-									positions: positions,
+									positions: rosterSpots,
 									starters: [],
 								},
 							}
@@ -981,7 +989,7 @@ export const getLeagueRecords = async (refresh = false) => {
 									playerInfo: playersInfo[playerID],
 									nflInfo: nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID],
 									avatar: playersInfo[playerID].pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`,
-									rosterSpot: starters.includes(playerID) ? positions[starters.indexOf(playerID)] : null,
+									rosterSpot: starters.includes(playerID) ? rosterSpots[starters.indexOf(playerID)] : null,
 								}
 			
 								const acquisitions = acquisitionRecords[year][opponent.recordManID];
@@ -1069,7 +1077,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								year,
 								matchupInfo: {
 									info: POmatchupWeek.find(m => m.roster_id == opponent.rosterID),
-									positions: positions,
+									positions: rosterSpots,
 									starters: [],
 								},
 							}
@@ -1127,7 +1135,7 @@ export const getLeagueRecords = async (refresh = false) => {
 									playerInfo: playersInfo[playerID],
 									nflInfo: nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID],
 									avatar: playersInfo[playerID].pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`,
-									rosterSpot: starters.includes(playerID) ? positions[starters.indexOf(playerID)] : null,
+									rosterSpot: starters.includes(playerID) ? rosterSpots[starters.indexOf(playerID)] : null,
 								}
 			
 								const acquisitions = acquisitionRecords[year][opponent.recordManID];
@@ -1215,7 +1223,7 @@ export const getLeagueRecords = async (refresh = false) => {
 								year,
 								matchupInfo: {
 									info: POmatchupWeek.find(m => m.roster_id == opponent.rosterID),
-									positions: positions,
+									positions: rosterSpots,
 									starters: [],
 								},
 							}
@@ -1273,7 +1281,7 @@ export const getLeagueRecords = async (refresh = false) => {
 									playerInfo: playersInfo[playerID],
 									nflInfo: nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID],
 									avatar: playersInfo[playerID].pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`,
-									rosterSpot: starters.includes(playerID) ? positions[starters.indexOf(playerID)] : null,
+									rosterSpot: starters.includes(playerID) ? rosterSpots[starters.indexOf(playerID)] : null,
 								}
 			
 								const acquisitions = acquisitionRecords[year][opponent.recordManID];
@@ -1380,7 +1388,7 @@ export const getLeagueRecords = async (refresh = false) => {
 					year,
 					matchupInfo: {
 						info: matchup,
-						positions: positions,
+						positions: rosterSpots,
 						starters: [],
 					},
 				}
@@ -1416,7 +1424,7 @@ export const getLeagueRecords = async (refresh = false) => {
 						playerInfo: playersInfo[playerID],
 						nflInfo: nflPlayerInfo[playerID] ? nflPlayerInfo[playerID] : nflPlayerInfo2[playerID],
 						avatar: playersInfo[playerID].pos == "DEF" ? `background-image: url(https://sleepercdn.com/images/team_logos/nfl/${playerID.toLowerCase()}.png);` : `background-image: url(https://sleepercdn.com/content/nfl/players/thumb/${playerID}.jpg), url(https://sleepercdn.com/images/v2/icons/player_default.webp);`,
-						rosterSpot: starters.includes(playerID) ? positions[starters.indexOf(playerID)] : null,
+						rosterSpot: starters.includes(playerID) ? rosterSpots[starters.indexOf(playerID)] : null,
 					}
 
 					const acquisitions = acquisitionRecords[year][recordManID];
@@ -1676,16 +1684,20 @@ export const getLeagueRecords = async (refresh = false) => {
 								if(!comboEntry.acquisitionFpts[recordMan[i].matchupInfo.starters[starter].howAcquired]) {
 									comboEntry.acquisitionFpts[recordMan[i].matchupInfo.starters[starter].howAcquired] = {
 										fpts: 0,
+										weeksPlayed: 0,
 									};
 								}
 								comboEntry.acquisitionFpts[recordMan[i].matchupInfo.starters[starter].howAcquired].fpts += recordMan[i].matchupInfo.starters[starter].playerPoints;
+								comboEntry.acquisitionFpts[recordMan[i].matchupInfo.starters[starter].howAcquired].weeksPlayed++;
 								
 								if(!comboEntry.positionFpts[recordMan[i].matchupInfo.starters[starter].playerInfo.pos]) {
 									comboEntry.positionFpts[recordMan[i].matchupInfo.starters[starter].playerInfo.pos] = {
 										fpts: 0,
+										weeksPlayed: 0,
 									};
 								}
 								comboEntry.positionFpts[recordMan[i].matchupInfo.starters[starter].playerInfo.pos].fpts += recordMan[i].matchupInfo.starters[starter].playerPoints;
+								comboEntry.positionFpts[recordMan[i].matchupInfo.starters[starter].playerInfo.pos].weeksPlayed++;
 							}
 
 							// add each week's score to running total & head-to-head totals
@@ -1776,10 +1788,12 @@ export const getLeagueRecords = async (refresh = false) => {
 
 						for(const transType in comboEntry.acquisitionFpts) {
 							comboEntry.acquisitionFpts[transType].perc = comboEntry.acquisitionFpts[transType].fpts / comboEntry.fpts * 100;
+							comboEntry.acquisitionFpts[transType].fptspg = comboEntry.acquisitionFpts[transType].fpts / comboEntry.acquisitionFpts[transType].weeksPlayed;
 						}
 
 						for(const position in comboEntry.positionFpts) {
 							comboEntry.positionFpts[position].perc = comboEntry.positionFpts[position].fpts / comboEntry.fpts * 100;
+							comboEntry.positionFpts[position].fptspg = comboEntry.positionFpts[position].fpts / comboEntry.positionFpts[position].weeksPlayed;
 						}
 
 						if(!masterRecordBook.managers.totals.years[year][recordManID]) {
@@ -1926,13 +1940,16 @@ export const getLeagueRecords = async (refresh = false) => {
 		// PLAYER –– POSITION - playerPositionRecords is the book of finished ARRAYS representing various positional records/rankings
 		playerPositionRecords.league.years[year] = {		// Directory: for every [year]
 			regularSeason: {									// League: league-wide records (ie. pooled from all managers in that year)
-				managerBests: {},									// regularSeason | playoffs | combined (RS & PO)
+				managerBests: {},
+				leagueAverages: {},									// regularSeason | playoffs | combined (RS & PO)
 			},															// every position
 			playoffs: {														// week_Top: top 10 highest-scoring performances at that position
-				managerBests: {},											// period_Top: top 10 highest-scoring RS|PO|COM at that position
+				managerBests: {},	
+				leagueAverages: {},										// period_Top: top 10 highest-scoring RS|PO|COM at that position
 			},															// managerBests
 			combined: {														// every position
-				managerBests: {},												// week_Best: ranking every manager's highest-scoring performance at that position
+				managerBests: {},	
+				leagueAverages: {},											// week_Best: ranking every manager's highest-scoring performance at that position
 			},																	// period_Best: ranking every manager's highest-scoring RS|PO|COM at that position
 		};
 		playerPositionRecords.managers.years[year] = {			// Managers: each manager's personal records (ie. pooled from all the players who scored for that manager in that year)
@@ -1947,8 +1964,13 @@ export const getLeagueRecords = async (refresh = false) => {
 			},
 		};
 		for(const recordPeriod in playerPositionRecords.league.years[year]) {
-			for(const key in nflPositions) {
-				const position = nflPositions[key];
+			for(const key in positions) {
+				const position = positions[key];
+				playerPositionRecords.league.years[year][recordPeriod].leagueAverages[position] = {
+					fpts: 0,
+					weeksPlayed: 0,
+					managerAverages: [],
+				}
 				playerPositionRecords.league.years[year][recordPeriod][position] = {
 					week_Top: masterRecordBook.players.league[recordPeriod].years[year].slice().filter(p => p.playerInfo.pos == position && p.benched == false).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
 					period_Top: masterRecordBook.players.league.totals.years[year][recordPeriod].slice().filter(p => p.playerInfo.pos == position).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
@@ -1969,7 +1991,21 @@ export const getLeagueRecords = async (refresh = false) => {
 					}
 					playerPositionRecords.league.years[year][recordPeriod].managerBests[position].week_Best.push(playerPositionRecords.managers.years[year][recordPeriod][recordManID][position].week_Top.slice(0, 1)[0]);
 					playerPositionRecords.league.years[year][recordPeriod].managerBests[position].period_Best.push(playerPositionRecords.managers.years[year][recordPeriod][recordManID][position].period_Top.slice(0, 1)[0]);
+
+					if(masterRecordBook.managers.totals.years[year][recordManID][recordPeriod].length > 0) {
+						playerPositionRecords.league.years[year][recordPeriod].leagueAverages[position].managerAverages.push({
+							recordManID,
+							manager: masterRecordBook.managers.totals.years[year][recordManID][recordPeriod][0].manager,
+							fpts: masterRecordBook.managers.totals.years[year][recordManID][recordPeriod][0].positionFpts[position].fpts,
+							fptspg: masterRecordBook.managers.totals.years[year][recordManID][recordPeriod][0].positionFpts[position].fptspg,
+						})
+						playerPositionRecords.league.years[year][recordPeriod].leagueAverages[position].fpts += masterRecordBook.managers.totals.years[year][recordManID][recordPeriod][0].positionFpts[position].fpts;
+						playerPositionRecords.league.years[year][recordPeriod].leagueAverages[position].weeksPlayed += masterRecordBook.managers.totals.years[year][recordManID][recordPeriod][0].positionFpts[position].weeksPlayed;
+					}
 				}
+				playerPositionRecords.league.years[year][recordPeriod].leagueAverages[position].managerAverages = playerPositionRecords.league.years[year][recordPeriod].leagueAverages[position].managerAverages.sort((a, b) => b.fptspg - a.fptspg);
+				playerPositionRecords.league.years[year][recordPeriod].leagueAverages[position].fptspg = playerPositionRecords.league.years[year][recordPeriod].leagueAverages[position].fpts / playerPositionRecords.league.years[year][recordPeriod].leagueAverages[position].weeksPlayed;
+
 				playerPositionRecords.league.years[year][recordPeriod].managerBests[position].week_Best = playerPositionRecords.league.years[year][recordPeriod].managerBests[position].week_Best.sort((a, b) => b.playerPoints - a.playerPoints);
 				playerPositionRecords.league.years[year][recordPeriod].managerBests[position].period_Best = playerPositionRecords.league.years[year][recordPeriod].managerBests[position].period_Best.sort((a, b) => b.playerPoints - a.playerPoints);
 			}
@@ -2409,18 +2445,22 @@ export const getLeagueRecords = async (refresh = false) => {
 						if(!comboEntry.acquisitionFpts[transType]) {
 							comboEntry.acquisitionFpts[transType] = {
 								fpts: 0,
+								weeksPlayed: 0,
 							};
 						}
 						comboEntry.acquisitionFpts[transType].fpts += typeRecord[i].acquisitionFpts[transType].fpts;
+						comboEntry.acquisitionFpts[transType].weeksPlayed += typeRecord[i].acquisitionFpts[transType].weeksPlayed;
 					}
 					for(const position in typeRecord[i].positionFpts) {
 
 						if(!comboEntry.positionFpts[position]) {
 							comboEntry.positionFpts[position] = {
 								fpts: 0,
+								weeksPlayed: 0,
 							};
 						}
 						comboEntry.positionFpts[position].fpts += typeRecord[i].positionFpts[position].fpts;
+						comboEntry.positionFpts[position].weeksPlayed += typeRecord[i].positionFpts[position].weeksPlayed;
 					}
 				}
 				// determine percentage-of-total stats
@@ -2431,9 +2471,11 @@ export const getLeagueRecords = async (refresh = false) => {
 
 				for(const transType in comboEntry.acquisitionFpts) {
 					comboEntry.acquisitionFpts[transType].perc = comboEntry.acquisitionFpts[transType].fpts / comboEntry.fpts * 100;
+					comboEntry.acquisitionFpts[transType].fptspg = comboEntry.acquisitionFpts[transType].fpts / comboEntry.acquisitionFpts[transType].weeksPlayed;
 				}
 				for(const position in comboEntry.positionFpts) {
 					comboEntry.positionFpts[position].perc = comboEntry.positionFpts[position].fpts / comboEntry.fpts * 100;
+					comboEntry.positionFpts[position].fptspg = comboEntry.positionFpts[position].fpts / comboEntry.positionFpts[position].weeksPlayed;
 				}
 
 				// push to masterRecordBook
@@ -2534,8 +2576,14 @@ export const getLeagueRecords = async (refresh = false) => {
 
 	// PLAYER –– POSITION –– ALLTIME - playerPositionRecords is the book of finished ARRAYS representing various positional records/rankings
 	for(const recordPeriod in playerPositionRecords.league.alltime) {
-		for(const key in nflPositions) {
-			const position = nflPositions[key];
+		for(const key in alltimePositions) {
+			const position = alltimePositions[key];
+
+			playerPositionRecords.league.alltime[recordPeriod].leagueAverages[position] = {
+				fpts: 0,
+				weeksPlayed: 0,
+				managerAverages: [],
+			}
 			playerPositionRecords.league.alltime[recordPeriod][position] = {
 				week_Top: masterRecordBook.players.league[recordPeriod].alltime.slice().filter(p => p.playerInfo.pos == position && p.benched == false).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
 				period_Top: masterRecordBook.players.league.totals.alltime[recordPeriod].slice().filter(p => p.playerInfo.pos == position).sort((a, b) => b.playerPoints - a.playerPoints).slice(0, 10),
@@ -2556,7 +2604,22 @@ export const getLeagueRecords = async (refresh = false) => {
 				}
 				playerPositionRecords.league.alltime[recordPeriod].managerBests[position].week_Best.push(playerPositionRecords.managers.alltime[recordPeriod][recordManID][position].week_Top.slice(0, 1)[0]);
 				playerPositionRecords.league.alltime[recordPeriod].managerBests[position].period_Best.push(playerPositionRecords.managers.alltime[recordPeriod][recordManID][position].period_Top.slice(0, 1)[0]);
+
+				if(masterRecordBook.managers.grandTotals[recordManID][recordPeriod].length > 0) {
+					playerPositionRecords.league.alltime[recordPeriod].leagueAverages[position].managerAverages.push({
+						recordManID,
+						manager: masterRecordBook.managers.grandTotals[recordManID][recordPeriod][0].manager,
+						fpts: masterRecordBook.managers.grandTotals[recordManID][recordPeriod][0].positionFpts[position].fpts,
+						fptspg: masterRecordBook.managers.grandTotals[recordManID][recordPeriod][0].positionFpts[position].fptspg,
+					})
+					playerPositionRecords.league.alltime[recordPeriod].leagueAverages[position].fpts += masterRecordBook.managers.grandTotals[recordManID][recordPeriod][0].positionFpts[position].fpts;
+					playerPositionRecords.league.alltime[recordPeriod].leagueAverages[position].weeksPlayed += masterRecordBook.managers.grandTotals[recordManID][recordPeriod][0].positionFpts[position].weeksPlayed;
+					
+				}
 			}
+			playerPositionRecords.league.alltime[recordPeriod].leagueAverages[position].managerAverages = playerPositionRecords.league.alltime[recordPeriod].leagueAverages[position].managerAverages.sort((a, b) => b.fptspg - a.fptspg);
+			playerPositionRecords.league.alltime[recordPeriod].leagueAverages[position].fptspg = playerPositionRecords.league.alltime[recordPeriod].leagueAverages[position].fpts / playerPositionRecords.league.alltime[recordPeriod].leagueAverages[position].weeksPlayed;
+
 			playerPositionRecords.league.alltime[recordPeriod].managerBests[position].week_Best = playerPositionRecords.league.alltime[recordPeriod].managerBests[position].week_Best.sort((a, b) => b.playerPoints - a.playerPoints);
 			playerPositionRecords.league.alltime[recordPeriod].managerBests[position].period_Best = playerPositionRecords.league.alltime[recordPeriod].managerBests[position].period_Best.sort((a, b) => b.playerPoints - a.playerPoints);
 		}
@@ -2682,6 +2745,7 @@ export const getLeagueRecords = async (refresh = false) => {
 	const recordsData = {
 		seasonWeekRecords,
 		leagueRosterRecords,
+		playerPositionRecords,
 		leagueWeekRecords: recordArrays.league.alltime.regularSeason.week_Top,
 		leagueRecordArrays: recordArrays.league.alltime,
 		playerAcquisitionRecords,

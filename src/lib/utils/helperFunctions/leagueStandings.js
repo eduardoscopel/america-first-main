@@ -42,22 +42,19 @@ export const getLeagueStandings = async () => {
 	}
 
 	// if the season hasn't started, standings can't be created
-	if(leagueData.status != "in_season" && leagueData.status != "post_season" && leagueData.status != "complete") {
-		return null;
-	}
+	if(leagueData.status != "in_season" && leagueData.status != "post_season" && leagueData.status != "complete") return null;
 
 	let week = 0;
 	if(nflState.season_type == 'regular') {
 		// max the week out at end of regular season
-		week = nflState.display_week > regularSeasonLength ? regularSeasonLength : nflState.display_week;
+		week = nflState.display_week > regularSeasonLength ? regularSeasonLength + 1 : nflState.display_week;
 	} else if(nflState.season_type == 'post') {
-		week = regularSeasonLength;
+		week = regularSeasonLength + 1;
 	}
 
 	// if at least one week hasn't been completed, then standings can't be created
-	if(week < 2) {
-		return null;
-	}
+	if(week < 2) return null;
+	
 
 	// pull in all matchup data for the season
 	const matchupsPromises = [];
@@ -71,9 +68,7 @@ export const getLeagueStandings = async () => {
 	for(const matchupRes of matchupsRes) {
 		const data = matchupRes.json(); 
 		matchupsJsonPromises.push(data)
-		if (!matchupRes.ok) {
-			throw new Error(data);
-		}
+		if (!matchupRes.ok) throw new Error(data);
 	}
 	const matchupsData = await waitForAll(...matchupsJsonPromises).catch((err) => { console.error(err); }).catch((err) => { console.error(err); });
 

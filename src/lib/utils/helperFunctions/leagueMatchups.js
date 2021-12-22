@@ -14,12 +14,14 @@ export const getLeagueMatchups = async () => {
 		return get(matchupsStore);
 	}
 
-	const [nflState, leagueData, rosterRes, users] = await waitForAll(
+	const [nflState, leagueData, rosterRes, users, playoffsRes] = await waitForAll(
 		getNflState(),
 		getLeagueData(leagueID),
 		getLeagueRosters(leagueID),
-		getLeagueUsers(leagueID)
+		getLeagueUsers(leagueID),
+		fetch(`https://api.sleeper.app/v1/league/${leagueID}/winners_bracket`, {compress: true}),
 	).catch((err) => { console.error(err); });
+	const playoffs = await playoffsRes.json();
 
 	let week = 1;
 	if(nflState.season_type == 'regular') {
@@ -28,33 +30,32 @@ export const getLeagueMatchups = async () => {
 		week = 18;
 	}
 	const year = leagueData.season;
+
 	const regularSeasonLength = leagueData.settings.playoff_week_start - 1;
+	const fullSeasonLength = regularSeasonLength + playoffs.pop().r;
 
 	const rosters = rosterRes.rosters;
 
-	let yearManagers = {};
+	const yearManagers = {};
     const yearP = parseInt(year);
     for(const managerID in managers) {
 		const manager = managers[managerID];
 
-		const entryMan = {
-			managerID: manager.managerID,
-			rosterID: manager.roster,
-			name: manager.name,
-			status: manager.status,
-			yearsactive: manager.yearsactive,
-			abbreviation: manager.abbreviation,
-		}
-
-		if(!yearManagers[manager.roster] && manager.yearsactive.includes(yearP)) {
-			yearManagers[manager.roster] = [];
-			yearManagers[manager.roster].push(entryMan);
+		if(manager.yearsactive.includes(yearP)) {
+			yearManagers[manager.roster] = {
+				managerID: manager.managerID,
+				rosterID: manager.roster,
+				name: manager.name,
+				status: manager.status,
+				yearsactive: manager.yearsactive,
+				abbreviation: manager.abbreviation,
+			};
 		}
 	}
 
 	// pull in all matchup data for the season
 	const matchupsPromises = [];
-	for(let i = 1; i < leagueData.settings.playoff_week_start; i++) {
+	for(let i = 1; i < fullSeasonLength; i++) {
 		matchupsPromises.push(fetch(`https://api.sleeper.app/v1/league/${leagueID}/matchups/${i}`, {compress: true}))
 	}
 	const matchupsRes = await waitForAll(...matchupsPromises);
@@ -64,9 +65,8 @@ export const getLeagueMatchups = async () => {
 	for(const matchupRes of matchupsRes) {
 		const data = matchupRes.json();
 		matchupsJsonPromises.push(data)
-		if (!matchupRes.ok) {
-			throw new Error(data);
-		}
+		if (!matchupRes.ok) throw new Error(data);
+		
 	}
 	const matchupsData = await waitForAll(...matchupsJsonPromises).catch((err) => { console.error(err); }).catch((err) => { console.error(err); });
 
@@ -87,6 +87,7 @@ export const getLeagueMatchups = async () => {
 		year,
 		week,
 		regularSeasonLength,
+		fullSeasonLength,
 		rawData: matchupsData,
 		managers: yearManagers,
 	}
@@ -97,23 +98,22 @@ export const getLeagueMatchups = async () => {
 }
 
 const processMatchups = (inputMatchups, yearManagers, rosters, users, week) => {
-	if(!inputMatchups || inputMatchups.length == 0) {
-		return false; 
-	}
+	if(!inputMatchups || inputMatchups.length == 0) return false; 
+	
 	const matchups = {};
 	for(const match of inputMatchups) {
 		if(!matchups[match.matchup_id]) {
 			matchups[match.matchup_id] = [];
 		}
-		let user = users[rosters[match.roster_id - 1].owner_id];
-		let recordManager = yearManagers[match.roster_id];
-		let recordManID = recordManager[0].managerID;
+		const user = users[rosters[match.roster_id - 1].owner_id];
+		const recordManager = yearManagers[match.roster_id];
+		const recordManID = recordManager.managerID;
 		matchups[match.matchup_id].push({
 			manager: {
 				name: user.metadata.team_name ? user.metadata.team_name : user.display_name,
 				avatar: user.avatar != null ? `https://sleepercdn.com/avatars/thumbs/${user.avatar}` : `https://sleepercdn.com/images/v2/icons/player_default.webp`,
-				realname: recordManager[0].name,
-				abbreviation: recordManager[0].abbreviation,
+				realname: recordManager.name,
+				abbreviation: recordManager.abbreviation,
 				rosterID: match.roster_id,
 				recordManID,
 			},
