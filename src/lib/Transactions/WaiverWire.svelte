@@ -33,14 +33,14 @@
 			if(waiverType == 2) {
 				remainingFaab = waiverBudget - rosters[key].settings.waiver_budget_used;
 			}
-
+			const moves = transactionTotals[recordManID].regularSeason.waiver + transactionTotals[recordManID].playoffs.waiver;
 			waiverWire.push({
                 recordManID,
 				rosterID: rosters[key].roster_id,
 				faab: remainingFaab,
 				priority: rosters[key].settings.waiver_position,
 				manager: currentManagers[recordManID],
-				moves: transactionTotals[recordManID].waiver,
+				moves,
 			})
 		}
 		waiverWire = waiverWire.sort((a, b) => a.priority - b.priority);
@@ -64,9 +64,7 @@
 			currentManagers = newTransactions.currentManagers;
 		}
 
-		if(rosters) {
-			getWaiverWire(transactionTotals, rosters, waiverBudget, waiverType, currentManagers, year);
-		}
+		if(rosters) getWaiverWire(transactionTotals, rosters, waiverBudget, waiverType, currentManagers, year);
 
 		loading = false;
 	})

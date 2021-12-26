@@ -71,7 +71,7 @@ export const parseDate = (rawDate) => {
     return stringDate(d);
 }
 
-export const generateGraph = ({stats, secondStats = null, x, y, stat, statCat, secondStatCat = null, header, field, short, secondField = null, classes = null}, roundOverride = 10, yMinOverride = null, classGraph = false) => {
+export const generateGraph = ({stats, secondStats = null, x, y, stat, statCat, secondStatCat = null, header, field, short, secondField = null, classes = null, category = null}, roundOverride = 10, yMinOverride = null, classGraph = false) => {
     if(!stats) {
         return null;
     }
@@ -90,6 +90,7 @@ export const generateGraph = ({stats, secondStats = null, x, y, stat, statCat, s
         yMax: 0,
         short,
         classes,
+        category,
     }
 
     const sortedStats = [...stats].sort((a, b) => a.recordManID - b.recordManID);
@@ -163,7 +164,7 @@ export const generateGraph = ({stats, secondStats = null, x, y, stat, statCat, s
                 }
             }
 
-            graphClass.yMax = Math.round(totalsArray.sort((a, b) => b - a)[0] + 0.1 * totalsArray.sort((a, b) => b - a)[0]); 
+            graphClass.yMax = Math.round(totalsArray.sort((a, b) => b - a)[0]); 
             const actualMax = totalsArray.sort((a, b) => b - a)[0];
 
             for(const recordManID in percsEntry) {

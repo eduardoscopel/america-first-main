@@ -4,27 +4,86 @@
 
     export let leagueRosterRecords, allManagers, transactionTotals, leagueWeekRecords, leagueRecordArrays, managerRecords, playerAcquisitionRecords, playerPositionRecords;
 
+    const recordPeriods = [
+        'regularSeason',
+        'playoffs',
+        'combined',
+    ]
     let lineupIQs = [];
-    const tradesData = [];
-    const waiversData = [];
-
-    let showTies = false;
+    let tradesArrays = {};
+    let waiversArrays = {};
+    let transArrays = {};
+    let playerPosArrays = {};
+    for(const recordPeriod of recordPeriods) {
+        playerPosArrays[recordPeriod] = [];
+        
+        for(const position in playerPositionRecords.league.alltime[recordPeriod].managerBests) {
+            playerPosArrays[recordPeriod].push({
+                position,
+                week: playerPositionRecords.league.alltime[recordPeriod].managerBests[position].week_Best,
+                period: playerPositionRecords.league.alltime[recordPeriod].managerBests[position].period_Best,
+            })
+        }
+    }
     
     for(const recordManID in transactionTotals.allTime) {
-        tradesData.push({
-            recordManID: transactionTotals.allTime[recordManID].recordManID,
-            manager: transactionTotals.allTime[recordManID].manager,
-            trades: transactionTotals.allTime[recordManID].trade,
-        })
 
-        const waiverPerc = transactionTotals.allTime[recordManID].waiver + transactionTotals.allTime[recordManID].outbid > 0 ? transactionTotals.allTime[recordManID].waiver / (transactionTotals.allTime[recordManID].waiver + transactionTotals.allTime[recordManID].outbid) * 100 : 'N/A';
-        waiversData.push({
-            recordManID: transactionTotals.allTime[recordManID].recordManID,
-            manager: transactionTotals.allTime[recordManID].manager,
-            waivers: transactionTotals.allTime[recordManID].waiver,
-            outbid: transactionTotals.allTime[recordManID].outbid,
-            waiverPerc,
-        })
+        for(const recordPeriod of recordPeriods) {
+
+            if(!tradesArrays[recordPeriod]) tradesArrays[recordPeriod] = [];
+            if(!waiversArrays[recordPeriod]) waiversArrays[recordPeriod] = [];
+            if(!transArrays[recordPeriod]) transArrays[recordPeriod] = [];
+
+            let trades, waivers, outbid;
+            if(recordPeriod == 'combined') {
+                trades = transactionTotals.allTime[recordManID].regularSeason.trade + transactionTotals.allTime[recordManID].playoffs.trade;
+                waivers = transactionTotals.allTime[recordManID].regularSeason.waiver + transactionTotals.allTime[recordManID].playoffs.waiver;
+                outbid = transactionTotals.allTime[recordManID].regularSeason.outbid + transactionTotals.allTime[recordManID].playoffs.outbid;
+            } else {
+                trades = transactionTotals.allTime[recordManID][recordPeriod].trade;
+                waivers = transactionTotals.allTime[recordManID][recordPeriod].waiver;
+                outbid = transactionTotals.allTime[recordManID][recordPeriod].outbid;
+            }
+            const waiverPerc = waivers + outbid > 0 ? waivers / (waivers + outbid) * 100 : 'N/A';
+
+            tradesArrays[recordPeriod].push({
+                recordManID: transactionTotals.allTime[recordManID].recordManID,
+                manager: transactionTotals.allTime[recordManID].manager,
+                trades,
+            })
+
+            waiversArrays[recordPeriod].push({
+                recordManID: transactionTotals.allTime[recordManID].recordManID,
+                manager: transactionTotals.allTime[recordManID].manager,
+                waivers,
+                outbid,
+                waiverPerc,
+            })
+        }
+    }
+
+    for(const recordManID in transactionTotals.allTime) {
+        for(const recordPeriod in tradesArrays) {
+            if(waiversArrays[recordPeriod].find(w => w.recordManID == recordManID)) {
+                const waiver = waiversArrays[recordPeriod].find(w => w.recordManID == recordManID);
+                const moves = (tradesArrays[recordPeriod].find(t => t.recordManID == recordManID)?.trades || 0) + (waiver?.waivers || 0);
+                transArrays[recordPeriod].push({
+                    recordManID,
+                    manager: waiver.manager,
+                    moves,
+                    trades: tradesArrays[recordPeriod].find(t => t.recordManID == recordManID)?.trades || 0,
+                    waivers: waiver?.waivers || 0,
+                    outbid: waiver?.outbid || 0,
+                    waiverPerc: waiver?.waiverPerc || 'N/A',
+                })
+            }
+        }
+    }
+
+    for(const recordPeriod in tradesArrays) {
+        tradesArrays[recordPeriod].sort((a, b) => b.trades - a.trades);
+        waiversArrays[recordPeriod].sort((a, b) => b.waivers - a.waivers);
+        transArrays[recordPeriod].sort((a, b) => b.moves - a.moves);
     }
 
     for(const key in leagueRosterRecords) {
@@ -43,15 +102,21 @@
 
         lineupIQs.push(lineupIQ)
     
-        if(leagueRosterRecord.ties > 0) showTies = true;
+    }
+
+    let showTies = {
+        regular: false,
+        epe: false,
+        median: false,
     }
 
     let winPercentages = leagueRecordArrays.regularSeason.managerBests.winRecords;
     lineupIQs.sort((a, b) => b.iq - a.iq);
     let fptsHistories = leagueRecordArrays.regularSeason.managerBests.cumulativePoints;
     let medianRecords = leagueRecordArrays.regularSeason.managerBests.medianRecords;
-    tradesData.sort((a, b) => b.trades - a.trades);
-    waiversData.sort((a, b) => b.waivers - a.waivers);
+    let tradesData = tradesArrays.regularSeason;
+    let waiversData = waiversArrays.regularSeason;
+    let transactions = transArrays.regularSeason;
 
     let allTimeBiggestBlowouts = leagueRecordArrays.regularSeason.biggestBlowouts;
     let allTimeClosestMatchups = leagueRecordArrays.regularSeason.narrowestVictories;
@@ -62,6 +127,9 @@
     let playerATWeekMissedBests = leagueRecordArrays.regularSeason.players.week_MissedBest;
     let playerATWeekTOPS = leagueRecordArrays.regularSeason.players.week_Top;
     let playerATWeekMissedTOPS = leagueRecordArrays.regularSeason.players.week_MissedTop;
+    let playerOverallBests = leagueRecordArrays.regularSeason.players.overall_Best;
+    let playerOverallMissedBests = leagueRecordArrays.regularSeason.players.overall_MissedBest;
+    let playerPosBests = playerPosArrays.regularSeason;
 
     let leagueWeekLows = leagueRecordArrays.regularSeason.week_Low;
     let mostSeasonLongPoints = leagueRecordArrays.regularSeason.period_Top;
@@ -83,6 +151,9 @@
         displayPositionRecord = newDisplayPosition;
         displayStats = selection;
         displayObject[selection] = {};
+        showTies.regular = false;
+        showTies.epe = false;
+        showTies.median = false;
         setSelected(displayStats, displayPositionRecord);
     }
 
@@ -95,6 +166,11 @@
             mostSeasonLongPoints = leagueRecordArrays.regularSeason.period_Top;
             leastSeasonLongPoints = leagueRecordArrays.regularSeason.period_Low;
             allTimeEPERecords = leagueRecordArrays.regularSeason.managerBests.epeRecords;
+            for(const record of allTimeEPERecords) {
+                if(record.epeTies > 0 && showTies.epe == false) {
+                    showTies.epe = true;
+                }
+            }
             allTimeSeasonWorsts = leagueRecordArrays.regularSeason.managerBests.period_Worst;
             allTimeSeasonBests = leagueRecordArrays.regularSeason.managerBests.period_Best;
             allTimeWeekBests = leagueRecordArrays.regularSeason.managerBests.week_Best;
@@ -105,10 +181,26 @@
             allTimeBiggestBlowouts = leagueRecordArrays.regularSeason.biggestBlowouts;
             allTimeClosestMatchups = leagueRecordArrays.regularSeason.narrowestVictories;
             winPercentages = leagueRecordArrays.regularSeason.managerBests.winRecords;
+            for(const record of winPercentages) {
+                if(record.ties > 0 && showTies.regular == false) {
+                    showTies.regular = true;
+                }
+            }
             fptsHistories = leagueRecordArrays.regularSeason.managerBests.cumulativePoints;
             medianRecords = leagueRecordArrays.regularSeason.managerBests.medianRecords;
+            for(const record of medianRecords) {
+                if(record.weekTies > 0 && showTies.median == false) {
+                    showTies.median = true;
+                }
+            }
             headToHeadRecords = managerRecords.headToHeadRecords.regularSeason.alltime;
             leaguePlayerRecords = managerRecords.leaguePlayerRecords.alltime.regularSeason;
+            playerOverallBests = leagueRecordArrays.regularSeason.players.overall_Best;
+            playerOverallMissedBests = leagueRecordArrays.regularSeason.players.overall_MissedBest;
+            playerPosBests = playerPosArrays.regularSeason;
+            tradesData = tradesArrays.regularSeason;
+            waiversData = waiversArrays.regularSeason;
+            transactions = transArrays.regularSeason;
 
             if(displayPositionRecord == 'ALL') {
                 playerATWeekTOPS = leagueRecordArrays.regularSeason.players.week_Top;
@@ -125,6 +217,11 @@
             mostSeasonLongPoints = leagueRecordArrays.playoffs.period_Top;
             leastSeasonLongPoints = leagueRecordArrays.playoffs.period_Low;
             allTimeEPERecords = leagueRecordArrays.playoffs.managerBests.epeRecords;
+            for(const record of allTimeEPERecords) {
+                if(record.epeTies > 0 && showTies.epe == false) {
+                    showTies.epe = true;
+                }
+            }
             allTimeSeasonWorsts = leagueRecordArrays.playoffs.managerBests.period_Worst;
             allTimeSeasonBests = leagueRecordArrays.playoffs.managerBests.period_Best;
             allTimeWeekBests = leagueRecordArrays.playoffs.managerBests.week_Best;
@@ -135,10 +232,26 @@
             allTimeBiggestBlowouts = leagueRecordArrays.playoffs.biggestBlowouts;
             allTimeClosestMatchups = leagueRecordArrays.playoffs.narrowestVictories;
             winPercentages = leagueRecordArrays.playoffs.managerBests.winRecords;
+            for(const record of winPercentages) {
+                if(record.ties > 0 && showTies.regular == false) {
+                    showTies.regular = true;
+                }
+            }
             fptsHistories = leagueRecordArrays.playoffs.managerBests.cumulativePoints;
             medianRecords = leagueRecordArrays.playoffs.managerBests.medianRecords;
+            for(const record of medianRecords) {
+                if(record.weekTies > 0 && showTies.median == false) {
+                    showTies.median = true;
+                }
+            }
             headToHeadRecords = managerRecords.headToHeadRecords.playoffs.alltime;
             leaguePlayerRecords = managerRecords.leaguePlayerRecords.alltime.playoffs;
+            playerOverallBests = leagueRecordArrays.playoffs.players.overall_Best;
+            playerOverallMissedBests = leagueRecordArrays.playoffs.players.overall_MissedBest;
+            playerPosBests = playerPosArrays.playoffs;
+            tradesData = tradesArrays.playoffs;
+            waiversData = waiversArrays.playoffs;
+            transactions = transArrays.playoffs;
 
             if(displayPositionRecord == 'ALL') {
                 playerATWeekTOPS = leagueRecordArrays.playoffs.players.week_Top;
@@ -155,6 +268,11 @@
             mostSeasonLongPoints = leagueRecordArrays.combined.period_Top;  
             leastSeasonLongPoints = leagueRecordArrays.combined.period_Low; 
             allTimeEPERecords = leagueRecordArrays.combined.managerBests.epeRecords;  
+            for(const record of allTimeEPERecords) {
+                if(record.epeTies > 0 && showTies.epe == false) {
+                    showTies.epe = true;
+                }
+            }
             allTimeSeasonWorsts = leagueRecordArrays.combined.managerBests.period_Worst; 
             allTimeSeasonBests = leagueRecordArrays.combined.managerBests.period_Best; 
             allTimeWeekBests = leagueRecordArrays.combined.managerBests.week_Best;
@@ -165,10 +283,26 @@
             allTimeBiggestBlowouts = leagueRecordArrays.combined.biggestBlowouts;
             allTimeClosestMatchups = leagueRecordArrays.combined.narrowestVictories;
             winPercentages = leagueRecordArrays.combined.managerBests.winRecords;
+            for(const record of winPercentages) {
+                if(record.ties > 0 && showTies.regular == false) {
+                    showTies.regular = true;
+                }
+            }
             fptsHistories = leagueRecordArrays.combined.managerBests.cumulativePoints;
             medianRecords = leagueRecordArrays.combined.managerBests.medianRecords;
+            for(const record of medianRecords) {
+                if(record.weekTies > 0 && showTies.median == false) {
+                    showTies.median = true;
+                }
+            }
             headToHeadRecords = managerRecords.headToHeadRecords.combined.alltime;
             leaguePlayerRecords = managerRecords.leaguePlayerRecords.alltime.combined;
+            playerOverallBests = leagueRecordArrays.combined.players.overall_Best;
+            playerOverallMissedBests = leagueRecordArrays.combined.players.overall_MissedBest;
+            playerPosBests = playerPosArrays.combined;
+            tradesData = tradesArrays.combined;
+            waiversData = waiversArrays.combined;
+            transactions = transArrays.combined;
 
             if(displayPositionRecord == 'ALL') {
                 playerATWeekTOPS = leagueRecordArrays.combined.players.week_Top;
@@ -296,7 +430,34 @@
                 sort: 'waivers',
                 inverted: false,
             },
+            transactions: {
+                stats: transactions,
+                sort: 'moves',
+                inverted: false,
+            },
+            playerOverallBests: {
+                stats: playerOverallBests,
+                sort: 'playerPoints',
+                inverted: false,
+            },
+            playerOverallMissedBests: {
+                stats: playerOverallMissedBests,
+                sort: 'benchPoints',
+                inverted: false,
+            },
             headToHeadRecords,
+        }
+        for(const position of playerPosBests) {
+            displayObject[displayStats][`weekBest_${position.position}`] = {
+                stats: position.week,
+                sort: 'playerPoints',
+                inverted: false,
+            }
+            displayObject[displayStats][`periodBest_${position.position}`] = {
+                stats: position.period,
+                sort: 'playerPoints',
+                inverted: false,
+            }
         }
     }
 
@@ -348,6 +509,9 @@
     playerWeekBests={playerATWeekBests}
     playerWeekMissedBests={playerATWeekMissedBests}
     playerWeekMissedTOPS={playerATWeekMissedTOPS}
+    {playerOverallBests}
+    {playerOverallMissedBests}
+    {playerPosBests}
     {leastSeasonLongPoints}  
     {showTies}
     {winPercentages}
@@ -358,6 +522,7 @@
     {lineupIQs}
     {tradesData}
     {waiversData}
+    {transactions}
     prefix="All-Time"
     allTime={true}
     regular={selection == 'regular'}

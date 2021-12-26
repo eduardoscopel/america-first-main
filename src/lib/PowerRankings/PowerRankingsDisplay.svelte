@@ -36,8 +36,14 @@
 
     let validGraph = false;
 
-    let graphs = [];
+    let graphsObj = {
+        powerRankings: {
+            Overall: {
 
+            }
+        }
+    }
+;
     const buildRankings = () => {
         const rosterPowers = [];
         let week = nflState.week;
@@ -94,9 +100,8 @@
             short: "ROS Power Ranking"
         };
 
-        graphs = [
-            generateGraph(powerGraph, 10)
-        ]
+        graphsObj.powerRankings.Overall.graph = generateGraph(powerGraph, 10);
+        
     }
 
     let players = playersInfo.players;
@@ -113,8 +118,6 @@
         refreshPlayers();
     }
 
-    let curGraph = 0;
-
     let el;
     let maxWidth = 620;
 
@@ -128,6 +131,11 @@
     let innerWidth;
 
     $: resize(innerWidth);
+
+    let curSort = {
+        sort: 'graph',
+        inverted: false,
+    };
 
 </script>
 
@@ -143,6 +151,6 @@
 
 {#if validGraph}
     <div class="enclosure" bind:this={el}>
-        <BarChart {maxWidth} {graphs} bind:curGraph={curGraph} />
+        <BarChart {maxWidth} {graphsObj} {curSort} />
     </div>
 {/if}

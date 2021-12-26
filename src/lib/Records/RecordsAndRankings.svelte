@@ -7,7 +7,7 @@
 
   	import DataTable, { Head, Body, Row, Cell } from '@smui/data-table'; 
 
-    export let selection = 'regular', displayPositionRecord = 'ALL', displayYear, waiversData, tradesData, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerWeekTOPS, allManagers, displayObject, headToHeadRecords, leaguePlayerRecords, allTime=false;
+    export let selection = 'regular', displayPositionRecord = 'ALL', displayYear, waiversData, tradesData, transactions, weekRecords, weekLows, seasonLongRecords, leastSeasonLongPoints, showTies, winPercentages, fptsHistories, medianRecords, lineupIQs, prefix, blowouts, closestMatchups, weekBests, weekWorsts, seasonBests, seasonWorsts, seasonEPERecords, playerSeasonTOPS, playerSeasonBests, playerWeekMissedTOPS, playerWeekBests, playerWeekMissedBests, playerWeekTOPS, allManagers, displayObject, headToHeadRecords, leaguePlayerRecords, playerOverallBests, playerOverallMissedBests, playerPosBests, allTime=false;
 
     const leagueManagers = {};
     const numManagers = managers.length;
@@ -40,6 +40,43 @@
 			yearsactive: manager.yearsactive,
 		}
 	}
+
+    let numPositions;
+    const getPlayerPosGraphs = (selection) => {
+        let playerPosGraphs = [];
+        numPositions = 0;
+        for(const position of playerPosBests) {
+            numPositions++;
+            playerPosGraphs.push({
+                position: position.position,
+                Seasons: {
+                    stats: displayObject[selection][`periodBest_${position.position}`].stats,
+                    x: 'Manager',
+                    y: 'Fantasy Points',
+                    stat: '',
+                    statCat: `periodBest_${position.position}`,
+                    header: `Best Single-Season Performances by ${position.position}`,
+                    field: 'playerPoints',
+                    short: `${position.position}`,
+                    category: 'Season',
+                },
+                Weeks: {
+                    stats: displayObject[selection][`weekBest_${position.position}`].stats,
+                    x: 'Manager',
+                    y: 'Fantasy Points',
+                    stat: '',
+                    statCat: `weekBest_${position.position}`,
+                    header: `Best Single-Week Performances by ${position.position}`,
+                    field: 'playerPoints',
+                    short: `${position.position}`,
+                    category: 'Week',
+                },
+            })
+        }
+        return playerPosGraphs;
+    }
+    let playerPosGraphs = getPlayerPosGraphs(selection);
+    $: getPlayerPosGraphs(selection);
 
     let lineupIQGraph = {
         stats: displayObject[selection].lineupIQs.stats,
@@ -75,23 +112,77 @@
         y: "Wins",
         stat: "",
         statCat: 'winPercentages',
-        header: "Team Wins",
+        header: "Win Records",
         field: "wins",
-        short: "Wins"
+        short: "Matchups"
     }
     $: winPercentagesGraph.stats = displayObject[selection].winPercentages.stats;
 
     let winPercentagesGraph = {
         stats: displayObject[selection].winPercentages.stats,
         x: "Manager",
-        y: "Win Percentage",
+        y: "Win %",
         stat: "%",
         statCat: 'winPercentages',
-        header: "Team Win Percentages",
+        header: "Win Percentages",
         field: "winPerc",
         short: "Win Percentage"
     }
     $: winPercentagesGraph.stats = displayObject[selection].winPercentages.stats;
+
+    let fptsSeasonBestGraph = {
+        stats: displayObject[selection].seasonBests.stats, 
+        x: "Manager",
+        y: "Fantasy PPG",
+        stat: "",
+        statCat: 'seasonBests',
+        header: "Highest Scoring Seasons",
+        field: "fptspg",
+        short: "Best",
+        category: "Seasons",
+    }
+    $: fptsSeasonBestGraph.stats = displayObject[selection].seasonBests.stats;
+
+    let fptsSeasonWorstGraph = {
+        stats: displayObject[selection].seasonWorsts.stats,
+        x: "Manager",
+        y: "Fantasy PPG",
+        stat: "",
+        statCat: 'seasonWorsts',
+        header: "Lowest Scoring Seasons",
+        field: "fptspg",
+        short: "Worst",
+        category: "Seasons",
+    }
+    $: fptsSeasonWorstGraph.stats = displayObject[selection].seasonWorsts.stats;
+
+    let fptsWeekBestGraph = {
+        stats: displayObject[selection].weekBests.stats,
+        x: "Manager",
+        y: "Fantasy Points",
+        stat: "",
+        statCat: 'weekBests',
+        header: "Highest Scoring Weeks",
+        field: "fpts",
+        short: "Best",
+        yMinOverride: 0,
+        category: "Weeks",
+    }
+    $: fptsWeekBestGraph.stats = displayObject[selection].weekBests.stats;
+
+    let fptsWeekWorstGraph = {
+        stats: displayObject[selection].weekWorsts.stats, 
+        x: "Manager",
+        y: "Fantasy Points",
+        stat: "",
+        statCat: 'weekWorsts',
+        header: "Lowest Scoring Weeks",
+        field: "fpts",
+        short: "Worst",
+        yMinOverride: 0,
+        category: "Weeks",
+    }
+    $: fptsWeekWorstGraph.stats = displayObject[selection].weekWorsts.stats;
 
     let fptsHistoriesGraph = {
         stats: displayObject[selection].fptsHistories.stats,
@@ -99,12 +190,12 @@
         y: "Fantasy Points",
         stat: "",
         statCat: 'fptsHistories',
-        header: "Team Fantasy Points",
-        field: "fptspg",
-        short: "Fantasy Points",
+        header: "Fantasy Points",
+        field: "fpts",
+        short: "Scoring",
         classes: [
             {
-                short: 'All',
+                short: 'Totals',
                 field: null,
                 colors: null,
                 totalField: null,
@@ -156,95 +247,89 @@
     let medianRecordsGraph = {
         stats: displayObject[selection].medianRecords.stats,
         x: "Manager",
-        y: "Win Percentage",
+        y: "Median Win %",
         stat: "%",
         statCat: 'medianRecords',
-        header: "Managers Against the Median",
+        header: "Win Records Against League Median",
         field: "medianPerc",
-        short: "Par Records"
+        short: "Median"
     }
     $: medianRecordsGraph.stats = displayObject[selection].medianRecords.stats;
-
-    let fptsSeasonBestGraph = {
-        stats: displayObject[selection].seasonBests.stats, 
-        secondStats: displayObject[selection].seasonWorsts.stats,
-        x: "Manager",
-        y: "Fantasy Points",
-        stat: "",
-        statCat: 'seasonBests',
-        secondStatCat: 'seasonWorsts',
-        header: "Team Highest / Lowest Scoring Seasons",
-        field: "fptspg",
-	    secondField: "fptspg",
-        short: "Season Records"
-    }
-    $: fptsSeasonBestGraph.stats = displayObject[selection].seasonBests.stats;
-    $: fptsSeasonBestGraph.secondStats = displayObject[selection].seasonWorsts.stats;
-
-    let fptsWeekBestGraph = {
-        stats: displayObject[selection].weekBests.stats,
-        secondStats: displayObject[selection].weekWorsts.stats, 
-        x: "Manager",
-        y: "Fantasy Points",
-        stat: "",
-        statCat: 'weekBests',
-        secondStatCat: 'weekWorsts',
-        header: "Team Highest / Lowest Scoring Weeks",
-        field: "fpts",
-        secondField: "fpts",
-        short: "Weekly Records",
-        yMinOverride: 0,
-    }
-    $: fptsWeekBestGraph.stats = displayObject[selection].weekBests.stats;
-    $: fptsWeekBestGraph.secondStats = displayObject[selection].weekWorsts.stats;
 
     let epeWinPercGraph = {
         stats: displayObject[selection].seasonEPERecords.stats,
         x: "Manager",
-        y: "EPE Win Percentage",
+        y: "EPE Win %",
         stat: "%",
         statCat: 'seasonEPERecords',
-        header: "Everyone Plays Everyone Win Percentage",
+        header: "Everyone Plays Everyone Win Record",
         field: "epePerc",
-        short: "EPE Records"
+        short: "EPE",
     }
     $: epeWinPercGraph.stats = displayObject[selection].seasonEPERecords.stats;
 
     let playerSeasonBestGraph = {
         stats: displayObject[selection].playerSeasonBests.stats,
         x: "Manager",
-        y: "Fantasy Points Earned",
+        y: "Fantasy PPG",
         stat: "",
         statCat: 'playerSeasonBests',
-        header: "Top Single-Season Points Earners",
+        header: "Best Single-Season Performances",
         field: "playerPPStart",
-        short: "Season Leaders"
+        short: "Seasons",
+        category: "Starters",
     }
     $: playerSeasonBestGraph.stats = displayObject[selection].playerSeasonBests.stats;
 
     let playerWeekBestGraph = {
         stats: displayObject[selection].playerWeekBests.stats,
         x: "Manager",
-        y: "Fantasy Points Earned",
+        y: "Total Fantasy Points",
         stat: "",
         statCat: 'playerWeekBests',
-        header: "Top Single-Week Points Earners",
+        header: "Best Single-Week Performances",
         field: "playerPoints",
-        short: "Week Leaders"
+        short: "Weeks",
+        category: "Starters",
     }
     $: playerWeekBestGraph.stats = displayObject[selection].playerWeekBests.stats;
 
     let playerWeekMissedBestGraph = {
         stats: displayObject[selection].playerWeekMissedBests.stats,
         x: "Manager",
-        y: "Fantasy Points Earned",
+        y: "Bench Points",
         stat: "",
         statCat: 'playerWeekMissedBests',
-        header: "Top Benchwarmers",
+        header: "Best Single-Week Benchwarmers",
         field: "benchPoints",
-        short: "Benchwarmers"
+        short: "Weeks",
+        category: "Bench",
     }
     $: playerWeekMissedBestGraph.stats = displayObject[selection].playerWeekMissedBests.stats;
+
+    let playerOverallBestGraph = {
+        stats: displayObject[selection].playerOverallBests.stats,
+        x: "Manager",
+        y: "Total Fantasy Points",
+        stat: "",
+        statCat: 'playerOverallBests',
+        header: "Top Cumulative Scorers",
+        field: "playerPoints",
+        short: "Players",
+    }
+    $: playerOverallBestGraph.stats = displayObject[selection].playerOverallBests.stats;
+
+    let playerOverallMissedBestGraph = {
+        stats: displayObject[selection].playerOverallMissedBests.stats,
+        x: "Manager",
+        y: "Total Bench Points",
+        stat: "",
+        statCat: 'playerOverallMissedBests',
+        header: "Top Cumulative Benchwarmers",
+        field: "benchPoints",
+        short: "Players",
+    }
+    $: playerOverallMissedBestGraph.stats = displayObject[selection].playerOverallMissedBests.stats;
 
     for(let i = 1; i <= numManagers; i++) {
         if(waiversData.find(w => w.recordManID == i)) {
@@ -259,13 +344,25 @@
         }
     }
 
+    let movesGraph = {
+        stats: displayObject[selection].transactions.stats,
+        x: "Manager",
+        y: "Transactions",
+        stat: "",
+        statCat: 'transactions',
+        header: "Total Transactions",
+        field: "moves",
+        short: "Moves"
+    }
+    $: movesGraph.stats = displayObject[selection].transactions.stats;
+
     let tradesGraph = {
         stats: displayObject[selection].tradesData.stats,
         x: "Manager",
-        y: "# of trades",
+        y: "Trades",
         stat: "",
         statCat: 'tradesData',
-        header: "Trades Managers Have Made",
+        header: "Completed Trades",
         field: "trades",
         short: "Trades"
     }
@@ -274,56 +371,132 @@
     let waiversGraph = {
         stats: displayObject[selection].waiversData.stats,
         x: "Manager",
-        y: "# of Waiver Moves",
+        y: "Pickups & Drops",
         stat: "",
         statCat: 'waiversData',
-        header: "Waivers Managers Have Made",
+        header: "Waivers Transactions",
         field: "waivers",
         short: "Waivers"
     }
     $: waiversGraph.stats = displayObject[selection].waiversData.stats;
 
-    const graphs = [];
 
-    if(lineupIQs[0]?.potentialPoints) {
-        graphs.push(generateGraph(lineupIQGraph));
+    const getGraph = (graphData, newHeader = null, newField = null, newStat = null, newY = null) => {
+        let graph = graphData;
+        if(newHeader) graph.header = newHeader;
+        if(newField) graph.field = newField;
+        if(newStat || newStat == '') graph.stat = newStat;
+        if(newY) graph.y = newY;
+        return generateGraph(graph);
     }
-    graphs.push(generateGraph(winsGraph, 5));
-    graphs.push(generateGraph(winPercentagesGraph));
-    graphs.push(generateGraph(fptsHistoriesGraph));
-    graphs.push(generateGraph(medianRecordsGraph));
-    if(lineupIQs[0]?.potentialPoints) {
-        graphs.push(generateGraph(potentialPointsGraph, 10, 0));
-    }
-    graphs.push(generateGraph(tradesGraph));
-    graphs.push(generateGraph(waiversGraph));
-    graphs.push(generateGraph(fptsSeasonBestGraph));
-    graphs.push(generateGraph(fptsWeekBestGraph));
-    graphs.push(generateGraph(epeWinPercGraph));
-    graphs.push(generateGraph(playerSeasonBestGraph));
-    graphs.push(generateGraph(playerWeekBestGraph));
-    graphs.push(generateGraph(playerWeekMissedBestGraph));
 
-    const transactions = [];
-    for(let i = 1; i <= numManagers; i++) {
-        if(waiversData.find(w => w.recordManID == i)) {
-            const waiver = waiversData.find(w => w.recordManID == i);
-            transactions.push({
-                recordManID: i,
-                manager: waiver.manager,
-                trades: tradesData.find(t => t.recordManID == i)?.trades || 0,
-                waivers: waiver?.waivers || 0,
-                outbid: waiver?.outbid || 0,
-                waiverPerc: waiver?.waiverPerc || 'N/A',
-            })
+    const graphsObj = {
+        Matchups: {
+            Overall: {
+                winPerc: getGraph(winPercentagesGraph),
+                wins: getGraph(winPercentagesGraph, 'Wins', 'wins', '', 'Wins'),
+                ties: getGraph(winPercentagesGraph, 'Ties', 'ties', '', 'Ties'),
+                losses: getGraph(winPercentagesGraph, 'Losses', 'losses', '', 'Losses'),
+            },
+            EPE: {
+                epePerc: getGraph(epeWinPercGraph),
+                epeWins: getGraph(epeWinPercGraph, 'Everyone Plays Everyone - Wins', 'epeWins', '', 'EPE Wins'),
+                epeTies: getGraph(epeWinPercGraph, 'Everyone Plays Everyone - Ties', 'epeTies', '', 'EPE Ties'),
+                epeLosses: getGraph(epeWinPercGraph, 'Everyone Plays Everyone - Losses', 'epeLosses', '', 'EPE Losses'),
+                topScores: getGraph(epeWinPercGraph, 'Weeks with Highest Score', 'topScores', '', 'Highest Scores'),
+                bottomScores: getGraph(epeWinPercGraph, 'Weeks with Lowest Score', 'bottomScores', '', 'Lowest Scores'),
+            },
+            Median: {
+                medianPerc: getGraph(medianRecordsGraph),
+                weekWinners: getGraph(medianRecordsGraph, 'Above-Average Week Scores', 'epeWins', '', 'Median Wins'),
+                weekTies: getGraph(medianRecordsGraph, 'Ties with Week Average', 'epeTies', '', 'Median Ties'),
+                weekLosers: getGraph(medianRecordsGraph, 'Below-Average Week Scores', 'epeLosses', '', 'Median Losses'),
+            }
+        },
+        Scoring: {
+            Overall: {
+                fpts: getGraph(fptsHistoriesGraph),
+                fptspg: getGraph(fptsHistoriesGraph, 'Fantasy Points Per Game', 'fptspg', '', 'Fantasy PPG'),
+                fptsAgainst: getGraph(fptsHistoriesGraph, 'Opponent Fantasy Points', 'fptsAgainst', '', 'Opponent Fantasy Points'),
+            },
+            Lineups: {
+                potentialPoints: getGraph(potentialPointsGraph),
+                iq: getGraph(potentialPointsGraph, 'Lineup IQs', 'iq', '%', 'IQ'),
+                fpts: getGraph(potentialPointsGraph, 'Total Points', 'fpts', '%', 'Fantasy Points'),
+            },
+            Seasons: {
+                Best: {
+                    fptspg: getGraph(fptsSeasonBestGraph),
+                    fpts: getGraph(fptsSeasonBestGraph, 'Highest Scoring Seasons', 'fpts', '', 'Fantasy Points'),
+                },
+                Worst: {
+                    fptspg: getGraph(fptsSeasonWorstGraph),
+                    fpts: getGraph(fptsSeasonWorstGraph, 'Lowest Scoring Seasons', 'fpts', '', 'Fantasy Points'),
+                }
+            },
+            Weeks: {
+                Best: {
+                    fptspg: getGraph(fptsWeekBestGraph),
+                    fpts: getGraph(fptsWeekBestGraph, 'Highest Scoring Weeks', 'fpts', '', 'Fantasy Points'),
+                },
+                Worst: {
+                    fptspg: getGraph(fptsWeekWorstGraph),
+                    fpts: getGraph(fptsWeekWorstGraph, 'Lowest Scoring Weeks', 'fpts', '', 'Fantasy Points'),
+                }
+            },
+        },
+        Players: {
+            Overall: {
+                Starters: {
+                    playerPoints: getGraph(playerOverallBestGraph),
+                },
+                Bench: {
+                    benchPoints: getGraph(playerOverallMissedBestGraph),
+                },
+            },
+            Starters: {
+                Seasons: {
+                    playerPPStart: getGraph(playerSeasonBestGraph),
+                    playerPoints: getGraph(playerSeasonBestGraph, 'Best Single-Season Performances', 'playerPoints', '', 'Fantasy Points'),
+                },
+                Weeks: {
+                    playerPPStart: getGraph(playerWeekBestGraph),
+                    playerPoints: getGraph(playerWeekBestGraph, 'Best Single-Week Performances', 'playerPoints', '', 'Fantasy Points'),
+                }
+            },
+            Bench: {
+                Weeks: {
+                    benchPoints: getGraph(playerWeekMissedBestGraph),
+                }
+            },
+            Positions: {},
+        },
+        Transactions: {
+            Overall: {
+                moves: getGraph(movesGraph),
+            },
+            Trades: {
+                trades: getGraph(tradesGraph),
+            },
+            Waivers: {
+                waivers: getGraph(waiversGraph),
+                outbid: getGraph(waiversGraph, 'Failed Waiver Bids', 'outbid', '', 'Failed Bids'),
+                waiverPerc: getGraph(waiversGraph, 'Waiver Bid Success Rates', 'waiverPerc', '%', 'Success Rate'),
+            },
+        },
+    };
+
+    for(const graph of playerPosGraphs) {
+        graphsObj.Players.Positions[graph.position] = {
+            Seasons: {
+                playerPoints: getGraph(graph.Seasons),
+            },
+            Weeks: {
+                playerPoints: getGraph(graph.Weeks),
+            },
         }
     }
-    $: displayObject[selection]['transactions'] = {
-        inverted: false,
-        sort: null,
-        stats: transactions,
-    }
-    
+
     let allManagerChoices = [];
     let allMatchups = [];
     let selectedMatchup;
@@ -495,12 +668,15 @@
 
     let curTable = 0;
     let curTableDesc;
-    let curGraph = 0;
+    let curGraph = Object.keys(graphsObj)[0];
+    let curSubType = 'Overall';
+    let curDubType = Object.keys(graphsObj[curGraph][curSubType])[0];   
+    let curPosType = curSubType == 'Positions' ? Object.keys(graphsObj[curGraph][curSubType][curDubType])[0] : null;
 
     let iqOffset = 0;
     const tables = [
         "Win Percentages",
-        "Points",
+        "Scoring",
         "Par Records",
         "Transactions",
         "Season Highs",
@@ -520,128 +696,90 @@
         tables.unshift('Lineup IQs');
         curTableDesc = 'lineupIQs.iq';
     }
-    const changeTable = (newGraph) => {
-        switch (newGraph) {
-            case 0 - iqOffset:
-            case (5 + (99 * iqOffset)):
-                curTable = 0;
-                break;
-            case 1 - iqOffset:
-            case 2 - iqOffset:
+
+    let oldGraph = curGraph;
+    const changeTable = (newGraph, newSubType, newDubType, newPosType) => {
+       
+       
+        if(newGraph != oldGraph) {
+            curSubType = 'Overall';
+            curDubType = Object.keys(graphsObj[newGraph][curSubType])[0];
+            curPosType = curSubType == 'Positions' ? Object.keys(graphsObj[newGraph][curSubType][curDubType])[0] : null;
+            newSubType = curSubType;
+            newDubType = curDubType;
+            newPosType = curPosType;
+            oldGraph = newGraph;
+        }
+        if(newGraph == 'Matchups') {
+            if(newSubType == 'Overall') {
                 curTable = 1 - iqOffset;
-                break;
-            case 3 - iqOffset:
-                curTable = 2 - iqOffset;
-                break;
-            case 4 - iqOffset:
-                curTable = 3 - iqOffset;
-                break;
-            case 6 - (2 * iqOffset):
-            case 7 - (2 * iqOffset):
-                curTable = 4 - iqOffset;
-                break;
-	         case 8 - (2 * iqOffset):
-		        if(curTable == 5 - iqOffset || curTable == 6 - iqOffset) {
-		            break;
-		        }
-		        curTable = 5 - iqOffset;
-		        break;			
-            case 9 - (2 * iqOffset):
-		        if(curTable == 7 - iqOffset || curTable == 8 - iqOffset) {
-		            break;
-		        }
-                curTable = 7 - iqOffset;
-                break;
-            case 10 - (2 * iqOffset):
+            } else if(newSubType == 'EPE') {
                 curTable = 9 - iqOffset;
-                break;
-            case 11 - (2 * iqOffset):
-                curTable = 10 - iqOffset;
-                break;
-            case 12 - (2 * iqOffset):
-                curTable = 11 - iqOffset;
-                break;
-            case 13 - (2 * iqOffset):
-                curTable = 12 - iqOffset;
-                break;
-            default:
+            } else if(newSubType == 'Median') {
+                curTable = 3 - iqOffset;
+            }
+        } else if(newGraph == 'Scoring') {
+            if(newSubType == 'Overall') {
+                curTable = 2 - iqOffset;
+            } else if(newSubType == 'Lineups') {
                 curTable = 0;
-                break;
+            } else if(newSubType == 'Seasons') {
+                if(newDubType == 'Best') {
+                    curTable = 5 - iqOffset;
+                } else if(newDubType == 'Worst') {
+                    curTable = 6 - iqOffset;
+                }
+            } else if(newSubType == 'Weeks') {
+                if(newDubType == 'Best') {
+                    curTable = 7 - iqOffset;
+                } else if(newDubType == 'Worst') {
+                    curTable = 8 - iqOffset;
+                }
+            }
+        } else if(newGraph == 'Players') {
+            if(newSubType == 'Overall') {
+                if(newDubType == 'Starters') {
+                    curTable = 13 - iqOffset;
+                } else if(newDubType == 'Bench') {
+                    curTable = 14 - iqOffset;
+                }
+            } else if(newSubType == 'Starters') {
+                if(newDubType == 'Seasons') {
+                    curTable = 10 - iqOffset;
+                } else if(newDubType == 'Weeks') {
+                    curTable = 11 - iqOffset;
+                }
+            } else if(newSubType == 'Bench') {
+                if(newDubType == 'Weeks') {
+                    curTable = 12 - iqOffset;
+                }
+            } else if(newSubType == 'Positions') {
+                for(const position of playerPosGraphs) {
+                    if(newPosType == 'Seasons') {
+                        if(newDubType == position.position) {
+                            curTable = 15 - iqOffset + 2 * playerPosGraphs.indexOf(position);
+                            break;
+                        }
+                    } else if(newPosType == 'Weeks') {
+                        if(newDubType == position.position) {
+                            curTable = 16 - iqOffset + 2 * playerPosGraphs.indexOf(position);
+                            break;
+                        }
+                    }
+                }
+            }
+        } else if(newGraph == 'Transactions') {
+            if(newSubType == 'Overall') {
+                curTable = 4 - iqOffset;
+            } else if(newSubType == 'Trades') {
+                curTable = 4 - iqOffset;
+            } else if(newSubType == 'Waivers') {
+                curTable = 4 - iqOffset;
+            }
         }
     }
 
-    const changeGraph = (newTable) => {
-        switch (newTable) {
-            case 0 - iqOffset:
-                if(curGraph == 0 || curGraph == 5) {
-                    break;
-                }
-                curGraph = 0;
-                curTableDesc = 'lineupIQs.iq';
-                break;
-            case 1 - iqOffset:
-                if(curGraph == 1 - iqOffset || curGraph == 2 - iqOffset) {
-                    break;
-                }
-                curTableDesc = 'winPercentages.wins';
-                curGraph = 1 - iqOffset;
-                break;
-            case 2 - iqOffset:
-                curTableDesc = 'fptsHistories.fptspg';
-                curGraph = 3 - iqOffset;
-                break;
-            case 3 - iqOffset:
-                curTableDesc = 'medianRecords.medianPerc';
-                curGraph = 4 - iqOffset;
-                break;
-            case 4 - iqOffset:
-                if(curGraph == 6 - (2 * iqOffset) || curGraph == 7 - (2 * iqOffset)) {
-                    break;
-                }
-                curTableDesc = 'tradesData.trades';
-                curGraph = 6 - (2 * iqOffset);
-                break;
-            case 5 - iqOffset:
-                curTableDesc = 'seasonBests.fptspg';
-                curGraph = 8 - (2 * iqOffset);
-                break;
-            case 6 - iqOffset:
-                curTableDesc = 'seasonWorsts.fptspg';
-                curGraph = 8 - (2 * iqOffset);
-                break;
-            case 7 - iqOffset:
-                curTableDesc = 'weekBests.fpts';
-                curGraph = 9 - (2 * iqOffset);
-                break;
-            case 8 - iqOffset:
-                curTableDesc = 'weekWorsts.fpts';
-                curGraph = 9 - (2 * iqOffset);
-                break;
-	        case 9 - iqOffset:
-                curTableDesc = 'sseasonEPERecords.epePerc';
-                curGraph = 10 - (2 * iqOffset);
-                break;
-	        case 10 - iqOffset:
-                curTableDesc = 'playerSeasonBests.playerPPStart';
-                curGraph = 11 - (2 * iqOffset);
-                break;
-            case 11 - iqOffset:
-                curTableDesc = 'playerWeekBests.playerPoints';
-                curGraph = 12 - (2 * iqOffset);
-                break;
-            case 12 - iqOffset:
-                curTableDesc = 'playerWeekMissedBests.benchPoints';
-                curGraph = 13 - (2 * iqOffset);
-                break;
-            default:
-                curTableDesc = 'lineupIQs.iq';
-                curGraph = 0;
-                break;
-        }
-    }
-
-    $: changeTable(curGraph);
-    $: changeGraph(curTable);
+    $: changeTable(curGraph, curSubType, curDubType, curPosType);
 
     let displayWeekRecord = 'high';
     const changeWeekRecord = (weekType) => {
@@ -705,15 +843,21 @@
     $: changePositionRecord(displayPositionRecord);
 
     let rand = 1;
+    let curSort = {
+        sort: null,
+        inverted: false,
+    };
     const changeSort = (arrayName, recordArray, newKey, inverted = false) => {
         let newRecordArray = recordArray;
         if(displayObject[selection][arrayName].sort == newKey) {
             if(displayObject[selection][arrayName].inverted == false) {
                 newRecordArray = newRecordArray.sort((a, b) => a[newKey] - b[newKey]);
                 displayObject[selection][arrayName].inverted = true;
+                curSort.inverted = true;
             } else {
                 newRecordArray = newRecordArray.sort((a, b) => b[newKey] - a[newKey]);
                 displayObject[selection][arrayName].inverted = false;
+                curSort.inverted = false;
             }
         } else {
             if(inverted == false) {
@@ -725,6 +869,7 @@
             }
         } 
         rand = rand * Math.random();
+        curSort.sort = newKey;
     }
     
     let innerWidth;
@@ -845,7 +990,7 @@
         position: relative;
         display: flex;
         flex-wrap: nowrap;
-        width: 1300%;
+        width: 1500%;
 		transition: margin-left 0.8s;
     }
 
@@ -1197,6 +1342,60 @@
         margin: 2px 0 0 7px;
         font-size: 1.05em;
         cursor: pointer;
+    }
+
+    .QB {
+		background-color: var(--QB);
+	}
+
+	.WR {
+		background-color: var(--WR);
+	}
+
+	.RB {
+		background-color: var(--RB);
+	}
+
+	.TE {
+		background-color: var(--TE);
+	}
+
+	.K {
+		background-color: var(--K);
+	}
+
+	.DEF {
+		background-color: var(--DEF);
+	}
+
+    .DL, .DE, .DT {
+        background-color: var(--DL);
+    }
+
+    .LB {
+        background-color: var(--LB);
+    }
+
+    .DB, .CB, .SS, .FS {
+        background-color: var(--DB);
+    }
+
+    .pos {
+        display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 7px;
+        max-width: 28px;
+        min-width: 28px;
+		height: 28px;
+    }
+
+    .teamAvatar {
+        display: inline-flex;
+		align-items: center;
+		justify-content: center;
+        height: 35px;
+        max-height: 35px;
     }
 
 </style>
@@ -1627,9 +1826,15 @@
                                 <Cell class="playerAvatar playerInfo" style="{playerATWeekTOP.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATWeekTOP.playerInfo.fn} {playerATWeekTOP.playerInfo.ln}</Cell>
                                 {#if displayPositionRecord == 'ALL'}
-                                    <Cell class="center">{playerATWeekTOP.playerInfo.pos}</Cell>
+                                    <Cell class="center">
+                                        <div class="pos {playerATWeekTOP.playerInfo.pos}">
+                                            {playerATWeekTOP.playerInfo.pos}
+                                        </div>
+                                    </Cell>
                                 {/if}
-                                <Cell class="center">{playerATWeekTOP.playerInfo.pos == 'DEF' ? playerATWeekTOP.playerID : playerATWeekTOP.nflInfo && playerATWeekTOP.nflInfo.espn.t[playerATWeekTOP.year].length > 1 ? nflTeams.find(t => t.espnAbbreviation == playerATWeekTOP.nflInfo.espn.t[playerATWeekTOP.year].find(w => w.firstWeek <= playerATWeekTOP.week && w.lastWeek >= playerATWeekTOP.week).team).sleeperID : playerATWeekTOP.playerInfo.wi[playerATWeekTOP.year][playerATWeekTOP.week] && playerATWeekTOP.playerInfo.wi[playerATWeekTOP.year][playerATWeekTOP.week].t ? playerATWeekTOP.playerInfo.wi[playerATWeekTOP.year][playerATWeekTOP.week].t : playerATWeekTOP.playerInfo.wi[playerATWeekTOP.year][1] && playerATWeekTOP.playerInfo.wi[playerATWeekTOP.year][1].t ? playerATWeekTOP.playerInfo.wi[playerATWeekTOP.year][1].t : nflTeams.find(t => t.espnAbbreviation == playerATWeekTOP.nflInfo.espn.t[playerATWeekTOP.year][0]).sleeperID}</Cell>
+                                <Cell class="center">
+                                    <img class="teamAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{playerATWeekTOP.team.toLowerCase()}.png" alt="{playerATWeekTOP.team}">
+                                </Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATWeekTOP.recordManID)}>
                                     {playerATWeekTOP.manager.realname}
                                     {#if !allTime}
@@ -1702,9 +1907,15 @@
                                     <Cell class="playerAvatar playerInfo" style="{playerATSeasonTOP.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                     <Cell class="left">{playerATSeasonTOP.playerInfo.fn} {playerATSeasonTOP.playerInfo.ln}</Cell>
                                     {#if displayPositionRecord == 'ALL'}
-                                        <Cell class="center">{playerATSeasonTOP.playerInfo.pos}</Cell>
+                                        <Cell class="center">
+                                            <div class="pos {playerATSeasonTOP.playerInfo.pos}">
+                                                {playerATSeasonTOP.playerInfo.pos}
+                                            </div>
+                                        </Cell>
                                     {/if}
-                                    <Cell class="center">{playerATSeasonTOP.playerInfo.pos == 'DEF' ? playerATSeasonTOP.playerID : playerATSeasonTOP.nflInfo && playerATSeasonTOP.nflInfo.espn.t[playerATSeasonTOP.year].length > 1 ? nflTeams.find(t => t.espnAbbreviation == playerATSeasonTOP.nflInfo.espn.t[playerATSeasonTOP.year].find(w => w.lastWeek == 100).team).sleeperID : playerATSeasonTOP.playerInfo.wi[playerATSeasonTOP.year][playerATSeasonTOP.week] && playerATSeasonTOP.playerInfo.wi[playerATSeasonTOP.year][playerATSeasonTOP.week].t ? playerATSeasonTOP.playerInfo.wi[playerATSeasonTOP.year][playerATSeasonTOP.week].t : playerATSeasonTOP.playerInfo.wi[playerATSeasonTOP.year][1] && playerATSeasonTOP.playerInfo.wi[playerATSeasonTOP.year][1].t ? playerATSeasonTOP.playerInfo.wi[playerATSeasonTOP.year][1].t : nflTeams.find(t => t.espnAbbreviation == playerATSeasonTOP.nflInfo.espn.t[playerATSeasonTOP.year][0]).sleeperID}</Cell>
+                                    <Cell class="center">
+                                        <img class="teamAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{playerATSeasonTOP.team.toLowerCase()}.png" alt="{playerATSeasonTOP.team}">
+                                    </Cell>
                                     <Cell class="cellName" on:click={() => gotoManager(playerATSeasonTOP.recordManID)}>
                                         {playerATSeasonTOP.manager.realname}
                                         {#if !allTime}
@@ -1760,9 +1971,15 @@
                                 <Cell class="playerAvatar playerInfo" style="{playerATWeekMissedTOP.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATWeekMissedTOP.playerInfo.fn} {playerATWeekMissedTOP.playerInfo.ln}</Cell>
                                 {#if displayPositionRecord == 'ALL'}
-                                    <Cell class="center">{playerATWeekMissedTOP.playerInfo.pos}</Cell>
+                                    <Cell class="center">
+                                        <div class="pos {playerATWeekMissedTOP.playerInfo.pos}">
+                                            {playerATWeekMissedTOP.playerInfo.pos}
+                                        </div>
+                                    </Cell>
                                 {/if}
-                                <Cell class="center">{playerATWeekMissedTOP.playerInfo.pos == 'DEF' ? playerATWeekMissedTOP.playerID : playerATWeekMissedTOP.nflInfo && playerATWeekMissedTOP.nflInfo.espn.t[playerATWeekMissedTOP.year].length > 1 ? nflTeams.find(t => t.espnAbbreviation == playerATWeekMissedTOP.nflInfo.espn.t[playerATWeekMissedTOP.year].find(w => w.firstWeek <= playerATWeekMissedTOP.week && w.lastWeek >= playerATWeekMissedTOP.week).team).sleeperID : playerATWeekMissedTOP.playerInfo.wi[playerATWeekMissedTOP.year][playerATWeekMissedTOP.week] && playerATWeekMissedTOP.playerInfo.wi[playerATWeekMissedTOP.year][playerATWeekMissedTOP.week].t ? playerATWeekMissedTOP.playerInfo.wi[playerATWeekMissedTOP.year][playerATWeekMissedTOP.week].t : playerATWeekMissedTOP.playerInfo.wi[playerATWeekMissedTOP.year][1] && playerATWeekMissedTOP.playerInfo.wi[playerATWeekMissedTOP.year][1].t ? playerATWeekMissedTOP.playerInfo.wi[playerATWeekMissedTOP.year][1].t : nflTeams.find(t => t.espnAbbreviation == playerATWeekMissedTOP.nflInfo.espn.t[playerATWeekMissedTOP.year][0]).sleeperID}</Cell>
+                                <Cell class="center">
+                                    <img class="teamAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{playerATWeekMissedTOP.team.toLowerCase()}.png" alt="{playerATWeekMissedTOP.team}">
+                                </Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATWeekMissedTOP.recordManID)}>
                                     {playerATWeekMissedTOP.manager.realname}
                                     {#if !allTime}
@@ -1788,10 +2005,10 @@
 </div>
 
 
-<BarChart maxWidth={innerWidth} {graphs} {displayObject} {leagueManagers} {allManagers} bind:displayYear={displayYear} bind:selection={selection} bind:allTime={allTime} bind:curGraph={curGraph} bind:curTableDesc={curTableDesc} />
+<BarChart maxWidth={innerWidth} {graphsObj} {displayObject} {leagueManagers} {allManagers} bind:displayYear={displayYear} bind:selection={selection} bind:allTime={allTime} bind:curGraph={curGraph} bind:curTableDesc={curTableDesc} bind:curSubType={curSubType} bind:curDubType={curDubType} bind:curPosType={curPosType} bind:curSort={curSort} />
 
 <div class="rankingHolder">
-    <div class="rankingInner" style="margin-left: -{100 * curTable}%;">
+    <div class="rankingInner" style="margin-left: -{100 * curTable}%; width: {1500 + 200*numPositions}%;">
         {#if lineupIQs[0]?.potentialPoints}
             <div class="rankingTableWrapper">
                 <DataTable class="rankingTable">
@@ -1867,7 +2084,7 @@
                             W
                             <Icon class="material-icons changeSort"on:click={() => changeSort('winPercentages', winPercentages, 'wins')}>filter_list</Icon>
                         </Cell>
-                            {#if showTies}
+                            {#if showTies.regular == true}
                                 <Cell class="header">
                                     T
                                     <Icon class="material-icons changeSort"on:click={() => changeSort('winPercentages', winPercentages, 'ties')}>filter_list</Icon>
@@ -1894,9 +2111,9 @@
                                 </Cell>
                                 <Cell class="center">{round(winPercentage.winPerc)}%</Cell>
                                 <Cell class="center">{winPercentage.wins}</Cell>
-                                    {#if showTies}
-                                        <Cell class="center">{winPercentage.ties}</Cell>
-                                    {/if}
+                                {#if showTies.regular == true}
+                                    <Cell class="center">{winPercentage.ties}</Cell>
+                                {/if}
                                 <Cell class="center">{winPercentage.losses}</Cell>			
                             </Row>
                         {/if}
@@ -1978,12 +2195,12 @@
                             W
                             <Icon class="material-icons changeSort"on:click={() => changeSort('medianRecords', medianRecords, 'weekWinners')}>filter_list</Icon>
                         </Cell>
-                        <!-- {#if showTies} -->
+                        {#if showTies.median == true}
                             <Cell class="header">
                                 T
                                 <Icon class="material-icons changeSort"on:click={() => changeSort('medianRecords', medianRecords, 'weekTies')}>filter_list</Icon>
                             </Cell>
-                        <!-- {/if} -->
+                        {/if}
                         <Cell class="header">
                             L
                             <Icon class="material-icons changeSort"on:click={() => changeSort('medianRecords', medianRecords, 'weekLosers')}>filter_list</Icon>
@@ -2005,9 +2222,9 @@
                                 </Cell>			
                                 <Cell class="center">{round(medianRecord.medianPerc)}%</Cell>
                                 <Cell class="center">{medianRecord.weekWinners}</Cell>
-                                <!-- {#if showTies} -->
+                                {#if showTies.median == true}
                                     <Cell class="center">{medianRecord.weekTies}</Cell>
-                                <!-- {/if} -->
+                                {/if}
                                 <Cell class="center">{medianRecord.weekLosers}</Cell>
                             </Row>
                         {/if}
@@ -2284,12 +2501,12 @@
                                 W
                                 <Icon class="material-icons changeSort"on:click={() => changeSort('seasonEPERecords', seasonEPERecords, 'epeWins')}>filter_list</Icon>
                             </Cell>
-                            <!-- {#if showTies} -->
+                            {#if showTies.epe == true}
                                 <Cell class="header">
                                     T
                                     <Icon class="material-icons changeSort"on:click={() => changeSort('seasonEPERecords', seasonEPERecords, 'epeTies')}>filter_list</Icon>
                                 </Cell>
-                            <!-- {/if} -->
+                            {/if}
                             <Cell class="header">
                                 L
                                 <Icon class="material-icons changeSort"on:click={() => changeSort('seasonEPERecords', seasonEPERecords, 'epeLosses')}>filter_list</Icon>
@@ -2319,9 +2536,9 @@
                                     </Cell>			
                                     <Cell class="center">{round(allTimeEPERecord.epePerc)}%</Cell>
                                     <Cell class="center">{allTimeEPERecord.epeWins}</Cell>
-                                    <!-- {#if showTies} -->
+                                    {#if showTies.epe == true}
                                         <Cell class="center">{allTimeEPERecord.epeTies}</Cell>
-                                    <!-- {/if} -->
+                                    {/if}
                                     <Cell class="center">{allTimeEPERecord.epeLosses}</Cell>
                                     <Cell class="center">{allTimeEPERecord.topScores}</Cell>
                                     <Cell class="center">{allTimeEPERecord.bottomScores}</Cell>
@@ -2352,9 +2569,9 @@
                             <Cell class="header">POS</Cell>
                             <Cell class="header">NFL Team</Cell>
                             <Cell class="header">Manager</Cell>
-                                {#if allTime}
-                                    <Cell class="header">Year</Cell>
-                                {/if}
+                            {#if allTime}
+                                <Cell class="header">Year</Cell>
+                            {/if}
                             <Cell class="header">
                                 Led Team
                                 <Icon class="material-icons changeSort"on:click={() => changeSort('playerSeasonBests', playerSeasonBests, 'topStarters')}>filter_list</Icon>
@@ -2386,17 +2603,23 @@
                                     <Cell class="rank">{ix + 1}</Cell>
                                     <Cell class="playerAvatar playerInfo" style="{playerATSeasonBest.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                     <Cell class="left">{playerATSeasonBest.playerInfo.fn} {playerATSeasonBest.playerInfo.ln}</Cell>
-                                    <Cell class="center">{playerATSeasonBest.playerInfo.pos}</Cell>
-                                    <Cell class="center">{playerATSeasonBest.playerInfo.pos == 'DEF' ? playerATSeasonBest.playerID : playerATSeasonBest.nflInfo && playerATSeasonBest.nflInfo.espn.t[playerATSeasonBest.year].length > 1 ? nflTeams.find(t => t.espnAbbreviation == playerATSeasonBest.nflInfo.espn.t[playerATSeasonBest.year].find(w => w.lastWeek == 100).team).sleeperID : playerATSeasonBest.playerInfo.wi[playerATSeasonBest.year][playerATSeasonBest.week] && playerATSeasonBest.playerInfo.wi[playerATSeasonBest.year][playerATSeasonBest.week].t ? playerATSeasonBest.playerInfo.wi[playerATSeasonBest.year][playerATSeasonBest.week].t : playerATSeasonBest.playerInfo.wi[playerATSeasonBest.year][1] && playerATSeasonBest.playerInfo.wi[playerATSeasonBest.year][1].t ? playerATSeasonBest.playerInfo.wi[playerATSeasonBest.year][1].t : nflTeams.find(t => t.espnAbbreviation == playerATSeasonBest.nflInfo.espn.t[playerATSeasonBest.year][0]).sleeperID}</Cell>
+                                    <Cell class="center">
+                                        <div class="pos {playerATSeasonBest.playerInfo.pos}">
+                                            {playerATSeasonBest.playerInfo.pos}
+                                        </div>
+                                    </Cell>
+                                    <Cell class="center">
+                                        <img class="teamAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{playerATSeasonBest.team.toLowerCase()}.png" alt="{playerATSeasonBest.team}">
+                                    </Cell>
                                     <Cell class="cellName" on:click={() => gotoManager(playerATSeasonBest.recordManID)}>
                                         {playerATSeasonBest.manager.realname}
                                         {#if !allTime}
                                             <div class="fantasyTeamName">({playerATSeasonBest.manager.name})</div>
                                         {/if}
                                     </Cell>
-                                        {#if allTime}
-                                            <Cell class="center">{playerATSeasonBest.year}</Cell>
-                                        {/if}
+                                    {#if allTime}
+                                        <Cell class="center">{playerATSeasonBest.year}</Cell>
+                                    {/if}
                                     <Cell class="center">{playerATSeasonBest.topStarters}</Cell>
                                     <Cell class="center">{round(playerATSeasonBest.starterRankAVG)}</Cell>
                                     <Cell class="center">{playerATSeasonBest.weeksStarted} / {playerATSeasonBest.weeksOwned}</Cell>
@@ -2429,9 +2652,9 @@
                             <Cell class="header">POS</Cell>
                             <Cell class="header">NFL Team</Cell>
                             <Cell class="header">Manager</Cell>
-                                {#if allTime}
-                                    <Cell class="header">Year</Cell>
-                                {/if}
+                            {#if allTime}
+                                <Cell class="header">Year</Cell>
+                            {/if}
                             <Cell class="header">Week</Cell>
                             <Cell class="header">PF</Cell>
                         </Row>
@@ -2442,17 +2665,23 @@
                                 <Cell class="rank">{ix + 1}</Cell>
                                 <Cell class="playerAvatar playerInfo" style="{playerATWeekBest.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATWeekBest.playerInfo.fn} {playerATWeekBest.playerInfo.ln}</Cell>
-                                <Cell class="center">{playerATWeekBest.playerInfo.pos}</Cell>
-                                <Cell class="center">{playerATWeekBest.playerInfo.pos == 'DEF' ? playerATWeekBest.playerID : playerATWeekBest.nflInfo && playerATWeekBest.nflInfo.espn.t[playerATWeekBest.year].length > 1 ? nflTeams.find(t => t.espnAbbreviation == playerATWeekBest.nflInfo.espn.t[playerATWeekBest.year].find(w => w.firstWeek <= playerATWeekBest.week && w.lastWeek >= playerATWeekBest.week).team).sleeperID : playerATWeekBest.playerInfo.wi[playerATWeekBest.year][playerATWeekBest.week] && playerATWeekBest.playerInfo.wi[playerATWeekBest.year][playerATWeekBest.week].t ? playerATWeekBest.playerInfo.wi[playerATWeekBest.year][playerATWeekBest.week].t : playerATWeekBest.playerInfo.wi[playerATWeekBest.year][1] && playerATWeekBest.playerInfo.wi[playerATWeekBest.year][1].t ? playerATWeekBest.playerInfo.wi[playerATWeekBest.year][1].t : nflTeams.find(t => t.espnAbbreviation == playerATWeekBest.nflInfo.espn.t[playerATWeekBest.year][0]).sleeperID}</Cell>
+                                <Cell class="center">
+                                    <div class="pos {playerATWeekBest.playerInfo.pos}">
+                                        {playerATWeekBest.playerInfo.pos}
+                                    </div>
+                                </Cell>
+                                <Cell class="center">
+                                    <img class="teamAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{playerATWeekBest.team.toLowerCase()}.png" alt="{playerATWeekBest.team}">
+                                </Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATWeekBest.recordManID)}>
                                     {playerATWeekBest.manager.realname}
                                     {#if !allTime}
                                         <div class="fantasyTeamName">({playerATWeekBest.manager.name})</div>
                                     {/if}
                                 </Cell>
-                                    {#if allTime}
-                                        <Cell class="center">{playerATWeekBest.year}</Cell>
-                                    {/if}
+                                {#if allTime}
+                                    <Cell class="center">{playerATWeekBest.year}</Cell>
+                                {/if}
                                 <Cell class="center">{playerATWeekBest.week}</Cell>
                                 <Cell class="center">{round(playerATWeekBest.playerPoints)}</Cell>
                             </Row>
@@ -2494,8 +2723,14 @@
                                 <Cell class="rank">{ix + 1}</Cell>
                                 <Cell class="playerAvatar playerInfo" style="{playerATWeekMissedBest.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
                                 <Cell class="left">{playerATWeekMissedBest.playerInfo.fn} {playerATWeekMissedBest.playerInfo.ln}</Cell>
-                                <Cell class="center">{playerATWeekMissedBest.playerInfo.pos}</Cell>
-                                <Cell class="center">{playerATWeekMissedBest.playerInfo.pos == 'DEF' ? playerATWeekMissedBest.playerID : playerATWeekMissedBest.nflInfo && playerATWeekMissedBest.nflInfo.espn.t[playerATWeekMissedBest.year].length > 1 ? nflTeams.find(t => t.espnAbbreviation == playerATWeekMissedBest.nflInfo.espn.t[playerATWeekMissedBest.year].find(w => w.firstWeek <= playerATWeekMissedBest.week && w.lastWeek >= playerATWeekMissedBest.week).team).sleeperID : playerATWeekMissedBest.playerInfo.wi[playerATWeekMissedBest.year][playerATWeekMissedBest.week] && playerATWeekMissedBest.playerInfo.wi[playerATWeekMissedBest.year][playerATWeekMissedBest.week].t ? playerATWeekMissedBest.playerInfo.wi[playerATWeekMissedBest.year][playerATWeekMissedBest.week].t : playerATWeekMissedBest.playerInfo.wi[playerATWeekMissedBest.year][1] && playerATWeekMissedBest.playerInfo.wi[playerATWeekMissedBest.year][1].t ? playerATWeekMissedBest.playerInfo.wi[playerATWeekMissedBest.year][1].t : nflTeams.find(t => t.espnAbbreviation == playerATWeekMissedBest.nflInfo.espn.t[playerATWeekMissedBest.year][0]).sleeperID}</Cell>
+                                <Cell class="center">
+                                    <div class="pos {playerATWeekMissedBest.playerInfo.pos}">
+                                        {playerATWeekMissedBest.playerInfo.pos}
+                                    </div>
+                                </Cell>
+                                <Cell class="center">
+                                    <img class="teamAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{playerATWeekMissedBest.team.toLowerCase()}.png" alt="{playerATWeekMissedBest.team}">
+                                </Cell>
                                 <Cell class="cellName" on:click={() => gotoManager(playerATWeekMissedBest.recordManID)}>
                                     {playerATWeekMissedBest.manager.realname}
                                     {#if !allTime}
@@ -2513,39 +2748,253 @@
                 </DataTable>
             {/if}
         </div>
-    </div>
-</div>
-<div class="recordsWrap">
-    <div class="columnWrap" style="width: 98%; flex-wrap: wrap;">
-        <div class="buttonHolder">
-            <Group variant="outlined">
-                {#each tables as table, ix}
-                    {#if (table == "Season Highs" || table == "Season Lows") && !allTime}
-                        <div></div>
-                    {:else}
-                        {#if ix < 6}
-                            <Button class="selectionButtons" on:click={() => curTable = ix} variant="{curTable == ix ? "raised" : "outlined"}">
-                                <Label>{table}</Label>
-                            </Button>
-                        {/if}
-                    {/if}
-                {/each}
-            </Group>
-            <br />
-            <Group variant="outlined">
-                {#each tables as table, ix}
-                    {#if (table == "Season Highs" || table == "Season Lows") && !allTime}
-                        <div></div>
-                    {:else}
-                        {#if ix > 5}
-                            <Button class="selectionButtons" on:click={() => curTable = ix} variant="{curTable == ix ? "raised" : "outlined"}">
-                                <Label>{table}</Label>
-                            </Button>
-                        {/if}
-                    {/if}
-                {/each}
-            </Group>
+
+        <div class="rankingTableWrapper">
+            {#if playerOverallBests && playerOverallBests.length}
+                <DataTable class="rankingTable">
+                    <Head>
+                        <Row>
+                            <Cell class="header" colspan=10>
+                                <p>
+                                    {#if allTime}
+                                        Highest Cumulative Scorers – Players<br>
+                                    {:else}
+                                        Most Starting & Bench Points - Players<br>
+                                    {/if}
+                                    {prefix} – {recordPrefix} 
+                                </p>
+                            </Cell>  
+                        </Row>
+                        <Row>
+                            <Cell class="header rank"></Cell>
+                            <Cell class="header rank" />
+                            <Cell class="header">Player</Cell>
+                            <Cell class="header">POS</Cell>
+                            <Cell class="header">NFL Team</Cell>
+                            <Cell class="header">Manager</Cell>
+                            {#if allTime}
+                                <Cell class="header">Years</Cell>
+                            {/if}
+                            <Cell class="header">{allTime ? 'Starts' : 'Rostered'}</Cell>
+                            <Cell class="header">PF</Cell>
+                            <Cell class="header">PPG</Cell>
+                        </Row>
+                    </Head>
+                    <Body>
+                        {#each playerOverallBests as playerOverallBest, ix}
+                            <Row>
+                                <Cell class="rank">{ix + 1}</Cell>
+                                <Cell class="playerAvatar playerInfo" style="{playerOverallBest.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
+                                <Cell class="left">{playerOverallBest.playerInfo.fn} {playerOverallBest.playerInfo.ln}</Cell>
+                                <Cell class="center">
+                                    <div class="pos {playerOverallBest.playerInfo.pos}">
+                                        {playerOverallBest.playerInfo.pos}
+                                    </div>
+                                </Cell>
+                                <Cell class="center">
+                                    <img class="teamAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{playerOverallBest.team.toLowerCase()}.png" alt="{playerOverallBest.team}">
+                                </Cell>
+                                <Cell class="cellName" on:click={() => gotoManager(playerOverallBest.recordManID)}>
+                                    {playerOverallBest.manager.realname}
+                                    {#if !allTime}
+                                        <div class="fantasyTeamName">({playerOverallBest.manager.name})</div>
+                                    {/if}
+                                </Cell>
+                                {#if allTime}
+                                    <Cell class="center">{playerOverallBest.yearsOwned}</Cell>
+                                {/if}
+                                <Cell class="center">{allTime ? playerOverallBest.weeksStarted : playerOverallBest.weeksOwned}</Cell>
+                                <Cell class="center">{allTime ? round(playerOverallBest.playerPoints) : round(playerOverallBest.totalFpts)}</Cell>
+                                <Cell class="center">{allTime ? round(playerOverallBest.playerPPStart) : round(playerOverallBest.totalFpts / playerOverallBest.weeksOwned)}</Cell>
+                            </Row>
+                        {/each}
+                    </Body>
+                </DataTable>
+            {/if}
         </div>
+
+        <div class="rankingTableWrapper">
+            {#if playerOverallMissedBests && playerOverallMissedBests.length}
+                <DataTable class="rankingTable">
+                    <Head>
+                        <Row>
+                            <Cell class="header" colspan=10>
+                                <p>
+                                    {#if allTime}
+                                        Top Cumulative Benchwarmers – Players<br>
+                                    {:else}
+                                        Most Starting & Bench Points - Players<br>
+                                    {/if}
+                                    {prefix} – {recordPrefix} 
+                                </p>
+                            </Cell>  
+                        </Row>
+                        <Row>
+                            <Cell class="header rank"></Cell>
+                            <Cell class="header rank" />
+                            <Cell class="header">Player</Cell>
+                            <Cell class="header">POS</Cell>
+                            <Cell class="header">NFL Team</Cell>
+                            <Cell class="header">Manager</Cell>
+                            {#if allTime}
+                                <Cell class="header">Years</Cell>
+                            {/if}
+                            <Cell class="header">{allTime ? 'Benched' : 'Rostered'}</Cell>
+                            <Cell class="header">BP</Cell>
+                            <Cell class="header">BPPG</Cell>
+                        </Row>
+                    </Head>
+                    <Body>
+                        {#each playerOverallMissedBests as playerOverallMissedBest, ix}
+                            <Row>
+                                <Cell class="rank">{ix + 1}</Cell>
+                                <Cell class="playerAvatar playerInfo" style="{playerOverallMissedBest.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
+                                <Cell class="left">{playerOverallMissedBest.playerInfo.fn} {playerOverallMissedBest.playerInfo.ln}</Cell>
+                                <Cell class="center">
+                                    <div class="pos {playerOverallMissedBest.playerInfo.pos}">
+                                        {playerOverallMissedBest.playerInfo.pos}
+                                    </div>
+                                </Cell>
+                                <Cell class="center">
+                                    <img class="teamAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{playerOverallMissedBest.team.toLowerCase()}.png" alt="{playerOverallMissedBest.team}">
+                                </Cell>
+                                <Cell class="cellName" on:click={() => gotoManager(playerOverallMissedBest.recordManID)}>
+                                    {playerOverallMissedBest.manager.realname}
+                                    {#if !allTime}
+                                        <div class="fantasyTeamName">({playerOverallMissedBest.manager.name})</div>
+                                    {/if}
+                                </Cell>
+                                {#if allTime}
+                                    <Cell class="center">{playerOverallMissedBest.yearsOwned}</Cell>
+                                {/if}
+                                <Cell class="center">{allTime ? playerOverallMissedBest.weeksBenched : playerOverallMissedBest.weeksOwned}</Cell>
+                                <Cell class="center">{allTime ? round(playerOverallMissedBest.benchPoints) : round(playerOverallMissedBest.totalFpts)}</Cell>
+                                <Cell class="center">{allTime ? round(playerOverallMissedBest.benchPPG) : round(playerOverallMissedBest.totalFpts / playerOverallMissedBest.weeksOwned)}</Cell>
+                            </Row>
+                        {/each}
+                    </Body>
+                </DataTable>
+            {/if}
+        </div>
+
+        {#each playerPosGraphs as position}
+            <div class="rankingTableWrapper">
+                {#if position.Seasons.stats && position.Seasons.stats.length}
+                    <DataTable class="rankingTable">
+                        <Head>
+                            <Row>
+                                <Cell class="header" colspan=11>
+                                    <p>
+                                        Best Single-Season Performances - {position.position}<br>
+                                        {prefix} – {recordPrefix} 
+                                    </p>
+                                </Cell>  
+                            </Row>
+                            <Row>
+                                <Cell class="header rank"></Cell>
+                                <Cell class="header rank" />
+                                <Cell class="header">Player</Cell>
+                                {#if position.position != 'DEF'}
+                                    <Cell class="header">NFL Team</Cell>
+                                {/if}
+                                <Cell class="header">Manager</Cell>
+                                {#if allTime}
+                                    <Cell class="header">Year</Cell>
+                                {/if}
+                                <Cell class="header">Led Team</Cell>
+                                <Cell class="header">Avg Rank</Cell>
+                                <Cell class="header">Starts</Cell>
+                                <Cell class="header">PF</Cell>
+                                <Cell class="header">PPG</Cell>
+                            </Row>
+                        </Head>
+                        <Body>
+                            {#each position.Seasons.stats as player, ix}
+                                <Row>
+                                    <Cell class="rank">{ix + 1}</Cell>
+                                    <Cell class="playerAvatar playerInfo" style="{player.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
+                                    <Cell class="left">{player.playerInfo.fn} {player.playerInfo.ln}</Cell>
+                                    {#if position.position != 'DEF'}
+                                        <Cell class="center">
+                                            <img class="teamAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{player.team.toLowerCase()}.png" alt="{player.team}">
+                                        </Cell>
+                                    {/if}
+                                    <Cell class="cellName" on:click={() => gotoManager(player.recordManID)}>
+                                        {player.manager.realname}
+                                        {#if !allTime}
+                                            <div class="fantasyTeamName">({player.manager.name})</div>
+                                        {/if}
+                                    </Cell>
+                                    {#if allTime}
+                                        <Cell class="center">{player.year}</Cell>
+                                    {/if}
+                                    <Cell class="center">{player.topStarters}</Cell>
+                                    <Cell class="center">{round(player.starterRankAVG)}</Cell>
+                                    <Cell class="center">{player.weeksStarted} / {player.weeksOwned}</Cell>
+                                    <Cell class="center">{round(player.playerPoints)}</Cell>
+                                    <Cell class="center">{round(player.playerPPStart)}</Cell>
+                                </Row>
+                            {/each}
+                        </Body>
+                    </DataTable>
+                {/if}
+            </div>
+            <div class="rankingTableWrapper">
+                {#if position.Weeks.stats && position.Weeks.stats.length}
+                    <DataTable class="rankingTable">
+                        <Head>
+                            <Row>
+                                <Cell class="header" colspan=8>
+                                    <p>
+                                        Best Single-Week Performances – {position.position}<br>
+                                        {prefix} – {recordPrefix} 
+                                    </p>
+                                </Cell>  
+                            </Row>
+                            <Row>
+                                <Cell class="header rank"></Cell>
+                                <Cell class="header rank" />
+                                <Cell class="header">Player</Cell>
+                                {#if position.position != 'DEF'}
+                                    <Cell class="header">NFL Team</Cell>
+                                {/if}
+                                <Cell class="header">Manager</Cell>
+                                {#if allTime}
+                                    <Cell class="header">Year</Cell>
+                                {/if}
+                                <Cell class="header">Week</Cell>
+                                <Cell class="header">PF</Cell>
+                            </Row>
+                        </Head>
+                        <Body>
+                            {#each position.Weeks.stats as player, ix}
+                                <Row>
+                                    <Cell class="rank">{ix + 1}</Cell>
+                                    <Cell class="playerAvatar playerInfo" style="{player.avatar}; vertical-align: middle; height: 45px; width: 45px; background-position: center; background-repeat: no-repeat; background-size: auto 45px;" />
+                                    <Cell class="left">{player.playerInfo.fn} {player.playerInfo.ln}</Cell>
+                                    {#if position.position != 'DEF'}
+                                        <Cell class="center">
+                                            <img class="teamAvatar" src="https://sleepercdn.com/images/team_logos/nfl/{player.team.toLowerCase()}.png" alt="{player.team}">
+                                        </Cell>
+                                    {/if}
+                                    <Cell class="cellName" on:click={() => gotoManager(player.recordManID)}>
+                                        {player.manager.realname}
+                                        {#if !allTime}
+                                            <div class="fantasyTeamName">({player.manager.name})</div>
+                                        {/if}
+                                    </Cell>
+                                    {#if allTime}
+                                        <Cell class="center">{player.year}</Cell>
+                                    {/if}
+                                    <Cell class="center">{player.week}</Cell>
+                                    <Cell class="center">{round(player.playerPoints)}</Cell>
+                                </Row>
+                            {/each}
+                        </Body>
+                    </DataTable>
+                {/if}
+            </div>
+        {/each}
     </div>
 </div>
 <div class="headerRow">

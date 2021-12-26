@@ -58,9 +58,9 @@ export const getLeagueTransactions = async (preview, refresh = false) => {
 		});
 	}
 
-	const {transactionsData, prevManagers, currentManagers, currentSeason, waiverBudgets} = await combThroughTransactions(week, leagueID, leagueManagers).catch((err) => { console.error(err); });
+	const {transactionsData, prevManagers, currentManagers, currentSeason, waiverBudgets, playoffStarts} = await combThroughTransactions(week, leagueID, leagueManagers).catch((err) => { console.error(err); });
 
-	const { transactions, totals } = digestTransactions(transactionsData, prevManagers, currentSeason, numberManagers, leagueManagers, waiverBudgets);
+	const { transactions, totals } = digestTransactions(transactionsData, prevManagers, currentSeason, numberManagers, leagueManagers, waiverBudgets, playoffStarts);
 
 	const transactionPackage = {
 		transactions,
@@ -116,6 +116,7 @@ const combThroughTransactions = async (week, currentLeagueID, leagueManagers) =>
 	let currentManagers = null;
 	let currentSeason = null;
 	const waiverBudgets = {};
+	const playoffStarts = {};
 
 	while(currentLeagueID && currentLeagueID != 0) {
 		// gather supporting info simultaneously
@@ -128,9 +129,9 @@ const combThroughTransactions = async (week, currentLeagueID, leagueManagers) =>
 		leagueIDs.push(currentLeagueID);
 
 		const rosters = rosterRes.rosters;
-	
 		const managers = {};
-		let year = parseInt(leagueData.season);
+		const year = parseInt(leagueData.season);
+		playoffStarts[year] = leagueData.settings.playoff_week_start;
 	
 		for(const roster of rosters) {
 			const rosterID = roster.roster_id;
@@ -198,10 +199,10 @@ const combThroughTransactions = async (week, currentLeagueID, leagueManagers) =>
 	const transactionDataPromises = [];
 	
 	for(const transactionRes of transactionRess) {
-			if (!transactionRes.ok) {
-				throw new Error(transactionRes);
-			}
-			transactionDataPromises.push(transactionRes.json());
+		if (!transactionRes.ok) {
+			throw new Error(transactionRes);
+		}
+		transactionDataPromises.push(transactionRes.json());
 	}
 
 	const transactionsDataJson = await waitForAll(...transactionDataPromises).catch((err) => { console.error(err); });
@@ -212,10 +213,10 @@ const combThroughTransactions = async (week, currentLeagueID, leagueManagers) =>
 		transactionsData = transactionsData.concat(transactionDataJson);
 	}
 
-	return {transactionsData, prevManagers, currentManagers, currentSeason, waiverBudgets};
+	return {transactionsData, prevManagers, currentManagers, currentSeason, waiverBudgets, playoffStarts};
 }
 
-const digestTransactions = (transactionsData, prevManagers, currentSeason, numberManagers, leagueManagers, waiverBudgets) => {
+const digestTransactions = (transactionsData, prevManagers, currentSeason, numberManagers, leagueManagers, waiverBudgets, playoffStarts) => {
 	const transactions = [];
 	const failedAdds = {};
 	const totals = {
@@ -287,14 +288,25 @@ const digestTransactions = (transactionsData, prevManagers, currentSeason, numbe
 			// add to league long totals
 			if(!totals.allTime[recordManID]) {
 				totals.allTime[recordManID] = {
-					trade: 0,
-					waiver: 0,
-					outbid: 0,
+					regularSeason: {
+						trade: 0,
+						waiver: 0,
+						outbid: 0,
+					},
+					playoffs: {
+						trade: 0,
+						waiver: 0,
+						outbid: 0,
+					},
 					manager: prevManagers[season][recordManID],
-					recordManID
+					recordManID,
 				};
 			}
-			totals.allTime[recordManID][type]++;
+			if(digestedTransaction.week < playoffStarts[season]) {
+				totals.allTime[recordManID].regularSeason[type]++;
+			} else {
+				totals.allTime[recordManID].playoffs[type]++;
+			}
 			
 			// add to season long totals
 			if(!totals.seasons[season]) {
@@ -302,14 +314,25 @@ const digestTransactions = (transactionsData, prevManagers, currentSeason, numbe
 			}
 			if(!totals.seasons[season][recordManID]) {
 				totals.seasons[season][recordManID] = {
-					trade: 0,
-					waiver: 0,
-					outbid: 0,
+					regularSeason: {
+						trade: 0,
+						waiver: 0,
+						outbid: 0,
+					},
+					playoffs: {
+						trade: 0,
+						waiver: 0,
+						outbid: 0,
+					},
 					manager: prevManagers[season][recordManID],
-					recordManID
+					recordManID,
 				};
 			}
-			totals.seasons[season][recordManID][type]++;
+			if(digestedTransaction.week < playoffStarts[season]) {
+				totals.seasons[season][recordManID].regularSeason[type]++;
+			} else {
+				totals.seasons[season][recordManID].playoffs[type]++;
+			}
 		}
 	}
 
@@ -339,6 +362,7 @@ const digestTransaction = (transaction, prevManagers, currentSeason, leagueManag
 			player: Object.keys(transaction.adds)[0],
 			adds: transaction.adds,
 			date,
+			week: transaction.leg,
 			bid: transaction.settings?.waiver_bid,
 			rosters: transaction.roster_ids,
 			type: 'outbid',
