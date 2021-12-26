@@ -172,7 +172,7 @@
     .awardsCase {
         background-color: var(--fff);
         padding: 0 0 2em;
-        margin: 3em 0 4em;
+        margin: 1.5em 0;
         border-bottom: 1px solid var(--aaa);
         border-top: 1px solid var(--aaa);
         box-shadow: 0 0 8px 4px var(--ccc);

@@ -12,6 +12,7 @@
     import PositionTable from './PositionTable.svelte';
     import TeamTable from './TeamTable.svelte';
     import ManagerRecords from './ManagerRecords.svelte';
+    import ManagerPositionRanks from './ManagerPositionRanks.svelte';
 
     export let manager, managers, rostersData, users, rosterPositions, transactions, currentManagers, prevManagers, awards, records, managerRecords;
 
@@ -425,13 +426,45 @@
     }
 
     .historyProfile {
-        padding: 1%;
         position: relative;
         display: inline-flex;
         min-height: 40em;
-        width: 98%;
+        width: 100%;
 		background-color: var(--gcBox);
 		box-shadow: inset 0px 3px 3px -2px rgb(0 0 0 / 40%), inset 0px 3px 4px 0px rgb(0 0 0 / 28%), inset 0px 1px 8px 0px rgb(0 0 0 / 24%);
+    }
+
+    .profileRow {
+        position: relative;
+        display: inline-flex;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .seasonHistoryRow {
+        position: relative;
+        display: inline-flex;
+        width: 98%;
+        height: 2.5em;
+        align-items: center;
+        border: 0.25px solid var(--gcBanner);
+        border-radius: 0.65em;
+        margin: 0.5% 0;
+    }
+
+    .seasonHistoryContent {
+        display: inline-flex;
+        position: relative;
+        justify-content: flex-start;
+        margin: 0 1%;
+        font-size: 0.85em;
+    }
+
+    .winRecordWrap {
+        display: inline-flex;
+        position: relative;
+        width: 100%; 
     }
 
     .columnWrap {
@@ -445,12 +478,13 @@
     }
 
     .seasonHistory {
-        width: 94%;
+        width: 100%;
         justify-content: center;
+        align-items: center;
+        flex-direction: column;
         display: inline-flex;
         position: relative;
         background-color: var(--gcComponent);
-        margin: 2% 0;
     }
 
     .overallHistory {
@@ -480,31 +514,6 @@
 
     .summaryChild {
         font-style: italic;
-    }
-
-    .summaries {
-        display: flex;
-        justify-content: space-evenly;
-        align-items: center;
-        vertical-align: center;
-        background-color: var(--f3f3f3);
-        width: 50%;
-        margin: 0 0;
-    }
-
-    .summaries span {
-        color: #ffffff;
-        font-size: 0.9em;
-    }
-
-    .summariesChild {
-        font-style: bold;
-    }
-
-    .summariesChildMiddle {
-        font-style: bold;
-        border-left: var(--eee);
-        border-right: var(--eee);
     }
 
     .rosterContainer {
@@ -729,164 +738,90 @@
         <div class="historyProfile">
             <div class="columnWrap">
                 <div class="seasonHistory">
+                    <div class="profileRow" style="font-size: 1.5em; font-weight 420; padding: 2%;">Season History</div>
                     {#if seasons && seasons.length}
-                        <DataTable class="historyTable">
-                            <Head>
-                                <Row>                        
-                                    <Cell class="header" colspan=8>Team History</Cell>
-                                </Row>
-                                <Row>                        
-                                    <Cell class="header">Year</Cell>
-                                    <Cell class="header">Team</Cell>
-                                    <Cell class="header">Record</Cell>
-                                    <Cell class="header">PF</Cell>
-                                    <Cell class="header">PA</Cell>
-                                    <Cell class="header">PPG</Cell>
-                                    <Cell class="header">RS</Cell>
-                                    <Cell class="header">Final</Cell>
-                                </Row>
-                            </Head>
-                            <Body>
-                                {#each seasons as season}
-                                    <Row>
-                                        <Cell class="header">{season.year}</Cell>
-                                        <Cell class="teamName">{season.manager.name}</Cell>
-                                        <Cell class="header">{season.showTies ? season.wins + ' - ' + season.ties + ' - ' + season.losses : season.wins + ' - ' + season.losses}</Cell>
-                                        <Cell class="header">{round(season.fpts)}</Cell>
-                                        <Cell class="header">{round(season.fptsAgainst)}</Cell>
-                                        <Cell class="header">{round(season.fptspg)}</Cell>
-                                        <Cell class="header">{season.regSeasonRank}<sup>{season.regSeasonRankSuper}</sup></Cell>
-                                        {#if season.finalRank}
-                                            <Cell class="header">{season.finalRank}<sup>{season.finalRankSuper}</sup></Cell>
-                                        {:else}
-                                            <Cell class="header">-</Cell>
-                                        {/if}
-                                    </Row>
-                                {/each}
-                            </Body>
-                        </DataTable>
+                        {#each seasons as season}
+                            <div class="seasonHistoryRow">
+                                <div class="seasonHistoryContent" style="width: 7%; font-size: 1em;">{season.year}</div>
+                                <div class="seasonHistoryContent" style="width: 28%;">{season.manager.name}</div>
+                                <div class="seasonHistoryContent" style="width: 2%; justify-content: center;">{season.wins}</div>
+                                {#if season.showTies}
+                                    <div class="seasonHistoryContent" style="width: 1%; justify-content: center;">-</div>
+                                    <div class="seasonHistoryContent" style="width: 2%; justify-content: center;">{season.ties}</div>
+                                {/if}
+                                <div class="seasonHistoryContent" style="width: 1%; justify-content: center;">-</div>
+                                <div class="seasonHistoryContent" style="width: 2%; justify-content: center;">{season.losses}</div>
+                                <div class="seasonHistoryContent" style="width: 10%; justify-content: center; margin: 0 1%;">{round(season.fpts)}</div>
+                                <div class="seasonHistoryContent" style="width: 10%; justify-content: center; margin: 0 1%;">{round(season.fptsAgainst)}</div>
+                                <div class="seasonHistoryContent" style="width: 10%; justify-content: center; margin: 0 1%;">{round(season.fptspg)}</div>
+                                <div class="seasonHistoryContent" style="width: 4%; justify-content: center; margin: 0 1%;">{season.regSeasonRank}</div>
+                                {#if season.finalRank}
+                                    <div class="seasonHistoryContent" style="width: 4%; justify-content: center; margin: 0 1%;">{season.finalRank}</div>
+                                {:else}
+                                    <div class="seasonHistoryContent" style="width: 4%; justify-content: center; margin: 0 1%;">-</div>
+                                {/if}
+                            </div>
+                        {/each}
                     {/if}
-                </div>
-                <div class="summaryHeadings">
-                    <span class="summaryChild">League</span>
-                    <span class="seperator">|</span>
-                    <span class="summaryChild">EPE</span>
-                    <span class="seperator">|</span>
-                    <span class="summaryChild">Median</span>
-                </div>
-    
-                <div class="overallHistory">
-                    <div class="columnWrap" style="width: 33.33%;">
-                        {#if recordHistory}
-                            <DataTable class="historyTable">
-                                <Head>
-                                    <Row>                        
-                                        <Cell class="header" colspan=4>Overall Record</Cell>
-                                    </Row>
-                                    <Row>                        
-                                        <Cell class="header">Win %</Cell>
-                                        <Cell class="header">W</Cell>
-                                        {#if recordHistory.showTies} 
-                                            <Cell class="header">T</Cell>
-                                        {/if}
-                                        <Cell class="header">L</Cell>
-                                    </Row>
-                                </Head>
-                                <Body>
-                                    <Row>
-                                        <Cell class="header">{round(recordHistory.winPerc)}</Cell>
-                                        <Cell class="header">{recordHistory.wins}</Cell>
-                                        {#if recordHistory.showTies} 
-                                            <Cell class="header">{recordHistory.ties}</Cell>
-                                        {/if}
-                                        <Cell class="header">{recordHistory.losses}</Cell>
-                                    </Row>
-                                </Body>
-                            </DataTable>
-                        {/if}
-                        {#if fptsHistory}
-                            <DataTable class="historyTable">
-                                <Head>
-                                    <Row>                        
-                                        <Cell class="header" colspan=3>Points Record</Cell>
-                                    </Row>
-                                    <Row>                 
-                                        <Cell class="header">PF</Cell>
-                                        <Cell class="header">PA</Cell>
-                                        <Cell class="header">PPG</Cell>
-                                    </Row>   
-                                </Head>
-                                <Body>
-                                    <Row>
-                                        <Cell class="header">{round(fptsHistory.fpts)}</Cell>
-                                        <Cell class="header">{round(fptsHistory.fptsAgainst)}</Cell>
-                                        <Cell class="header">{round(fptsHistory.fptspg)}</Cell>
-                                    </Row>
-                                </Body>
-                            </DataTable>
-                        {/if}
-                    </div>
-                    <div class="columnWrap" style="width: 33.33%;">
-                        {#if epeHistory}
-                            <DataTable class="historyTable">
-                                <Head>
-                                    <Row>                        
-                                        <Cell class="header" colspan=4>EPE Record</Cell>
-                                    </Row>
-                                    <Row>                        
-                                        <Cell class="header">Win %</Cell>
-                                        <Cell class="header">W</Cell>
-                                        {#if epeHistory.showTies} 
-                                            <Cell class="header">T</Cell>
-                                        {/if}
-                                        <Cell class="header">L</Cell>
-                                    </Row>
-                                </Head>
-                                <Body>
-                                    <Row>
-                                        <Cell class="header">{round(epeHistory.epePerc)}</Cell>
-                                        <Cell class="header">{epeHistory.wins}</Cell>
-                                        {#if epeHistory.showTies} 
-                                            <Cell class="header">{epeHistory.ties}</Cell>
-                                        {/if}
-                                        <Cell class="header">{epeHistory.losses}</Cell>
-                                    </Row>
-                                </Body>
-                            </DataTable>
-                        {/if}
-                    </div>
-                    <div class="columnWrap" style="width: 33.33%;">
-                        {#if medianHistory}
-                            <DataTable class="historyTable">
-                                <Head>
-                                    <Row>                        
-                                        <Cell class="header" colspan=6>Median Record</Cell>
-                                    </Row>
-                                    <Row>                 
-                                        <Cell class="header">Win %</Cell>
-                                        <Cell class="header">W</Cell>
-                                        {#if medianHistory.showTies} 
-                                            <Cell class="header">T</Cell>
-                                        {/if}
-                                        <Cell class="header">L</Cell>
-                                        <Cell class="header">Top</Cell>
-                                        <Cell class="header">Bot.</Cell>
-                                    </Row>   
-                                </Head>
-                                <Body>
-                                    <Row>
-                                        <Cell class="header">{round(medianHistory.medianPerc)}</Cell>
-                                        <Cell class="header">{medianHistory.wins}</Cell>
-                                        {#if medianHistory.showTies} 
-                                            <Cell class="header">{medianHistory.ties}</Cell>
-                                        {/if}
-                                        <Cell class="header">{medianHistory.losses}</Cell>
-                                        <Cell class="header">{medianHistory.topScores}</Cell>
-                                        <Cell class="header">{medianHistory.bottomScores}</Cell>
-                                    </Row>
-                                </Body>
-                            </DataTable>
-                        {/if}
+                    <div class="profileRow" style="font-size: 1.5em; font-weight 420; padding: 2%;">Manager History</div>
+                    <div class="winRecordWrap">
+                        <div class="columnWrap" style="width: 33.333%; align-items: flex-start;">
+                            <div class="profileRow">Win Records</div>
+                            <div class="seasonHistoryRow">
+                                <div class="seasonHistoryContent" style="width: 20%; padding: 0 3%; margin: 0;">TOT:</div>
+                                <div class="seasonHistoryContent" style="width: 25%; justify-content: center; margin: 0;">{round(recordHistory.winPerc)}%</div>
+                                <div class="seasonHistoryContent" style="width: 55%; justify-content: space-evenly; margin: 0;">
+                                    <div class="seasonHistoryContent">{recordHistory.wins}</div>
+                                    {#if recordHistory.showTies}
+                                        <div class="seasonHistoryContent">-</div>
+                                        <div class="seasonHistoryContent">{recordHistory.ties}</div>
+                                    {/if}
+                                    <div class="seasonHistoryContent">-</div>
+                                    <div class="seasonHistoryContent">{recordHistory.losses}</div>
+                                </div>
+                            </div>
+                            <div class="seasonHistoryRow">
+                                <div class="seasonHistoryContent" style="width: 20%; padding: 0 3%; margin: 0;">EPE:</div>
+                                <div class="seasonHistoryContent" style="width: 25%; justify-content: center; margin: 0;">{round(epeHistory.epePerc)}%</div>
+                                <div class="seasonHistoryContent" style="width: 55%; justify-content: space-evenly; margin: 0;">
+                                    <div class="seasonHistoryContent">{epeHistory.wins}</div>
+                                    {#if epeHistory.showTies}
+                                        <div class="seasonHistoryContent">-</div>
+                                        <div class="seasonHistoryContent">{epeHistory.ties}</div>
+                                    {/if}
+                                    <div class="seasonHistoryContent">-</div>
+                                    <div class="seasonHistoryContent">{epeHistory.losses}</div>
+                                </div>
+                            </div>
+                            <div class="seasonHistoryRow">
+                                <div class="seasonHistoryContent" style="width: 20%; padding: 0 3%; margin: 0;">AVG:</div>
+                                <div class="seasonHistoryContent" style="width: 25%; justify-content: center; margin: 0;">{round(medianHistory.medianPerc)}%</div>
+                                <div class="seasonHistoryContent" style="width: 55%; justify-content: space-evenly; margin: 0;">
+                                    <div class="seasonHistoryContent">{medianHistory.wins}</div>
+                                    {#if medianHistory.showTies}
+                                        <div class="seasonHistoryContent">-</div>
+                                        <div class="seasonHistoryContent">{medianHistory.ties}</div>
+                                    {/if}
+                                    <div class="seasonHistoryContent">-</div>
+                                    <div class="seasonHistoryContent">{medianHistory.losses}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="columnWrap" style="width: 33.333%; align-items: flex-start;">
+                            <div class="profileRow">Scoring</div>
+                            <div class="seasonHistoryRow">
+                                <div class="seasonHistoryContent" style="width: 50%; padding: 0 3%; justify-content: flex-end; margin: 0;">PF:</div>
+                                <div class="seasonHistoryContent" style="width: 48%; padding: 0 3%; justify-content: center; margin: 0 2% 0 0;">{round(fptsHistory.fpts)}</div>
+                            </div>
+                            <div class="seasonHistoryRow">
+                                <div class="seasonHistoryContent" style="width: 50%; padding: 0 3%; justify-content: flex-end; margin: 0;">PA:</div>
+                                <div class="seasonHistoryContent" style="width: 48%; padding: 0 3%; justify-content: center; margin: 0 2% 0 0;">{round(fptsHistory.fptsAgainst)}</div>
+                            </div>
+                            <div class="seasonHistoryRow">
+                                <div class="seasonHistoryContent" style="width: 50%; padding: 0 3%; justify-content: flex-end; margin: 0;">PPG:</div>
+                                <div class="seasonHistoryContent" style="width: 48%; padding: 0 3%; justify-content: center; margin: 0 2% 0 0;">{round(fptsHistory.fptspg)}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -923,12 +858,9 @@
             <ManagerFantasyInfo {viewManager} {players} {managerRecords} {records} />
         {/if}
 
-        <ManagerAwards {recordManID} {awards} {records} {roster} />
+        <ManagerPositionRanks {recordManID} {records} />
 
-        <!-- {#if loading}
-            Loading positions records...
-        {:else}
-        {/if} -->
+        <ManagerAwards {recordManID} {awards} {records} {roster} />
 
         <ManagerRecords {recordManID} {firstYear} {currentYear} {managerRecords} {records} />
     </div>
